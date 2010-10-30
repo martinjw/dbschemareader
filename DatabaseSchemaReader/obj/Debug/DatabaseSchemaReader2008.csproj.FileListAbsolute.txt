@@ -1,0 +1,5 @@
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReader\bin\Debug\DatabaseSchemaReader.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReader\bin\Debug\DatabaseSchemaReader.pdb
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReader\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReader\obj\Debug\DatabaseSchemaReader.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReader\obj\Debug\DatabaseSchemaReader.pdb
