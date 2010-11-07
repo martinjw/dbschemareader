@@ -139,6 +139,9 @@ namespace DatabaseSchemaReader.Conversion
         public static List<DatabaseIndex> Indexes(DataTable dt, string tableName)
         {
             List<DatabaseIndex> list = new List<DatabaseIndex>();
+            //Npgsql
+            if (dt.Columns.Count == 0) return list;
+
             //sql server
             string key = "CONSTRAINT_NAME";
             string tableKey = "TABLE_NAME";
@@ -159,6 +162,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "POSITION";
             if (!dt.Columns.Contains(columnKey)) columnKey = "NAME";
+
 
             dt.DefaultView.Sort = ordinalKey;
             //this could be more than one table, so filter the view

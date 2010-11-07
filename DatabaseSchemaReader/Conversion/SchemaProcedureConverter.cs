@@ -47,6 +47,10 @@ namespace DatabaseSchemaReader.Conversion
             string key = "OBJECT_NAME";
             string ownerKey = "OWNER";
             string sqlKey = "SQL";
+            //devart
+            if (!dt.Columns.Contains(key)) key = "NAME";
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            //other
             if (!dt.Columns.Contains(ownerKey)) ownerKey = null;
             if (!dt.Columns.Contains(sqlKey)) sqlKey = null;
             foreach (DataRow row in dt.Rows)

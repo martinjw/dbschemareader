@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
 {
+    /// <summary>
+    /// Represents a table in the database
+    /// </summary>
     [Serializable]
     public class DatabaseTable
     {
@@ -23,6 +26,9 @@ namespace DatabaseSchemaReader.DataSchema
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _checkConstraints = new List<DatabaseConstraint>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseTable"/> class.
+        /// </summary>
         public DatabaseTable()
         {
             Triggers = new List<DatabaseTrigger>();

@@ -4,6 +4,9 @@ using System.Globalization;
 
 namespace DatabaseSchemaReader.DataSchema
 {
+    /// <summary>
+    /// Represents the schema of the database, including all tables, views, stored procedures...
+    /// </summary>
     [Serializable]
     public class DatabaseSchema
     {

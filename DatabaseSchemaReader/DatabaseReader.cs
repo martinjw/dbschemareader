@@ -16,12 +16,23 @@ namespace DatabaseSchemaReader
         private readonly SchemaExtendedReader _sr;
         private readonly DatabaseSchema _db;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="providerName">Name of the provider.</param>
         public DatabaseReader(string connectionString, string providerName)
         {
             _sr = new SchemaExtendedReader(connectionString, providerName);
             _db = new DatabaseSchema();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="owner">The owner.</param>
         public DatabaseReader(string connectionString, string providerName, string owner)
             : this(connectionString, providerName)
         {

@@ -428,7 +428,15 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                return conn.GetSchema(DbMetaDataCollectionNames.DataTypes);
+                try
+                {
+                    return conn.GetSchema(DbMetaDataCollectionNames.DataTypes);
+                }
+                catch (NotSupportedException)
+                {
+                    //Npgsql doesn't have the collection and throws this exception
+                    return new DataTable("DataTypes");
+                }
             }
         }
         #endregion

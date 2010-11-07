@@ -3,12 +3,12 @@ using System.Diagnostics;
 
 namespace DatabaseSchemaReader.DataSchema
 {
+    /// <summary>
+    /// Represents a column in a <see cref="DatabaseTable"/> or <see cref="DatabaseView"/>
+    /// </summary>
     [Serializable]
     public class DatabaseColumn
     {
-        #region Fields
-
-        #endregion
 
         #region Properties
 
