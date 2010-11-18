@@ -7,7 +7,7 @@ Unfortunately the information is returned in datatables, and the schema collecti
 
 This is an adapter which loads those collections into simple collections of plain old CLR objects, which are the same for all providers. It doesn't try to hide the underlying differences: Oracle will have packages and none of the others will. But the many small differences between tables, columns and stored procedure parameters disappear.
 
-There is no UI (the tests show how to use the class library).
+There is a very simple Winforms UI project (DatabaseSchemaViewer.exe) See the tests show how to use the class library.
 
 It is not optimized or particularly well designed code. It was originally written in 2005, just after .Net 2.0 came out. It has been updated to .net 3.5 (although you can see the .net 2 vintage of much of it), and the project files are VS 2008 and VS 2010.
 
@@ -18,12 +18,15 @@ To use it simply specify the connection string and ADO provider (eg System.Data,
 const string providername = "System.Data.SqlClient";
 const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
 
-
-Then load the schema (this will take a little time on moderate to large database structures)
+Create the database reader object.
 
 var dbReader = new DatabaseReader(connectionString, providername);
-var schema = dbReader.ReadAll();
 
+For Oracle, you should always specify the Owner (Schema) as the full schema of an Oracle database is huge and will be very slow to load.
+dbReader.Owner = "HR";
+
+Then load the schema (this will take a little time on moderate to large database structures)
+var schema = dbReader.ReadAll();
 
 The DatabaseSchema object has a collection of tables, views, stored procedures, functions, packages and datatypes. Tables and views have columns, with their datatypes.
 

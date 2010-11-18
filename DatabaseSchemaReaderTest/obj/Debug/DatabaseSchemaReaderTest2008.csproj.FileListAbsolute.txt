@@ -5,3 +5,4 @@ C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\Datab
 C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReaderTest\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReaderTest\obj\Debug\DatabaseSchemaReaderTest.dll
 C:\Users\Martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReaderTest\obj\Debug\DatabaseSchemaReaderTest.pdb
+C:\Users\martin\Documents\Visual Studio 2010\Projects\DatabaseSchemaReader\DatabaseSchemaReaderTest\bin\Debug\DatabaseSchemaReader.xml
