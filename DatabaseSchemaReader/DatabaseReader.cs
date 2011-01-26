@@ -11,28 +11,17 @@ namespace DatabaseSchemaReader
     /// <summary>
     /// Uses <see cref="SchemaReader"/> to read database schema into schema objects (rather than DataTables). Either load independent objects (list of Tables, StoredProcedures), fuller informarion (a Table with all Columns, constraints...), or full database schemas (all tables, views, stored procedures with all information; the DatabaseSchema object can hook up the relationships). Obviously the fuller versions will be slow on moderate to large databases.
     /// </summary>
-    public class DatabaseReader
+    public class DatabaseReader : IDisposable
     {
         private readonly SchemaExtendedReader _sr;
         private readonly DatabaseSchema _db;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseReader"/> class.
-        /// </summary>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="providerName">Name of the provider.</param>
         public DatabaseReader(string connectionString, string providerName)
         {
             _sr = new SchemaExtendedReader(connectionString, providerName);
             _db = new DatabaseSchema();
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseReader"/> class.
-        /// </summary>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="providerName">Name of the provider.</param>
-        /// <param name="owner">The owner.</param>
         public DatabaseReader(string connectionString, string providerName, string owner)
             : this(connectionString, providerName)
         {
@@ -50,7 +39,7 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
-        /// Gets the database schema. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchema.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchema.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
+        /// Gets the database schema. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
         public DatabaseSchema DatabaseSchema
         {
@@ -83,11 +72,11 @@ namespace DatabaseSchemaReader
             //oracle extra
             DatabaseSchema.Sequences = SchemaProcedureConverter.Sequences(_sr.Sequences());
 
-            //procedure and function source sql
+            //procedure, function and view source sql
             DataTable srcs = _sr.ProcedureSource(null);
             SchemaSourceConverter.AddSources(DatabaseSchema, srcs);
 
-            DatabaseSchema.UpdateReferences(); //updates all references
+            DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
 
             return _db;
         }
@@ -160,10 +149,10 @@ namespace DatabaseSchemaReader
                 table.Triggers = SchemaConstraintConverter.Triggers(triggers, table.Name);
             }
             DatabaseSchema.Tables = tables;
-            DatabaseSchema.UpdateReferences(); //updates all references
+            DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
 
             if (DatabaseSchema.DataTypes.Count > 0)
-                DatabaseSchema.UpdateDataTypes();
+                DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
 
             return tables;
         }
@@ -223,7 +212,7 @@ namespace DatabaseSchemaReader
                 SchemaConstraintConverter.AddIdentity(ds.Tables["IdentityColumns"], table);
 
             if (DatabaseSchema.DataTypes.Count > 0)
-                DatabaseSchema.UpdateDataTypes();
+                DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
 
             return table;
         }
@@ -262,8 +251,32 @@ namespace DatabaseSchemaReader
         {
             List<DataType> list = SchemaConverter.DataTypes(_sr.DataTypes());
             DatabaseSchema.DataTypes = list;
-            DatabaseSchema.UpdateDataTypes(); //if columns/arguments loaded later, run this method again.
+            DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema); //if columns/arguments loaded later, run this method again.
             return list;
         }
+
+        #region Implementation of IDisposable
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        /// <filterpriority>2</filterpriority>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources
+                if (_sr != null)
+                {
+                    _sr.Dispose();
+                }
+            }
+        }
+        #endregion
     }
 }

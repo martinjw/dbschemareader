@@ -282,7 +282,7 @@ WHERE o1.XTYPE = 'TR' AND
                 //create a dataadaptor and fill it
                 using (DbDataAdapter da = Factory.CreateDataAdapter())
                 {
-                    string sqlCommand = @"SELECT OWNER,
+                    const string sqlCommand = @"SELECT OWNER,
   OBJECT_NAME,
   DBMS_METADATA.GET_DDL('FUNCTION', OBJECT_NAME, :OWNER) AS ""SQL""
 FROM ALL_OBJECTS
@@ -335,7 +335,7 @@ AND OBJECT_TYPE  = 'FUNCTION'";
 FROM sys.sql_modules AS sm
 	JOIN sys.objects AS o 
 		ON sm.object_id = o.object_id
-WHERE (o.type = N'P' OR o.type = N'FN' OR o.type='PC')
+WHERE (o.type = N'P' OR o.type = N'FN' OR o.type='PC' OR o.type='V')
 	AND (OBJECT_SCHEMA_NAME(o.object_id) = @schemaOwner OR @schemaOwner IS NULL)
 	AND (OBJECT_NAME(sm.object_id) = @name OR @name IS NULL)
 ORDER BY o.type;";
@@ -506,7 +506,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         /// </summary>
         private string GetKeySql()
         {
-            string sqlCommand = null;
+            string sqlCommand;
             if (IsOracle)//Oracle doesn't have INFORMATION_SCHEMA
             {
                 sqlCommand = @"SELECT cols.constraint_name, 

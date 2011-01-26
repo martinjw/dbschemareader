@@ -1,7 +1,21 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DatabaseSchemaViewer.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="SchemaOwner" Type="System.String" Scope="User">
+      <Value Profile="(Default)">dbo</Value>
+    </Setting>
+    <Setting Name="ConnectionString" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind</Value>
+    </Setting>
+    <Setting Name="CodeGenFilePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Temp\</Value>
+    </Setting>
+    <Setting Name="CodeGenNamespace" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Domain</Value>
+    </Setting>
+    <Setting Name="Provider" Type="System.String" Scope="User">
+      <Value Profile="(Default)">System.Data.SqlClient</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

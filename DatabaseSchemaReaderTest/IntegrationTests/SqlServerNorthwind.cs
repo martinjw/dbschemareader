@@ -122,7 +122,18 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
                 //	Column ReorderLevel	smallint
                 //	Column Discontinued	bit
             }
+        }
 
+        [TestMethod]
+        public void ReadNorthwindViews()
+        {
+            var dbReader = GetNortwindReader();
+            var schema = dbReader.ReadAll();
+            foreach (var view in schema.Views)
+            {
+                var sql = view.Sql;
+                Assert.IsNotNull(sql, "ProcedureSource should also fill in the view source");
+            }
         }
 
         [TestMethod]

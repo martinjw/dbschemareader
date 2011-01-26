@@ -69,6 +69,12 @@ namespace DatabaseSchemaReader.Conversion
                         if (matchFunction == null) continue;
                         matchFunction.Sql = text;
                         break;
+
+                    case "V": //sql server view
+                        DatabaseView matchView = schema.Views.Find(delegate(DatabaseView x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+                        if (matchView == null) continue;
+                        matchView.Sql = text;
+                        break;
                 }
             }
         }

@@ -23,7 +23,7 @@ namespace DatabaseSchemaReader
     ///    dataGrid1.DataSource = schema.Tables(); //a list of all tables
     ///    dataGrid1.DataSource = schema.Columns("MYTABLENAME"); //a list of columns for a specific table
     ///</example>
-    internal class SchemaReader
+    public class SchemaReader : IDisposable
     {
         //#region public static methods
         ///// <summary>
@@ -439,6 +439,32 @@ namespace DatabaseSchemaReader
                 }
             }
         }
+        #endregion
+
+        #region Implementation of IDisposable
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        /// <filterpriority>2</filterpriority>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources
+                if (_restrictions != null)
+                {
+                    _restrictions.Dispose();
+                    _restrictions = null;
+                }
+            }
+        }
+
         #endregion
     }
 }

@@ -11,7 +11,7 @@ There is a very simple Winforms UI project (DatabaseSchemaViewer.exe) See the te
 
 It is not optimized or particularly well designed code. It was originally written in 2005, just after .Net 2.0 came out. It has been updated to .net 3.5 (although you can see the .net 2 vintage of much of it), and the project files are VS 2008 and VS 2010.
 
-Over the years I've used it for code generation of data access code, and for conversions between database platforms. Some of the latter code is included, but there are better solutions for data access code gen (you could still use this library to get the schema data and then use that within T4 templating, for instance).
+Over the years I've used it for code generation of data access code, and for conversions between database platforms. Some of this code is included, but there are better solutions for data access code gen (you could still use this library to get the schema data and then use that within T4 templating, for instance).
 
 To use it simply specify the connection string and ADO provider (eg System.Data,SqlClient or System.Data,OracleClient)
 
@@ -42,7 +42,7 @@ foreach (var table in schema.Tables)
       }
 }
 
-It links up all the foreign key tables automatically so you can do this:
+It automatically calls DatabaseSchemaFixer to link up all the foreign key tables so you can do this:
 
 if (column.IsForeignKey) Debug.Write("\tForeign key to " + column.ForeignKeyTable.Name);
 
@@ -64,4 +64,22 @@ gen.ManualPrefix = table.Name + "__";
 var path = Path.Combine(Environment.CurrentDirectory, "sqlserver_sprocs.sql");
 gen.WriteToScript(path);
 
-The SQL generation/ conversion utilities are very basic; at best they are a starting point for what you can do with the the DatabaseSchemaReader. 
+The SQL generation/ conversion utilities are very basic; at best they are a starting point for what you can do with the DatabaseSchemaReader. 
+
+The code generation is also rudimentary. Here's code gen from a SqlExpress Northwind:
+//first the standard schema reader
+const string providername = "System.Data.SqlClient";
+const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+var reader = new DatabaseReader(connectionString, providername);
+var schema = dbReader.ReadAll();
+
+//now write the code
+var directory = new DirectoryInfo(Environment.CurrentDirectory);
+var codeWriter = new CodeWriter();
+codeWriter.Execute(schema, directory, "Northwind.Domain");
+
+It writes a C# class for each table, with each column as an automatic property. Relations between classes reflect the foreign key constraints. Composite keys are handled by creating key classes. Overrides for ToString, Equals and GetHashCode are added (the last two are required for NHibernate). The properties are decorated with DataAnnotations validation attributes (there's even commented out .Net 4/SL 3 attributes). 
+
+It also writes an NHibernate mapping class in a "mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started. If you don't need NHibernate, simply ignore this.
+
+It also writes a VS2008 v3.5 csproj file, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.

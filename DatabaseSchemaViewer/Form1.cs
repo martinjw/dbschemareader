@@ -9,6 +9,8 @@ namespace DatabaseSchemaViewer
 {
     public partial class Form1 : Form
     {
+        private DatabaseSchema _databaseSchema;
+
         public Form1()
         {
             InitializeComponent();
@@ -17,7 +19,11 @@ namespace DatabaseSchemaViewer
             DataProviders.DataSource = dt;
             DataProviders.DisplayMember = "InvariantName";
             DataProviders.ValueMember = "InvariantName";
-            DataProviders.SelectedValue = "System.Data.SqlClient";
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            DataProviders.SelectedValue = Properties.Settings.Default.Provider;
         }
 
         private void ConnectionStringValidating(object sender, CancelEventArgs e)
@@ -42,7 +48,7 @@ namespace DatabaseSchemaViewer
             var providerName = DataProviders.SelectedValue.ToString();
             var rdr = new DatabaseReader(connectionString, providerName);
             var owner = SchemaOwner.Text.Trim();
-            if(!string.IsNullOrEmpty(owner))
+            if (!string.IsNullOrEmpty(owner))
                 rdr.Owner = owner;
 
             backgroundWorker1.RunWorkerAsync(rdr);
@@ -83,14 +89,33 @@ namespace DatabaseSchemaViewer
             else
             {
                 //it worked
-                var schema = e.Result as DatabaseSchema;
-                if (schema != null)
+                _databaseSchema = e.Result as DatabaseSchema;
+                if (_databaseSchema != null)
                 {
-                    SchemaToTreeview.PopulateTreeView(schema, treeView1);
+                    SchemaToTreeview.PopulateTreeView(_databaseSchema, treeView1);
+                    toolStripButton1.Enabled = true;
                 }
             }
             StopWaiting();
         }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            if (_databaseSchema == null) return;
+
+            using (var f = new CodeGenForm(_databaseSchema))
+            {
+                f.ShowDialog();
+            }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.Provider = DataProviders.SelectedValue.ToString();
+
+            Properties.Settings.Default.Save();
+        }
+
 
     }
 }

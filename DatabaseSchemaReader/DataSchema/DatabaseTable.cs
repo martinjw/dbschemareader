@@ -6,11 +6,13 @@ using System.Linq;
 namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
-    /// Represents a table in the database
+    /// A table in the database
     /// </summary>
     [Serializable]
     public class DatabaseTable
     {
+        #region Fields
+        //backing fields and initialize collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string _netName;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -25,10 +27,8 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly List<DatabaseIndex> _indexes = new List<DatabaseIndex>();
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _checkConstraints = new List<DatabaseConstraint>();
+        #endregion
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseTable"/> class.
-        /// </summary>
         public DatabaseTable()
         {
             Triggers = new List<DatabaseTrigger>();
@@ -37,8 +37,20 @@ namespace DatabaseSchemaReader.DataSchema
 
         public DatabaseSchema DatabaseSchema { get; set; }
 
+        /// <summary>
+        /// Gets or sets the table name (original database format)
+        /// </summary>
+        /// <value>
+        /// The table name.
+        /// </value>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the table name in .Net (C#) compatible format.
+        /// </summary>
+        /// <value>
+        /// The .net name
+        /// </value>
         public string NetName
         {
             get { return _netName ?? Name; }
@@ -138,7 +150,7 @@ namespace DatabaseSchemaReader.DataSchema
         }
         #endregion
 
-        public List<DatabaseTable> ForeignKeyChildren { get; set; }
+        public IList<DatabaseTable> ForeignKeyChildren { get; private set; }
 
         public List<DatabaseTrigger> Triggers { get; set; }
 
@@ -169,6 +181,12 @@ namespace DatabaseSchemaReader.DataSchema
             return Columns.Find(delegate(DatabaseColumn col) { return col.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this instance has a composite key.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance has a composite key; otherwise, <c>false</c>.
+        /// </value>
         public bool HasCompositeKey
         {
             get

@@ -74,6 +74,8 @@ namespace DatabaseSchemaReader.Conversion
             //oracle
             if (!dt.Columns.Contains(key)) key = "OBJECT_NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
+            string packageKey = "PACKAGE_NAME";
+            if (!dt.Columns.Contains(packageKey)) packageKey = null; //sql
             //jet
             if (!dt.Columns.Contains(key)) key = "PROCEDURE_NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
@@ -84,14 +86,21 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.Oracle
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            if (packageKey == null && dt.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
 
             foreach (DataRow row in dt.Rows)
             {
-                DatabaseStoredProcedure t = new DatabaseStoredProcedure();
-                t.Name = row[key].ToString();
-                t.SchemaOwner = row[ownerKey].ToString();
-                if (sql != null) t.Sql = row[sql].ToString();
-                list.Add(t);
+                DatabaseStoredProcedure sproc = new DatabaseStoredProcedure();
+                sproc.Name = row[key].ToString();
+                sproc.SchemaOwner = row[ownerKey].ToString();
+                if (sql != null) sproc.Sql = row[sql].ToString();
+                if (packageKey != null)
+                {
+                    string package = row[packageKey].ToString();
+                    if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
+                    sproc.Package = package;
+                }
+                list.Add(sproc);
             }
             return list;
         }
@@ -140,7 +149,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (packageKey != null)
                 {
                     package = row[packageKey].ToString();
-                    if (package == string.Empty) package = null; //so we can match easily
+                    if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
                 }
 
                 DataView dv = new DataView(arguments);

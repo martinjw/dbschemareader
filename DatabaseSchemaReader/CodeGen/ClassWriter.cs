@@ -1,0 +1,140 @@
+﻿using System;
+using System.Linq;
+using DatabaseSchemaReader.DataSchema;
+
+namespace DatabaseSchemaReader.CodeGen
+{
+    class ClassWriter
+    {
+        private readonly DatabaseTable _table;
+        private readonly string _ns;
+        private readonly ClassBuilder _cb;
+
+        public ClassWriter(DatabaseTable table, string ns)
+        {
+            _ns = ns;
+            _table = table;
+            _cb = new ClassBuilder();
+        }
+
+        public string Write()
+        {
+            var className = _table.NetName;
+
+            WriteNamespaces();
+
+            if (!string.IsNullOrEmpty(_ns))
+            {
+                _cb.BeginNest("namespace " + _ns);
+            }
+
+            using (_cb.BeginNest("public class " + className, "Class representing " + _table.Name + " table"))
+            {
+                InitializeCollectionsInConstructor(className);
+
+                if(_table.HasCompositeKey)
+                {
+                    _cb.AppendAutomaticProperty(className + "Key", "Key");
+                }
+
+                foreach (var column in _table.Columns)
+                {
+                    if (_table.HasCompositeKey && column.IsPrimaryKey) continue;
+                    WriteColumn(column);
+                }
+
+                WriteForeignKeyCollections();
+
+                if (!_table.HasCompositeKey)
+                {
+                    var overrider = new OverrideWriter(_cb, _table);
+                    overrider.AddOverrides();
+                }
+            }
+
+            if (_table.HasCompositeKey)
+            {
+                WriteCompositeKeyClass(className);
+            }
+
+            if (!string.IsNullOrEmpty(_ns))
+            {
+                _cb.EndNest();
+            }
+
+            return _cb.ToString();
+        }
+
+        private void WriteNamespaces()
+        {
+            _cb.AppendLine("using System;");
+            if (_table.ForeignKeyChildren.Any())
+            {
+                _cb.AppendLine("using System.Collections.Generic;");
+            }
+            _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+        }
+
+        private void WriteForeignKeyCollections()
+        {
+            foreach (var foreignKey in _table.ForeignKeyChildren)
+            {
+                var propertyName = foreignKey.NetName + "Collection";
+                var dataType = "IList<" + foreignKey.NetName + ">";
+                _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
+            }
+        }
+
+        private void InitializeCollectionsInConstructor(string className)
+        {
+            if (!_table.ForeignKeyChildren.Any()) return;
+            using (_cb.BeginNest("public " + className + "()"))
+            {
+                foreach (var foreignKey in _table.ForeignKeyChildren)
+                {
+                    var propertyName = foreignKey.NetName + "Collection";
+                    var dataType = "List<" + foreignKey.NetName + ">";
+                    _cb.AppendLine(propertyName + " = new " + dataType + "();");
+                }
+            }
+            _cb.AppendLine("");
+        }
+
+        private void WriteColumn(DatabaseColumn column)
+        {
+            var propertyName = column.NetName;
+            var dataType = column.DataType.NetDataTypeCsName;
+            //if it's nullable (and not string or array)
+            if (column.Nullable && 
+                !column.DataType.IsString && 
+                !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
+            {
+                dataType += "?"; //nullable
+            }
+            if (column.IsForeignKey)
+            {
+                dataType = column.ForeignKeyTable.NetName;
+            }
+
+            DataAnnotationWriter.Write(_cb, column);
+            _cb.AppendAutomaticProperty(dataType, propertyName);
+        }
+
+
+        private void WriteCompositeKeyClass(string className)
+        {
+            using (_cb.BeginNest("public class " + className + "Key", "Class representing " + _table.Name + " composite key"))
+            {
+                foreach (var column in _table.Columns)
+                {
+                    if(column.IsPrimaryKey)
+                        WriteColumn(column);
+                }
+
+                var overrider = new OverrideWriter(_cb, _table);
+                overrider.NetName = className + "Key";
+                overrider.AddOverrides();
+            }
+        }
+    }
+}

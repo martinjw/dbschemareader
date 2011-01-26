@@ -117,34 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="errorProvider1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>402, 17</value>
-  </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="toolStripButton1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAKPSURBVDhPtVPbT9JhGOb/Ka2WmkW2DrpwXiFLFMVBHkCX
-        5IEfCYiVC7SSQ6EVtdKBupRKUVREZyBZnrC5VTYw55qYF61uujDNnl5/NBxzrqu+m2/79j6H93nfj8PZ
-        59xsmscdyyIargdRpw1iv7q4d7t9HRbzMltsvPUWY6PA8NAviITt7Ftfbwjysm6Ul/XsJbS2RDA0uAnv
-        yG9oNDNglAF4CNzv+gmtxoeii3YoazywWiOorQ2gtKQznoTPH8NA/war6h3Zhmc4Cnb2/IDD8Q022zpa
-        CNzcvILqqnHweJq9LqSSUbK8ReBtmE2LyOTdBu98ExoNC6S8yoIZJoCkoyXx4Ie2CDocn3GvdQVD7k1Y
-        74ZxWdGNzo4vaGtbhVrdR/Z9uKEPk/15iMUOul+guroLHFffJAyGZfh925TBFtneQGamheyGkJHegJwL
-        Jlytn0Cu0AZd/QcwqgUKcRLZ/Cc4c/oaEbhew6D/FAtsp+e0NB0qq1zofR7E+3drBHIRwSOyv4AKxRxK
-        ZW8glb7CKarjzEx/RL5oGKK8ZxAXuOGwf4e61g8+vxHB4DrlESaBcchknr/gKXC5RhxPrcSxFMVuFmZT
-        Dy6VD+DB/Qg7KkY5Aamkg0jbIZePxJQFgk4cOVwcH+Lc7BqMRpo9M8aCd9LW65eg00V7jtqeItsB5BeM
-        g3uCQSCwtEvie7mCwsKu2Kjq6mahZCbZnhUElhFYIHBAmOtGgdiPPJGXbSG2xuHQV8hlj3FF5YdWO43E
-        xGKkJFdAVjrKKmdkWHDwQA6Baiibp3Sr0Nrq3btIxUXNSE/X4NxZM62zCVlZJkgo7YQECVsskQwiOUkB
-        p3P235/LbncjlRRPclU4lBgl+C/nD/Vt58a+BN5BAAAAAElFTkSuQmCC
-</value>
-  </data>
-  <metadata name="errorProvider1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>127, 17</value>
-  </metadata>
-  <metadata name="backgroundWorker1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>250, 17</value>
+  <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>140, 17</value>
   </metadata>
 </root>

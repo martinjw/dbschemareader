@@ -22,5 +22,65 @@ namespace DatabaseSchemaViewer.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("dbo")]
+        public string SchemaOwner {
+            get {
+                return ((string)(this["SchemaOwner"]));
+            }
+            set {
+                this["SchemaOwner"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=.\\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind")]
+        public string ConnectionString {
+            get {
+                return ((string)(this["ConnectionString"]));
+            }
+            set {
+                this["ConnectionString"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Temp\\")]
+        public string CodeGenFilePath {
+            get {
+                return ((string)(this["CodeGenFilePath"]));
+            }
+            set {
+                this["CodeGenFilePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Domain")]
+        public string CodeGenNamespace {
+            get {
+                return ((string)(this["CodeGenNamespace"]));
+            }
+            set {
+                this["CodeGenNamespace"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("System.Data.SqlClient")]
+        public string Provider {
+            get {
+                return ((string)(this["Provider"]));
+            }
+            set {
+                this["Provider"] = value;
+            }
+        }
     }
 }
