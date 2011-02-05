@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -12,8 +11,6 @@ namespace DatabaseSchemaReader.DataSchema
             Arguments = new List<DatabaseArgument>();
         }
 
-        public DatabaseSchema DatabaseSchema { get; set; }
-
         public string Name { get; set; }
 
         public string SchemaOwner { get; set; }
@@ -23,6 +20,10 @@ namespace DatabaseSchemaReader.DataSchema
         public string Sql { get; set; }
 
         public List<DatabaseArgument> Arguments { get; set; }
+
+        public DatabaseSchema DatabaseSchema { get; set; }
+
+        public string NetName { get; set; }
 
         public override string ToString()
         {

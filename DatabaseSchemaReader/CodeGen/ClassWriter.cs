@@ -32,7 +32,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 InitializeCollectionsInConstructor(className);
 
-                if(_table.HasCompositeKey)
+                if (_table.HasCompositeKey)
                 {
                     _cb.AppendAutomaticProperty(className + "Key", "Key");
                 }
@@ -103,15 +103,17 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteColumn(DatabaseColumn column)
         {
             var propertyName = column.NetName;
-            var dataType = column.DataType.NetDataTypeCsName;
+            var dt = column.DataType;
+            var dataType = dt != null ? dt.NetDataTypeCsName : "object";
             //if it's nullable (and not string or array)
-            if (column.Nullable && 
-                !column.DataType.IsString && 
+            if (column.Nullable &&
+                dt != null &&
+                !dt.IsString &&
                 !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
             {
                 dataType += "?"; //nullable
             }
-            if (column.IsForeignKey)
+            if (column.IsForeignKey && column.ForeignKeyTable != null)
             {
                 dataType = column.ForeignKeyTable.NetName;
             }
@@ -127,7 +129,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var column in _table.Columns)
                 {
-                    if(column.IsPrimaryKey)
+                    if (column.IsPrimaryKey)
                         WriteColumn(column);
                 }
 

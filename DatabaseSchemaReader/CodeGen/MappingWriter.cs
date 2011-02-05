@@ -26,7 +26,8 @@ namespace DatabaseSchemaReader.CodeGen
             _classElement = new XElement(_xmlns + "class",
                                          new XAttribute("name", _table.NetName),
                                          new XAttribute("table", SqlSafe(_table.Name)),
-                //consider this
+                                         new XAttribute("schema", SqlSafe(_table.SchemaOwner)),
+                                         //consider this
                                          new XAttribute("dynamic-update", "true"),
                                          new XAttribute("optimistic-lock", "dirty"));
             hibmap.Add(_classElement);
@@ -66,6 +67,7 @@ namespace DatabaseSchemaReader.CodeGen
             bag.SetAttributeValue("name", propertyName);
             //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");
             bag.SetAttributeValue("table", SqlSafe(foreignKeyTable));
+            bag.SetAttributeValue("schema", SqlSafe(foreignKeyChild.SchemaOwner));
             bag.SetAttributeValue("cascade", "all-delete-orphan");
             //assume child always controls collection
             bag.SetAttributeValue("inverse", "true");
@@ -102,7 +104,6 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var propertyName = column.NetName;
-            var dataType = column.DataType.NetDataTypeCsName;
 
             var property = new XElement(_xmlns + "property",
                 new XAttribute("name", propertyName));
@@ -111,11 +112,16 @@ namespace DatabaseSchemaReader.CodeGen
                 property.SetAttributeValue("column", SqlSafe(column.Name));
             }
 
-            property.SetAttributeValue("type", dataType);
-            //nvarchar(max) may be -1
-            if (column.DataType.IsString && column.Length > 0)
+            var dt = column.DataType;
+            if (dt != null)
             {
-                property.SetAttributeValue("length", column.Length.ToString());
+                var dataType = dt.NetDataTypeCsName;
+                property.SetAttributeValue("type", dataType);
+                //nvarchar(max) may be -1
+                if (dt.IsString && column.Length > 0)
+                {
+                    property.SetAttributeValue("length", column.Length.ToString());
+                }
             }
 
             if (!column.Nullable)
@@ -157,7 +163,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void AddPrimaryKey()
         {
-            if (_table.PrimaryKey.Columns.Count == 0)
+            if (_table.PrimaryKey == null || _table.PrimaryKey.Columns.Count == 0)
             {
                 _classElement.Add(new XComment("TODO- you MUST add a primary key!"));
                 return;

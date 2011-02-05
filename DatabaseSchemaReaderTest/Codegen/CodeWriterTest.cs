@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+//MSUnit only, sorry
 
 namespace DatabaseSchemaReaderTest.Codegen
 {
@@ -33,8 +35,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var directory = new DirectoryInfo(Environment.CurrentDirectory);
             const string @namespace = "Northwind.Domain";
 
-            var codeWriter = new CodeWriter();
-            codeWriter.Execute(schema, directory, @namespace);
+            var codeWriter = new CodeWriter(schema);
+            codeWriter.Execute(directory, @namespace);
 
             var files = directory.GetFiles("*.cs");
 
@@ -62,6 +64,40 @@ namespace DatabaseSchemaReaderTest.Codegen
              */
         }
 
+        [TestMethod]
+        public void AdventureWorksTest()
+        {
+            const string providername = "System.Data.SqlClient";
+            const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks";
+
+            var dbReader= new DatabaseReader(connectionString, providername);
+            DatabaseSchema schema = null;
+            try
+            {
+                schema = dbReader.ReadAll();
+            }
+            catch (SqlException exception)
+            {
+                Assert.Inconclusive("Cannot access database " + exception.Message);
+            }
+            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            const string @namespace = "AdventureWorks.Domain";
+
+            var codeWriter = new CodeWriter(schema);
+            codeWriter.Execute(directory, @namespace);
+
+            var procedures = directory.GetDirectories("Procedures").FirstOrDefault();
+            if(procedures == null) 
+                Assert.Fail("Could not find Procedures subdirectory for stored procedures");
+            var files = procedures.GetFiles("*.cs");
+
+            var category = files.First(f => f.Name == "uspLogError.cs");
+            var cs = File.ReadAllText(category.FullName);
+
+            StringAssert.Contains(cs, "public DbCommand CreateCommand(int? errorLogId)",
+                                  "Should contain the uspLogError stored procedure (in standard AdventureWorks db)");
+        }
+
 
         /// <summary>
         ///A test for Execute
@@ -69,13 +105,13 @@ namespace DatabaseSchemaReaderTest.Codegen
         [TestMethod]
         public void ExecuteTest()
         {
-            var target = new CodeWriter();
             DatabaseSchema schema = PrepareModel();
+            var target = new CodeWriter(schema);
 
             var directory = new DirectoryInfo(Environment.CurrentDirectory);
             const string @namespace = "MyTest";
 
-            target.Execute(schema, directory, @namespace);
+            target.Execute(directory, @namespace);
 
             var files = directory.GetFiles("*.cs");
             Assert.AreEqual(2, files.Length);

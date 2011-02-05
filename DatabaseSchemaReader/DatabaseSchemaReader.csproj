@@ -56,7 +56,9 @@
     <Compile Include="CodeGen\NameFixer.cs" />
     <Compile Include="CodeGen\Nester.cs" />
     <Compile Include="CodeGen\OverrideWriter.cs" />
+    <Compile Include="CodeGen\PrepareSchemaNames.cs" />
     <Compile Include="CodeGen\ProjectWriter.cs" />
+    <Compile Include="CodeGen\SprocWriter.cs" />
     <Compile Include="DatabaseReader.cs" />
     <Compile Include="DataSchema\ConstraintType.cs" />
     <Compile Include="DataSchema\DatabaseArgument.cs" />

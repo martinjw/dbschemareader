@@ -14,8 +14,6 @@ namespace DatabaseSchemaReader.DataSchema
         #region Fields
         //backing fields and initialize collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string _netName;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private List<DatabaseColumn> _columns = new List<DatabaseColumn>();
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private DatabaseConstraint _primaryKey;
@@ -51,11 +49,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The .net name
         /// </value>
-        public string NetName
-        {
-            get { return _netName ?? Name; }
-            set { _netName = value; }
-        }
+        public string NetName { get; set; }
 
         public string SchemaOwner { get; set; }
 
@@ -137,8 +131,12 @@ namespace DatabaseSchemaReader.DataSchema
                             col.IsPrimaryKey = true;
                             break;
                         case ConstraintType.ForeignKey:
-                            col.IsForeignKey = true;
-                            col.ForeignKeyTableName = con.RefersToTable;
+                            if (!string.IsNullOrEmpty(con.RefersToTable))
+                            {
+                                //ignore fk constraint to a pk without a table.
+                                col.IsForeignKey = true;
+                                col.ForeignKeyTableName = con.RefersToTable;
+                            }
                             break;
                         case ConstraintType.UniqueKey:
                             col.IsUniqueKey = true;

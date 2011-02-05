@@ -71,6 +71,7 @@ The code generation is also rudimentary. Here's code gen from a SqlExpress North
 const string providername = "System.Data.SqlClient";
 const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
 var reader = new DatabaseReader(connectionString, providername);
+//if this is Oracle, set dbReader.Owner = "MyOwner";
 var schema = dbReader.ReadAll();
 
 //now write the code
@@ -81,5 +82,7 @@ codeWriter.Execute(schema, directory, "Northwind.Domain");
 It writes a C# class for each table, with each column as an automatic property. Relations between classes reflect the foreign key constraints. Composite keys are handled by creating key classes. Overrides for ToString, Equals and GetHashCode are added (the last two are required for NHibernate). The properties are decorated with DataAnnotations validation attributes (there's even commented out .Net 4/SL 3 attributes). 
 
 It also writes an NHibernate mapping class in a "mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started. If you don't need NHibernate, simply ignore this.
+
+For each stored procedure, it writes a class to create the DbCommand with all the parameters exposed as simple .net parameters. You must execute the DbCommand as ExecuteReader/ExecuteNonQuery etc as required. The messy parameter setting is done for you, but the rest of the ADO is up to you. It only understands simple parameter types (numbers, string, dates) plus Oracle ref cursors; lobs and specialized data types are beyond the scope.
 
 It also writes a VS2008 v3.5 csproj file, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.

@@ -9,19 +9,34 @@ using DatabaseSchemaReader.DataSchema;
 namespace DatabaseSchemaReader
 {
     /// <summary>
-    /// Uses <see cref="SchemaReader"/> to read database schema into schema objects (rather than DataTables). Either load independent objects (list of Tables, StoredProcedures), fuller informarion (a Table with all Columns, constraints...), or full database schemas (all tables, views, stored procedures with all information; the DatabaseSchema object can hook up the relationships). Obviously the fuller versions will be slow on moderate to large databases.
+    /// Uses <see cref="SchemaReader"/> to read database schema into schema objects (rather than DataTables). 
     /// </summary>
+    /// <remarks>
+    /// Either load independent objects (list of Tables, StoredProcedures), fuller informarion (a Table with all Columns, constraints...), or full database schemas (<see cref="ReadAll"/>: all tables, views, stored procedures with all information; the DatabaseSchema object will hook up the relationships). Obviously the fuller versions will be slow on moderate to large databases.
+    /// </remarks>
     public class DatabaseReader : IDisposable
     {
         private readonly SchemaExtendedReader _sr;
         private readonly DatabaseSchema _db;
+        private bool _fixUp = true;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class. For Oracle, use the overload.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="providerName">Name of the provider.</param>
         public DatabaseReader(string connectionString, string providerName)
         {
             _sr = new SchemaExtendedReader(connectionString, providerName);
             _db = new DatabaseSchema();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class. For Oracle, use this overload.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="owner">The schema owner.</param>
         public DatabaseReader(string connectionString, string providerName, string owner)
             : this(connectionString, providerName)
         {
@@ -39,7 +54,7 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
-        /// Gets the database schema. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
+        /// Gets the database schema. Only call AFTER calling <see cref="ReadAll"/> or one or more other methods such as <see cref="AllTables"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
         public DatabaseSchema DatabaseSchema
         {
@@ -52,6 +67,8 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public DatabaseSchema ReadAll()
         {
+            _fixUp = false;
+            DataTypes();
             AllUsers();
             AllTables();
             AllViews();
@@ -68,15 +85,11 @@ namespace DatabaseSchemaReader
             }
 
             AllStoredProcedures();
-            DataTypes(); //will update above with datatypes
             //oracle extra
             DatabaseSchema.Sequences = SchemaProcedureConverter.Sequences(_sr.Sequences());
 
-            //procedure, function and view source sql
-            DataTable srcs = _sr.ProcedureSource(null);
-            SchemaSourceConverter.AddSources(DatabaseSchema, srcs);
-
-            DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
+            _fixUp = true;
+            UpdateReferences();
 
             return _db;
         }
@@ -149,7 +162,7 @@ namespace DatabaseSchemaReader
                 table.Triggers = SchemaConstraintConverter.Triggers(triggers, table.Name);
             }
             DatabaseSchema.Tables = tables;
-            DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
+            UpdateReferences();
 
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
@@ -223,25 +236,38 @@ namespace DatabaseSchemaReader
         public IList<DatabaseStoredProcedure> StoredProcedureList()
         {
             DataTable dt = _sr.StoredProcedures();
-            return SchemaProcedureConverter.StoredProcedures(dt);
+            SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
+            return DatabaseSchema.StoredProcedures;
         }
 
         /// <summary>
-        /// Gets all stored procedures with their arguments
-        /// Note for Oracle: stored procedures are often in packages. We read the non-packaged stored procedures, then add packaged stored procedures if they have arguments. If they don't have arguments, they are not found.
+        /// Gets all stored procedures (and functions) with their arguments
         /// </summary>
+        /// <remarks>
+        /// <para>We also get the source (if available)</para>
+        /// <para>We don't get functions here.</para>
+        /// <para>In Oracle stored procedures are often in packages. We read the non-packaged stored procedures, then add packaged stored procedures if they have arguments. If they don't have arguments, they are not found.</para>
+        /// </remarks>
         public IList<DatabaseStoredProcedure> AllStoredProcedures()
         {
+            
             DataTable dt = _sr.StoredProcedures();
-            List<DatabaseStoredProcedure> sprocs = SchemaProcedureConverter.StoredProcedures(dt);
-            DatabaseSchema.StoredProcedures = sprocs;
+            SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
+
+            DatabaseSchema.Packages = SchemaProcedureConverter.Packages(_sr.Packages());
             //do all the arguments as one call and sort them out. 
-            //NB: This seems to be slow on Oracle
+            //NB: This is often slow on Oracle
             DataTable args = _sr.StoredProcedureArguments(null);
-            //note that arguments could be for functions too
+            //arguments could be for functions too
             SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
 
-            return sprocs;
+            //procedure, function and view source sql
+            DataTable srcs = _sr.ProcedureSource(null);
+            SchemaSourceConverter.AddSources(DatabaseSchema, srcs);
+
+            UpdateReferences();
+
+            return DatabaseSchema.StoredProcedures;
         }
 
         /// <summary>
@@ -253,6 +279,13 @@ namespace DatabaseSchemaReader
             DatabaseSchema.DataTypes = list;
             DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema); //if columns/arguments loaded later, run this method again.
             return list;
+        }
+
+        private void UpdateReferences()
+        {
+            //a simple latch so ReadAll will only call this at the end
+            if (_fixUp)
+                DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
         }
 
         #region Implementation of IDisposable

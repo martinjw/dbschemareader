@@ -10,8 +10,6 @@ namespace DatabaseSchemaReader.DataSchema
     public class DatabaseColumn
     {
         #region Fields
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string _netName;
 
         #endregion
 
@@ -77,11 +75,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The .net name
         /// </value>
-        public string NetName
-        {
-            get { return _netName ?? Name; }
-            set { _netName = value; }
-        }
+        public string NetName { get; set; }
 
         /// <summary>
         /// Gets or sets the table reference. When converting from a database, only the string <see cref="TableName"/> is set; this object reference must be added (for example using <see cref="DatabaseSchemaFixer"/>)

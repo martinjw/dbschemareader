@@ -65,12 +65,13 @@ namespace DatabaseSchemaReader.Conversion
             return list;
         }
 
-        public static List<DatabaseStoredProcedure> StoredProcedures(DataTable dt)
+        public static void StoredProcedures(DatabaseSchema schema, DataTable dt)
         {
-            List<DatabaseStoredProcedure> list = new List<DatabaseStoredProcedure>();
             //sql server
             string key = "ROUTINE_NAME";
             string ownerKey = "ROUTINE_SCHEMA";
+            string routineTypeKey = "ROUTINE_TYPE";
+            if (!dt.Columns.Contains(routineTypeKey)) routineTypeKey = null;
             //oracle
             if (!dt.Columns.Contains(key)) key = "OBJECT_NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
@@ -90,19 +91,33 @@ namespace DatabaseSchemaReader.Conversion
 
             foreach (DataRow row in dt.Rows)
             {
-                DatabaseStoredProcedure sproc = new DatabaseStoredProcedure();
-                sproc.Name = row[key].ToString();
-                sproc.SchemaOwner = row[ownerKey].ToString();
-                if (sql != null) sproc.Sql = row[sql].ToString();
+                string name = row[key].ToString();
+                string schemaOwner = row[ownerKey].ToString();
+                bool isFunction = false;
+                if (!string.IsNullOrEmpty(routineTypeKey))
+                {
+                    var type = row[routineTypeKey].ToString();
+                    if (string.Equals(type, "FUNCTION", StringComparison.OrdinalIgnoreCase))
+                        isFunction = true;
+                }
+                string package = null;
                 if (packageKey != null)
                 {
-                    string package = row[packageKey].ToString();
+                    package = row[packageKey].ToString();
                     if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
+                }
+
+                //check if already loaded (so can call this function multiple times)
+                DatabaseStoredProcedure sproc = FindStoredProcedureOrFunction(schema, name, schemaOwner, package);
+                if (sproc == null)
+                {
+                    sproc = CreateProcedureOrFunction(schema, isFunction);
+                    sproc.Name = name;
+                    sproc.SchemaOwner = schemaOwner;
                     sproc.Package = package;
                 }
-                list.Add(sproc);
+                if (sql != null) sproc.Sql = row[sql].ToString();
             }
-            return list;
         }
 
         public static void UpdateArguments(DatabaseSchema databaseSchema, DataTable arguments)
@@ -154,30 +169,72 @@ namespace DatabaseSchemaReader.Conversion
 
                 DataView dv = new DataView(arguments);
                 //match sproc name and schema
-                dv.RowFilter = "[" + sprocKey + "] = '" + name + "' AND [" + ownerKey + "] = '" + owner + "'";
+                dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND [{2}] = '{3}'", sprocKey, name, ownerKey, owner);
                 dv.Sort = ordinalKey;
                 List<DatabaseArgument> args = StoredProcedureArguments(dv);
 
-                DatabaseStoredProcedure sproc = databaseSchema.StoredProcedures.Find(delegate(DatabaseStoredProcedure x) { return x.Name == name && x.SchemaOwner == owner && x.Package == package; });
-                if (sproc == null) //is it actually a function?
-                {
-                    DatabaseFunction fun = databaseSchema.Functions.Find(delegate(DatabaseFunction f) { return f.Name == name && f.SchemaOwner == owner && f.Package == package; });
-                    if (fun != null)
-                    {
-                        fun.Arguments = args;
-                        continue;
-                    }
-                }
+                DatabaseStoredProcedure sproc = FindStoredProcedureOrFunction(databaseSchema, name, owner, package);
+
                 if (sproc == null) //sproc in a package and not found before?
                 {
-                    sproc = new DatabaseStoredProcedure();
+                    sproc = CreateProcedureOrFunction(databaseSchema, args);
                     sproc.Name = name;
                     sproc.SchemaOwner = owner;
                     sproc.Package = package;
-                    databaseSchema.StoredProcedures.Add(sproc);
                 }
                 sproc.Arguments = args;
             }
+        }
+
+        private static DatabaseStoredProcedure CreateProcedureOrFunction(DatabaseSchema databaseSchema, bool isFunction)
+        {
+            DatabaseStoredProcedure sproc;
+            if (isFunction)
+            {
+                //functions are just a type of stored procedure
+                DatabaseFunction fun = new DatabaseFunction();
+                databaseSchema.Functions.Add(fun);
+                sproc = fun;
+            }
+            else
+            {
+                sproc = new DatabaseStoredProcedure();
+                databaseSchema.StoredProcedures.Add(sproc);
+            }
+            return sproc;
+        }
+
+        private static DatabaseStoredProcedure CreateProcedureOrFunction(DatabaseSchema databaseSchema, List<DatabaseArgument> args)
+        {
+            //if it's ordinal 0 and no name, it's a function not a sproc
+            DatabaseStoredProcedure sproc;
+            if (args.Find(delegate(DatabaseArgument arg) { return arg.Ordinal == 0 && string.IsNullOrEmpty(arg.Name); }) != null)
+            {
+                //functions are just a type of stored procedure
+                DatabaseFunction fun = new DatabaseFunction();
+                databaseSchema.Functions.Add(fun);
+                sproc = fun;
+            }
+            else
+            {
+                sproc = new DatabaseStoredProcedure();
+                databaseSchema.StoredProcedures.Add(sproc);
+            }
+            return sproc;
+        }
+
+        private static DatabaseStoredProcedure FindStoredProcedureOrFunction(DatabaseSchema databaseSchema, string name, string owner, string package)
+        {
+            var sproc = databaseSchema.StoredProcedures.Find(delegate(DatabaseStoredProcedure x) { return x.Name == name && x.SchemaOwner == owner && x.Package == package; });
+            if (sproc == null) //is it actually a function?
+            {
+                DatabaseFunction fun = databaseSchema.Functions.Find(delegate(DatabaseFunction f) { return f.Name == name && f.SchemaOwner == owner && f.Package == package; });
+                if (fun != null)
+                {
+                    return fun;
+                }
+            }
+            return sproc;
         }
 
         private static List<DatabaseArgument> StoredProcedureArguments(DataView dataView)
@@ -246,6 +303,28 @@ namespace DatabaseSchemaReader.Conversion
                 t.Scale = GetNullableInt(row[scaleKey]);
 
                 list.Add(t);
+            }
+            return list;
+        }
+
+        public static List<DatabasePackage> Packages(DataTable dt)
+        {
+            List<DatabasePackage> list = new List<DatabasePackage>();
+            if (dt.Rows.Count == 0) return list;
+
+            //oracle and ODP
+            string key = "OBJECT_NAME";
+            string ownerKey = "OWNER";
+            //Devart.Data.Oracle
+            if (!dt.Columns.Contains(key)) key = "NAME";
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+
+            foreach (DataRow row in dt.Rows)
+            {
+                DatabasePackage package = new DatabasePackage();
+                package.Name = row[key].ToString();
+                package.SchemaOwner = row[ownerKey].ToString();
+                list.Add(package);
             }
             return list;
         }

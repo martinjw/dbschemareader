@@ -7,6 +7,8 @@ namespace DatabaseSchemaReader.DataSchema
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private List<DatabaseStoredProcedure> _procedures = new List<DatabaseStoredProcedure>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private List<DatabaseFunction> _functions = new List<DatabaseFunction>();
 
         public string Name { get; set; }
         public string SchemaOwner { get; set; }
@@ -17,6 +19,13 @@ namespace DatabaseSchemaReader.DataSchema
             get { return _procedures; }
             set { _procedures = value; }
         }
+        public List<DatabaseFunction> Functions
+        {
+            get { return _functions; }
+            set { _functions = value; }
+        }
+        
+        public string NetName { get; set; }
 
         public override string ToString()
         {

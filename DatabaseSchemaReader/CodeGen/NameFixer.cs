@@ -22,8 +22,10 @@ namespace DatabaseSchemaReader.CodeGen
         /// <remarks>
         /// See C# language specification http://msdn.microsoft.com/en-us/library/aa664670.aspx
         /// </remarks>
-        public static string Fix(string name)
+        public static string ToPascalCase(string name)
         {
+            if (string.IsNullOrEmpty(name)) return "A" + Guid.NewGuid().ToString("N");
+
             var endsWithId = Regex.IsMatch(name, "[a-z0-9 _]{1}(?<Id>ID)$");
 
             name = MakePascalCase(name);
@@ -37,6 +39,36 @@ namespace DatabaseSchemaReader.CodeGen
 
             //remove all spaces
             name = Regex.Replace(name, @"[^\w]+", string.Empty);
+            return name;
+        }
+
+        /// <summary>
+        /// Fixes the specified name to be camel cased. No singularization.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        public static string ToCamelCase(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return "a" + Guid.NewGuid().ToString("N");
+
+            var endsWithId = Regex.IsMatch(name, "[a-z0-9 _]{1}(?<Id>ID)$");
+
+            name = MakePascalCase(name); //reuse this
+
+            if (endsWithId)
+            {
+                //ends with a capital "ID" in an otherwise non-capitalized word
+                name = name.Substring(0, name.Length - 2) + "Id";
+            }
+
+            //remove all spaces
+            name = Regex.Replace(name, @"[^\w]+", string.Empty);
+
+            if (Char.IsUpper(name[0]))
+            {
+                name = char.ToLowerInvariant(name[0]) +
+                    (name.Length > 1 ? name.Substring(1) : string.Empty);
+            }
 
             //this could still be a c# keyword
             if (!CSharpProvider.IsValidIdentifier(name))

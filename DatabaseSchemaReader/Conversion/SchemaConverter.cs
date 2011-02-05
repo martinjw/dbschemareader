@@ -14,6 +14,8 @@ namespace DatabaseSchemaReader.Conversion
     /// SqlServer: http://msdn.microsoft.com/en-us/library/ms254969.aspx
     /// Oracle: http://msdn.microsoft.com/en-us/library/cc716723.aspx
     /// Also supports OleDb, MySql, SQLite, DataDirect and Devart providers
+    /// ODP: http://download.oracle.com/docs/html/E15167_01/appSpecificSchema.htm
+    /// Devart: http://www.devart.com/dotconnect/oracle/docs/MetaData.html
     /// </remarks>
     internal static class SchemaConverter
     {

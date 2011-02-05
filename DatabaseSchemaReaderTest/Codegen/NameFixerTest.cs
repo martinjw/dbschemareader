@@ -12,11 +12,13 @@ namespace DatabaseSchemaReaderTest.Codegen
     public class NameFixerTest
     {
         /// <summary>
-        ///A test for Fix
+        ///A test for ToPascalCase
         ///</summary>
         [TestMethod]
-        public void FixTest()
+        public void ToPascalCaseTest()
         {
+            //ARRANGE
+
             var dict = new Dictionary<string, string>();
             //pascalcase
             dict.Add("START_DATE", "StartDate"); //underscore
@@ -43,10 +45,51 @@ namespace DatabaseSchemaReaderTest.Codegen
             {
                 var name = item.Key;
                 var expected = item.Value;
-                var actual = NameFixer.Fix(name);
+
+                //ACT
+                var actual = NameFixer.ToPascalCase(name);
+
+                //ASSERT
                 Assert.AreEqual(expected, actual);
             }
 
+        }
+
+        [TestMethod]
+        public void ToCamelCaseTest()
+        {
+            //ARRANGE
+
+            var dict = new Dictionary<string, string>();
+            //pascalcase
+            dict.Add("START_DATE", "startDate"); //underscore
+            dict.Add("EMPLOYEE_ID", "employeeId");
+            dict.Add("EMPLOYEE ID", "employeeId"); //spaces
+            dict.Add("CategoryId", "categoryId"); //if mixed case, preserve it
+            //no singularization
+            dict.Add("Cars", "cars");
+            //complex titlecase
+            dict.Add("les naufragés d'ythaq", "lesNaufragésDythaq");
+            dict.Add("Database_IO", "databaseIO"); //mixed case with uppercase acronym
+            //Id recognition
+            dict.Add("CategoryID", "categoryId");
+            //weird db names
+            dict.Add("$NAME", "name");
+            //c# keywords
+            dict.Add("NAMESPACE", "@namespace");
+            dict.Add("CLASS", "@class");
+
+            foreach (var item in dict)
+            {
+                var name = item.Key;
+                var expected = item.Value;
+
+                //ACT
+                var actual = NameFixer.ToCamelCase(name);
+
+                //ASSERT
+                Assert.AreEqual(expected, actual);
+            }
         }
     }
 }

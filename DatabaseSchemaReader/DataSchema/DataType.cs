@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace DatabaseSchemaReader.DataSchema
 {
+    /// <summary>
+    /// Maps between database datatypes and .Net datatypes.
+    /// </summary>
     [Serializable]
     public class DataType
     {
@@ -109,7 +112,7 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 if (!IsString) return false;
                 //(n)text or (n)varchar
-                return (TypeName.EndsWith("text", StringComparison.OrdinalIgnoreCase));
+                return (TypeName.EndsWith("text", StringComparison.OrdinalIgnoreCase) || string.Equals("CLOB", TypeName, StringComparison.OrdinalIgnoreCase));
             }
         }
 

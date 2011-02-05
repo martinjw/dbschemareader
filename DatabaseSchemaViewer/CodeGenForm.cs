@@ -31,10 +31,10 @@ namespace DatabaseSchemaViewer
             var directory = new DirectoryInfo(txtFilePath.Text.Trim());
             var ns = txtNamespace.Text.Trim();
 
-            var cw = new CodeWriter();
+            var cw = new CodeWriter(_databaseSchema);
             try
             {
-                cw.Execute(_databaseSchema, directory, ns);
+                cw.Execute(directory, ns);
             }
             catch (IOException exception)
             {

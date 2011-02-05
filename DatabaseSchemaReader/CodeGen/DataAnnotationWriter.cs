@@ -31,7 +31,11 @@ namespace DatabaseSchemaReader.CodeGen
                 return;
 
             var dt = column.DataType;
-            if (dt.IsString)
+            if (dt == null)
+            {
+                //it is a database specific type
+            }
+            else if (dt.IsString)
             {
                 //if it's over a million characters, no point validating
                 if (column.Length < 1073741823)
