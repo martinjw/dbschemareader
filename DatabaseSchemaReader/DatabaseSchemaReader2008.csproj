@@ -48,6 +48,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGen\ClassBuilder.cs" />
+    <Compile Include="CodeGen\ClassWriter.cs" />
+    <Compile Include="CodeGen\CodeWriter.cs" />
+    <Compile Include="CodeGen\DataAnnotationWriter.cs" />
+    <Compile Include="CodeGen\MappingWriter.cs" />
+    <Compile Include="CodeGen\NameFixer.cs" />
+    <Compile Include="CodeGen\Nester.cs" />
+    <Compile Include="CodeGen\OverrideWriter.cs" />
+    <Compile Include="CodeGen\PrepareSchemaNames.cs" />
+    <Compile Include="CodeGen\ProjectWriter.cs" />
+    <Compile Include="CodeGen\SprocWriter.cs" />
     <Compile Include="DatabaseReader.cs" />
     <Compile Include="DataSchema\ConstraintType.cs" />
     <Compile Include="DataSchema\DatabaseArgument.cs" />
@@ -58,6 +69,7 @@
     <Compile Include="DataSchema\DatabaseIndex.cs" />
     <Compile Include="DataSchema\DatabasePackage.cs" />
     <Compile Include="DataSchema\DatabaseSchema.cs" />
+    <Compile Include="DataSchema\DatabaseSchemaFixer.cs" />
     <Compile Include="DataSchema\DatabaseSequence.cs" />
     <Compile Include="DataSchema\DatabaseStoredProcedure.cs" />
     <Compile Include="DataSchema\DatabaseTable.cs" />
@@ -94,6 +106,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DataSchema\ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CodeGen\Project.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

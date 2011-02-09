@@ -46,6 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codegen\CodeWriterTest.cs" />
+    <Compile Include="Codegen\NameFixerTest.cs" />
     <Compile Include="IntegrationTests\DatabaseReaderTest.cs" />
     <Compile Include="IntegrationTests\DataDirectProvider.cs" />
     <Compile Include="IntegrationTests\DevartProviderTests.cs" />
