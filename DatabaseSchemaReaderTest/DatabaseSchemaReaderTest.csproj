@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
+    <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="IntegrationTests\DatabaseReaderTest.cs" />
     <Compile Include="IntegrationTests\DataDirectProvider.cs" />
     <Compile Include="IntegrationTests\DevartProviderTests.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="IntegrationTests\MySql.cs" />
     <Compile Include="IntegrationTests\OracleDataProvider.cs" />
     <Compile Include="IntegrationTests\Postgresql.cs" />
+    <Compile Include="IntegrationTests\ProviderChecker.cs" />
     <Compile Include="IntegrationTests\SqlLite.cs" />
     <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

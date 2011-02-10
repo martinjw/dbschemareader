@@ -38,8 +38,8 @@ namespace DatabaseSchemaReader
 
         protected readonly string ConnectionString;
         protected readonly DbProviderFactory Factory;
-        private DataTable _metadata;
         protected readonly string ProviderName;
+        private DataTable _metadata;
         private SchemaRestrictions _restrictions;
 
 
@@ -99,7 +99,7 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collection = "Users";
+                const string collection = "Users";
                 if (!SchemaCollectionExists(conn, collection))
                     return new DataTable("Users");
                 return conn.GetSchema(collection);

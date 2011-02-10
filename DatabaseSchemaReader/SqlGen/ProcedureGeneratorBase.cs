@@ -7,8 +7,11 @@ using DatabaseSchemaReader.DataSchema;
 namespace DatabaseSchemaReader.SqlGen
 {
     ///<summary>
-    /// Override this with platform specific procedure generators
+    /// Generate stored procedures (standard CRUD types including paging)
     ///</summary>
+    /// <remarks>
+    /// Override this with platform specific procedure generators
+    /// </remarks>
     public abstract class ProcedureGeneratorBase
     {
         protected readonly DatabaseTable Table;

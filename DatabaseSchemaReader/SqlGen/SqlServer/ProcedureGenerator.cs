@@ -1,6 +1,4 @@
 ﻿using DatabaseSchemaReader.DataSchema;
-using Library.Data.SqlGen;
-using Library.Data.SqlGen.SqlServer;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -26,10 +28,39 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             const string providername = "System.Data.SqlClient";
             const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
             return schema.FindTableByName("Categories");
+        }
+        private static DirectoryInfo CreateDirectory(string folder)
+        {
+            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            if (directory.GetDirectories(folder).Any())
+            {
+                return directory.GetDirectories(folder).First();
+            }
+            return directory.CreateSubdirectory(folder);
+        }
+
+        [TestMethod]
+        public void TestWritingOracleTables()
+        {
+            var table = LoadCategoriesFromNorthwind();
+
+            //take a SQLServer table and create Oracle table DDL
+            var gen = new DatabaseSchemaReader.SqlGen.Oracle.TableGenerator(table);
+
+            var destination = CreateDirectory("sql").FullName;
+            gen.WriteToFolder(destination);
+
+            var path = Directory.GetFiles(destination, table.Name + "*").FirstOrDefault();
+            Assert.IsNotNull(path);
+            var txt = File.ReadAllText(path);
+            Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
+
+            //manually check the script is ok
         }
 
         [TestMethod]
@@ -40,9 +71,12 @@ namespace DatabaseSchemaReaderTest.SqlGen
             //let's create the SQLServer crud procedures
             var gen = new DatabaseSchemaReader.SqlGen.SqlServer.ProcedureGenerator(table);
             gen.ManualPrefix = table.Name + "__";
-            var path = Path.Combine(Environment.CurrentDirectory, "sqlserver_sprocs.sql");
+            var destination = CreateDirectory("sql").FullName;
+            var path = Path.Combine(destination, "sqlserver_sprocs.sql");
             gen.WriteToScript(path);
 
+            var txt = File.ReadAllText(path);
+            Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
             //manually check the script is ok
         }
 
@@ -60,9 +94,12 @@ namespace DatabaseSchemaReaderTest.SqlGen
             oracleGen.FormatParameter = name => "p_" + name;
             //also define the cursor parameter
             oracleGen.CursorParameterName = "p_cursor";
-            var oraclePath = Path.Combine(Environment.CurrentDirectory, "oracle_sprocs.sql");
+            var destination = CreateDirectory("sql").FullName;
+            var oraclePath = Path.Combine(destination, "oracle_sprocs.sql");
             oracleGen.WriteToScript(oraclePath);
 
+            var txt = File.ReadAllText(oraclePath);
+            Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
             //manually check the script is ok
         }
     }

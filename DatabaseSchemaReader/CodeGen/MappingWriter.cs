@@ -115,7 +115,7 @@ namespace DatabaseSchemaReader.CodeGen
             var dt = column.DataType;
             if (dt != null)
             {
-                var dataType = dt.NetDataTypeCsName;
+                var dataType = dt.NetCodeName(column);
                 property.SetAttributeValue("type", dataType);
                 //nvarchar(max) may be -1
                 if (dt.IsString && column.Length > 0)
@@ -184,7 +184,7 @@ namespace DatabaseSchemaReader.CodeGen
                 id.SetAttributeValue("column", SqlSafe(idColumn.Name));
             }
 
-            id.SetAttributeValue("type", dataType.NetDataTypeCsName);
+            id.SetAttributeValue("type", dataType.NetCodeName(idColumn));
             if (dataType.IsString) id.SetAttributeValue("length", idColumn.Length.ToString());
             else if (dataType.IsNumeric) id.SetAttributeValue("unsaved-value", "0");
             ////using most common "_myId" format

@@ -77,6 +77,54 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
+        /// Gets the name of the C# net data type, correcting for the column properties
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
+        public string NetCodeName(DatabaseColumn column)
+        {
+            if (!IsNumeric || IsInt) return NetDataTypeCsName;
+            var precision = column.Precision.GetValueOrDefault();
+            var scale = column.Scale.GetValueOrDefault();
+            return NetNameForIntegers(scale, precision);
+        }
+
+        /// <summary>
+        /// Gets the name of the C# net data type, correcting for the argument properties
+        /// </summary>
+        /// <param name="argument">The argument.</param>
+        /// <returns></returns>
+        public string NetCodeName(DatabaseArgument argument)
+        {
+            if (!IsNumeric || IsInt) return NetDataTypeCsName;
+            var precision = argument.Precision.GetValueOrDefault();
+            var scale = argument.Scale.GetValueOrDefault();
+            return NetNameForIntegers(scale, precision);
+        }
+
+        private string NetNameForIntegers(int scale, int precision)
+        {
+            if (scale != 0 || precision >= 19) return NetDataTypeCsName;
+
+            //could be a short, int or long...
+            //VARCHAR2(10) is common for Oracle integers, but it can overflow an int
+            //int.MaxValue is 2147483647 so +1 is allowable in the database
+            if (precision > 10) //up to long.MaxValue
+            {
+                return "long";
+            }
+            if (precision > 4) //2147483647
+            {
+                return "int";
+            }
+            if (precision > 1)
+            {
+                return "short";
+            }
+            return NetDataTypeCsName;
+        }
+
+        /// <summary>
         /// Gets the type of the net data type.
         /// </summary>
         public Type GetNetType()

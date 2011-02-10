@@ -187,7 +187,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var dt = argument.DataType;
                 if (dt != null)
                 {
-                    netType = dt.NetDataTypeCsName;
+                    netType = dt.NetCodeName(argument);
                     if (dt.IsNumeric)
                         netType += "?"; //nullable
                     else if (dt.GetNetType() == typeof(DateTime))

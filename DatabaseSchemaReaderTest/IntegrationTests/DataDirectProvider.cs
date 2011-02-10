@@ -18,7 +18,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     ///         NB SQLExpress is not supported by this driver
     ///     Oracle Express with HR (userId HR, password HR)
     /// </summary>
-    [TestClass, Ignore]
+    [TestClass]
     public class DataDirectProvider
     {
         [TestMethod]
@@ -27,6 +27,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             //not sql express
             const string providername = "DDTek.SQLServer";
             const string connectionString = @"Server=localhost;AuthenticationMethod=NTLM;DatabaseName=AdventureWorks";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
@@ -42,6 +43,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "DDTek.Oracle";
             const string connectionString = "Host=localhost;Service Name=XE;User Id=HR;Password=HR;";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             dbReader.Owner = "HR";

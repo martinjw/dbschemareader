@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using DatabaseSchemaReader.DataSchema;
 
-namespace Library.Data.SqlGen.SqlServer
+namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     /// <summary>
     /// Returns a datatype string (will convert common Oracle types to SqlServer)

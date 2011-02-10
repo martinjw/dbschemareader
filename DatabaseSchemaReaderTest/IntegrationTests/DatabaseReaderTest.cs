@@ -30,6 +30,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "System.Data.OleDb";
             const string connectionString = "Provider=msdaora;Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             dbReader.Owner = "HR";
@@ -47,6 +48,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "System.Data.OracleClient";
             const string connectionString = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             dbReader.Owner = "HR";
@@ -63,6 +65,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "System.Data.SqlClient";
             const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();

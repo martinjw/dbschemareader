@@ -26,6 +26,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "Devart.Data.Oracle";
             const string connectionString = "Server=localhost;Sid=XE;Port=1521;Direct=true;User Id=HR;Password=HR;";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             dbReader.Owner = "HR";
@@ -38,11 +39,12 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
         //ignored because it isn't installed on my machine.
-        [TestMethod, Ignore]
+        [TestMethod]
         public void DevartSqlServer()
         {
             const string providername = "Devart.Data.SqlServer";
             const string connectionString = @"Data Source=localhost\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();

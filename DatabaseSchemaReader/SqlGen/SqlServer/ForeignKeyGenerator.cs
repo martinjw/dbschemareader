@@ -4,7 +4,7 @@ using System.Text;
 using DatabaseSchemaReader.DataSchema;
 using System.Collections.Generic;
 
-namespace Library.Data.SqlGen.SqlServer
+namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     public class ForeignKeyGenerator
     {

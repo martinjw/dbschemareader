@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.SqlGen;
 
-namespace Library.Data.SqlGen.SqlServer
+namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     public class TableGenerator : ITableGenerator
     {

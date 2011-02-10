@@ -1,5 +1,8 @@
 ﻿namespace DatabaseSchemaReader.SqlGen
 {
+    /// <summary>
+    /// Write a stored procedure
+    /// </summary>
     public interface IProcedureWriter
     {
         void AddOutputParameter(string parameterName, string dataType);

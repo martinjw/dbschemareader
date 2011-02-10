@@ -104,7 +104,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var propertyName = column.NetName;
             var dt = column.DataType;
-            var dataType = dt != null ? dt.NetDataTypeCsName : "object";
+            var dataType = dt != null ? dt.NetCodeName(column) : "object";
             //if it's nullable (and not string or array)
             if (column.Nullable &&
                 dt != null &&

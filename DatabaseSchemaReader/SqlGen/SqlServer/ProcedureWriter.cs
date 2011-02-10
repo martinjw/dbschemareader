@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DatabaseSchemaReader.SqlGen;
 
-namespace Library.Data.SqlGen.SqlServer
+namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     class ProcedureWriter : IProcedureWriter
     {

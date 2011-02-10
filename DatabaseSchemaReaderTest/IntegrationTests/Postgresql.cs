@@ -1,5 +1,14 @@
 ﻿using DatabaseSchemaReader;
+#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#else
+using NUnit.Framework;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestCleanup = NUnit.Framework.TearDownAttribute;
+using TestContext = System.Object;
+#endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -23,17 +32,18 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         //	</system.data>
         //also reference Npgsql.dll and Mono.Security.dll
 
-        //[TestMethod]
-        //public void TestNpgsql()
-        //{
-        //    //using the MySql world database ported to Postgres
-        //    const string providername = "Npgsql";
-        //    const string connectionString = @"Server=127.0.0.1;User id=postgres;password=secret;database=World;";
+        [TestMethod]
+        public void TestNpgsql()
+        {
+            //using the MySql world database ported to Postgres
+            const string providername = "Npgsql";
+            const string connectionString = @"Server=127.0.0.1;User id=postgres;password=secret;database=World;";
+            ProviderChecker.Check(providername, connectionString);
 
-        //    var dbReader = new DatabaseReader(connectionString, providername);
-        //    var schema = dbReader.ReadAll();
-        //    var orders = schema.FindTableByName("country");
-        //    Assert.AreEqual(15, orders.Columns.Count);
-        //}
+            var dbReader = new DatabaseReader(connectionString, providername);
+            var schema = dbReader.ReadAll();
+            var orders = schema.FindTableByName("country");
+            Assert.AreEqual(15, orders.Columns.Count);
+        }
     }
 }

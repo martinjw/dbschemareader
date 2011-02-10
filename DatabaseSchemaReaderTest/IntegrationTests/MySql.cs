@@ -25,6 +25,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "MySql.Data.MySqlClient";
             const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
+            ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();

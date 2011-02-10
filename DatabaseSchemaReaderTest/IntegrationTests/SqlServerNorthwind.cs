@@ -24,6 +24,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "System.Data.SqlClient";
             const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+            ProviderChecker.Check(providername, connectionString);
 
             return new DatabaseReader(connectionString, providername);
         }
@@ -147,7 +148,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             foreach (var column in table.Columns)
             {
                 //Cs properties (the column name could be made .Net friendly too)
-                Debug.WriteLine("\tpublic " + column.DataType.NetDataTypeCsName + " " + column.Name + " { get; set; }");
+                Debug.WriteLine("\tpublic " + column.DataType.NetCodeName(column) + " " + column.Name + " { get; set; }");
             }
             //	public int ProductID { get; set; }
             //	public string ProductName { get; set; }

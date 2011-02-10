@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Library.Data.SqlGen;
 
 namespace DatabaseSchemaReader.SqlGen.MySql
 {

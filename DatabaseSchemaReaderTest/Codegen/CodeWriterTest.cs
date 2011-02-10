@@ -1,12 +1,23 @@
 ﻿using System;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReaderTest.IntegrationTests;
+#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//MSUnit only, sorry
+#else
+using NUnit.Framework;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestCleanup = NUnit.Framework.TearDownAttribute;
+using TestContext = System.Object;
+#endif
 
 namespace DatabaseSchemaReaderTest.Codegen
 {
@@ -22,17 +33,30 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             const string providername = "System.Data.SqlClient";
             const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+            ProviderChecker.Check(providername, connectionString);
 
             return new DatabaseReader(connectionString, providername);
         }
-        
+
+        private static DirectoryInfo CreateDirectory(string folder)
+        {
+            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            if(directory.GetDirectories(folder).Any())
+            {
+                //if it's already there, clear it out
+                var sub = directory.GetDirectories(folder).First();
+                sub.Delete(true);
+            }
+            return directory.CreateSubdirectory(folder);
+        }
+
         [TestMethod]
         public void NorthwindTest()
         {
             var dbReader = GetNortwindReader();
             var schema = dbReader.ReadAll();
 
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            var directory = CreateDirectory("Northwind");
             const string @namespace = "Northwind.Domain";
 
             var codeWriter = new CodeWriter(schema);
@@ -43,7 +67,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var category = files.First(f => f.Name == "Category.cs");
             var cs = File.ReadAllText(category.FullName);
 
-            StringAssert.Contains(cs, "public virtual IList<Product> ProductCollection { get; private set; }", "Should contain the collection of products");
+            var ok = cs.Contains("public virtual IList<Product> ProductCollection { get; private set; }");
+            Assert.IsTrue(ok, "Should contain the collection of products");
 
             /*
              * When generated, create a startup project-
@@ -69,8 +94,9 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             const string providername = "System.Data.SqlClient";
             const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks";
+            ProviderChecker.Check(providername, connectionString);
 
-            var dbReader= new DatabaseReader(connectionString, providername);
+            var dbReader = new DatabaseReader(connectionString, providername);
             DatabaseSchema schema = null;
             try
             {
@@ -80,22 +106,60 @@ namespace DatabaseSchemaReaderTest.Codegen
             {
                 Assert.Inconclusive("Cannot access database " + exception.Message);
             }
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            var directory = CreateDirectory("AdventureWorks");
             const string @namespace = "AdventureWorks.Domain";
 
             var codeWriter = new CodeWriter(schema);
             codeWriter.Execute(directory, @namespace);
 
             var procedures = directory.GetDirectories("Procedures").FirstOrDefault();
-            if(procedures == null) 
+            if (procedures == null)
                 Assert.Fail("Could not find Procedures subdirectory for stored procedures");
             var files = procedures.GetFiles("*.cs");
 
             var category = files.First(f => f.Name == "uspLogError.cs");
             var cs = File.ReadAllText(category.FullName);
 
-            StringAssert.Contains(cs, "public DbCommand CreateCommand(int? errorLogId)",
-                                  "Should contain the uspLogError stored procedure (in standard AdventureWorks db)");
+
+            var ok = cs.Contains("public DbCommand CreateCommand(int? errorLogId)");
+            Assert.IsTrue(ok, "Should contain the uspLogError stored procedure (in standard AdventureWorks db)");
+        }
+
+        [TestMethod]
+        public void OracleHrTest()
+        {
+            const string providername = "System.Data.OracleClient";
+            const string connectionString = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            dbReader.Owner = "HR";
+            DatabaseSchema schema = null;
+            try
+            {
+                schema = dbReader.ReadAll();
+            }
+            catch (DbException exception)
+            {
+                Assert.Inconclusive("Cannot access database " + exception.Message);
+            }
+            var directory = CreateDirectory("Hr");
+            const string @namespace = "Hr.Domain";
+
+            var codeWriter = new CodeWriter(schema);
+            codeWriter.Execute(directory, @namespace);
+
+            var mapping = directory.GetDirectories("mapping").FirstOrDefault();
+            if (mapping == null)
+                Assert.Fail("Could not find Mapping subdirectory");
+            var files = mapping.GetFiles("*.xml");
+
+            var employeeMap = files.First(f => f.Name == "Employee.hbm.xml");
+            var doc = XDocument.Load(employeeMap.FullName);
+
+            var classElement = doc.Descendants("{urn:nhibernate-mapping-2.2}class").FirstOrDefault();
+            Assert.AreEqual("Employee", (string)classElement.Attribute("name"));
+            Assert.AreEqual("`EMPLOYEES`", (string)classElement.Attribute("table"));
         }
 
 
@@ -108,7 +172,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             DatabaseSchema schema = PrepareModel();
             var target = new CodeWriter(schema);
 
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            var directory = CreateDirectory("MyTest");
             const string @namespace = "MyTest";
 
             target.Execute(directory, @namespace);
@@ -119,13 +183,14 @@ namespace DatabaseSchemaReaderTest.Codegen
             var category = files.First(f => f.Name == "Category.cs");
             var cs = File.ReadAllText(category.FullName);
 
-            StringAssert.Contains(cs, "public virtual IList<Product> ProductCollection { get; private set; }", "Should contain the collection of products");
+            var ok = cs.Contains("public virtual IList<Product> ProductCollection { get; private set; }");
+            Assert.IsTrue(ok, "Should contain the collection of products");
         }
 
         private static DatabaseSchema PrepareModel()
         {
             var schema = new DatabaseSchema();
-            var integer = new DataType { NetDataType = typeof(int).FullName};
+            var integer = new DataType { NetDataType = typeof(int).FullName };
             var @string = new DataType { NetDataType = typeof(string).FullName };
 
             var categories = new DatabaseTable { Name = "Categories" };

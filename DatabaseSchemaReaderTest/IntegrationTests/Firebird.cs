@@ -1,4 +1,5 @@
-﻿#if !NUNIT
+﻿using DatabaseSchemaReader;
+#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
 using NUnit.Framework;
@@ -17,29 +18,31 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class Firebird
     {
-        //[TestMethod]
-        //public void FirebirdTest()
-        //{
-        //    //  <system.data>
-        //    //    <DbProviderFactories>
-        //    //      <add
-        //    //          name="Firebird Data Provider"
-        //    //          invariant="FirebirdSql.Data.FirebirdClient" description="Firebird"
-        //    //          type="FirebirdSql.Data.FirebirdClient.FirebirdClientFactory, FirebirdSql.Data.FirebirdClient, Version=2.5.2.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c"
-        //    //      />
-        //    //    </DbProviderFactories>
-        //    //  </system.data>
-        //    const string providername = "FirebirdSql.Data.FirebirdClient";
-        //    const string path = @"C:\Program Files\Firebird\Firebird_2_1\examples\empbuild\EMPLOYEE.FDB";
-        //    string connectionString = "User=SYSDBA;Password=masterkey;Database=" + path + ";Server=localhost; Connection lifetime=15;Pooling=true";
+        [TestMethod]
+        public void FirebirdTest()
+        {
+            //  <system.data>
+            //    <DbProviderFactories>
+            //      <add
+            //          name="Firebird Data Provider"
+            //          invariant="FirebirdSql.Data.FirebirdClient" description="Firebird"
+            //          type="FirebirdSql.Data.FirebirdClient.FirebirdClientFactory, FirebirdSql.Data.FirebirdClient, Version=2.5.2.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c"
+            //      />
+            //    </DbProviderFactories>
+            //  </system.data>
+            const string providername = "FirebirdSql.Data.FirebirdClient";
+            const string path = @"C:\Program Files\Firebird\Firebird_2_1\examples\empbuild\EMPLOYEE.FDB";
+            const string connectionString = "User=SYSDBA;Password=masterkey;Database=" + path + ";Server=localhost; Connection lifetime=15;Pooling=true";
 
-        //    var dbReader = new DatabaseReader(connectionString, providername);
-        //    var schema = dbReader.ReadAll();
-        //    var employees = schema.FindTableByName("EMPLOYEE");
-        //    Assert.AreEqual(11, employees.Columns.Count);
+            ProviderChecker.Check(providername, connectionString);
 
-        //    var table = dbReader.Table("EMPLOYEE");
-        //    Assert.AreEqual(11, table.Columns.Count);
-        //}
+            var dbReader = new DatabaseReader(connectionString, providername);
+            var schema = dbReader.ReadAll();
+            var employees = schema.FindTableByName("EMPLOYEE");
+            Assert.AreEqual(11, employees.Columns.Count);
+
+            var table = dbReader.Table("EMPLOYEE");
+            Assert.AreEqual(11, table.Columns.Count);
+        }
     }
 }
