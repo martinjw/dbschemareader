@@ -1,96 +1,56 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
-    public class TableGenerator : ITableGenerator
+    class TableGenerator : TableGeneratorBase
     {
-        private readonly DatabaseTable _table;
-        private readonly string _tableName;
         private bool _hasBit;
 
         public TableGenerator(DatabaseTable table)
+            : base(table)
         {
-            _table = table;
-            _tableName = table.Name;
         }
 
-
-        public void WriteToFolder(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-                throw new ArgumentNullException("path");
-            if (!Directory.Exists(path))
-                throw new ArgumentException("Path does not exist", path);
-
-            var w = Write();
-
-            string fileName = _tableName + ".sql";
-            File.WriteAllText(Path.Combine(path, fileName), w);
-        }
-
-        public void WriteToScript(string scriptPath)
-        {
-            if (string.IsNullOrEmpty(scriptPath))
-                throw new ArgumentNullException("scriptPath");
-            if (!Directory.Exists(Path.GetDirectoryName(scriptPath)))
-                throw new ArgumentException("Path does not exist", scriptPath);
-
-            var w = Write();
-
-            File.AppendAllText(scriptPath, w);
-        }
-
-        private string Write()
+        protected override string ConstraintWriter()
         {
             var sb = new StringBuilder();
+            var constraintWriter = new ConstraintWriter(Table);
+            constraintWriter.IncludeSchema = IncludeSchema;
 
-            sb.AppendLine("CREATE TABLE [" + _tableName + "]");
-            sb.AppendLine("(");
-            var list = new List<string>();
-            foreach (var column in _table.Columns)
+            //single primary keys done inline
+            if (Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count > 1)
             {
-                list.Add("  [" + column.Name + "] "
-                + WriteDataType(column));
+                sb.AppendLine(constraintWriter.WritePrimaryKey());
             }
-            sb.Append(string.Join("," + Environment.NewLine, list.ToArray()));
 
-            sb.AppendLine(")");
-            sb.AppendLine("GO");
-            foreach (var check in _table.CheckConstraints)
-            {
-                //looks like a boolean check, skip it
-                if (_hasBit && check.Expression.Contains(" IN (0, 1)")) continue;
-
-                sb.AppendLine();
-                sb.AppendLine("ALTER TABLE [" + _tableName + "]");
-                sb.AppendLine(" ADD CONSTRAINT [" + check.Name +
-                    "] CHECK  (" + check.Expression + ")");
-                sb.AppendLine("GO");
-            }
-            foreach (var uniques in _table.UniqueKeys)
-            {
-                sb.AppendLine();
-                sb.AppendLine("ALTER TABLE [" + _tableName + "]");
-                var cols = string.Join(", ", uniques.Columns.ToArray());
-
-                sb.AppendLine(" ADD CONSTRAINT [" + uniques.Name +
-                    "] UNIQUE (" + cols + ")");
-                sb.AppendLine("GO");
-            }
+            sb.AppendLine(constraintWriter.WriteUniqueKeys());
+            //looks like a boolean check, skip it
+            constraintWriter.CheckConstraintExcluder = check => (_hasBit && check.Expression.Contains(" IN (0, 1)"));
+            sb.AppendLine(constraintWriter.WriteCheckConstraints());
             return sb.ToString();
         }
 
-        private string WriteDataType(DatabaseColumn column)
+        protected override string LineEnding()
+        {
+            return @"
+GO
+";
+        }
+
+        protected override string EscapeName(string name)
+        {
+            return StringEscaper.Escape(name);
+        }
+
+        protected override string WriteDataType(DatabaseColumn column)
         {
 
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
-                var defaultConstraint = " CONSTRAINT [DF_" + _tableName + "_" + column.Name + "] DEFAULT ";
+                var defaultConstraint = " CONSTRAINT [DF_" + TableName + "_" + column.Name + "] DEFAULT ";
                 var dataType = column.DbDataType.ToUpperInvariant();
                 if (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR")
                 {
@@ -105,17 +65,22 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var sql = column.SqlServerDataType();
             if (sql == "BIT") _hasBit = true;
 
-            if (_table.Triggers.Count == 1 && column.IsPrimaryKey)
+            if (Table.Triggers.Count == 1 && column.IsPrimaryKey)
             {
                 column.IsIdentity = true;
                 //if a table has a trigger, we assume it's an Oracle trigger/sequence which is translated to identity for the pk
             }
             if (column.IsIdentity) sql += " IDENTITY(1,1)";
-            if (column.IsPrimaryKey) 
+            if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)
                 sql += " PRIMARY KEY NOT NULL";
             else
-                sql += " " + (column.Nullable ? " NOT NULL" : " NULL") + " " + defaultValue;
+                sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + " " + defaultValue;
             return sql;
+        }
+
+        protected override string NonNativeAutoIncrementWriter()
+        {
+            return string.Empty;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.SqlGen;
 using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,19 +46,57 @@ namespace DatabaseSchemaReaderTest.SqlGen
         }
 
         [TestMethod]
-        public void TestWritingOracleTables()
+        public void TestWritingNorthwindTables()
+        {
+            var schemas = LoadCategoriesFromNorthwind().DatabaseSchema;
+
+            //take a SQLServer Northwind and write all the tables and relations
+            var gen = new DdlGeneratorFactory(SqlType.SqlServer).AllTablesGenerator(schemas);
+            var txt = gen.Write();
+
+            Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
+
+            //let's translate it into Oracle.
+            var oracleGen = new DdlGeneratorFactory(SqlType.Oracle).AllTablesGenerator(schemas);
+            oracleGen.IncludeSchema = false; //we don't want "dbo." prefixes
+            txt = oracleGen.Write();
+            Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
+
+            //let's translate it into MySQL.
+            var mysqlGen = new DdlGeneratorFactory(SqlType.MySql).AllTablesGenerator(schemas);
+            mysqlGen.IncludeSchema = false; //we don't want "dbo." prefixes
+            var mySqlTxt = mysqlGen.Write();
+            Assert.IsFalse(string.IsNullOrEmpty(mySqlTxt), "Should have written some text");
+
+            //manually check the script is ok
+        }
+
+        [TestMethod]
+        public void TestWritingSqlTableIntoOracleTable()
         {
             var table = LoadCategoriesFromNorthwind();
 
             //take a SQLServer table and create Oracle table DDL
-            var gen = new DatabaseSchemaReader.SqlGen.Oracle.TableGenerator(table);
+            var gen = new DdlGeneratorFactory(SqlType.Oracle).TableGenerator(table);
 
-            var destination = CreateDirectory("sql").FullName;
-            gen.WriteToFolder(destination);
+            var txt = gen.Write();
 
-            var path = Directory.GetFiles(destination, table.Name + "*").FirstOrDefault();
-            Assert.IsNotNull(path);
-            var txt = File.ReadAllText(path);
+            Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
+
+            //manually check the script is ok
+        }
+
+
+        [TestMethod]
+        public void TestWritingSqlTableIntoMySqlTable()
+        {
+            var table = LoadCategoriesFromNorthwind();
+
+            //take a SQLServer table and create MySQL table DDL
+            var gen = new DdlGeneratorFactory(SqlType.MySql).TableGenerator(table);
+
+            var txt = gen.Write();
+
             Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
 
             //manually check the script is ok
@@ -69,7 +108,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var table = LoadCategoriesFromNorthwind();
 
             //let's create the SQLServer crud procedures
-            var gen = new DatabaseSchemaReader.SqlGen.SqlServer.ProcedureGenerator(table);
+            var gen = new DdlGeneratorFactory(SqlType.SqlServer).ProcedureGenerator(table);
             gen.ManualPrefix = table.Name + "__";
             var destination = CreateDirectory("sql").FullName;
             var path = Path.Combine(destination, "sqlserver_sprocs.sql");
@@ -88,7 +127,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var table = LoadCategoriesFromNorthwind();
 
             //let's pretend it's an oracle table and create an oracle package
-            var oracleGen = new DatabaseSchemaReader.SqlGen.Oracle.ProcedureGenerator(table);
+            var oracleGen = new DdlGeneratorFactory(SqlType.Oracle).ProcedureGenerator(table);
             oracleGen.ManualPrefix = table.Name + "__";
             //here i want all my parameters prefixed by a p
             oracleGen.FormatParameter = name => "p_" + name;

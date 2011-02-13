@@ -44,6 +44,11 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             {
                 Assert.Inconclusive("Cannot access database for provider " + providerName + " message= " + exception.Message);
             }
+            catch (Exception exception)
+            {
+                //no oracle installed = System.Exception: System.Data.OracleClient requires Oracle client software version 8.1.7 or greater.
+                Assert.Inconclusive("Cannot access database for provider " + providerName + " message= " + exception.Message);
+            }
         }
     }
 }

@@ -12,9 +12,9 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         public static string MySqlDataType(this DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
-            int providerType = -1;
-            if (column.DataType != null)
-                providerType = column.DataType.ProviderDbType;
+            //int providerType = -1;
+            //if (column.DataType != null)
+            //    providerType = column.DataType.ProviderDbType;
 
             var precision = column.Precision;
             var scale = column.Scale;
@@ -25,37 +25,55 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             if (dataType == "VARCHAR2" || dataType == "NVARCHAR")
             {
                 dataType = "VARCHAR";
+                if (length == -1) //MAX
+                {
+                    dataType = "TEXT";
+                }
             }
-
-            if (dataType == "DATETIME2" ||
+            else if (dataType == "CLOB")
+            {
+                dataType = "TEXT";
+            }
+            else if (dataType == "NTEXT")
+            {
+                dataType = "TEXT";
+            }
+            else if (dataType == "DATETIME2" ||
                 dataType == "TIME")
             {
                 dataType = "DATETIME";
             }
-            //if (dataType == "NUMERIC")
-            //{
-            //    dataType = "DECIMAL";
-            //}
-            if (dataType == "BIT")
+            else if (dataType == "MONEY")
+            {
+                dataType = "DECIMAL";
+            }
+            else if (dataType == "BIT")
             {
                 dataType = "TINYINT";
             }
 
+            else if (dataType == "IMAGE")
+            {
+                dataType = "BLOB";
+            }
+            else if (dataType == "VARBINARY" && length == -1)
+            {
+                dataType = "BLOB";
+            }
             //write out SqlServer datatype definition
             if (dataType == "VARCHAR" ||
                 dataType == "CHAR" ||
                 dataType == "BINARY" ||
                 dataType == "VARBINARY")
             {
-                dataType = dataType + " (" +
-                    (length != -1 ? length.ToString() : "MAX")
-                    + ")";
+   
+                dataType = dataType + " (" + length + ")";
             }
 
             if (dataType == "NUMERIC" ||
                 dataType == "DECIMAL")
             {
-                var writeScale = ((scale != null) && (scale > 0) ? "," + scale.ToString() : "");
+                var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
                 dataType = dataType + " (" + precision + writeScale + ")";
             }
 

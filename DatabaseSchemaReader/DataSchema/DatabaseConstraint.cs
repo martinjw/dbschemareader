@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -29,6 +30,19 @@ namespace DatabaseSchemaReader.DataSchema
         public List<string> Columns { get; set; }
 
         public string Expression { get; set; }
+
+        public DatabaseTable ReferencedTable(DatabaseSchema schema)
+        {
+            if(schema == null) return null;
+
+            return schema.Tables.FirstOrDefault(table =>
+                //the string RefersToTable is the same
+                table.Name.Equals(RefersToTable, StringComparison.OrdinalIgnoreCase) ||
+                //or the RefersToConstraint is it's primary key
+                (table.PrimaryKey != null && 
+                table.PrimaryKey.Name.Equals(RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
+        }
+
 
         public override string ToString()
         {

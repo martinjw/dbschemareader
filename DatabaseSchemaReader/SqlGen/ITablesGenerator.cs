@@ -1,9 +1,9 @@
-﻿namespace DatabaseSchemaReader.SqlGen
+namespace DatabaseSchemaReader.SqlGen
 {
     /// <summary>
-    /// Generate a table DDL
+    /// Generate Ddl for all tables in schema.
     /// </summary>
-    public interface ITableGenerator
+    public interface ITablesGenerator
     {
         /// <summary>
         /// Indicates whether schema will be written in DDL
@@ -12,7 +12,7 @@
         bool IncludeSchema { get; set; }
 
         /// <summary>
-        /// Writes the DDL.
+        /// Writes this ddl script.
         /// </summary>
         /// <returns></returns>
         string Write();

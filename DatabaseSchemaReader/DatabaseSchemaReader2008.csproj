@@ -87,9 +87,21 @@
     <Compile Include="SchemaExtendedReader.cs" />
     <Compile Include="SchemaReader.cs" />
     <Compile Include="SchemaRestrictions.cs" />
+    <Compile Include="SqlGen\ConstraintWriterBase.cs" />
+    <Compile Include="SqlGen\DdlGeneratorFactory.cs" />
+    <Compile Include="SqlGen\IProcedureGenerator.cs" />
     <Compile Include="SqlGen\IProcedureWriter.cs" />
     <Compile Include="SqlGen\ITableGenerator.cs" />
+    <Compile Include="SqlGen\ITablesGenerator.cs" />
+    <Compile Include="SqlGen\MySql\ConstraintWriter.cs" />
     <Compile Include="SqlGen\MySql\DataTypeWriter.cs" />
+    <Compile Include="SqlGen\MySql\StringEscaper.cs" />
+    <Compile Include="SqlGen\MySql\TableGenerator.cs" />
+    <Compile Include="SqlGen\MySql\TablesGenerator.cs" />
+    <Compile Include="SqlGen\Oracle\AutoIncrementWriter.cs" />
+    <Compile Include="SqlGen\Oracle\ConstraintWriter.cs" />
+    <Compile Include="SqlGen\Oracle\StringEscaper.cs" />
+    <Compile Include="SqlGen\Oracle\TablesGenerator.cs" />
     <Compile Include="SqlGen\ProcedureGeneratorBase.cs" />
     <Compile Include="SqlGen\MySql\ProcedureGenerator.cs" />
     <Compile Include="SqlGen\MySql\ProcedureWriter.cs" />
@@ -97,11 +109,16 @@
     <Compile Include="SqlGen\Oracle\ProcedureGenerator.cs" />
     <Compile Include="SqlGen\Oracle\ProcedureWriter.cs" />
     <Compile Include="SqlGen\Oracle\TableGenerator.cs" />
+    <Compile Include="SqlGen\SqlServer\ConstraintWriter.cs" />
     <Compile Include="SqlGen\SqlServer\DataTypeWriter.cs" />
     <Compile Include="SqlGen\SqlServer\ForeignKeyGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ProcedureGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ProcedureWriter.cs" />
+    <Compile Include="SqlGen\SqlServer\StringEscaper.cs" />
     <Compile Include="SqlGen\SqlServer\TableGenerator.cs" />
+    <Compile Include="SqlGen\SqlServer\TablesGenerator.cs" />
+    <Compile Include="SqlGen\TableGeneratorBase.cs" />
+    <Compile Include="SqlGen\TablesGeneratorBase.cs" />
     <Compile Include="SqlWriter.cs" />
   </ItemGroup>
   <ItemGroup>

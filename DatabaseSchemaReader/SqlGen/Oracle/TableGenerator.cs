@@ -1,57 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
 {
-    public class TableGenerator : ITableGenerator
+    class TableGenerator : TableGeneratorBase
     {
-        private readonly DatabaseTable _table;
-        private readonly string _tableName;
-        private string _path;
 
         public TableGenerator(DatabaseTable table)
+            : base(table)
         {
-            _table = table;
-            _tableName = table.Name;
         }
 
 
-        public void WriteToFolder(string path)
+        protected override string ConstraintWriter()
         {
-            if (string.IsNullOrEmpty(path))
-                throw new ArgumentNullException("path");
-            if (!Directory.Exists(path))
-                throw new ArgumentException("Path does not exist", path);
-
-            _path = path;
-
             var sb = new StringBuilder();
+            var constraintWriter = new ConstraintWriter(Table);
+            constraintWriter.IncludeSchema = IncludeSchema;
 
-            sb.AppendLine("CREATE TABLE \"" + _tableName + "\"");
-            sb.AppendLine("(");
-            var columnList = new List<string>();
-            foreach (var column in _table.Columns)
-            {
-                columnList.Add("  \"" + column.Name + "\" " + WriteDataType(column));
-            }
-            sb.AppendLine(string.Join("," + Environment.NewLine, columnList.ToArray()));
-            if(_table.PrimaryKey != null)
-            {
-                
-            }
-
-            sb.AppendLine(")");
-
-            string fileName = _tableName + ".sql";
-
-            File.WriteAllText(Path.Combine(_path, fileName), sb.ToString());
-
+            constraintWriter.CheckConstraintExcluder = ExcludeCheckConstraint;
+            constraintWriter.TranslateCheckConstraint = TranslateCheckExpression;
+            sb.AppendLine(constraintWriter.WriteTableConstraints());
+            return sb.ToString();
         }
 
-        private static string WriteDataType(DatabaseColumn column)
+
+        private static bool ExcludeCheckConstraint(DatabaseConstraint check)
+        {
+            //Oracle doesn't allow SYSDATE in check constraints
+            if (check.Expression.IndexOf("getDate()", StringComparison.OrdinalIgnoreCase) != -1)
+                return true;
+            return false;
+        }
+
+        private static string TranslateCheckExpression(string expression)
+        {
+            //translate SqlServer-isms into Oracle
+            return expression
+                //column escaping
+                .Replace("[", "\"")
+                .Replace("]", "\"");
+        }
+
+        protected override string LineEnding()
+        {
+            return @";";
+        }
+
+        protected override string EscapeName(string name)
+        {
+            return StringEscaper.Escape(name);
+        }
+
+        protected override string WriteDataType(DatabaseColumn column)
         {
             var sql = string.Empty;
             var defaultValue = string.Empty;
@@ -67,17 +69,23 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             }
             //sql server to oracle translation
             if (dataType == "VARBINARY" || dataType == "IMAGE") dataType = "BLOB";
-            if (dataType == "NVARCHAR" && column.Length> 4000) dataType = "CLOB";
+            if (dataType == "NVARCHAR" && column.Length > 4000) dataType = "CLOB";
             if (dataType == "NVARCHAR") dataType = "NVARCHAR2";
             if (dataType == "VARCHAR") dataType = "VARCHAR2";
             if (dataType == "NTEXT" || dataType == "TEXT") dataType = "CLOB";
             //Dates in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D.
-            if (dataType == "DATETIME") dataType = "DATE"; 
+            if (dataType == "DATETIME") dataType = "DATE";
             if (dataType == "NUMERIC") dataType = "NUMBER";
             if (dataType == "INT")
             {
                 dataType = "NUMBER";
-                precision = 38;
+                precision = 9;
+                scale = 0;
+            }
+            if (dataType == "SMALLINT")
+            {
+                dataType = "NUMBER";
+                precision = 5;
                 scale = 0;
             }
             if (dataType == "BIT")
@@ -122,10 +130,15 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = " DEFAULT " + column.DefaultValue;
             }
-
-            if (dataType == "CHAR")
+            if (dataType == "REAL")
             {
-                sql = "CHAR (" + column.Length + ")";
+                sql = "REAL";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = " DEFAULT " + column.DefaultValue;
+            }
+            if (dataType == "CHAR" || dataType == "NCHAR")
+            {
+                sql = dataType + " (" + column.Length + ")";
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = AddQuotedDefault(column);
             }
@@ -166,6 +179,12 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             }
 
             return sql + defaultValue + (!column.Nullable ? " NOT NULL" : string.Empty);
+        }
+
+        protected override string NonNativeAutoIncrementWriter()
+        {
+            //SQLServer table with IDENTITY- let's create the Oracle equivalent
+            return new AutoIncrementWriter(Table).Write();
         }
 
         private static string AddQuotedDefault(DatabaseColumn column)

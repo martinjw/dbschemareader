@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.SqlGen
     /// <remarks>
     /// Override this with platform specific procedure generators
     /// </remarks>
-    public abstract class ProcedureGeneratorBase
+    public abstract class ProcedureGeneratorBase : IProcedureGenerator
     {
         protected readonly DatabaseTable Table;
         protected readonly string TableName;
@@ -100,15 +100,17 @@ namespace DatabaseSchemaReader.SqlGen
         {
             if (string.IsNullOrEmpty(scriptPath))
                 throw new ArgumentNullException("scriptPath");
-// ReSharper disable AssignNullToNotNullAttribute
+            // ReSharper disable AssignNullToNotNullAttribute
             if (!Directory.Exists(Path.GetDirectoryName(scriptPath)))
-// ReSharper restore AssignNullToNotNullAttribute
+                // ReSharper restore AssignNullToNotNullAttribute
                 throw new ArgumentException("Path does not exist", scriptPath);
 
             _scriptPath = scriptPath;
 
             Write();
         }
+
+        public virtual string CursorParameterName { get; set; }
 
         private void Write()
         {

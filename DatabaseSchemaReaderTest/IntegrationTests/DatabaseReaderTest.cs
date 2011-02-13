@@ -12,7 +12,7 @@ using TestContext = System.Object;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
-    
+
     /// <summary>
     /// These are INTEGRATION tests using databases.
     /// The following databases should exist on localhost:
@@ -70,10 +70,10 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
             var product = schema.FindTableByName("Product");
-            Assert.AreEqual(25, product.Columns.Count);
+            Assert.IsTrue(product.Columns.Count >= 17); //different versions of AdventureWorks have different # columns
 
             var table = dbReader.Table("Product");
-            Assert.AreEqual(25, table.Columns.Count);
+            Assert.IsTrue(table.Columns.Count >= 17);
         }
 
     }

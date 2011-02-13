@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
@@ -33,7 +32,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         /// Gets or sets the name of the cursor parameter. Defaults to Result.
         /// </summary>
         /// <value>The name of the cursor parameter.</value>
-        public string CursorParameterName { get; set; }
+        public override string CursorParameterName { get; set; }
 
         protected override IProcedureWriter CreateProcedureWriter(string procName)
         {
