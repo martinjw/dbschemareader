@@ -17,8 +17,12 @@ namespace DatabaseSchemaReader.SqlGen
             IncludeSchema = true;
         }
 
-        protected abstract string LineEnding();
-        protected abstract string EscapeName(string name);
+        protected abstract ISqlFormatProvider SqlFormatProvider();
+
+        private string EscapeName(string name)
+        {
+            return SqlFormatProvider().Escape(name);
+        }
         protected abstract string WriteDataType(DatabaseColumn column);
         protected abstract string NonNativeAutoIncrementWriter();
 
@@ -39,7 +43,7 @@ namespace DatabaseSchemaReader.SqlGen
             }
             sb.AppendLine(string.Join("," + Environment.NewLine, columnList.ToArray()));
 
-            sb.AppendLine(")" + LineEnding());
+            sb.AppendLine(")" + SqlFormatProvider().LineEnding());
 
             sb.AppendLine(ConstraintWriter());
 

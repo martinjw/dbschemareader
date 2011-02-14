@@ -72,15 +72,15 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public void AddParameter(string parameterName, string dataType)
         {
-            _parameters.Add(" " + parameterName + " in " + dataType);
+            _parameters.Add(" " + parameterName + " IN " + dataType);
         }
         public void AddIntegerParameter(string parameterName)
         {
-            _parameters.Add(" " + parameterName + " in NUMBER");
+            _parameters.Add(" " + parameterName + " IN NUMBER");
         }
         public void AddOutputParameter(string parameterName, string dataType)
         {
-            _parameters.Add(" " + parameterName + " out " + dataType);
+            _parameters.Add(" " + parameterName + " OUT " + dataType);
         }
 
         public string Signature()

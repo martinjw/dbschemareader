@@ -112,6 +112,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="SchemaToTreeview.cs" />
+    <Compile Include="TaskRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">

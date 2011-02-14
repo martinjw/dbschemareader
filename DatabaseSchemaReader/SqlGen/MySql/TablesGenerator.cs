@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.MySql
@@ -25,12 +22,14 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             return new TableGenerator(table);
         }
 
+        protected override ISqlFormatProvider SqlFormatProvider()
+        {
+            return new SqlFormatProvider();
+        }
+
         protected override void WriteDrops(StringBuilder sb)
         {
-            foreach (var table in Schema.Tables)
-            {
-                sb.AppendLine("-- DROP TABLE " + StringEscaper.Escape(table.Name) + " CASCADE;"); //only if InnoDb
-            }
+            sb.AppendLine(DropTables.Write(Schema, SqlFormatProvider()));
         }
     }
 }

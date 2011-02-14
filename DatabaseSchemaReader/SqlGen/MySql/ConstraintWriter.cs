@@ -10,13 +10,9 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 
         #region Overrides of ConstraintWriterBase
 
-        protected override string LineEnding()
+        protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return @";";
-        }
-        protected override string EscapeName(string name)
-        {
-            return StringEscaper.Escape(name);
+            return new SqlFormatProvider();
         }
 
         #endregion

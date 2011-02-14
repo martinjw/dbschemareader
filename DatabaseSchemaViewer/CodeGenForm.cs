@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaViewer
@@ -19,10 +18,21 @@ namespace DatabaseSchemaViewer
 
             if (txtFilePath.Text == string.Empty)
                 txtFilePath.Text = Environment.CurrentDirectory;
+
+            cmbDialect.DataSource = Enum.GetValues(typeof(SqlType));
+
+            if (databaseSchema.Tables.Count == 0)
+            {
+                radSprocs.Visible = false;
+            }
+            cmbTables.DisplayMember = "Name";
+            cmbTables.DataSource = databaseSchema.Tables;
+            RadioCheckedChanged(this, EventArgs.Empty);
+
             errorProvider1.SetError(txtFilePath, string.Empty);
         }
 
-        private void btnClasses_Click(object sender, EventArgs e)
+        private void GenerateClick(object sender, EventArgs e)
         {
             if (!ValidateChildren()) return;
 
@@ -30,49 +40,97 @@ namespace DatabaseSchemaViewer
 
             var directory = new DirectoryInfo(txtFilePath.Text.Trim());
             var ns = txtNamespace.Text.Trim();
+            var dialect = (SqlType)cmbDialect.SelectedItem;
 
-            var cw = new CodeWriter(_databaseSchema);
-            try
+            if (radCSharp.Checked)
             {
-                cw.Execute(directory, ns);
+                RunCodeWriter(directory, ns);
             }
-            catch (IOException exception)
+            else if (radDdl.Checked)
             {
-                MessageBox.Show(
-                    @"An IO error occurred while opening the file.\n" + exception.Message,
-                    @"Exception",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error,
-                    MessageBoxDefaultButton.Button1);
+                RunTableDdl(directory, dialect);
             }
-            catch (UnauthorizedAccessException exception)
+            else if (radSprocs.Checked)
             {
-                MessageBox.Show(
-                    @"The caller does not have the required permission or path is readonly.\n" + exception.Message,
-                    @"Exception",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error,
-                    MessageBoxDefaultButton.Button1);
+                var table = (DatabaseTable)cmbTables.SelectedItem;
+                RunSprocs(directory, dialect, table);
             }
             StopWaiting();
         }
 
+        private void RunSprocs(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
+        {
+            var runner = new TaskRunner(_databaseSchema);
+            if (runner.RunSprocs(directory, dialect, table))
+            {
+                toolStripStatusLabel1.Text = runner.Message;
+            }
+            else
+            {
+                MessageBox.Show(
+                    runner.Message,
+                    @"Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+            }
+
+        }
+
+
+        private void RunTableDdl(DirectoryInfo directory, SqlType dialect)
+        {
+            var runner = new TaskRunner(_databaseSchema);
+            if (runner.RunTableDdl(directory, dialect))
+            {
+                toolStripStatusLabel1.Text = runner.Message;
+            }
+            else
+            {
+                MessageBox.Show(
+                    runner.Message,
+                    @"Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+            }
+        }
+
+
+        private void RunCodeWriter(DirectoryInfo directory, string ns)
+        {
+            var runner = new TaskRunner(_databaseSchema);
+            if (runner.RunCodeWriter(directory, ns))
+            {
+                toolStripStatusLabel1.Text = runner.Message;
+            }
+            else
+            {
+                MessageBox.Show(
+                    runner.Message,
+                    @"Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+            }
+        }
+
         private void StopWaiting()
         {
-            btnClasses.Visible = true;
+            btnGenerate.Visible = true;
             progressBar1.Visible = false;
             Cursor = Cursors.Default;
         }
 
         private void StartWaiting()
         {
-            btnClasses.Visible = false;
+            btnGenerate.Visible = false;
             progressBar1.Visible = true;
             Cursor = Cursors.WaitCursor;
             Refresh();
         }
 
-        private void txtFilePath_Validating(object sender, CancelEventArgs e)
+        private void FilePathValidating(object sender, CancelEventArgs e)
         {
             var path = txtFilePath.Text.Trim();
             if (string.IsNullOrEmpty(path))
@@ -90,7 +148,7 @@ namespace DatabaseSchemaViewer
             errorProvider1.SetError(txtFilePath, string.Empty);
         }
 
-        private void txtNamespace_Validating(object sender, CancelEventArgs e)
+        private void NamespaceValidating(object sender, CancelEventArgs e)
         {
             var ns = txtNamespace.Text.Trim();
             //a simplistic regex just to exclude weird punctuation/spaces etc
@@ -105,7 +163,7 @@ namespace DatabaseSchemaViewer
             }
         }
 
-        private void btnFolderPicker_Click(object sender, EventArgs e)
+        private void FolderPickerClick(object sender, EventArgs e)
         {
             using (var picker = new FolderBrowserDialog())
             {
@@ -122,7 +180,30 @@ namespace DatabaseSchemaViewer
             }
         }
 
-        private void CodeGenForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void RadioCheckedChanged(object sender, EventArgs e)
+        {
+            if (radCSharp.Checked)
+            {
+                cmbDialect.Visible = false;
+                labDialect.Visible = false;
+                txtNamespace.Visible = true;
+                labNamespace.Visible = true;
+                panelTables.Visible = false;
+            }
+            else
+            {
+                cmbDialect.Visible = true;
+                labDialect.Visible = true;
+                panelTables.Visible = radSprocs.Checked;
+
+                txtNamespace.Visible = false;
+                labNamespace.Visible = false;
+                if (txtNamespace.Text.Trim() == string.Empty)
+                    txtNamespace.Text = @"Domain";
+            }
+        }
+
+        private void CodeGenFormFormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Save();
         }

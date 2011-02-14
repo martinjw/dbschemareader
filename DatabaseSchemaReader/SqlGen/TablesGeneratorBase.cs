@@ -46,6 +46,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected abstract ConstraintWriterBase LoadConstraintWriter(DatabaseTable table);
         protected abstract ITableGenerator LoadTableGenerator(DatabaseTable table);
+        protected abstract ISqlFormatProvider SqlFormatProvider();
         protected abstract void WriteDrops(StringBuilder sb);
     }
 }

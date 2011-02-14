@@ -14,13 +14,14 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             get { return 30; }
         }
 
-        protected override string LineEnding()
+
+        #region Overrides of ConstraintWriterBase
+
+        protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return @";";
+            return new SqlFormatProvider();
         }
-        protected override string EscapeName(string name)
-        {
-            return StringEscaper.Escape(name);
-        }
+
+        #endregion
     }
 }

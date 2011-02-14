@@ -157,7 +157,7 @@ namespace DatabaseSchemaReader.SqlGen
         protected virtual void Save()
         {
             if (!string.IsNullOrEmpty(_scriptPath))
-                System.IO.File.AppendAllText(_scriptPath, File.ToString());
+                System.IO.File.WriteAllText(_scriptPath, File.ToString());
         }
         private void SelectAll()
         {

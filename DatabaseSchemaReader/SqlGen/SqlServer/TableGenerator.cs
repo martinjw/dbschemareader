@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -32,16 +31,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return sb.ToString();
         }
 
-        protected override string LineEnding()
+        protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return @"
-GO
-";
-        }
-
-        protected override string EscapeName(string name)
-        {
-            return StringEscaper.Escape(name);
+            return new SqlFormatProvider();
         }
 
         protected override string WriteDataType(DatabaseColumn column)

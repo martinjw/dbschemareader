@@ -43,14 +43,9 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 .Replace("]", "\"");
         }
 
-        protected override string LineEnding()
+        protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return @";";
-        }
-
-        protected override string EscapeName(string name)
-        {
-            return StringEscaper.Escape(name);
+            return new SqlFormatProvider();
         }
 
         protected override string WriteDataType(DatabaseColumn column)

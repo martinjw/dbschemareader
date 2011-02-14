@@ -16,8 +16,16 @@ namespace DatabaseSchemaReader.SqlGen
             _table = table;
         }
 
-        protected abstract string LineEnding();
-        protected abstract string EscapeName(string name);
+        protected abstract ISqlFormatProvider SqlFormatProvider();
+
+        private string EscapeName(string name)
+        {
+            return SqlFormatProvider().Escape(name);
+        }
+        private string LineEnding()
+        {
+            return SqlFormatProvider().LineEnding();
+        }
         public bool IncludeSchema { get; set; }
 
         protected virtual int MaximumNameLength

@@ -20,20 +20,14 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return new TableGenerator(table);
         }
 
+        protected override ISqlFormatProvider SqlFormatProvider()
+        {
+            return new SqlFormatProvider();
+        }
+
         protected override void WriteDrops(StringBuilder sb)
         {
-            foreach (var table in Schema.Tables)
-            {
-                foreach (var foreignKey in table.ForeignKeys)
-                {
-                    sb.AppendLine("-- ALTER TABLE " + StringEscaper.Escape(table.Name) + " DROP FOREIGN KEY " + foreignKey.Name + ";");
-                    
-                }
-            } 
-            foreach (var table in Schema.Tables)
-            {
-                sb.AppendLine("-- DROP TABLE " + StringEscaper.Escape(table.Name) + " CASCADE CONSTRAINTS;");
-            }
+            sb.AppendLine(DropTables.Write(Schema, SqlFormatProvider()));
         }
     }
 }

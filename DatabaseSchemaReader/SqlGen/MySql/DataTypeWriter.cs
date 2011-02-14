@@ -60,6 +60,11 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             {
                 dataType = "BLOB";
             }
+            else if (dataType == "UNIQUEIDENTIFIER")
+            {
+                dataType = "VARCHAR";
+                length = 64;
+            }
             //write out SqlServer datatype definition
             if (dataType == "VARCHAR" ||
                 dataType == "CHAR" ||
