@@ -58,7 +58,9 @@
     <Compile Include="CodeGen\OverrideWriter.cs" />
     <Compile Include="CodeGen\PrepareSchemaNames.cs" />
     <Compile Include="CodeGen\ProjectWriter.cs" />
+    <Compile Include="CodeGen\SprocResultWriter.cs" />
     <Compile Include="CodeGen\SprocWriter.cs" />
+    <Compile Include="CodeGen\UnitTestWriter.cs" />
     <Compile Include="DatabaseReader.cs" />
     <Compile Include="DataSchema\ConstraintType.cs" />
     <Compile Include="DataSchema\DatabaseArgument.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="DataSchema\DatabaseFunction.cs" />
     <Compile Include="DataSchema\DatabaseIndex.cs" />
     <Compile Include="DataSchema\DatabasePackage.cs" />
+    <Compile Include="DataSchema\DatabaseResultSet.cs" />
     <Compile Include="DataSchema\DatabaseSchema.cs" />
     <Compile Include="DataSchema\DatabaseSchemaFixer.cs" />
     <Compile Include="DataSchema\DatabaseSequence.cs" />
@@ -77,11 +80,12 @@
     <Compile Include="DataSchema\DatabaseUser.cs" />
     <Compile Include="DataSchema\DatabaseView.cs" />
     <Compile Include="DataSchema\DataType.cs" />
+    <Compile Include="DataSchema\SqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
     <Compile Include="Conversion\SchemaConverter.cs" />
     <Compile Include="Conversion\SchemaProcedureConverter.cs" />
     <Compile Include="Conversion\SchemaSourceConverter.cs" />
-    <Compile Include="DataSchema\SqlType.cs" />
+    <Compile Include="Procedures\ResultSetReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SchemaExtendedReader.cs" />

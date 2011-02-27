@@ -71,6 +71,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteStoredProcedures(directory.FullName, @namespace, pw);
             WritePackages(directory.FullName, @namespace, pw);
+            WriteUnitTest(directory.FullName, @namespace);
 
             File.WriteAllText(
                 Path.Combine(directory.FullName, (@namespace ?? "Project") + ".csproj"),
@@ -96,6 +97,16 @@ namespace DatabaseSchemaReader.CodeGen
                 var path = Path.Combine(commands.FullName, fileName);
                 File.WriteAllText(path, txt);
                 pw.AddClass(procedures + @"\" + fileName);
+
+                if (sproc.ResultSets.Count > 0)
+                {
+                    var rs = new SprocResultWriter(sproc, @namespace);
+                    txt = rs.Write();
+                    fileName = sproc.NetName + "Result.cs";
+                    path = Path.Combine(commands.FullName, fileName);
+                    File.WriteAllText(path, txt);
+                    pw.AddClass(procedures + @"\" + fileName);
+                }
             }
         }
 
@@ -129,6 +140,17 @@ namespace DatabaseSchemaReader.CodeGen
                 File.WriteAllText(path, txt);
                 pw.AddClass(package.NetName + @"\" + fileName);
             }
+        }
+
+        private void WriteUnitTest(string directoryFullName, string @namespace)
+        {
+            var tw = new UnitTestWriter(_schema, @namespace);
+            var txt = tw.Write();
+            if(string.IsNullOrEmpty(txt)) return;
+            var fileName = tw.ClassName + ".cs";
+            var path = Path.Combine(directoryFullName, fileName);
+            File.WriteAllText(path, txt);
+            //not included in project as this is just for demo
         }
 
     }

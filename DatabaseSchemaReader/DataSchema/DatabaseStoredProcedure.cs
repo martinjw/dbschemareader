@@ -9,6 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
         public DatabaseStoredProcedure()
         {
             Arguments = new List<DatabaseArgument>();
+            ResultSets = new List<DatabaseResultSet>();
         }
 
         public string Name { get; set; }
@@ -24,6 +25,8 @@ namespace DatabaseSchemaReader.DataSchema
         public DatabaseSchema DatabaseSchema { get; set; }
 
         public string NetName { get; set; }
+
+        public IList<DatabaseResultSet> ResultSets { get; private set; }
 
         public override string ToString()
         {

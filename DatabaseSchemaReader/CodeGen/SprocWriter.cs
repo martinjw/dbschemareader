@@ -47,6 +47,11 @@ namespace DatabaseSchemaReader.CodeGen
                 WriteConstructor(className);
                 WriteCreateCommand();
                 WriteAddWithValue();
+
+                if (_storedProcedure.ResultSets.Count > 0)
+                {
+                    WriteExecute(className);
+                }
             }
 
             if (!string.IsNullOrEmpty(_namespace))
@@ -60,6 +65,10 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteNamespaces()
         {
             _cb.AppendLine("using System;");
+            if (_storedProcedure.ResultSets.Count > 0)
+            {
+                _cb.AppendLine("using System.Collections.Generic;");
+            }
             _cb.AppendLine("using System.Data;");
             _cb.AppendLine("using System.Data.Common;");
             //if it has Oracle refcursors
@@ -114,6 +123,108 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("return cmd;");
             }
             _cb.AppendLine("//var cmd = sproc.CreateCommand(" + CreateDummyCall() + ");");
+        }
+
+        private void WriteExecute(string className)
+        {
+            var resultClassName = className + "Result";
+            var returnType = resultClassName;
+            bool singleResultSet = (_storedProcedure.ResultSets.Count == 1);
+            if (singleResultSet)
+            {
+                returnType = "IEnumerable<" + resultClassName + ">";
+            }
+
+            string argList = CreateArgumentList();
+            var call = CreateArgumentCall();
+
+            using (_cb.BeginNest("public " + returnType + " Execute(" + argList + ")",
+                              "Executes the stored procedure and returns a result"))
+            {
+                _cb.AppendLine("var cmd = CreateCommand(" + call + ");");
+                WriteExecuteBody(resultClassName, singleResultSet);
+            }
+            if (!singleResultSet)
+            {
+                WriteReadData(resultClassName);
+            }
+            else
+            {
+                WriteSingleReadData(resultClassName, _storedProcedure.ResultSets[0]);
+            }
+        }
+
+        private void WriteExecuteBody(string resultClassName, bool singleResultSet)
+        {
+            _cb.AppendLine("var isClosed = (_connection.State == ConnectionState.Closed);");
+            _cb.AppendLine("if (isClosed) _connection.Open();");
+            if (!singleResultSet)
+            {
+                _cb.AppendLine("var result = new " + resultClassName + "();");
+            }
+            else
+            {
+                _cb.AppendLine("var result = new List<" + resultClassName + ">();");
+            }
+            using (_cb.BeginNest("try"))
+            {
+                using (_cb.BeginNest("using (var rdr = cmd.ExecuteReader())"))
+                {
+                    _cb.AppendLine("ReadData(rdr, result);");
+                }
+            }
+            using (_cb.BeginNest("finally"))
+            {
+                _cb.AppendLine("if (isClosed) _connection.Close();");
+            }
+            _cb.AppendLine("return result;");
+        }
+
+        private void WriteSingleReadData(string resultClassName, DatabaseResultSet result)
+        {
+            //single result set
+            using (_cb.BeginNest("private static void ReadData(IDataReader rdr, ICollection<" + resultClassName + "> result)"))
+            {
+                using (_cb.BeginNest("while (rdr.Read())"))
+                {
+                    _cb.AppendLine("var record = new " + resultClassName + "();");
+                    for (int index = 0; index < result.Columns.Count; index++)
+                    {
+                        var column = result.Columns[index];
+                        var name = column.NetName ?? NameFixer.ToPascalCase(column.Name);
+                        var dataType = column.DbDataType;
+                        if (!string.Equals(dataType, "String", StringComparison.OrdinalIgnoreCase) && !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
+                        {
+                            dataType += "?"; //nullable
+                        }
+                        //manage DbNull
+                        _cb.AppendLine("var r" + index + " = rdr[" + index + "];");
+                        _cb.AppendLine("if (r" + index + " == DBNull.Value) r" + index + " = null;");
+                        _cb.AppendLine("record." + name + " = (" + dataType + ") r" + index + ";");
+                    }
+                    _cb.AppendLine("result.Add(record);");
+                }
+            }
+        }
+
+
+        private void WriteReadData(string resultClassName)
+        {
+            using (_cb.BeginNest("private static void ReadData(IDataReader rdr, " + resultClassName + " result)"))
+            {
+                for (int index = 0; index < _storedProcedure.ResultSets.Count; index++)
+                {
+                    var name = resultClassName + index;
+                    _cb.AppendLine("ReadData(rdr, result." + name + ");");
+                    _cb.AppendLine("rdr.NextResult();");
+                }
+            }
+            for (int index = 0; index < _storedProcedure.ResultSets.Count; index++)
+            {
+                var resultSet = _storedProcedure.ResultSets[index];
+                var name = resultClassName + index;
+                WriteSingleReadData(name, resultSet);
+            }
         }
 
         private void WriteArgument(DatabaseArgument argument)
@@ -194,6 +305,23 @@ namespace DatabaseSchemaReader.CodeGen
                         netType += "?"; //nullable
                 }
                 args.Add(netType + " " + name);
+            }
+            return string.Join(", ", args.ToArray());
+        }
+
+        private string CreateArgumentCall()
+        {
+            var args = new List<string>();
+            foreach (var argument in _storedProcedure.Arguments)
+            {
+                if (!argument.In) continue;
+                var name = argument.NetName;
+                if (string.IsNullOrEmpty(name))
+                {
+                    name = NameFixer.ToPascalCase(argument.Name);
+                    argument.NetName = name;
+                }
+                args.Add(name);
             }
             return string.Join(", ", args.ToArray());
         }

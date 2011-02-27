@@ -42,7 +42,9 @@ namespace DatabaseSchemaReader.DataSchema
 
         public List<DatabaseSequence> Sequences { get; set; }
 
- 
+        public string ConnectionString {get; set; }
+        public string Provider { get; set; }
+
 
         public DatabaseTable FindTableByName(string name)
         {
