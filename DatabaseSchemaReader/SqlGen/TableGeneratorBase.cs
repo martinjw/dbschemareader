@@ -28,6 +28,11 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected abstract string ConstraintWriter();
 
+        protected virtual void AddTableConstraints(IList<string> columnList)
+        {
+            //override this to add constraints after columns
+        }
+
         public bool IncludeSchema { get; set; }
 
         public string Write()
@@ -41,6 +46,7 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 columnList.Add("  " + EscapeName(column.Name) + " " + WriteDataType(column));
             }
+            AddTableConstraints(columnList);
             sb.AppendLine(string.Join("," + Environment.NewLine, columnList.ToArray()));
 
             sb.AppendLine(")" + SqlFormatProvider().LineEnding());
@@ -56,5 +62,6 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
 
         }
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 
@@ -14,30 +13,6 @@ namespace DatabaseSchemaViewer
         {
             _databaseSchema = databaseSchema;
         }
-
-
-        public bool RunCodeWriter(DirectoryInfo directory, string ns)
-        {
-            var cw = new CodeWriter(_databaseSchema);
-            try
-            {
-                cw.Execute(directory, ns);
-                Message = @"Wrote to " + directory.FullName;
-                return true;
-            }
-            catch (IOException exception)
-            {
-                Message = 
-                    @"An IO error occurred while opening the file.\n" + exception.Message;
-            }
-            catch (UnauthorizedAccessException exception)
-            {
-                Message =
-                    @"The caller does not have the required permission or path is readonly.\n" + exception.Message;
-            }
-            return false;
-        }
-
 
         public bool RunTableDdl(DirectoryInfo directory, SqlType dialect)
         {
@@ -78,6 +53,12 @@ namespace DatabaseSchemaViewer
             }
 
             var gen = new DdlGeneratorFactory(dialect).ProcedureGenerator(table);
+            if(gen == null)
+            {
+                //there is no sproc provider (SQLite)
+                Message = @"There is no sproc generator";
+                return false;
+            }
             var path = Path.Combine(directory.FullName, table.Name + "_sprocs.sql");
             try
             {

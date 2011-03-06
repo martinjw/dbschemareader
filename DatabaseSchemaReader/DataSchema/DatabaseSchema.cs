@@ -14,8 +14,11 @@ namespace DatabaseSchemaReader.DataSchema
     [Serializable]
     public class DatabaseSchema
     {
-        public DatabaseSchema()
+        public DatabaseSchema(string connectionString, string providerName)
         {
+            ConnectionString = connectionString;
+            Provider = providerName;
+
             Packages = new List<DatabasePackage>();
             Views = new List<DatabaseView>();
             Users = new List<DatabaseUser>();
@@ -26,25 +29,25 @@ namespace DatabaseSchemaReader.DataSchema
             DataTypes = new List<DataType>();
         }
 
-        public List<DataType> DataTypes { get; set; }
+        public List<DataType> DataTypes { get; internal set; }
 
-        public List<DatabaseStoredProcedure> StoredProcedures { get; set; }
+        public List<DatabaseStoredProcedure> StoredProcedures { get; internal set; }
 
-        public List<DatabasePackage> Packages { get; set; }
+        public List<DatabasePackage> Packages { get; internal set; }
 
-        public List<DatabaseTable> Tables { get; set; }
+        public List<DatabaseTable> Tables { get; internal set; }
 
-        public List<DatabaseView> Views { get; set; }
+        public List<DatabaseView> Views { get; internal set; }
 
-        public List<DatabaseUser> Users { get; set; }
+        public List<DatabaseUser> Users { get; internal set; }
 
-        public List<DatabaseFunction> Functions { get; set; }
+        public List<DatabaseFunction> Functions { get; internal set; }
 
-        public List<DatabaseSequence> Sequences { get; set; }
+        public List<DatabaseSequence> Sequences { get; internal set; }
 
-        public string ConnectionString {get; set; }
         public string Provider { get; set; }
-
+        public string ConnectionString { get; set; }
+        public string Owner { get; set; }
 
         public DatabaseTable FindTableByName(string name)
         {

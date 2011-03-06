@@ -20,13 +20,12 @@ namespace DatabaseSchemaReader.DataSchema
 
         public string Sql { get; set; }
 
-        public List<DatabaseArgument> Arguments { get; set; }
+        public List<DatabaseArgument> Arguments { get; private set; }
+        public IList<DatabaseResultSet> ResultSets { get; private set; }
 
         public DatabaseSchema DatabaseSchema { get; set; }
 
         public string NetName { get; set; }
-
-        public IList<DatabaseResultSet> ResultSets { get; private set; }
 
         public override string ToString()
         {

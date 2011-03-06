@@ -28,7 +28,7 @@ namespace DatabaseSchemaReader
         public DatabaseReader(string connectionString, string providerName)
         {
             _sr = new SchemaExtendedReader(connectionString, providerName);
-            _db = new DatabaseSchema();
+            _db = new DatabaseSchema(connectionString, providerName);
         }
 
         /// <summary>
@@ -41,6 +41,7 @@ namespace DatabaseSchemaReader
             : this(connectionString, providerName)
         {
             _sr.Owner = owner;
+            _db.Owner = owner;
         }
 
         /// <summary>
@@ -50,7 +51,11 @@ namespace DatabaseSchemaReader
         public string Owner
         {
             get { return _sr.Owner; }
-            set { _sr.Owner = value; }
+            set
+            {
+                _sr.Owner = value;
+                _db.Owner = value;
+            }
         }
 
         /// <summary>
@@ -150,7 +155,7 @@ namespace DatabaseSchemaReader
             });
             foreach (DatabaseTable table in tables)
             {
-                table.Columns = SchemaConverter.Columns(cols, table.Name);
+                table.Columns.AddRange(SchemaConverter.Columns(cols, table.Name));
                 List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(pks, ConstraintType.PrimaryKey, table.Name);
                 if (pkConstraints.Count > 0) table.PrimaryKey = pkConstraints[0];
                 table.ForeignKeys = SchemaConstraintConverter.Constraints(fks, ConstraintType.ForeignKey, table.Name);
@@ -181,7 +186,7 @@ namespace DatabaseSchemaReader
             DataTable cols = _sr.Columns(null);
             foreach (DatabaseView v in views)
             {
-                v.Columns = SchemaConverter.Columns(cols, v.Name);
+                v.Columns.AddRange(SchemaConverter.Columns(cols, v.Name));
             }
             DatabaseSchema.Views = views;
             return views;
@@ -206,7 +211,7 @@ namespace DatabaseSchemaReader
             table.Name = tableName;
             table.SchemaOwner = _sr.Owner;
             //columns must be done first as it is updated by the others
-            table.Columns = SchemaConverter.Columns(ds.Tables["Columns"]);
+            table.Columns.AddRange(SchemaConverter.Columns(ds.Tables["Columns"]));
             if (ds.Tables.Contains("Primary_Keys"))
             {
                 List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["Primary_Keys"], ConstraintType.PrimaryKey);

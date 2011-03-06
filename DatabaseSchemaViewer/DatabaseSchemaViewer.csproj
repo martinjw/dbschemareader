@@ -75,6 +75,7 @@
     <Compile Include="CodeGenForm.Designer.cs">
       <DependentUpon>CodeGenForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CodeWriterRunner.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

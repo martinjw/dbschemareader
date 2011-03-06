@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security;
 using DatabaseSchemaReader.DataSchema;
 
@@ -80,6 +81,8 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteStoredProcedures(string directoryFullName, string @namespace, ProjectWriter pw)
         {
+            if (!_schema.StoredProcedures.Any()) return;
+
             //we'll put stored procedures in a "Procedures" subdirectory
             const string procedures = "Procedures";
             var commands = new DirectoryInfo(Path.Combine(directoryFullName, procedures));
@@ -88,25 +91,30 @@ namespace DatabaseSchemaReader.CodeGen
 
             foreach (var sproc in _schema.StoredProcedures)
             {
-                //if no .net classname, don't process
-                if (string.IsNullOrEmpty(sproc.NetName)) continue;
+                WriteStoredProcedure(procedures, commands.FullName, @namespace, sproc, pw);
+            }
+        }
 
-                var sw = new SprocWriter(sproc, @namespace);
-                var txt = sw.Write();
-                var fileName = sproc.NetName + ".cs";
-                var path = Path.Combine(commands.FullName, fileName);
+        private static void WriteStoredProcedure(string procedures, string directoryPath, string @namespace, DatabaseStoredProcedure sproc, ProjectWriter pw)
+        {
+            //if no .net classname, don't process
+            if (string.IsNullOrEmpty(sproc.NetName)) return;
+
+            var sw = new SprocWriter(sproc, @namespace);
+            var txt = sw.Write();
+            var fileName = sproc.NetName + ".cs";
+            var path = Path.Combine(directoryPath, fileName);
+            File.WriteAllText(path, txt);
+            pw.AddClass(procedures + @"\" + fileName);
+
+            if (sproc.ResultSets.Count > 0)
+            {
+                var rs = new SprocResultWriter(sproc, @namespace);
+                txt = rs.Write();
+                fileName = sproc.NetName + "Result.cs";
+                path = Path.Combine(directoryPath, fileName);
                 File.WriteAllText(path, txt);
                 pw.AddClass(procedures + @"\" + fileName);
-
-                if (sproc.ResultSets.Count > 0)
-                {
-                    var rs = new SprocResultWriter(sproc, @namespace);
-                    txt = rs.Write();
-                    fileName = sproc.NetName + "Result.cs";
-                    path = Path.Combine(commands.FullName, fileName);
-                    File.WriteAllText(path, txt);
-                    pw.AddClass(procedures + @"\" + fileName);
-                }
             }
         }
 
@@ -130,15 +138,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             foreach (var sproc in package.StoredProcedures)
             {
-                //if no .net classname, don't process
-                if (string.IsNullOrEmpty(sproc.NetName)) continue;
-
-                var sw = new SprocWriter(sproc, @namespace);
-                var txt = sw.Write();
-                var fileName = sproc.NetName + ".cs";
-                var path = Path.Combine(packDirectory.FullName, fileName);
-                File.WriteAllText(path, txt);
-                pw.AddClass(package.NetName + @"\" + fileName);
+                WriteStoredProcedure(package.NetName, packDirectory.FullName, @namespace, sproc, pw);
             }
         }
 
@@ -146,7 +146,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var tw = new UnitTestWriter(_schema, @namespace);
             var txt = tw.Write();
-            if(string.IsNullOrEmpty(txt)) return;
+            if (string.IsNullOrEmpty(txt)) return;
             var fileName = tw.ClassName + ".cs";
             var path = Path.Combine(directoryFullName, fileName);
             File.WriteAllText(path, txt);

@@ -14,8 +14,6 @@ namespace DatabaseSchemaReader.DataSchema
         #region Fields
         //backing fields and initialize collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private List<DatabaseColumn> _columns = new List<DatabaseColumn>();
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private DatabaseConstraint _primaryKey;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _foreignKeys = new List<DatabaseConstraint>();
@@ -29,6 +27,7 @@ namespace DatabaseSchemaReader.DataSchema
 
         public DatabaseTable()
         {
+            Columns = new List<DatabaseColumn>();
             Triggers = new List<DatabaseTrigger>();
             ForeignKeyChildren = new List<DatabaseTable>();
         }
@@ -53,11 +52,8 @@ namespace DatabaseSchemaReader.DataSchema
 
         public string SchemaOwner { get; set; }
 
-        public List<DatabaseColumn> Columns
-        {
-            get { return _columns; }
-            set { _columns = value; }
-        }
+        public List<DatabaseColumn> Columns { get; private set; }
+
         /// <summary>
         /// Gets or sets the primary key column (assuming this isn't a composite key- check PrimaryKey.Columns.Count)
         /// </summary>

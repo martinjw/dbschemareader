@@ -48,6 +48,8 @@
             this.panelTables = new System.Windows.Forms.Panel();
             this.cmbTables = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.chkReadSprocs = new System.Windows.Forms.CheckBox();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.panelTables.SuspendLayout();
@@ -95,7 +97,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(0, 244);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(498, 22);
-            this.statusStrip1.TabIndex = 15;
+            this.statusStrip1.TabIndex = 16;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
@@ -130,6 +132,7 @@
             this.cmbDialect.Name = "cmbDialect";
             this.cmbDialect.Size = new System.Drawing.Size(121, 21);
             this.cmbDialect.TabIndex = 10;
+            this.cmbDialect.Validating += new System.ComponentModel.CancelEventHandler(this.DialectValidating);
             // 
             // labNamespace
             // 
@@ -157,7 +160,7 @@
             this.btnGenerate.Location = new System.Drawing.Point(83, 205);
             this.btnGenerate.Name = "btnGenerate";
             this.btnGenerate.Size = new System.Drawing.Size(75, 23);
-            this.btnGenerate.TabIndex = 14;
+            this.btnGenerate.TabIndex = 15;
             this.btnGenerate.Text = "Generate";
             this.btnGenerate.UseVisualStyleBackColor = true;
             this.btnGenerate.Click += new System.EventHandler(this.GenerateClick);
@@ -170,7 +173,7 @@
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(354, 23);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.progressBar1.TabIndex = 14;
+            this.progressBar1.TabIndex = 16;
             this.progressBar1.Visible = false;
             // 
             // radCSharp
@@ -217,7 +220,7 @@
             this.panelTables.Location = new System.Drawing.Point(13, 150);
             this.panelTables.Name = "panelTables";
             this.panelTables.Size = new System.Drawing.Size(463, 39);
-            this.panelTables.TabIndex = 11;
+            this.panelTables.TabIndex = 12;
             // 
             // cmbTables
             // 
@@ -225,7 +228,7 @@
             this.cmbTables.Location = new System.Drawing.Point(71, 9);
             this.cmbTables.Name = "cmbTables";
             this.cmbTables.Size = new System.Drawing.Size(121, 21);
-            this.cmbTables.TabIndex = 13;
+            this.cmbTables.TabIndex = 14;
             // 
             // label2
             // 
@@ -233,14 +236,33 @@
             this.label2.Location = new System.Drawing.Point(3, 12);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(34, 13);
-            this.label2.TabIndex = 12;
+            this.label2.TabIndex = 13;
             this.label2.Text = "Table";
+            // 
+            // chkReadSprocs
+            // 
+            this.chkReadSprocs.AutoSize = true;
+            this.chkReadSprocs.Checked = true;
+            this.chkReadSprocs.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkReadSprocs.Location = new System.Drawing.Point(84, 127);
+            this.chkReadSprocs.Name = "chkReadSprocs";
+            this.chkReadSprocs.Size = new System.Drawing.Size(181, 17);
+            this.chkReadSprocs.TabIndex = 11;
+            this.chkReadSprocs.Text = "Read Stored Procedures Results";
+            this.chkReadSprocs.UseVisualStyleBackColor = true;
+            this.chkReadSprocs.Visible = false;
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker1RunWorkerCompleted);
             // 
             // CodeGenForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(498, 266);
+            this.Controls.Add(this.chkReadSprocs);
             this.Controls.Add(this.panelTables);
             this.Controls.Add(this.radSprocs);
             this.Controls.Add(this.radDdl);
@@ -290,5 +312,7 @@
         private System.Windows.Forms.Panel panelTables;
         private System.Windows.Forms.ComboBox cmbTables;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkReadSprocs;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }

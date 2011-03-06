@@ -44,9 +44,11 @@ namespace DatabaseSchemaViewer
 
             if (radCSharp.Checked)
             {
-                RunCodeWriter(directory, ns);
+                //this launches in background worker
+                RunCodeWriter(directory, ns, chkReadSprocs.Checked);
+                return;
             }
-            else if (radDdl.Checked)
+            if (radDdl.Checked)
             {
                 RunTableDdl(directory, dialect);
             }
@@ -97,21 +99,16 @@ namespace DatabaseSchemaViewer
         }
 
 
-        private void RunCodeWriter(DirectoryInfo directory, string ns)
+        private void RunCodeWriter(DirectoryInfo directory, string ns, bool readStoredProcedures)
         {
-            var runner = new TaskRunner(_databaseSchema);
-            if (runner.RunCodeWriter(directory, ns))
+            var runner = new CodeWriterRunner(_databaseSchema, directory, ns, readStoredProcedures);
+            if (readStoredProcedures)
             {
-                toolStripStatusLabel1.Text = runner.Message;
+                toolStripStatusLabel1.Text = @"Reading stored procedures";
             }
-            else
+            if (!backgroundWorker1.IsBusy)
             {
-                MessageBox.Show(
-                    runner.Message,
-                    @"Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error,
-                    MessageBoxDefaultButton.Button1);
+                backgroundWorker1.RunWorkerAsync(runner);
             }
         }
 
@@ -163,6 +160,23 @@ namespace DatabaseSchemaViewer
             }
         }
 
+        private void DialectValidating(object sender, CancelEventArgs e)
+        {
+            var dialect = (SqlType)cmbDialect.SelectedItem;
+
+            var nok = (dialect == SqlType.SqLite && radSprocs.Checked);
+            if (nok)
+            {
+                e.Cancel = true;
+                errorProvider1.SetError(cmbDialect, "SqLite has no stored procedures");
+            }
+            else
+            {
+                errorProvider1.SetError(cmbDialect, string.Empty);
+            }
+
+        }
+
         private void FolderPickerClick(object sender, EventArgs e)
         {
             using (var picker = new FolderBrowserDialog())
@@ -189,12 +203,14 @@ namespace DatabaseSchemaViewer
                 txtNamespace.Visible = true;
                 labNamespace.Visible = true;
                 panelTables.Visible = false;
+                chkReadSprocs.Visible = true;
             }
             else
             {
                 cmbDialect.Visible = true;
                 labDialect.Visible = true;
                 panelTables.Visible = radSprocs.Checked;
+                chkReadSprocs.Visible = false;
 
                 txtNamespace.Visible = false;
                 labNamespace.Visible = false;
@@ -203,9 +219,38 @@ namespace DatabaseSchemaViewer
             }
         }
 
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var runner = (CodeWriterRunner)e.Argument;
+            runner.RunCodeWriter();
+            e.Result = runner;
+        }
+
+        private void BackgroundWorker1RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var runner = (CodeWriterRunner)e.Result;
+            if (runner.Result)
+            {
+                toolStripStatusLabel1.Text = runner.Message;
+            }
+            else
+            {
+                MessageBox.Show(
+                    runner.Message,
+                    @"Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+            }
+            StopWaiting();
+        }
+
         private void CodeGenFormFormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Save();
         }
+
+
     }
 }

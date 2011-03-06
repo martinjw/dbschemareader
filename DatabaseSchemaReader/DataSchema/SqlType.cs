@@ -5,6 +5,7 @@ namespace DatabaseSchemaReader.DataSchema
     {
         SqlServer,
         Oracle,
-        MySql
+        MySql,
+        SqLite
     }
 }

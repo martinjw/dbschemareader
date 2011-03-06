@@ -58,6 +58,7 @@
     <Compile Include="IntegrationTests\ProviderChecker.cs" />
     <Compile Include="IntegrationTests\SqlLite.cs" />
     <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
+    <Compile Include="Procedures\RunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlGen\WritingSprocsTest.cs" />
   </ItemGroup>

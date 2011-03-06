@@ -137,7 +137,7 @@ namespace DatabaseSchemaReader.Procedures
                 {
                     parameter.Value = "0";
                 }
-                else if (argument.DataType.GetNetType() == typeof(DateTime))
+                else if (argument.DataType.IsDateTime)
                 {
                     parameter.Value = DateTime.Now;
                 }
@@ -158,7 +158,7 @@ namespace DatabaseSchemaReader.Procedures
                     {
                         parameter.DbType = DbType.Int32;
                     }
-                    else if (argument.DataType.GetNetType() == typeof(DateTime))
+                    else if (argument.DataType.IsDateTime)
                     {
                         parameter.DbType = DbType.DateTime;
                     }

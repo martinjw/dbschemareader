@@ -28,11 +28,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
             column.Length = 20;
             column.DbDataType = "VARCHAR2";
 
-            column.DataType = new DataType
-                                  {
-                                      TypeName = "VARCHAR2",
-                                      NetDataType = "System.String"
-                                  };
+            column.DataType = new DataType("VARCHAR2", "System.String");
 
             //act
             var result = column.DataType.NetCodeName(column);
@@ -116,11 +112,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
         {
             column.DbDataType = "NUMBER";
 
-            column.DataType = new DataType
-            {
-                TypeName = "NUMBER",
-                NetDataType = "System.Decimal"
-            };
+            column.DataType = new DataType("NUMBER", "System.Decimal");
         }
     }
 }

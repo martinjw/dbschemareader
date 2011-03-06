@@ -1,4 +1,5 @@
 ﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.SqlGen.SqLite;
 
 namespace DatabaseSchemaReader.SqlGen
 {
@@ -33,6 +34,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new Oracle.TableGenerator(table);
                 case SqlType.MySql:
                     return new MySql.TableGenerator(table);
+                case SqlType.SqLite:
+                    return new TableGenerator(table);
             }
             return null;
         }
@@ -52,6 +55,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new Oracle.TablesGenerator(schema);
                 case SqlType.MySql:
                     return new MySql.TablesGenerator(schema);
+                case SqlType.SqLite:
+                    return new TablesGenerator(schema);
             }
             return null;
         }
@@ -71,6 +76,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new Oracle.ProcedureGenerator(table);
                 case SqlType.MySql:
                     return new MySql.ProcedureGenerator(table);
+                case SqlType.SqLite:
+                    return null; //no stored procedures in SqlLite
             }
             return null;
         }

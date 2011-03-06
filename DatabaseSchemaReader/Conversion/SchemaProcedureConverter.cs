@@ -182,7 +182,7 @@ namespace DatabaseSchemaReader.Conversion
                     sproc.SchemaOwner = owner;
                     sproc.Package = package;
                 }
-                sproc.Arguments = args;
+                sproc.Arguments.AddRange(args);
             }
         }
 
@@ -283,7 +283,19 @@ namespace DatabaseSchemaReader.Conversion
             foreach (DataRowView row in dataView)
             {
                 var t = new DatabaseArgument();
-                t.Name = row[name].ToString();
+                var argName = row[name].ToString();
+                t.Name = argName;
+                //check if it's already there
+                var existing = list.Find(delegate(DatabaseArgument arg) { return arg.Name == argName; });
+                if (existing == null)
+                {
+                    list.Add(t);
+                }
+                else
+                {
+                    t = existing;
+                }
+
                 t.ProcedureName = row[sprocName].ToString();
                 t.SchemaOwner = row[ownerKey].ToString();
                 if (packageKey != null) t.PackageName = row[packageKey].ToString();
@@ -301,8 +313,6 @@ namespace DatabaseSchemaReader.Conversion
                 t.Length = GetNullableInt(row[lengthKey]);
                 t.Precision = GetNullableInt(row[precisionKey]);
                 t.Scale = GetNullableInt(row[scaleKey]);
-
-                list.Add(t);
             }
             return list;
         }

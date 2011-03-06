@@ -41,7 +41,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         private static DirectoryInfo CreateDirectory(string folder)
         {
             var directory = new DirectoryInfo(Environment.CurrentDirectory);
-            if(directory.GetDirectories(folder).Any())
+            if (directory.GetDirectories(folder).Any())
             {
                 //if it's already there, clear it out
                 var sub = directory.GetDirectories(folder).First();
@@ -189,9 +189,9 @@ namespace DatabaseSchemaReaderTest.Codegen
 
         private static DatabaseSchema PrepareModel()
         {
-            var schema = new DatabaseSchema();
-            var integer = new DataType { NetDataType = typeof(int).FullName };
-            var @string = new DataType { NetDataType = typeof(string).FullName };
+            var schema = new DatabaseSchema(null, null);
+            var integer = new DataType("INT", typeof(int).FullName);
+            var @string = new DataType("VARCHAR", typeof(string).FullName);
 
             var categories = new DatabaseTable { Name = "Categories" };
             var categoryId = new DatabaseColumn { Name = "CategoryId", DataType = integer };

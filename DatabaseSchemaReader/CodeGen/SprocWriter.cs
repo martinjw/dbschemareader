@@ -301,7 +301,7 @@ namespace DatabaseSchemaReader.CodeGen
                     netType = dt.NetCodeName(argument);
                     if (dt.IsNumeric)
                         netType += "?"; //nullable
-                    else if (dt.GetNetType() == typeof(DateTime))
+                    else if (dt.IsDateTime)
                         netType += "?"; //nullable
                 }
                 args.Add(netType + " " + name);
@@ -342,7 +342,7 @@ namespace DatabaseSchemaReader.CodeGen
                     args.Add("0");
                 else if (dt.IsString)
                     args.Add("\"a\"");
-                else if (dt.GetNetType() == typeof(DateTime))
+                else if (dt.IsDateTime)
                     args.Add("DateTime.Now");
                 else
                     args.Add("null");

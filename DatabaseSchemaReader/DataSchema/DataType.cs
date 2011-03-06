@@ -18,17 +18,24 @@ namespace DatabaseSchemaReader.DataSchema
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool? _isNumeric;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private bool? _isDateTime;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string _netDataTypeCsName;
 
+        public DataType(string typeName, string netDataType)
+        {
+            TypeName = typeName;
+            NetDataType = netDataType;
+        }
         ///<summary>
         ///The provider-specific data type name.
         ///</summary>
-        public string TypeName { get; set; }
+        public string TypeName { get; private set; }
 
         ///<summary>
         ///The name of the .NET Framework type of the data type.
         ///</summary>
-        public string NetDataType { get; set; }
+        public string NetDataType { get; private set; }
 
         /// <summary>
         /// Gets the name of the C# net data type.
@@ -48,13 +55,13 @@ namespace DatabaseSchemaReader.DataSchema
                     _netDataTypeCsName = "int";
                 else if (IsFloat)
                     _netDataTypeCsName = "float";
+                else if (IsDateTime)
+                    _netDataTypeCsName = "DateTime";
                 else
                 {
                     //check others
                     Type t = GetNetType();
-                    if (t == typeof(DateTime))
-                        _netDataTypeCsName = "DateTime";
-                    else if (t == typeof(bool))
+                    if (t == typeof(bool))
                         _netDataTypeCsName = "bool";
                     else if (t == typeof(short))
                         _netDataTypeCsName = "short";
@@ -152,7 +159,7 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
-        /// Returns if this is a large System.String (text, ntext)
+        /// Returns if this is a large System.String (text, ntext, clob)
         /// </summary>
         public bool IsStringClob
         {
@@ -161,6 +168,22 @@ namespace DatabaseSchemaReader.DataSchema
                 if (!IsString) return false;
                 //(n)text or (n)varchar
                 return (TypeName.EndsWith("text", StringComparison.OrdinalIgnoreCase) || string.Equals("CLOB", TypeName, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is a datetime.
+        /// </summary>
+        public bool IsDateTime
+        {
+            get
+            {
+                if (_isDateTime.HasValue)
+                    return _isDateTime.Value;
+                if (string.IsNullOrEmpty(NetDataType))
+                    return false;
+                _isDateTime = (Type.GetType(NetDataType) == typeof(DateTime));
+                return _isDateTime.Value;
             }
         }
 

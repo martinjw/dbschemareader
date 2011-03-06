@@ -52,6 +52,21 @@ var table = dbReader.Table("Products");
 
 Obviously the relations between the table cannot be created if you only load a single table, But even then it reads the constraints as well so you have a lot of information to play with.
 
+===Stored Procedure Result Sets===
+
+You can read the result sets for stored procedures. 
+var sprocRunner = new DatabaseSchemaReader.Procedures.ResultSetReader(databaseSchema);
+sprocRunner.Execute();
+
+This uses the DbDataAdaptor.FillSchema method. Under the covers, this actually executes the stored procedure; it's within a transaction that is rolled back, so it should be safe. 
+
+It may fail if the input parameters don't fit your logic (string parameters are set to "a", numeric ones to "0", datetime to today's date, and any other type will probably error).
+
+The stored procedure gains a collection of DatabaseResultSets, each of which contains DatabaseColumns.
+
+
+===SQL Generation===
+
 There are also rudimentary tools to generate SQL (note this is VERY LIMITED):
 
 var sqlWriter = new SqlWriter(table, DatabaseSchemaReader.DataSchema.SqlType.SqlServer);
@@ -65,6 +80,8 @@ var path = Path.Combine(Environment.CurrentDirectory, "sqlserver_sprocs.sql");
 gen.WriteToScript(path);
 
 The SQL generation/ conversion utilities are very basic; at best they are a starting point for what you can do with the DatabaseSchemaReader. 
+
+===Code generation===
 
 The code generation is also rudimentary. Here's code gen from a SqlExpress Northwind:
 //first the standard schema reader
@@ -84,5 +101,9 @@ It writes a C# class for each table, with each column as an automatic property. 
 It also writes an NHibernate mapping class in a "mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started. If you don't need NHibernate, simply ignore this.
 
 For each stored procedure, it writes a class to create the DbCommand with all the parameters exposed as simple .net parameters. You must execute the DbCommand as ExecuteReader/ExecuteNonQuery etc as required. The messy parameter setting is done for you, but the rest of the ADO is up to you. It only understands simple parameter types (numbers, string, dates) plus Oracle ref cursors; lobs and specialized data types are beyond the scope.
+
+If you use Oracle packages, the generated code is grouped with a folder/namespace that matches the package name.
+
+If a stored procedure has ResultSets (if you used ResultSetReader), a typed result class is generated, and the stored procedure class has an Execute method.
 
 It also writes a VS2008 v3.5 csproj file, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.

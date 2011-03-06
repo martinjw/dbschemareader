@@ -90,7 +90,7 @@ namespace DatabaseSchemaReader.CodeGen
                         {
                             list.Add("1");
                         }
-                        else if (arg.DataType.GetNetType() == typeof(DateTime))
+                        else if (arg.DataType.IsDateTime)
                         {
                             list.Add("DateTime.Now");
                         }
@@ -134,7 +134,7 @@ namespace DatabaseSchemaReader.CodeGen
                         value = "0";
                     else if (column.DataType.IsString)
                         value = "GenerateString(" + column.Length + ")";
-                    else if (column.DataType.GetNetType() == typeof(DateTime))
+                    else if (column.DataType.IsDateTime)
                         value = "DateTime.Now";
                     if (value != null)
                         _cb.AppendLine("entity." + name + " = " + value + ";");

@@ -32,6 +32,8 @@ namespace DatabaseSchemaReader.SqlGen
             foreach (var table in Schema.Tables)
             {
                 var constraintWriter = LoadConstraintWriter(table);
+                //SQLite has no ALTER TABLE support, so this is not supported
+                if (constraintWriter == null) continue;
                 constraintWriter.IncludeSchema = IncludeSchema;
                 sb.AppendLine(constraintWriter.WriteForeignKeys());
             }

@@ -189,9 +189,9 @@ namespace DatabaseSchemaReader.Conversion
 
             foreach (DataRow row in dataTable.Rows)
             {
-                DataType d = new DataType();
-                d.TypeName = row["TypeName"].ToString();
-                d.NetDataType = row["DataType"].ToString();
+                string typeName = row["TypeName"].ToString();
+                string netDataType = row["DataType"].ToString();
+                DataType d = new DataType(typeName, netDataType);
                 d.ProviderDbType = Convert.ToInt32(row["ProviderDbType"], CultureInfo.InvariantCulture);
                 d.LiteralPrefix = row["LiteralPrefix"].ToString();
                 d.LiteralSuffix = row["LiteralSuffix"].ToString();
