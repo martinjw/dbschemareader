@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
 {
@@ -16,7 +17,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         public static string OracleDataTypeForParameter(this DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
-            var brace = dataType.IndexOf("(");
+            var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
             if (brace != -1) //timestamp(6)
                 dataType = dataType.Substring(0, brace);
             int providerType = GetProviderType(column);
@@ -77,7 +78,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
             if (dataType == "DATETIME") dataType = "DATE";
             //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
-            if (dataType.StartsWith("TIMESTAMP") && providerType != 0x12 && providerType != 0x13 && providerType != 20)
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != 0x12 && providerType != 0x13 && providerType != 20)
             {
                 dataType = "NUMBER";
             }

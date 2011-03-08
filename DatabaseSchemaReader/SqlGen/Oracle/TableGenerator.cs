@@ -117,7 +117,12 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = AddQuotedDefault(column);
             }
-
+            if (dataType == "CHAR" || dataType == "NCHAR")
+            {
+                sql = dataType + " (" + column.Length + ")";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
             if (dataType == "NUMBER")
             {
                 var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
@@ -131,12 +136,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = " DEFAULT " + column.DefaultValue;
             }
-            if (dataType == "CHAR" || dataType == "NCHAR")
-            {
-                sql = dataType + " (" + column.Length + ")";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
-            }
+
 
             if (dataType == "DATE")
             {

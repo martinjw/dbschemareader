@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -80,15 +81,21 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (dataType == "DATE" && providerType != (int)SqlDbType.Date)
                 dataType = "DATETIME";
             //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
-            if (dataType.StartsWith("TIMESTAMP") && providerType != (int)SqlDbType.Timestamp)
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != (int)SqlDbType.Timestamp)
                 dataType = "DATETIME";
             //Oracle numbers- use precise SqlServer versiom
-            if (dataType == "NUMBER" && precision < 38 && scale == 0) dataType = "INT";
-            if (dataType == "NUMBER" && precision == 1 && scale == 0) dataType = "BIT";
-            if (dataType == "NUMBER" && precision == 18 && scale == 0) dataType = "DECIMAL";
-            if (dataType == "NUMBER" && precision == 15 && scale == 4) dataType = "MONEY";
-            if (dataType == "NUMBER") dataType = "NUMERIC";
+            if (dataType == "NUMBER") 
+                dataType = NumberConversion(precision, scale);
             return dataType;
+        }
+
+        private static string NumberConversion(int? precision, int? scale)
+        {
+            if (precision < 38 && scale == 0) return "INT";
+            if (precision == 1 && scale == 0) return "BIT";
+            if (precision == 18 && scale == 0) return "DECIMAL";
+            if (precision == 15 && scale == 4) return "MONEY";
+            return "NUMERIC";
         }
     }
 }

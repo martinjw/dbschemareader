@@ -107,7 +107,7 @@ ADD CONSTRAINT {2} UNIQUE ({3})",
             if (CheckConstraintExcluder != null && CheckConstraintExcluder(checkConstraint)) return null;
             var expression = checkConstraint.Expression;
             //remove wrapping
-            if (expression.StartsWith("(") && expression.EndsWith(")"))
+            if (expression.StartsWith("(", StringComparison.OrdinalIgnoreCase) && expression.EndsWith(")", StringComparison.OrdinalIgnoreCase))
             {
                 expression = expression.Substring(1, expression.Length - 2);
             }

@@ -159,7 +159,7 @@ namespace DatabaseSchemaViewer
                 indexRoot.Nodes.Add(node);
                 foreach (var column in index.Columns)
                 {
-                    var columnNode = new TreeNode(column.Value);
+                    var columnNode = new TreeNode(column.Name);
                     node.Nodes.Add(columnNode);
                 }
             }

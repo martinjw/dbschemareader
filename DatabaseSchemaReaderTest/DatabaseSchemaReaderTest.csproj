@@ -44,6 +44,7 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -55,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
+    <Compile Include="DataSchema\CanSerializeTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="IntegrationTests\DatabaseReaderTest.cs" />
     <Compile Include="IntegrationTests\DataDirectProvider.cs" />

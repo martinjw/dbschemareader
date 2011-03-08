@@ -52,17 +52,13 @@ namespace DatabaseSchemaReader.Conversion
 
 
             //sort it (unless it's a check constraint)
-            if (constraintType != ConstraintType.Check && !string.IsNullOrEmpty(ordinalKey))
-                dt.DefaultView.Sort = ordinalKey;
-            //this could be more than one table, so filter the view
-            if (!string.IsNullOrEmpty(tableName))
-                dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
+            CreateDefaultView(dt, tableKey, ordinalKey, constraintType, tableName);
 
             foreach (DataRowView row in dt.DefaultView)
             {
                 string name = row[key].ToString();
                 //constraints may be on multiple columns, each as sep row.
-                DatabaseConstraint c = list.Find(delegate(DatabaseConstraint f) { return f.Name == name; });
+                DatabaseConstraint c = FindConstraint(list, name);
                 if (c == null)
                 {
                     c = new DatabaseConstraint(); //it's a new constraint
@@ -76,25 +72,52 @@ namespace DatabaseSchemaReader.Conversion
                     }
                     else
                     {
-                        if (!string.IsNullOrEmpty(refersToKey))
-                            c.RefersToConstraint = row[refersToKey] == DBNull.Value ? null : row[refersToKey].ToString();
+                        c.RefersToConstraint = AddRefersToConstraint(row, refersToKey);
                         if (!string.IsNullOrEmpty(refersToTableKey))
                             c.RefersToTable = row[refersToTableKey].ToString();
-                        if (!string.IsNullOrEmpty(deleteRuleKey))
-                        {
-                            string deleteRule = row[deleteRuleKey].ToString();
-                            if (!string.IsNullOrEmpty(deleteRule) && !deleteRule.Equals("NO ACTION", StringComparison.OrdinalIgnoreCase))
-                                c.DeleteRule = deleteRule;
-                        }
+                        AddDeleteRule(row, deleteRuleKey, c);
                     }
                 }
-                if (constraintType != ConstraintType.Check && !string.IsNullOrEmpty(columnKey))
-                {
-                    string col = row[columnKey].ToString();
-                    c.Columns.Add(col); //assume they are in the right order
-                }
+                AddConstraintColumns(row, columnKey, constraintType, c);
             }
             return list;
+        }
+
+        private static void CreateDefaultView(DataTable dt, string tableKey, string ordinalKey, ConstraintType constraintType, string tableName)
+        {
+            if (constraintType != ConstraintType.Check && !string.IsNullOrEmpty(ordinalKey))
+                dt.DefaultView.Sort = ordinalKey;
+            //this could be more than one table, so filter the view
+            if (!string.IsNullOrEmpty(tableName))
+                dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
+        }
+
+        private static DatabaseConstraint FindConstraint(List<DatabaseConstraint> list, string name)
+        {
+            return list.Find(delegate(DatabaseConstraint f) { return f.Name == name; });
+        }
+
+        private static string AddRefersToConstraint(DataRowView row, string refersToKey)
+        {
+            if (!string.IsNullOrEmpty(refersToKey) && row[refersToKey] != DBNull.Value)
+                return  row[refersToKey].ToString();
+            return null;
+        }
+
+        private static void AddConstraintColumns(DataRowView row, string columnKey, ConstraintType constraintType, DatabaseConstraint constraint)
+        {
+            if (constraintType == ConstraintType.Check || string.IsNullOrEmpty(columnKey)) return;
+            string col = row[columnKey].ToString();
+            constraint.Columns.Add(col); //assume they are in the right order
+        }
+
+        private static void AddDeleteRule(DataRowView row, string deleteRuleKey, DatabaseConstraint constraint)
+        {
+            if (string.IsNullOrEmpty(deleteRuleKey)) return;
+
+            string deleteRule = row[deleteRuleKey].ToString();
+            if (!string.IsNullOrEmpty(deleteRule) && !deleteRule.Equals("NO ACTION", StringComparison.OrdinalIgnoreCase))
+                constraint.DeleteRule = deleteRule;
         }
 
         /// <summary>
@@ -185,8 +208,11 @@ namespace DatabaseSchemaReader.Conversion
                     list.Add(c);
                 }
                 int ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
-                string col = row[columnKey].ToString();
-                c.Columns.Add(ordinal, col);
+                string colName = row[columnKey].ToString();
+                DatabaseColumn column = new DatabaseColumn();
+                column.Name = colName;
+                column.Ordinal = ordinal;
+                c.Columns.Add(column);
             }
             return list;
         }

@@ -1,6 +1,9 @@
 ﻿
+using System;
+
 namespace DatabaseSchemaReader.DataSchema
 {
+    [Serializable]
     public class DatabaseSequence
     {
         public string Name { get; set; }

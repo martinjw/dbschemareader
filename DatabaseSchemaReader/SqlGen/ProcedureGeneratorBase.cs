@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.SqlGen
     /// <remarks>
     /// Override this with platform specific procedure generators
     /// </remarks>
-    public abstract class ProcedureGeneratorBase : IProcedureGenerator
+    internal abstract class ProcedureGeneratorBase : IProcedureGenerator
     {
         protected readonly DatabaseTable Table;
         protected readonly string TableName;

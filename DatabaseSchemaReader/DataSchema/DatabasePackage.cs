@@ -1,14 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace DatabaseSchemaReader.DataSchema
 {
+    [Serializable]
     public class DatabasePackage
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private List<DatabaseStoredProcedure> _procedures = new List<DatabaseStoredProcedure>();
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private List<DatabaseFunction> _functions = new List<DatabaseFunction>();
+
+        public DatabasePackage()
+        {
+            
+        }
 
         public string Name { get; set; }
         public string SchemaOwner { get; set; }

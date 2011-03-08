@@ -5,7 +5,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     /// <summary>
     /// Generate SqlServer stored procedures.
     /// </summary>
-    public class ProcedureGenerator : ProcedureGeneratorBase
+    internal class ProcedureGenerator : ProcedureGeneratorBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcedureGenerator"/> class.

@@ -178,9 +178,12 @@ namespace DatabaseSchemaReaderTest.Codegen
             target.Execute(directory, @namespace);
 
             var files = directory.GetFiles("*.cs");
-            Assert.AreEqual(2, files.Length);
+            var products = files.FirstOrDefault(f => f.Name == "Product.cs");
+            Assert.IsNotNull(products, "Should have written Product class to represent [Products] table");
 
-            var category = files.First(f => f.Name == "Category.cs");
+            var category = files.FirstOrDefault(f => f.Name == "Category.cs");
+            Assert.IsNotNull(products, "Should have written Category class to represent [Categories] table");
+
             var cs = File.ReadAllText(category.FullName);
 
             var ok = cs.Contains("public virtual IList<Product> ProductCollection { get; private set; }");

@@ -134,55 +134,68 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "column_data_type";
             if (!dt.Columns.Contains(lengthKey)) lengthKey = "COLUMN_SIZE";
 
-            dt.DefaultView.Sort = ordinalKey;
-            //this could be more than one table, so filter the view
-            if (!string.IsNullOrEmpty(tableName))
-                dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
+            CreateDefaultView(dt, ordinalKey, tableKey, tableName);
 
             foreach (DataRowView row in dt.DefaultView)
             {
-                DatabaseColumn c = new DatabaseColumn();
-                c.Name = row[key].ToString();
-                c.TableName = row[tableKey].ToString();
-                c.Ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
-                c.DbDataType = row[datatypeKey].ToString();
+                DatabaseColumn column = new DatabaseColumn();
+                column.Name = row[key].ToString();
+                column.TableName = row[tableKey].ToString();
+                column.Ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
+                column.DbDataType = row[datatypeKey].ToString();
 
-                string nullable = row[nullableKey].ToString();
-                //could be Y, YES, N, NO, true, false.
-                if (nullable.StartsWith("Y", StringComparison.OrdinalIgnoreCase)) //Y or YES
-                    c.Nullable = true;
-                else if (nullable.StartsWith("N", StringComparison.OrdinalIgnoreCase)) //N or NO
-                    c.Nullable = false;
-                //sqlite has a boolean type
-                else if ((bool)row[nullableKey])
-                    c.Nullable = true;
+                AddNullability(row, nullableKey, column);
                 //the length unless it's an OleDb blob or clob
-                c.Length = GetNullableInt(row[lengthKey]);
-                c.Precision = GetNullableInt(row[precisionKey]);
-                c.Scale = GetNullableInt(row[scaleKey]);
+                column.Length = GetNullableInt(row[lengthKey]);
+                column.Precision = GetNullableInt(row[precisionKey]);
+                column.Scale = GetNullableInt(row[scaleKey]);
                 if (dateTimePrecision != null)
                 {
-                    c.DateTimePrecision = GetNullableInt(row[dateTimePrecision]);
+                    column.DateTimePrecision = GetNullableInt(row[dateTimePrecision]);
                 }
 
-                if (!string.IsNullOrEmpty(defaultKey))
-                {
-                    string d = row[defaultKey].ToString();
-                    if (!string.IsNullOrEmpty(d)) c.DefaultValue = d.Trim(new[] { ' ', '\'', '=' });
-                }
+                AddColumnDefault(row, defaultKey, column);
                 if (!string.IsNullOrEmpty(primaryKeyKey) && (bool)row[primaryKeyKey])
-                    c.IsPrimaryKey = true;
+                    column.IsPrimaryKey = true;
                 if (!string.IsNullOrEmpty(autoIncrementKey) && (bool)row[autoIncrementKey])
-                    c.IsIdentity = true;
+                    column.IsIdentity = true;
                 if (!string.IsNullOrEmpty(uniqueKey) && (bool)row[uniqueKey])
-                    c.IsUniqueKey = true;
+                    column.IsUniqueKey = true;
 
-                list.Add(c);
+                list.Add(column);
             }
             return list;
         }
 
-         public static List<DataType> DataTypes(DataTable dataTable)
+        private static void AddColumnDefault(DataRowView row, string defaultKey, DatabaseColumn column)
+        {
+            if (string.IsNullOrEmpty(defaultKey)) return;
+            string d = row[defaultKey].ToString();
+            if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(new[] { ' ', '\'', '=' });
+        }
+
+        private static void AddNullability(DataRowView row, string nullableKey, DatabaseColumn column)
+        {
+            string nullable = row[nullableKey].ToString();
+            //could be Y, YES, N, NO, true, false.
+            if (nullable.StartsWith("Y", StringComparison.OrdinalIgnoreCase)) //Y or YES
+                column.Nullable = true;
+            else if (nullable.StartsWith("N", StringComparison.OrdinalIgnoreCase)) //N or NO
+                column.Nullable = false;
+                //sqlite has a boolean type
+            else if ((bool)row[nullableKey])
+                column.Nullable = true;
+        }
+
+        private static void CreateDefaultView(DataTable dt, string ordinalKey, string tableKey, string tableName)
+        {
+            dt.DefaultView.Sort = ordinalKey;
+            //this could be more than one table, so filter the view
+            if (!string.IsNullOrEmpty(tableName))
+                dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
+        }
+
+        public static List<DataType> DataTypes(DataTable dataTable)
         {
             List<DataType> list = new List<DataType>();
             if (dataTable == null || dataTable.Rows.Count == 0) return list;

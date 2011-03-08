@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
     /// <summary>
     /// Generate Oracle stored procedures.
     /// </summary>
-    public class ProcedureGenerator : ProcedureGeneratorBase
+    internal class ProcedureGenerator : ProcedureGeneratorBase
     {
         private readonly StringBuilder _packageDefinition = new StringBuilder();
 

@@ -91,7 +91,8 @@ namespace DatabaseSchemaReader
 
             AllStoredProcedures();
             //oracle extra
-            DatabaseSchema.Sequences = SchemaProcedureConverter.Sequences(_sr.Sequences());
+            DatabaseSchema.Sequences.Clear();
+            DatabaseSchema.Sequences.AddRange(SchemaProcedureConverter.Sequences(_sr.Sequences()));
 
             _fixUp = true;
             UpdateReferences();
@@ -118,7 +119,8 @@ namespace DatabaseSchemaReader
                 u.Name = row[key].ToString();
                 list.Add(u);
             }
-            DatabaseSchema.Users = list;
+            DatabaseSchema.Users.Clear();
+            DatabaseSchema.Users.AddRange(list);
             return list;
         }
 
@@ -164,9 +166,11 @@ namespace DatabaseSchemaReader
                 table.CheckConstraints = SchemaConstraintConverter.Constraints(cks, ConstraintType.Check, table.Name);
                 table.Indexes = SchemaConstraintConverter.Indexes(indexes, table.Name);
                 SchemaConstraintConverter.AddIdentity(ids, table);
-                table.Triggers = SchemaConstraintConverter.Triggers(triggers, table.Name);
+                table.Triggers.Clear();
+                table.Triggers.AddRange(SchemaConstraintConverter.Triggers(triggers, table.Name));
             }
-            DatabaseSchema.Tables = tables;
+            DatabaseSchema.Tables.Clear();
+            DatabaseSchema.Tables.AddRange(tables);
             UpdateReferences();
 
             if (DatabaseSchema.DataTypes.Count > 0)
@@ -188,7 +192,8 @@ namespace DatabaseSchemaReader
             {
                 v.Columns.AddRange(SchemaConverter.Columns(cols, v.Name));
             }
-            DatabaseSchema.Views = views;
+            DatabaseSchema.Views.Clear();
+            DatabaseSchema.Views.AddRange(views);
             return views;
         }
 
@@ -211,6 +216,7 @@ namespace DatabaseSchemaReader
             table.Name = tableName;
             table.SchemaOwner = _sr.Owner;
             //columns must be done first as it is updated by the others
+            table.Columns.Clear();
             table.Columns.AddRange(SchemaConverter.Columns(ds.Tables["Columns"]));
             if (ds.Tables.Contains("Primary_Keys"))
             {
@@ -255,11 +261,12 @@ namespace DatabaseSchemaReader
         /// </remarks>
         public IList<DatabaseStoredProcedure> AllStoredProcedures()
         {
-            
+
             DataTable dt = _sr.StoredProcedures();
             SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
 
-            DatabaseSchema.Packages = SchemaProcedureConverter.Packages(_sr.Packages());
+            DatabaseSchema.Packages.Clear();
+            DatabaseSchema.Packages.AddRange(SchemaProcedureConverter.Packages(_sr.Packages()));
             //do all the arguments as one call and sort them out. 
             //NB: This is often slow on Oracle
             DataTable args = _sr.StoredProcedureArguments(null);
@@ -281,7 +288,8 @@ namespace DatabaseSchemaReader
         public IList<DataType> DataTypes()
         {
             List<DataType> list = SchemaConverter.DataTypes(_sr.DataTypes());
-            DatabaseSchema.DataTypes = list;
+            DatabaseSchema.DataTypes.Clear();
+            DatabaseSchema.DataTypes.AddRange(list);
             DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema); //if columns/arguments loaded later, run this method again.
             return list;
         }

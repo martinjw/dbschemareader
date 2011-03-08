@@ -8,12 +8,8 @@ namespace DatabaseSchemaReader.Conversion
     {
         public static void AddSources(DatabaseSchema schema, DataTable dt)
         {
-            //bool hasLines = (dt.Columns.Contains("LINE"));
-
             DatabaseStoredProcedure matchProcedure;
             DatabaseFunction matchFunction;
-            DatabasePackage matchPackage;
-
             //oracle sources come in lines; assume in order, so we can just concatenate
             foreach (DataRow row in dt.Rows)
             {
@@ -24,54 +20,44 @@ namespace DatabaseSchemaReader.Conversion
                 switch (type)
                 {
                     case "PACKAGE": //oracle package
-                        matchPackage = schema.Packages.Find(delegate(DatabasePackage x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
-                        if (matchPackage == null)
-                        {
-                            matchPackage = AddPackage(name, owner);
-                            schema.Packages.Add(matchPackage);
-                        }
+                        var package = FindPackage(schema, name, owner);
                         //text will have a newline but not cReturn
-                        matchPackage.Definition += text;
+                        package.Definition += text;
                         break;
 
                     case "PACKAGE BODY": //oracle package body
-                        matchPackage = schema.Packages.Find(delegate(DatabasePackage x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
-                        if (matchPackage == null)
-                        {
-                            matchPackage = AddPackage(name, owner);
-                            schema.Packages.Add(matchPackage);
-                        }
+                        var package2 = FindPackage(schema, name, owner);
                         //text will have a newline but not cReturn
-                        matchPackage.Body += text;
+                        package2.Body += text;
                         break;
 
                     case "PROCEDURE": //oracle procedure
-                        matchProcedure = schema.StoredProcedures.Find(delegate(DatabaseStoredProcedure x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+                        matchProcedure = FindStoredProcedure(schema, name);
                         if (matchProcedure == null) continue;
                         //text will have a newline but not cReturn
                         matchProcedure.Sql += text;
                         break;
 
                     case "FUNCTION": //oracle function
-                        matchFunction = schema.Functions.Find(delegate(DatabaseFunction x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+                        matchFunction = FindFunction(schema, name);
                         if (matchFunction == null) continue;
                         matchFunction.Sql += text;
                         break;
 
                     case "P": //sql server procedure
-                        matchProcedure = schema.StoredProcedures.Find(delegate(DatabaseStoredProcedure x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+                        matchProcedure = FindStoredProcedure(schema, name);
                         if (matchProcedure == null) continue;
                         matchProcedure.Sql = text;
                         break;
 
                     case "FN": //sql server function
-                        matchFunction = schema.Functions.Find(delegate(DatabaseFunction x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+                        matchFunction = FindFunction(schema, name);
                         if (matchFunction == null) continue;
                         matchFunction.Sql = text;
                         break;
 
                     case "V": //sql server view
-                        DatabaseView matchView = schema.Views.Find(delegate(DatabaseView x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+                        DatabaseView matchView = FindView(schema, name);
                         if (matchView == null) continue;
                         matchView.Sql = text;
                         break;
@@ -79,9 +65,35 @@ namespace DatabaseSchemaReader.Conversion
             }
         }
 
+        private static DatabaseView FindView(DatabaseSchema schema, string name)
+        {
+            return schema.Views.Find(delegate(DatabaseView x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+        }
+
+        private static DatabaseFunction FindFunction(DatabaseSchema schema, string name)
+        {
+            return schema.Functions.Find(delegate(DatabaseFunction x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+        }
+
+        private static DatabaseStoredProcedure FindStoredProcedure(DatabaseSchema schema, string name)
+        {
+            return schema.StoredProcedures.Find(delegate(DatabaseStoredProcedure x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+        }
+
+        private static DatabasePackage FindPackage(DatabaseSchema schema, string name, string owner)
+        {
+            var matchPackage = schema.Packages.Find(delegate(DatabasePackage x) { return x.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+            if (matchPackage == null)
+            {
+                matchPackage = AddPackage(name, owner);
+                schema.Packages.Add(matchPackage);
+            }
+            return matchPackage;
+        }
+
         private static DatabasePackage AddPackage(string name, string owner)
         {
-            DatabasePackage pack = new DatabasePackage();
+            var pack = new DatabasePackage();
             pack.Name = name;
             pack.SchemaOwner = owner;
             return pack;

@@ -16,20 +16,30 @@ namespace DatabaseSchemaReader.DataSchema
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private DatabaseConstraint _primaryKey;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly List<DatabaseConstraint> _foreignKeys = new List<DatabaseConstraint>();
+        private readonly List<DatabaseConstraint> _foreignKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly List<DatabaseConstraint> _uniqueKeys = new List<DatabaseConstraint>();
+        private readonly List<DatabaseConstraint> _uniqueKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly List<DatabaseIndex> _indexes = new List<DatabaseIndex>();
+        private readonly List<DatabaseIndex> _indexes;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly List<DatabaseConstraint> _checkConstraints = new List<DatabaseConstraint>();
+        private readonly List<DatabaseConstraint> _checkConstraints;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly List<DatabaseColumn> _columns;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly List<DatabaseTrigger> _triggers;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly List<DatabaseTable> _foreignKeyChildren;
         #endregion
 
         public DatabaseTable()
         {
-            Columns = new List<DatabaseColumn>();
-            Triggers = new List<DatabaseTrigger>();
-            ForeignKeyChildren = new List<DatabaseTable>();
+            _columns = new List<DatabaseColumn>();
+            _triggers = new List<DatabaseTrigger>();
+            _foreignKeyChildren = new List<DatabaseTable>();
+            _indexes = new List<DatabaseIndex>();
+            _uniqueKeys = new List<DatabaseConstraint>();
+            _foreignKeys = new List<DatabaseConstraint>();
+            _checkConstraints = new List<DatabaseConstraint>();
         }
 
         public DatabaseSchema DatabaseSchema { get; set; }
@@ -52,7 +62,7 @@ namespace DatabaseSchemaReader.DataSchema
 
         public string SchemaOwner { get; set; }
 
-        public List<DatabaseColumn> Columns { get; private set; }
+        public List<DatabaseColumn> Columns { get { return _columns; } }
 
         /// <summary>
         /// Gets or sets the primary key column (assuming this isn't a composite key- check PrimaryKey.Columns.Count)
@@ -144,9 +154,9 @@ namespace DatabaseSchemaReader.DataSchema
         }
         #endregion
 
-        public IList<DatabaseTable> ForeignKeyChildren { get; private set; }
+        public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren;  } }
 
-        public List<DatabaseTrigger> Triggers { get; set; }
+        public List<DatabaseTrigger> Triggers { get { return _triggers;  } }
 
         public List<DatabaseIndex> Indexes
         {
@@ -156,9 +166,10 @@ namespace DatabaseSchemaReader.DataSchema
         public void AddIndex(DatabaseIndex index)
         {
             Indexes.Add(index);
-            foreach (KeyValuePair<int, string> kvp in index.Columns)
+
+            foreach (DatabaseColumn column in index.Columns)
             {
-                string name = kvp.Value;
+                string name = column.Name;
                 foreach (DatabaseColumn col in Columns)
                 {
                     if (col.Name.Equals(name, StringComparison.OrdinalIgnoreCase))

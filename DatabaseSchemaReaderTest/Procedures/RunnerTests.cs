@@ -46,6 +46,8 @@ namespace DatabaseSchemaReaderTest.Procedures
             return directory.CreateSubdirectory(folder);
         }
 
+
+
         [TestMethod]
         public void TestRunnerWithNorthwind()
         {

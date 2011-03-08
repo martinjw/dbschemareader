@@ -131,11 +131,12 @@ namespace DatabaseSchemaReader.Procedures
                 if (argument.DataType.IsString)
                 {
                     parameter.DbType = DbType.AnsiString;
-                    parameter.Value = "a";
+                    //a string "1" seems better than a letter (TO_NUMBER, CONVERTs etc)
+                    parameter.Value = "1";
                 }
                 else if (argument.DataType.IsNumeric)
                 {
-                    parameter.Value = "0";
+                    parameter.Value = 1;
                 }
                 else if (argument.DataType.IsDateTime)
                 {

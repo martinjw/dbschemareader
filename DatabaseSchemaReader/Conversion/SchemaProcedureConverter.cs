@@ -282,39 +282,50 @@ namespace DatabaseSchemaReader.Conversion
 
             foreach (DataRowView row in dataView)
             {
-                var t = new DatabaseArgument();
                 var argName = row[name].ToString();
-                t.Name = argName;
                 //check if it's already there
-                var existing = list.Find(delegate(DatabaseArgument arg) { return arg.Name == argName; });
-                if (existing == null)
-                {
-                    list.Add(t);
-                }
-                else
-                {
-                    t = existing;
-                }
+                var argument = AddArgumentToList(list, argName);
 
-                t.ProcedureName = row[sprocName].ToString();
-                t.SchemaOwner = row[ownerKey].ToString();
-                if (packageKey != null) t.PackageName = row[packageKey].ToString();
-                t.Ordinal = Convert.ToDecimal(row[ordinalKey], CultureInfo.CurrentCulture);
+                argument.ProcedureName = row[sprocName].ToString();
+                argument.SchemaOwner = row[ownerKey].ToString();
+                AddPackage(row, packageKey, argument);
+                argument.Ordinal = Convert.ToDecimal(row[ordinalKey], CultureInfo.CurrentCulture);
 
-                t.DatabaseDataType = row[datatypeKey].ToString();
-                if (inoutKey != null)
-                {
-                    string inout = row[inoutKey].ToString();
-                    if (inout.Contains("IN")) t.In = true;
-                    if (inout.Contains("OUT")) t.Out = true;
-                }
+                argument.DatabaseDataType = row[datatypeKey].ToString();
+                AddInOut(row, inoutKey, argument);
 
                 //Oracle: these can be decimals, but we'll assume ints
-                t.Length = GetNullableInt(row[lengthKey]);
-                t.Precision = GetNullableInt(row[precisionKey]);
-                t.Scale = GetNullableInt(row[scaleKey]);
+                argument.Length = GetNullableInt(row[lengthKey]);
+                argument.Precision = GetNullableInt(row[precisionKey]);
+                argument.Scale = GetNullableInt(row[scaleKey]);
             }
             return list;
+        }
+
+        private static void AddPackage(DataRowView row, string packageKey, DatabaseArgument argument)
+        {
+            if (packageKey != null) argument.PackageName = row[packageKey].ToString();
+        }
+
+        private static void AddInOut(DataRowView row, string inoutKey, DatabaseArgument argument)
+        {
+            if (inoutKey == null) return;
+            string inout = row[inoutKey].ToString();
+            if (inout.Contains("IN")) argument.In = true;
+            if (inout.Contains("OUT")) argument.Out = true;
+        }
+
+        private static DatabaseArgument AddArgumentToList(List<DatabaseArgument> list, string argName)
+        {
+            var existing = list.Find(delegate(DatabaseArgument arg) { return arg.Name == argName; });
+            if (existing == null)
+            {
+                DatabaseArgument argument = new DatabaseArgument();
+                argument.Name = argName;
+                list.Add(argument);
+                return argument;
+            }
+            return existing;
         }
 
         public static List<DatabasePackage> Packages(DataTable dt)

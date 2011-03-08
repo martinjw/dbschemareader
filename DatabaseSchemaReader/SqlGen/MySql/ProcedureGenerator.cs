@@ -5,7 +5,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
     /// <summary>
     /// Generate MySql stored procedures.
     /// </summary>
-    public class ProcedureGenerator : ProcedureGeneratorBase
+    internal class ProcedureGenerator : ProcedureGeneratorBase
     {
         public ProcedureGenerator(DatabaseTable table) : base(table)
         {

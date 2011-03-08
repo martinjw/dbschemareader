@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
@@ -10,9 +11,15 @@ namespace DatabaseSchemaReader.DataSchema
     [Serializable]
     public class DatabaseConstraint
     {
+        #region Fields
+        //backing fields
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly List<string> _columns;
+        #endregion
+
         public DatabaseConstraint()
         {
-            Columns = new List<string>();
+            _columns = new List<string>();
         }
 
         public string Name { get; set; }
@@ -27,8 +34,14 @@ namespace DatabaseSchemaReader.DataSchema
 
         public ConstraintType ConstraintType { get; set; }
 
-        public List<string> Columns { get; set; }
+        /// <summary>
+        /// Gets the columns. A check constraint has no columns.
+        /// </summary>
+        public List<string> Columns { get { return _columns; } }
 
+        /// <summary>
+        /// Gets or sets the expression (check constraints only).
+        /// </summary>
         public string Expression { get; set; }
 
         public DatabaseTable ReferencedTable(DatabaseSchema schema)
