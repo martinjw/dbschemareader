@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Essentially the same (and inherits from) a <see cref="DatabaseTable"/>
     /// </remarks>
     [Serializable]
-    public class DatabaseView : DatabaseTable
+    public partial class DatabaseView : DatabaseTable
     {
         /// <summary>
         /// Gets or sets the DDL to create this view (if available)

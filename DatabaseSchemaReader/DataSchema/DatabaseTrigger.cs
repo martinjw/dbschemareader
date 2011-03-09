@@ -3,7 +3,7 @@
 namespace DatabaseSchemaReader.DataSchema
 {
     [Serializable]
-    public class DatabaseTrigger
+    public partial class DatabaseTrigger
     {
         public DatabaseSchema DatabaseSchema { get; set; }
 

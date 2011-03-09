@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A column in the database
     /// </summary>
     [Serializable]
-    public class DatabaseColumn
+    public partial class DatabaseColumn
     {
         #region Fields
 

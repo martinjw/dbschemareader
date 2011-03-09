@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace DatabaseSchemaReader.DataSchema
 {
     [Serializable]
-    public class DatabasePackage
+    public partial class DatabasePackage
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private List<DatabaseStoredProcedure> _procedures = new List<DatabaseStoredProcedure>();

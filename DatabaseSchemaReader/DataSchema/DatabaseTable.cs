@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A table in the database
     /// </summary>
     [Serializable]
-    public class DatabaseTable
+    public partial class DatabaseTable
     {
         #region Fields
         //backing fields and initialize collections

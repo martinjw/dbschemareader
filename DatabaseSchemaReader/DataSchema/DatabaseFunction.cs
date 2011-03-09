@@ -3,7 +3,7 @@
 namespace DatabaseSchemaReader.DataSchema
 {
     [Serializable]
-    public class DatabaseFunction : DatabaseStoredProcedure
+    public partial class DatabaseFunction : DatabaseStoredProcedure
     {
 
     }

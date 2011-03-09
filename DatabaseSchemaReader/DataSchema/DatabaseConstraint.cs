@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a constraint (of <see cref="ConstraintType"/> such as primary key, foreign key...) that is attached to <see cref="Columns"/> of a table with name <see cref="TableName"/>
     /// </summary>
     [Serializable]
-    public class DatabaseConstraint
+    public partial class DatabaseConstraint
     {
         #region Fields
         //backing fields
@@ -17,6 +17,9 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly List<string> _columns;
         #endregion
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseConstraint"/> class.
+        /// </summary>
         public DatabaseConstraint()
         {
             _columns = new List<string>();

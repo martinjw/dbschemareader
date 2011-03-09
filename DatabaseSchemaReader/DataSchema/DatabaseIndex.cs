@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace DatabaseSchemaReader.DataSchema
 {
     [Serializable]
-    public class DatabaseIndex
+    public partial class DatabaseIndex
     {
         #region Fields
         //backing fields

@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace DatabaseSchemaReader.DataSchema
 {
     [Serializable]
-    public class DatabaseStoredProcedure
+    public partial class DatabaseStoredProcedure
     {
         #region Fields
         //backing fields

@@ -4,7 +4,7 @@ using System;
 namespace DatabaseSchemaReader.DataSchema
 {
     [Serializable]
-    public class DatabaseSequence
+    public partial class DatabaseSequence
     {
         public string Name { get; set; }
         public string SchemaOwner { get; set; }
