@@ -4,6 +4,9 @@ using System.Diagnostics;
 
 namespace DatabaseSchemaReader.DataSchema
 {
+    /// <summary>
+    /// Represents a stored procedure in the database.
+    /// </summary>
     [Serializable]
     public partial class DatabaseStoredProcedure
     {
@@ -22,6 +25,28 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets the full name (including schema if applicable, and package if applicable)
+        /// </summary>
+        public string FullName
+        {
+            get
+            {
+                var fullName = Name;
+                if (!string.IsNullOrEmpty(Package))
+                {
+                    //prefix with package name
+                    fullName = Package + "." + fullName;
+                }
+                if (!SchemaOwner.Equals("dbo"))
+                {
+                    //prefix with schema name
+                    fullName = SchemaOwner + "." + fullName;
+                }
+                return fullName;
+            }
+        }
 
         public string SchemaOwner { get; set; }
 

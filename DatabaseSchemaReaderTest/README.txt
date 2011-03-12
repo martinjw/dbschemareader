@@ -10,7 +10,7 @@ This means the databases must exist in order to run it.
 *     Oracle Express with HR (userId HR, password HR)
 *     MySQL with Northwind (user id root, passwod mysql)
 
-All ADO providers are accessed using ADO 2's DbProvdierFactories - there are no direct references.
+All ADO providers are accessed using ADO 2's DbProviderFactories - there are no direct references.
 If the provider is not installed (eg Devart.Oracle), the test runs as Inconclusive.
 If the database cannot be opened (invalid connection string/ password etc), the test runs as Inconclusive.
 

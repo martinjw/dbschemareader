@@ -28,5 +28,13 @@ namespace DatabaseSchemaReader.DataSchema
         /// Gets the columns.
         /// </summary>
         public List<DatabaseColumn> Columns { get { return _columns; } }
+
+        /// <summary>
+        /// Gets or sets the result set name in .Net (C#) compatible format.
+        /// </summary>
+        /// <value>
+        /// The .net name
+        /// </value>
+        public string NetName { get; set; }
     }
 }

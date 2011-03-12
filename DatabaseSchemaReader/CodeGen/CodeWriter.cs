@@ -106,12 +106,13 @@ namespace DatabaseSchemaReader.CodeGen
             var path = Path.Combine(directoryPath, fileName);
             File.WriteAllText(path, txt);
             pw.AddClass(procedures + @"\" + fileName);
+            if (sw.RequiresOracleReference) pw.AddOracleReference();
 
-            if (sproc.ResultSets.Count > 0)
+            if (sw.HasResultClass)
             {
                 var rs = new SprocResultWriter(sproc, @namespace);
                 txt = rs.Write();
-                fileName = sproc.NetName + "Result.cs";
+                fileName = rs.ClassName + ".cs";
                 path = Path.Combine(directoryPath, fileName);
                 File.WriteAllText(path, txt);
                 pw.AddClass(procedures + @"\" + fileName);

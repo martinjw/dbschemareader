@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using DatabaseSchemaReader;
@@ -51,6 +52,7 @@ namespace DatabaseSchemaReaderTest.Procedures
         [TestMethod]
         public void TestRunnerWithNorthwind()
         {
+            //smoke test - does this run without any exceptions
             var dbReader = GetNortwindReader();
             var schema = dbReader.ReadAll();
 
@@ -62,6 +64,8 @@ namespace DatabaseSchemaReaderTest.Procedures
 
             var codeWriter = new CodeWriter(schema);
             codeWriter.Execute(directory, @namespace);
+
+            Debug.WriteLine("Check project in " + directory.FullName);
         }
     }
 }

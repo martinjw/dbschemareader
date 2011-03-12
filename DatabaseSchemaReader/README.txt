@@ -100,7 +100,7 @@ It writes a C# class for each table, with each column as an automatic property. 
 
 It also writes an NHibernate mapping class in a "mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started. If you don't need NHibernate, simply ignore this.
 
-For each stored procedure, it writes a class to create the DbCommand with all the parameters exposed as simple .net parameters. You must execute the DbCommand as ExecuteReader/ExecuteNonQuery etc as required. The messy parameter setting is done for you, but the rest of the ADO is up to you. It only understands simple parameter types (numbers, string, dates) plus Oracle ref cursors; lobs and specialized data types are beyond the scope.
+For each stored procedure, it writes a class to create the DbCommand with all the parameters exposed as simple .net parameters. It also creates a method (Execute) to execute the stored procedure. If you have the result sets (you used ResultSetReader) the Execute method will return classes typed to the result sets and your output parameters, so the only ADO you need is to create the DbConnection. It only understands simple parameter types (numbers, string, dates) plus Oracle ref cursors; lobs and specialized data types are beyond the scope.
 
 If you use Oracle packages, the generated code is grouped with a folder/namespace that matches the package name.
 

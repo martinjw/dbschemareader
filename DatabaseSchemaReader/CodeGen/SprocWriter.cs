@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
@@ -22,17 +21,31 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly DatabaseStoredProcedure _storedProcedure;
         private readonly string _namespace;
         private readonly ClassBuilder _cb;
+        private readonly SprocLogic _logic;
+        private readonly SprocResultType _sprocResultType;
 
         public SprocWriter(DatabaseStoredProcedure storedProcedure, string ns)
         {
             _namespace = ns;
             _storedProcedure = storedProcedure;
+            _logic = new SprocLogic(_storedProcedure);
+            _sprocResultType = _logic.ResultType;
             _cb = new ClassBuilder();
+        }
+
+        public bool HasResultClass
+        {
+            get { return _sprocResultType != SprocResultType.Void; }
+        }
+
+        public bool RequiresOracleReference
+        {
+            get { return _logic.HasRefCursors; }
         }
 
         public string Write()
         {
-            var className = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
+            var className = _logic.ClassName;
 
             WriteNamespaces();
 
@@ -41,17 +54,13 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.BeginNest("namespace " + _namespace);
             }
 
-            var fullName = _storedProcedure.SchemaOwner + "." + _storedProcedure.Name;
-            using (_cb.BeginNest("public class " + className, "Class representing " + fullName + " stored procedure"))
+            using (_cb.BeginNest("public class " + className, "Class representing " + _storedProcedure.FullName + " stored procedure"))
             {
                 WriteConstructor(className);
                 WriteCreateCommand();
                 WriteAddWithValue();
 
-                if (_storedProcedure.ResultSets.Count > 0)
-                {
-                    WriteExecute(className);
-                }
+                WriteExecute();
             }
 
             if (!string.IsNullOrEmpty(_namespace))
@@ -72,10 +81,10 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("using System.Data;");
             _cb.AppendLine("using System.Data.Common;");
             //if it has Oracle refcursors
-            if (_storedProcedure.Arguments.Any(argument => string.Equals("REF CURSOR", argument.DatabaseDataType, StringComparison.OrdinalIgnoreCase)))
+            if (_logic.HasRefCursors)
             {
                 //could also be ODP, Devart etc.
-                _cb.AppendLine("using System.Data.OracleClient;");
+                _cb.AppendLine("using System.Data.OracleClient; //contains a Ref Cursor");
             }
             _cb.AppendLine("using System.Diagnostics;");
         }
@@ -96,22 +105,12 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteCreateCommand()
         {
-            string argList = CreateArgumentList();
+            string argList = _logic.CreateArgumentList();
 
-            using (_cb.BeginNest("public DbCommand CreateCommand(" + argList + ")", "Creates the command and all parameters."))
+            using (_cb.BeginNest("public virtual DbCommand CreateCommand(" + argList + ")", "Creates the command and all parameters."))
             {
                 _cb.AppendLine("var cmd = _connection.CreateCommand();");
-                var fullName = _storedProcedure.Name;
-                if (!string.IsNullOrEmpty(_storedProcedure.Package))
-                {
-                    //prefix with package name
-                    fullName = _storedProcedure.Package + "." + fullName;
-                }
-                if (!_storedProcedure.SchemaOwner.Equals("dbo"))
-                {
-                    //prefix with schema name
-                    fullName = _storedProcedure.SchemaOwner + "." + fullName;
-                }
+                var fullName = _storedProcedure.FullName;
                 _cb.AppendLine("cmd.CommandText = @\"" + fullName + "\";");
                 _cb.AppendLine("cmd.CommandType = CommandType.StoredProcedure;");
 
@@ -122,62 +121,111 @@ namespace DatabaseSchemaReader.CodeGen
 
                 _cb.AppendLine("return cmd;");
             }
-            _cb.AppendLine("//var cmd = sproc.CreateCommand(" + CreateDummyCall() + ");");
+            _cb.AppendLine("//var cmd = sproc.CreateCommand(" + _logic.CreateDummyCall() + ");");
         }
 
-        private void WriteExecute(string className)
+        private void WriteExecute()
         {
-            var resultClassName = className + "Result";
-            var returnType = resultClassName;
-            bool singleResultSet = (_storedProcedure.ResultSets.Count == 1);
-            if (singleResultSet)
-            {
-                returnType = "IEnumerable<" + resultClassName + ">";
-            }
+            var resultClassName = _logic.ResultClassName;
+            var returnType = _logic.ReturnType;
 
-            string argList = CreateArgumentList();
-            var call = CreateArgumentCall();
+            string argList = _logic.CreateArgumentList();
+            var call = _logic.CreateArgumentCall();
 
-            using (_cb.BeginNest("public " + returnType + " Execute(" + argList + ")",
-                              "Executes the stored procedure and returns a result"))
+            using (_cb.BeginNest("public virtual " + returnType + " Execute(" + argList + ")",
+                              "Executes the stored procedure"))
             {
-                _cb.AppendLine("var cmd = CreateCommand(" + call + ");");
-                WriteExecuteBody(resultClassName, singleResultSet);
+                CreateResultClass(resultClassName);
+                using (_cb.BeginNest("using (var cmd = CreateCommand(" + call + "))"))
+                {
+                    WriteExecuteBody();
+                }
+                if (_sprocResultType != SprocResultType.Void)
+                {
+                    _cb.AppendLine("return result;");
+                }
             }
-            if (!singleResultSet)
-            {
-                WriteReadData(resultClassName);
-            }
-            else
+            if (_sprocResultType == SprocResultType.Enumerable)
             {
                 WriteSingleReadData(resultClassName, _storedProcedure.ResultSets[0]);
+                WriteFixNull();
+            }
+            else if (_sprocResultType == SprocResultType.ResultClass)
+            {
+                WriteReadData(resultClassName);
+                WriteFixNull();
+            }
+
+            if (_logic.HasOutputParameters)
+            {
+                WriteOutputParameters(resultClassName);
             }
         }
 
-        private void WriteExecuteBody(string resultClassName, bool singleResultSet)
+        private void CreateResultClass(string resultClassName)
         {
-            _cb.AppendLine("var isClosed = (_connection.State == ConnectionState.Closed);");
-            _cb.AppendLine("if (isClosed) _connection.Open();");
-            if (!singleResultSet)
+            if (_sprocResultType == SprocResultType.Void)
             {
-                _cb.AppendLine("var result = new " + resultClassName + "();");
+                //no result
             }
-            else
+            else if (_sprocResultType == SprocResultType.Enumerable)
             {
+                //return a simple enumerable of results
+                //We cannot tell is this is a scalar (singular) result
                 _cb.AppendLine("var result = new List<" + resultClassName + ">();");
             }
+            else //if (sprocResultType == SprocResultType.ResultClass)
+            {
+                //return a result class containing the multiple result lists
+                _cb.AppendLine("var result = new " + resultClassName + "();");
+            }
+        }
+
+        private void WriteExecuteBody()
+        {
+            var numberResults = _storedProcedure.ResultSets.Count;
+
+            _cb.AppendLine("var isClosed = (_connection.State == ConnectionState.Closed);");
+            _cb.AppendLine("if (isClosed) _connection.Open();");
             using (_cb.BeginNest("try"))
             {
-                using (_cb.BeginNest("using (var rdr = cmd.ExecuteReader())"))
+                if (numberResults == 0)
                 {
-                    _cb.AppendLine("ReadData(rdr, result);");
+                    _cb.AppendLine("cmd.ExecuteNonQuery();");
+                }
+                else //if (numberResults > 0)
+                {
+                    using (_cb.BeginNest("using (var rdr = cmd.ExecuteReader())"))
+                    {
+                        _cb.AppendLine("ReadData(rdr, result);");
+                    }
+                }
+                //if has output parameters (after reader is closed)
+                if (_logic.HasOutputParameters)
+                {
+                    _cb.AppendLine("UpdateOutputParameters(cmd, result);");
                 }
             }
             using (_cb.BeginNest("finally"))
             {
                 _cb.AppendLine("if (isClosed) _connection.Close();");
             }
-            _cb.AppendLine("return result;");
+        }
+
+        private void WriteOutputParameters(string resultClassName)
+        {
+            using (_cb.BeginNest("private static void UpdateOutputParameters(IDbCommand cmd, " + resultClassName + " result)"))
+            {
+                foreach (var argument in _storedProcedure.Arguments)
+                {
+                    if (!argument.Out) continue;
+                    //gets rid of REF CURSORS
+                    if (argument.DataType == null) continue;
+                    var dataType = argument.DataType.NetDataTypeCsName;
+                    if (!argument.DataType.IsString) dataType += "?";
+                    _cb.AppendLine("result." + argument.NetName + " = (" + dataType + ")((DbParameter)cmd.Parameters[\"" + argument.Name + "\"]).Value;");
+                }
+            }
         }
 
         private void WriteSingleReadData(string resultClassName, DatabaseResultSet result)
@@ -198,9 +246,7 @@ namespace DatabaseSchemaReader.CodeGen
                             dataType += "?"; //nullable
                         }
                         //manage DbNull
-                        _cb.AppendLine("var r" + index + " = rdr[" + index + "];");
-                        _cb.AppendLine("if (r" + index + " == DBNull.Value) r" + index + " = null;");
-                        _cb.AppendLine("record." + name + " = (" + dataType + ") r" + index + ";");
+                        _cb.AppendLine("record." + name + " = (" + dataType + ")FixNull(rdr[" + index + "]);");
                     }
                     _cb.AppendLine("result.Add(record);");
                 }
@@ -210,6 +256,8 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteReadData(string resultClassName)
         {
+            if (_storedProcedure.ResultSets.Count == 0) return;
+
             using (_cb.BeginNest("private static void ReadData(IDataReader rdr, " + resultClassName + " result)"))
             {
                 for (int index = 0; index < _storedProcedure.ResultSets.Count; index++)
@@ -233,7 +281,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("//" + argument.Name + " " + argument.DatabaseDataType);
             string s = string.Format(CultureInfo.InvariantCulture,
                                      "AddWithValue(cmd, \"{0}\", {1});",
-                                     argument.Name, argument.NetName);
+                                     argument.Name, SprocLogic.ArgumentCamelCaseName(argument));
             if (!argument.Out)
             {
                 //normal in parameters
@@ -282,78 +330,22 @@ namespace DatabaseSchemaReader.CodeGen
 
         }
 
-        private string CreateArgumentList()
+        private void WriteFixNull()
         {
-            var args = new List<string>();
-            foreach (var argument in _storedProcedure.Arguments)
-            {
-                if (!argument.In) continue;
-                var name = argument.NetName;
-                if (string.IsNullOrEmpty(name))
-                {
-                    name = NameFixer.ToPascalCase(argument.Name);
-                    argument.NetName = name;
-                }
-                var netType = "object";
-                var dt = argument.DataType;
-                if (dt != null)
-                {
-                    netType = dt.NetCodeName(argument);
-                    if (dt.IsNumeric)
-                        netType += "?"; //nullable
-                    else if (dt.IsDateTime)
-                        netType += "?"; //nullable
-                }
-                args.Add(netType + " " + name);
-            }
-            return string.Join(", ", args.ToArray());
-        }
+            if (_storedProcedure.ResultSets.Count == 0) return;
 
-        private string CreateArgumentCall()
-        {
-            var args = new List<string>();
-            foreach (var argument in _storedProcedure.Arguments)
+            using (_cb.BeginNest("private static object FixNull(object value)", "Change DBNull values to null"))
             {
-                if (!argument.In) continue;
-                var name = argument.NetName;
-                if (string.IsNullOrEmpty(name))
-                {
-                    name = NameFixer.ToPascalCase(argument.Name);
-                    argument.NetName = name;
-                }
-                args.Add(name);
+                _cb.AppendLine("return (value == DBNull.Value) ? null : value;");
             }
-            return string.Join(", ", args.ToArray());
         }
-
-        private string CreateDummyCall()
-        {
-            var args = new List<string>();
-            foreach (var argument in _storedProcedure.Arguments)
-            {
-                if (!argument.In) continue;
-                var dt = argument.DataType;
-                if (dt == null)
-                {
-                    args.Add("null");
-                    continue;
-                }
-                if (dt.IsNumeric)
-                    args.Add("0");
-                else if (dt.IsString)
-                    args.Add("\"a\"");
-                else if (dt.IsDateTime)
-                    args.Add("DateTime.Now");
-                else
-                    args.Add("null");
-            }
-            return string.Join(", ", args.ToArray());
-        }
-
         private void WriteAddWithValue()
         {
             if (_storedProcedure.Arguments.Count == 0) return;
+            //this only applies to input parameters
+            if (!_storedProcedure.Arguments.Any(x => x.In)) return;
 
+            //if you have a lot of sprocs, this belongs in a base class or extension class
             using (_cb.BeginNest("private static DbParameter AddWithValue(DbCommand command, string parameterName, object value)"))
             {
                 _cb.AppendLine("var p = command.CreateParameter();");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
@@ -10,20 +11,22 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly DatabaseStoredProcedure _storedProcedure;
         private readonly string _namespace;
         private readonly ClassBuilder _cb;
+        private readonly SprocLogic _logic;
+        private readonly string _resultClassName;
 
         public SprocResultWriter(DatabaseStoredProcedure storedProcedure, string ns)
         {
             _namespace = ns;
             _storedProcedure = storedProcedure;
+            _logic = new SprocLogic(_storedProcedure);
+            _resultClassName = _logic.ResultClassName;
             _cb = new ClassBuilder();
         }
 
+        public string ClassName { get { return _resultClassName; } }
 
         public string Write()
         {
-            var className = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
-            var fullName = _storedProcedure.SchemaOwner + "." + _storedProcedure.Name;
-
             WriteNamespaces();
 
             if (!string.IsNullOrEmpty(_namespace))
@@ -31,10 +34,9 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.BeginNest("namespace " + _namespace);
             }
 
-            var resultClassName = className + "Result";
-            using (_cb.BeginNest("public class " + resultClassName, "Class representing result of " + fullName + " stored procedure"))
+            using (_cb.BeginNest("public class " + _resultClassName, "Class representing result of " + _storedProcedure.FullName + " stored procedure"))
             {
-                if (_storedProcedure.ResultSets.Count == 1)
+                if (_logic.ResultType == SprocResultType.Enumerable)
                 {
                     var result = _storedProcedure.ResultSets[0];
                     WriteProperties(result);
@@ -42,13 +44,13 @@ namespace DatabaseSchemaReader.CodeGen
                 }
                 else
                 {
-                    WriteMultiResultSet(resultClassName);
+                    WriteMultiResultSet();
                 }
             }
 
-            if (_storedProcedure.ResultSets.Count > 1)
+            if (_logic.ResultType == SprocResultType.ResultClass)
             {
-                WriteMultiResultSetClasses(resultClassName);
+                WriteMultiResultSetClasses();
             }
 
             if (!string.IsNullOrEmpty(_namespace))
@@ -59,12 +61,13 @@ namespace DatabaseSchemaReader.CodeGen
             return _cb.ToString();
         }
 
-        private void WriteMultiResultSetClasses(string resultClassName)
+        private void WriteMultiResultSetClasses()
         {
             for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
             {
                 var result = _storedProcedure.ResultSets[i];
-                using (_cb.BeginNest("public class " + resultClassName + i, "Result set " + i + " for " + _storedProcedure.Name))
+                var name = result.NetName ?? _resultClassName + i;
+                using (_cb.BeginNest("public class " + name, "Result set " + i + " for " + _logic.ClassName))
                 {
                     WriteProperties(result);
                     AddToString(result.Columns);
@@ -73,23 +76,42 @@ namespace DatabaseSchemaReader.CodeGen
         }
 
 
-        private void WriteMultiResultSet(string resultClassName)
+        private void WriteMultiResultSet()
         {
-            using (_cb.BeginNest("public " + resultClassName + "()"))
+            //constructor
+            if (_storedProcedure.ResultSets.Count > 0)
             {
-                for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
+                using (_cb.BeginNest("public " + _resultClassName + "()"))
                 {
-                    var name = resultClassName + i;
-                    var dataType = "List<" + name + ">();";
-                    _cb.AppendLine(name + " = new " + dataType);
+                    for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
+                    {
+                        var rs = _storedProcedure.ResultSets[i];
+                        var name = rs.NetName ?? _resultClassName + i;
+                        var dataType = "List<" + name + ">();";
+                        _cb.AppendLine(name + " = new " + dataType);
+                    }
                 }
             }
 
+            //properties
             for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
             {
-                var dataType = "IList<" + (resultClassName + i) + ">";
-                _cb.AppendAutomaticCollectionProperty(dataType, resultClassName + i);
+                var rs = _storedProcedure.ResultSets[i];
+                var name = rs.NetName ?? _resultClassName + i;
+                var dataType = "IList<" + name + ">";
+                _cb.AppendAutomaticCollectionProperty(dataType, name);
             }
+
+            //output parameters
+            foreach (var argument in _storedProcedure.Arguments)
+            {
+                if (!argument.Out) continue;
+                //gets rid of REF CURSORS
+                if (argument.DataType == null) continue;
+                var dataType = argument.DataType.NetDataTypeCsName;
+                if (!argument.DataType.IsString) dataType += "?";
+                _cb.AppendAutomaticProperty(dataType, argument.NetName);
+           }
         }
 
         private void WriteProperties(DatabaseResultSet result)
@@ -116,7 +138,10 @@ namespace DatabaseSchemaReader.CodeGen
             var column = columns[0];
             using (_cb.BeginNest("public override string ToString()"))
             {
-                var line = "return \"[" + column.NetName + "] = \" + " + column.NetName + ";";
+                var line = string.Format(
+                    CultureInfo.InvariantCulture, 
+                    "return \"[{0}] = \" + {0};", 
+                    column.NetName);
                 _cb.AppendLine(line);
             }
         }
@@ -124,7 +149,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteNamespaces()
         {
             _cb.AppendLine("using System;");
-            if (_storedProcedure.ResultSets.Count > 1)
+            if (_logic.ResultType == SprocResultType.ResultClass)
             {
                 _cb.AppendLine("using System.Collections.Generic;");
             }

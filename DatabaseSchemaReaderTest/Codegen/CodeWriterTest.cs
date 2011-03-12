@@ -121,7 +121,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var cs = File.ReadAllText(category.FullName);
 
 
-            var ok = cs.Contains("public DbCommand CreateCommand(int? errorLogId)");
+            var ok = cs.Contains("public virtual DbCommand CreateCommand(int? errorLogId)");
             Assert.IsTrue(ok, "Should contain the uspLogError stored procedure (in standard AdventureWorks db)");
         }
 

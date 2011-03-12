@@ -51,7 +51,7 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var argument in sproc.Arguments)
             {
                 if (string.IsNullOrEmpty(argument.NetName))
-                    argument.NetName = NameFixer.ToCamelCase(argument.Name);
+                    argument.NetName = NameFixer.ToPascalCase(argument.Name);
             }
         }
     }
