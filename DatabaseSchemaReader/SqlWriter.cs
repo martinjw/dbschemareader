@@ -8,6 +8,9 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader
 {
+    /// <summary>
+    /// Writes simple SQL statements
+    /// </summary>
     public class SqlWriter
     {
         private readonly DatabaseTable _table;
@@ -18,6 +21,11 @@ namespace DatabaseSchemaReader
         private readonly SqlType _sqlType;
         private bool _inStoredProcedure;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlWriter"/> class.
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="sqlType">Type of the SQL.</param>
         public SqlWriter(DatabaseTable table, SqlType sqlType)
         {
             if (table == null)
@@ -38,6 +46,11 @@ namespace DatabaseSchemaReader
                     _nameEscapeStart = "`"; //backtick, not single apos
                     _nameEscapeEnd = "`";
                     break;
+                case SqlType.SqLite:
+                    _parameterPrefix = '@'; //can also be $
+                    _nameEscapeStart = "\""; //double quote (supports single quote and square brackets for compat)
+                    _nameEscapeEnd = "\"";
+                    break;
                 //case SqlType.SqlServer:
                 default:
                     _parameterPrefix = '@';
@@ -46,6 +59,7 @@ namespace DatabaseSchemaReader
                     break;
             }
         }
+
 
         /// <summary>
         /// In stored procedures, Oracle and MySql do not use the parameter prefix. Ignored for SqlServer (which requires @).
@@ -62,7 +76,12 @@ namespace DatabaseSchemaReader
         }
 
         #region Formatting
-        private string ParameterName(string columnName)
+        /// <summary>
+        /// Formats a column name as a parameter.
+        /// </summary>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public string ParameterName(string columnName)
         {
             //override how column parameters are formatted
             if (FormatParameter != null)
@@ -73,6 +92,12 @@ namespace DatabaseSchemaReader
             return columnName;
         }
 
+        /// <summary>
+        /// Gets the escaped name of the table.
+        /// </summary>
+        /// <value>
+        /// The name of the escaped table.
+        /// </value>
         public string EscapedTableName
         {
             get { return EscapedName(_table.Name); }
@@ -113,7 +138,7 @@ namespace DatabaseSchemaReader
 
         private string[] GetAllColumns()
         {
-            string[] cols = new string[_table.Columns.Count];
+            var cols = new string[_table.Columns.Count];
             for (int i = 0; i < _table.Columns.Count; i++)
             {
                 cols[i] = _table.Columns[i].Name;
@@ -157,7 +182,7 @@ namespace DatabaseSchemaReader
         {
             //the primary keys as orderBy statements
             int numPks = PrimaryKeys.Count;
-            string[] pks = new string[numPks];
+            var pks = new string[numPks];
             for (int i = 0; i < numPks; i++)
             {
                 var pkName = PrimaryKeys[i];
@@ -184,6 +209,9 @@ namespace DatabaseSchemaReader
         /// <value>The format parameter function.</value>
         public Func<string, string> FormatParameter { get; set; }
 
+        /// <summary>
+        /// Gets the primary keys.
+        /// </summary>
         public IList<string> PrimaryKeys
         {
             get
@@ -204,6 +232,9 @@ namespace DatabaseSchemaReader
                 return _primaryKeys;
             }
         }
+        /// <summary>
+        /// Gets the non primary key columns.
+        /// </summary>
         public IList<string> NonPrimaryKeyColumns
         {
             get
@@ -222,6 +253,10 @@ namespace DatabaseSchemaReader
             }
         }
 
+        /// <summary>
+        /// SQL for select by primary key.
+        /// </summary>
+        /// <returns></returns>
         public string SelectByIdSql()
         {
             return SelectAllSql() +
@@ -229,9 +264,13 @@ namespace DatabaseSchemaReader
                 AddWhere();
         }
 
+        /// <summary>
+        /// SQL for select all.
+        /// </summary>
+        /// <returns></returns>
         public string SelectAllSql()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             string[] cols = GetAllColumns();
 
             sb.AppendLine("SELECT");
@@ -250,7 +289,7 @@ namespace DatabaseSchemaReader
         /// </remarks>
         public string SelectPageSql()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             string[] cols = GetAllColumns();
 
             string columns = FormattedColumns(cols);
@@ -301,7 +340,7 @@ namespace DatabaseSchemaReader
         /// </remarks>
         public string SelectPageStartToEndRowSql()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             string[] cols = GetAllColumns();
 
             string columns = FormattedColumns(cols);
@@ -343,6 +382,11 @@ namespace DatabaseSchemaReader
             return sb.ToString();
         }
 
+        /// <summary>
+        /// SQL for select with where clause for specified column.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
         public string SelectWhereSql(string column)
         {
             return SelectAllSql() +
@@ -352,11 +396,20 @@ namespace DatabaseSchemaReader
                 "  " + EscapedName(column) + " = " + ParameterName(column);
         }
 
+        /// <summary>
+        /// SQL for count all.
+        /// </summary>
+        /// <returns></returns>
         public string CountSql()
         {
             return "SELECT COUNT(*) FROM " + EscapedTableName;
         }
 
+        /// <summary>
+        /// SQL for count all with output parameter.
+        /// </summary>
+        /// <param name="outputParameter">The output parameter.</param>
+        /// <returns></returns>
         public string CountSql(string outputParameter)
         {
             string what = outputParameter + " = COUNT(*)";
@@ -365,20 +418,43 @@ namespace DatabaseSchemaReader
             return "SELECT " + what + " FROM " + EscapedTableName;
         }
 
+        /// <summary>
+        /// SQL for delete by primary key.
+        /// </summary>
+        /// <returns></returns>
         public string DeleteSql()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine("DELETE FROM " + EscapedTableName);
             sb.Append(AddWhere());
 
             return sb.ToString();
         }
 
+        /// <summary>
+        /// SQL for insert new row.
+        /// </summary>
+        /// <returns></returns>
         public string InsertSql()
         {
-            StringBuilder sb = new StringBuilder();
-            string[] cols = GetColumns(); //excluding identity and timestamps
-            string[] values = new string[cols.Length];
+            return InsertSql(false);
+        }
+
+        /// <summary>
+        /// SQL for insert new row.
+        /// </summary>
+        /// <param name="includeIdentityInInsert">if set to <c>true</c> include identity column in insert.</param>
+        /// <returns></returns>
+        public string InsertSql(bool includeIdentityInInsert)
+        {
+            var sb = new StringBuilder();
+            string[] cols;
+            if (!includeIdentityInInsert)
+                cols = GetColumns(); //excluding identity and timestamps
+            else
+                cols = GetAllColumns(); //incl indentity
+
+            var values = new string[cols.Length];
             for (int i = 0; i < cols.Length; i++)
             {
                 values[i] = ParameterName(cols[i]);
@@ -391,7 +467,7 @@ namespace DatabaseSchemaReader
             sb.Append(" ");
             sb.AppendLine(String.Join(joinString, values));
             sb.Append(")");
-            if (_table.HasIdentityColumn)
+            if (_table.HasIdentityColumn && !includeIdentityInInsert)
             {
                 string identityParameter = FindIdentityParameter();
                 if (_sqlType == SqlType.Oracle)
@@ -425,9 +501,13 @@ namespace DatabaseSchemaReader
             return identityParameter;
         }
 
+        /// <summary>
+        /// SQL for update row.
+        /// </summary>
+        /// <returns></returns>
         public string UpdateSql()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             var cols = new List<string>();
             foreach (string name in NonPrimaryKeyColumns)
