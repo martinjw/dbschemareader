@@ -207,6 +207,8 @@ namespace DatabaseSchemaReader
 
             DataSet ds = _sr.Table(tableName);
             if (ds == null) return null;
+            if (ds.Tables.Count == 0) return null;
+
             DatabaseTable table = DatabaseSchema.Tables.Find(delegate(DatabaseTable x) { return x.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase); });
             if (table == null)
             {

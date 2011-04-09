@@ -21,7 +21,13 @@ namespace CopyToSQLite
             DataProviders.DataSource = dt;
             DataProviders.DisplayMember = "InvariantName";
             DataProviders.ValueMember = "InvariantName";
-        }
+            if (dt.Select("[InvariantName] = 'System.Data.SqlServerCe.4.0'").Length == 1)
+            {
+                WarningLabel.Text = WarningLabel.Text.Replace("SQLite", "SQLite or SqlServer CE 4");
+                WriteToFileLabel.Text = WriteToFileLabel.Text.Replace("SQLite", "SQLite or SqlServer CE 4");
+                TargetGroupBox.Visible = true;
+            }
+       }
 
         private void Form1Load(object sender, EventArgs e)
         {
@@ -39,7 +45,6 @@ namespace CopyToSQLite
             else
             {
                 errorProvider1.SetError(ConnectionString, string.Empty);
-
             }
         }
 
@@ -104,7 +109,7 @@ namespace CopyToSQLite
             if (_providerName.Equals("System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
                 return SqlType.SqlServer;
             if (_providerName.Equals("System.Data.SQLite", StringComparison.OrdinalIgnoreCase))
-                return SqlType.SqLite;
+                return SqlType.SQLite;
             if (_providerName.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1)
                 return SqlType.Oracle;
             if (_providerName.Equals("MySql.Data.MySqlClient", StringComparison.OrdinalIgnoreCase))
@@ -116,11 +121,12 @@ namespace CopyToSQLite
         private void BackgroundDoWork(object sender, DoWorkEventArgs e)
         {
             var rdr = (DatabaseReader)e.Argument;
-            var runner = new Runner(rdr, _filePath, OriginSqlType());
+            var runner = new Runner(rdr, _filePath, OriginSqlType(), SqlServerCE4Radio.Checked);
             //pass thru the event to background worker
             runner.ProgressChanged += (s1, e1) => backgroundWorker1.ReportProgress(e1.ProgressPercentage, e1.UserState);
             var result = runner.Execute();
-            e.Result = result;
+            if (!result) e.Result = runner.LastErrorMessage;
+            else e.Result = null;
         }
 
         private void BackgroundCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -134,8 +140,11 @@ namespace CopyToSQLite
             else
             {
                 //it worked
-                var itWorked = (bool)e.Result;
-                toolStripStatusLabel1.Text = itWorked ? "Database created" : "Something went wrong";
+                var message = (string)e.Result;
+                if (string.IsNullOrEmpty(message))
+                    toolStripStatusLabel1.Text = @"Database created";
+                else
+                    toolStripStatusLabel1.Text = message;
             }
             StopWaiting();
         }

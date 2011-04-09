@@ -68,8 +68,8 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var mySqlTxt = mysqlGen.Write();
             Assert.IsFalse(string.IsNullOrEmpty(mySqlTxt), "Should have written some text");
 
-            //let's translate it into SqLite.
-            var sqliteGen = new DdlGeneratorFactory(SqlType.SqLite).AllTablesGenerator(schemas);
+            //let's translate it into SQLite.
+            var sqliteGen = new DdlGeneratorFactory(SqlType.SQLite).AllTablesGenerator(schemas);
             sqliteGen.IncludeSchema = false; //we don't want "dbo." prefixes
             var sqliteTxt = sqliteGen.Write();
             Assert.IsFalse(string.IsNullOrEmpty(sqliteTxt), "Should have written some text");

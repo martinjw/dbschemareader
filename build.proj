@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Release">
+  <PropertyGroup>
+    <!-- properties that are used in this build file - referenced as $(PropertyName) -->
+    <ProjectName>DatabaseSchemaReader</ProjectName>
+	<OutputPath>$(MSBuildProjectDirectory)\Bin\</OutputPath>
+	<CopyToSQLiteOutputPath>$(OutputPath)CopyToSQLite\</CopyToSQLiteOutputPath>
+  </PropertyGroup>
+  
+  <!-- targets -->
+  
+  <Target Name="BuildViewer">
+    <Message Text="Building SchemaViewer" />
+    <RemoveDir Directories="$(OutputPath)"/>
+    <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
+		Properties="Configuration=Release;OutputPath=$(OutputPath)"/>
+    <Message Text="SchemaViewer Built" />
+	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
+  </Target>
+  
+  <Target Name="BuildCopyToSQLite">
+    <Message Text="Building CopyToSQLite" />
+    <MSBuild Projects="CopyToSQLite\CopyToSQLite.csproj" 
+		Properties="Configuration=Release;OutputPath=$(CopyToSQLiteOutputPath)"/>
+    <Message Text="CopyToSQLite Built" />
+  </Target>
+  
+  <Target Name="Release" DependsOnTargets="BuildViewer; BuildCopyToSQLite">
+    <Message Text="Built All" />
+  </Target>
+  
+</Project>

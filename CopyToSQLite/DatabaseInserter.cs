@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Diagnostics;
+using System.Data.Common;
 
 namespace CopyToSQLite
 {
     sealed class DatabaseInserter : IDisposable
     {
-        private readonly SQLiteConnection _connection;
-        private readonly SQLiteCommand _command;
-        private readonly SQLiteTransaction _sqLiteTransaction;
+        private readonly DbConnection _connection;
+        private readonly DbCommand _command;
+        private readonly DbTransaction _sqLiteTransaction;
 
-        public DatabaseInserter(SQLiteConnection connection, string insertSql)
+        public DatabaseInserter(DbConnection connection, string insertSql)
         {
             _connection = connection;
-            _command = new SQLiteCommand(insertSql, _connection);
+            _command = _connection.CreateCommand();
+            _command.Connection = _connection;
+            _command.CommandText = insertSql;
             _connection.Open();
             _sqLiteTransaction = _connection.BeginTransaction();
         }
@@ -25,20 +26,27 @@ namespace CopyToSQLite
             _command.Parameters.Clear();
             foreach (var column in parameters)
             {
-                _command.Parameters.AddWithValue(column.Key, column.Value);
+                var par = _command.CreateParameter();
+                par.ParameterName = column.Key;
+                par.Value = column.Value;
+                _command.Parameters.Add(par);
             }
             try
             {
                 _command.ExecuteNonQuery();
                 result = true;
             }
-            catch (SQLiteException exception)
+            catch (DbException exception)
             {
-                Debug.WriteLine(exception.Message);
+                //flatten the sql format
+                var insertSql = _command.CommandText.Replace(Environment.NewLine, " ").Replace("  ", " ");
+                LastErrorMessage = exception.Message + " " + insertSql;
                 result = false;
             }
             return result;
         }
+
+        public string LastErrorMessage { get; private set; }
 
         public void Dispose()
         {

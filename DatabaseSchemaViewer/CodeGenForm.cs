@@ -164,11 +164,11 @@ namespace DatabaseSchemaViewer
         {
             var dialect = (SqlType)cmbDialect.SelectedItem;
 
-            var nok = (dialect == SqlType.SqLite && radSprocs.Checked);
+            var nok = (dialect == SqlType.SQLite && radSprocs.Checked);
             if (nok)
             {
                 e.Cancel = true;
-                errorProvider1.SetError(cmbDialect, "SqLite has no stored procedures");
+                errorProvider1.SetError(cmbDialect, "SQLite has no stored procedures");
             }
             else
             {

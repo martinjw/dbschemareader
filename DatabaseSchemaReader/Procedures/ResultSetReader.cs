@@ -64,7 +64,7 @@ namespace DatabaseSchemaReader.Procedures
             if (_isOracle && !procedure.Arguments.Any(a => a.DatabaseDataType == "REF CURSOR"))
                 return;
 
-            var resultSet = new DataSet {Locale = CultureInfo.InvariantCulture};
+            var resultSet = new DataSet { Locale = CultureInfo.InvariantCulture };
 
             using (DbConnection connection = _factory.CreateConnection())
             {
@@ -75,12 +75,7 @@ namespace DatabaseSchemaReader.Procedures
                 command.CommandTimeout = 5;
                 command.CommandType = CommandType.StoredProcedure;
 
-                foreach (var argument in procedure.Arguments)
-                {
-                    var parameter = _factory.CreateParameter();
-                    AddParameter(parameter, argument);
-                    command.Parameters.Add(parameter);
-                }
+                AddParameters(procedure, command);
 
                 connection.Open();
                 var tx = connection.BeginTransaction();
@@ -122,66 +117,91 @@ namespace DatabaseSchemaReader.Procedures
             }
         }
 
+        private static void AddParameters(DatabaseStoredProcedure procedure, DbCommand command)
+        {
+            foreach (var argument in procedure.Arguments)
+            {
+                var parameter = command.CreateParameter();
+                AddParameter(parameter, argument);
+                command.Parameters.Add(parameter);
+            }
+        }
+
         private static void AddParameter(DbParameter parameter, DatabaseArgument argument)
         {
             parameter.ParameterName = argument.Name;
             if (argument.In && argument.DataType != null)
             {
                 //add dummy data
-                if (argument.DataType.IsString)
-                {
-                    parameter.DbType = DbType.AnsiString;
-                    //a string "1" seems better than a letter (TO_NUMBER, CONVERTs etc)
-                    parameter.Value = "1";
-                }
-                else if (argument.DataType.IsNumeric)
-                {
-                    parameter.Value = 1;
-                }
-                else if (argument.DataType.IsDateTime)
-                {
-                    parameter.Value = DateTime.Now;
-                }
+                AddInputParameter(parameter, argument);
             }
 
             if (argument.Out && argument.In)
                 parameter.Direction = ParameterDirection.InputOutput;
             if (argument.Out)
             {
-                parameter.Direction = ParameterDirection.Output;
-                if(argument.DataType != null)
-                {
-                    if (argument.DataType.IsString)
-                    {
-                        parameter.DbType = DbType.AnsiString;
-                    }
-                    else if (argument.DataType.IsNumeric)
-                    {
-                        parameter.DbType = DbType.Int32;
-                    }
-                    else if (argument.DataType.IsDateTime)
-                    {
-                        parameter.DbType = DbType.DateTime;
-                    }
-                }
+                AddOutputParameter(parameter, argument);
+            }
+        }
 
-                if (argument.DatabaseDataType == "REF CURSOR")
+        private static void AddInputParameter(DbParameter parameter, DatabaseArgument argument)
+        {
+            if (argument.DataType.IsString)
+            {
+                parameter.DbType = DbType.AnsiString;
+                //a string "1" seems better than a letter (TO_NUMBER, CONVERTs etc)
+                parameter.Value = "1";
+            }
+            else if (argument.DataType.IsNumeric)
+            {
+                parameter.Value = 1;
+            }
+            else if (argument.DataType.IsDateTime)
+            {
+                parameter.Value = DateTime.Now;
+            }
+        }
+
+        private static void AddOutputParameter(DbParameter parameter, DatabaseArgument argument)
+        {
+            parameter.Direction = ParameterDirection.Output;
+            if (argument.DataType != null)
+            {
+                if (argument.DataType.IsString)
                 {
-                    //we don't want a direct dependency, so we use reflection
-                    var fullName = parameter.GetType().FullName;
-                    if (fullName == "System.Data.OracleClient.OracleParameter")
-                    {
-                        var prop = parameter.GetType().GetProperty("OracleType");
-                        //OracleType.Cursor
-                        prop.SetValue(parameter, 5, null);
-                    }
-                    else if (fullName == "Oracle.DataAccess.Client.OracleParameter")
-                    {
-                        var prop = parameter.GetType().GetProperty("OracleDbType");
-                        //OracleDbType.RefCursor
-                        prop.SetValue(parameter, 121, null);
-                    }
+                    parameter.DbType = DbType.AnsiString;
                 }
+                else if (argument.DataType.IsNumeric)
+                {
+                    parameter.DbType = DbType.Int32;
+                }
+                else if (argument.DataType.IsDateTime)
+                {
+                    parameter.DbType = DbType.DateTime;
+                }
+            }
+
+            if (argument.DatabaseDataType == "REF CURSOR")
+            {
+                AddRefCursorParameter(parameter);
+            }
+        }
+
+        private static void AddRefCursorParameter(DbParameter parameter)
+        {
+            //we don't want a direct dependency, so we use reflection
+            var fullName = parameter.GetType().FullName;
+            if (fullName == "System.Data.OracleClient.OracleParameter")
+            {
+                var prop = parameter.GetType().GetProperty("OracleType");
+                //OracleType.Cursor
+                prop.SetValue(parameter, 5, null);
+            }
+            else if (fullName == "Oracle.DataAccess.Client.OracleParameter")
+            {
+                var prop = parameter.GetType().GetProperty("OracleDbType");
+                //OracleDbType.RefCursor
+                prop.SetValue(parameter, 121, null);
             }
         }
     }

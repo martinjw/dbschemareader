@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -46,7 +47,7 @@ namespace DatabaseSchemaReader
                     _nameEscapeStart = "`"; //backtick, not single apos
                     _nameEscapeEnd = "`";
                     break;
-                case SqlType.SqLite:
+                case SqlType.SQLite:
                     _parameterPrefix = '@'; //can also be $
                     _nameEscapeStart = "\""; //double quote (supports single quote and square brackets for compat)
                     _nameEscapeEnd = "\"";
@@ -315,6 +316,29 @@ namespace DatabaseSchemaReader
                 sb.AppendLine("   rowNumber >= (" + ParameterName("pageSize") + " * (" + ParameterName("currentPage") + " - 1))");
                 sb.AppendLine("   AND rowNumber <= (" + ParameterName("pageSize") + " * " + ParameterName("currentPage") + ")");
             }
+            else if (_sqlType == SqlType.SQLite)
+            {
+                sb.AppendLine(EscapedTableName);
+                //LIMIT [offset rows,] <number of rows>
+                //NB: we use 1-based page numbers, so add a -1 here!
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "LIMIT (({0}-1) * {1}) ,{2}",
+                    ParameterName("currentPage"),
+                    ParameterName("pageSize"),
+                    ParameterName("pageSize")));
+            }
+            // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
+            //else if (_sqlType == SqlType.SqlServer)
+            //{
+            //    //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
+            //    sb.AppendLine(EscapedTableName);
+            //    sb.AppendLine("  ORDER BY  " + orderBy + ")");
+            //    sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+            //        "OFFSET (({0}-1) * {1}) ROWS FETCH NEXT {2} ROWS ONLY",
+            //        ParameterName("currentPage"),
+            //        ParameterName("pageSize"),
+            //        ParameterName("pageSize")));
+            //}
             else
             {
                 //SQLServer 2005+, Oracle 8+
@@ -332,7 +356,7 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
-        /// Paged select. Requires input params: startRow, endRow
+        /// Paged select. Requires input params: startRow (1 based), endRow.
         /// </summary>
         /// <returns></returns>
         /// <remarks>
@@ -365,6 +389,28 @@ namespace DatabaseSchemaReader
                 sb.AppendLine(" WHERE");
                 sb.AppendLine("   rowNumber >= " + ParameterName("startRow"));
                 sb.AppendLine("   AND rowNumber <= " + ParameterName("endRow"));
+            }
+            else if (_sqlType == SqlType.SQLite)
+            {
+                sb.AppendLine(EscapedTableName);
+                //LIMIT <number of rows> OFFSET <offset rows>
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "LIMIT ({0} - {1} + 1) OFFSET ({2}-1)",
+                    ParameterName("endRow"),
+                    ParameterName("startRow"),
+                    ParameterName("startRow")));
+            }
+            // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
+            else if (_sqlType == SqlType.SqlServer)
+            {
+                //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
+                sb.AppendLine(EscapedTableName);
+                sb.AppendLine("  ORDER BY  " + orderBy + ")");
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "OFFSET ({0}-1) ROWS FETCH NEXT ({1} - {2} +1) ROWS ONLY",
+                    ParameterName("startRow"),
+                    ParameterName("endRow"),
+                    ParameterName("startRow")));
             }
             else
             {
@@ -437,15 +483,28 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public string InsertSql()
         {
-            return InsertSql(false);
+            return InsertSql(true, false);
         }
 
         /// <summary>
-        /// SQL for insert new row.
+        /// SQL for insert new row including any identity column.
         /// </summary>
-        /// <param name="includeIdentityInInsert">if set to <c>true</c> include identity column in insert.</param>
         /// <returns></returns>
-        public string InsertSql(bool includeIdentityInInsert)
+        public string InsertSqlIncludingIdentity()
+        {
+            return InsertSql(false, true);
+        }
+
+        /// <summary>
+        /// SQL for insert new row without output parameter
+        /// </summary>
+        /// <returns></returns>
+        public string InsertSqlWithoutOutputParameter()
+        {
+            return InsertSql(false, false);
+        }
+
+        private string InsertSql(bool useOutputParameter, bool includeIdentityInInsert)
         {
             var sb = new StringBuilder();
             string[] cols;
@@ -467,36 +526,47 @@ namespace DatabaseSchemaReader
             sb.Append(" ");
             sb.AppendLine(String.Join(joinString, values));
             sb.Append(")");
-            if (_table.HasIdentityColumn && !includeIdentityInInsert)
+            if (_table.HasIdentityColumn)
             {
                 string identityParameter = FindIdentityParameter();
-                if (_sqlType == SqlType.Oracle)
+                if (_sqlType == SqlType.Oracle && useOutputParameter)
                 {
                     //a primary key assigned from a sequence by a trigger
                     var pk = EscapedName(PrimaryKeys[0]);
                     sb.AppendLine(" RETURNING " + pk + " INTO " + identityParameter + "");
                 }
-                else if (_sqlType == SqlType.SqlServer)
+                else if (_sqlType == SqlType.SqlServer && useOutputParameter)
                 {
                     sb.AppendLine(";");
                     sb.Append("SET " + identityParameter + " = SCOPE_IDENTITY();");
                 }
-                else if (_sqlType == SqlType.MySql)
+                else if (_sqlType == SqlType.MySql && useOutputParameter)
                 {
                     sb.AppendLine(";");
                     sb.Append("SET " + identityParameter + " = LAST_INSERT_ID();");
+                }
+                else if (_sqlType == SqlType.SQLite)
+                {
+                    //SQLite doesn't have output parameters
+                    sb.AppendLine(";");
+                    sb.Append("SELECT last_insert_rowid();");
                 }
             }
 
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Finds the identity parameter. May be null if no identity.
+        /// </summary>
+        /// <returns></returns>
         private string FindIdentityParameter()
         {
             DatabaseColumn identityColumn = _table.Columns.Find(delegate(DatabaseColumn col)
             {
                 return col.IsIdentity;
             });
+            if (identityColumn == null) return null;
             string identityParameter = ParameterName(identityColumn.Name);
             return identityParameter;
         }

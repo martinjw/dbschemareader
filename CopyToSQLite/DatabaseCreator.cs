@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Diagnostics;
 
 namespace CopyToSQLite
 {
-    class DatabaseCreator
+    class DatabaseCreator : IDatabaseCreator
     {
         private readonly string _connectionString;
 
@@ -16,7 +17,7 @@ namespace CopyToSQLite
             _connectionString = csb.ConnectionString;
         }
 
-        public SQLiteConnection CreateConnection()
+        public DbConnection CreateConnection()
         {
             return new SQLiteConnection(_connectionString);
         }
@@ -25,8 +26,10 @@ namespace CopyToSQLite
         {
             using (var con = CreateConnection())
             {
-                using (var cmd = new SQLiteCommand(ddl, con))
+                using (var cmd = con.CreateCommand())
                 {
+                    cmd.Connection = con;
+                    cmd.CommandText = ddl;
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
@@ -39,11 +42,17 @@ namespace CopyToSQLite
             bool result;
             using (var con = CreateConnection())
             {
-                using (var cmd = new SQLiteCommand(insert, con))
+                using (var cmd = con.CreateCommand())
                 {
+                    cmd.Connection = con;
+                    cmd.CommandText = insert;
+
                     foreach (var column in dictionary)
                     {
-                        cmd.Parameters.AddWithValue(column.Key, column.Value);
+                        var par = cmd.CreateParameter();
+                        par.ParameterName = column.Key;
+                        par.Value = column.Value;
+                        cmd.Parameters.Add(par);
                     }
                     con.Open();
                     try
@@ -51,7 +60,7 @@ namespace CopyToSQLite
                         cmd.ExecuteNonQuery();
                         result = true;
                     }
-                    catch (SQLiteException exception)
+                    catch (DbException exception)
                     {
                         Debug.WriteLine(exception.Message);
                         result = false;

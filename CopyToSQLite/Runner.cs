@@ -5,9 +5,13 @@ using System.Data.Common;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
+using DatabaseSchemaReader.Utilities;
 
 namespace CopyToSQLite
 {
+    /// <summary>
+    /// Does the actual work
+    /// </summary>
     class Runner
     {
         private readonly DatabaseReader _databaseReader;
@@ -15,6 +19,8 @@ namespace CopyToSQLite
         private readonly SqlType _originType;
         private DbProviderFactory _dbFactory;
         private string _originConnection;
+        private readonly int _maxiumumRecords;
+        private readonly bool _useSqlServerCe;
 
         public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
@@ -28,11 +34,13 @@ namespace CopyToSQLite
             }
         }
 
-        public Runner(DatabaseReader databaseReader, string filePath, SqlType originType)
+        public Runner(DatabaseReader databaseReader, string filePath, SqlType originType, bool useSqlServerCe)
         {
+            _useSqlServerCe = useSqlServerCe;
             _originType = originType;
             _filePath = filePath;
             _databaseReader = databaseReader;
+            _maxiumumRecords = Properties.Settings.Default.MaximumRecords;
         }
 
         public bool Execute()
@@ -42,26 +50,29 @@ namespace CopyToSQLite
             _dbFactory = DbProviderFactories.GetFactory(databaseSchema.Provider);
             _originConnection = databaseSchema.ConnectionString;
 
-            var factory = new DdlGeneratorFactory(SqlType.SqLite);
+            //for SQLServer CE we are actually using the SqlServer settings
+            //CE only supports a subset of SqlServer datatypes and functionality
+            //the big problem is VARCHAR(MAX) - CE only has NTEXT.
+            var factory = new DdlGeneratorFactory(_useSqlServerCe ? SqlType.SqlServer : SqlType.SQLite);
             var tableGenerator = factory.AllTablesGenerator(databaseSchema);
             tableGenerator.IncludeSchema = false;
             var ddl = tableGenerator.Write();
 
-            var dbCreator = new DatabaseCreator(_filePath);
-            InvokeProgressChanged(0, "Creating SQLite database tables");
+            IDatabaseCreator dbCreator;
+            if (_useSqlServerCe)
+            {
+                dbCreator = new SqlServerCeDatabaseCreator(_filePath);
+            }
+            else
+            {
+                dbCreator = new DatabaseCreator(_filePath);
+            }
+            InvokeProgressChanged(0, "Creating database tables");
             dbCreator.CreateTables(ddl);
 
-            //we could work out a proper build order here
-            databaseSchema.Tables.Sort((a, b) =>
-                                            {
-                                                if (a == b) return 0; //the same
-                                                if (a == null) return -1; //b is greater
-                                                if (b == null) return 1; //a is greater
+            //put them in fk dependency order
+            SchemaTablesSorter.Sort(databaseSchema);
 
-                                                //b depends on a so a is first
-                                                if (b.ForeignKeyChildren.Contains(a)) return -1;
-                                                return 1;
-                                            });
             var count = databaseSchema.Tables.Count;
             decimal current = 0;
             foreach (var databaseTable in databaseSchema.Tables)
@@ -75,16 +86,29 @@ namespace CopyToSQLite
             return true;
         }
 
-        private bool Copy(DatabaseCreator dbCreator, DatabaseTable databaseTable)
+        private bool Copy(IDatabaseCreator dbCreator, DatabaseTable databaseTable)
         {
             var originSql = new SqlWriter(databaseTable, _originType);
-            var destinationSql = new SqlWriter(databaseTable, SqlType.SqLite);
+            var destinationSql = new SqlWriter(databaseTable, _useSqlServerCe ? SqlType.SqlServer : SqlType.SQLite);
 
             var selectAll = originSql.SelectAllSql();
-            var insert = destinationSql.InsertSql(true);
+            string insert;
+            //SQLServerCE and SQLite can't deal with output parameters, so we can't use the standard INSERT.
+            if (_useSqlServerCe)
+            {
+                //for sqlserver, we don't want an output parameter.
+                //there may be FK errors (unless you SET IDENTITY_INSERT myTable ON)
+                insert = destinationSql.InsertSqlWithoutOutputParameter();
+            }
+            else
+            {
+                //Fortunately SQLite allows you to insert "identity" primary keys
+                insert = destinationSql.InsertSqlIncludingIdentity();
+            }
 
             using (var inserter = new DatabaseInserter(dbCreator.CreateConnection(), insert))
             {
+
                 using (var con = _dbFactory.CreateConnection())
                 {
                     con.ConnectionString = _originConnection;
@@ -101,10 +125,14 @@ namespace CopyToSQLite
                                 {
                                     i++;
                                     //we only do the first 1000 rows. This is for small databases only!
-                                    if (i > 1000) return true;
+                                    if (i > _maxiumumRecords) return true;
                                     var result = CopyRow(databaseTable, destinationSql, rdr, inserter);
                                     //if there's a problem, stop doing anything
-                                    if (!result) return false;
+                                    if (!result)
+                                    {
+                                        LastErrorMessage = inserter.LastErrorMessage;
+                                        return false;
+                                    }
                                 }
                             }
                         }
@@ -132,5 +160,8 @@ namespace CopyToSQLite
             }
             return inserter.Insert(dictionary);
         }
+
+        public string LastErrorMessage { get; private set; }
+
     }
 }

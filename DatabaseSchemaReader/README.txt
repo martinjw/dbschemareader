@@ -1,4 +1,7 @@
-﻿From MSDN http://msdn.microsoft.com/en-us/library/kcax58fh.aspx
+﻿
+===Background===
+
+From MSDN http://msdn.microsoft.com/en-us/library/kcax58fh.aspx
 +Obtaining schema information from a database is accomplished with the process of schema discovery. Schema discovery allows applications to request that managed providers find and return information about the database schema, also known as metadata, of a given database. Different database schema elements such as tables, columns, and stored-procedures are exposed through schema collections. Each schema collection contains a variety of schema information specific to the provider being used.
 
 Each of the .NET Framework managed providers implement the GetSchema method in the Connection class, and the schema information that is returned from the GetSchema method comes in the form of a DataTable. The GetSchema method is an overloaded method that provides optional parameters for specifying the schema collection to return, and restricting the amount of information returned.+
@@ -12,6 +15,8 @@ There is a very simple Winforms UI project (DatabaseSchemaViewer.exe) See the te
 It is not optimized or particularly well designed code. It was originally written in 2005, just after .Net 2.0 came out. It has been updated to .net 3.5 (although you can see the .net 2 vintage of much of it), and the project files are VS 2008 and VS 2010.
 
 Over the years I've used it for code generation of data access code, and for conversions between database platforms. Some of this code is included, but there are better solutions for data access code gen (you could still use this library to get the schema data and then use that within T4 templating, for instance).
+
+===Use===
 
 To use it simply specify the connection string and ADO provider (eg System.Data,SqlClient or System.Data,OracleClient)
 
@@ -107,3 +112,12 @@ If you use Oracle packages, the generated code is grouped with a folder/namespac
 If a stored procedure has ResultSets (if you used ResultSetReader), a typed result class is generated, and the stored procedure class has an Execute method.
 
 It also writes a VS2008 v3.5 csproj file, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
+
+===UIs===
+
+There are two simple UIs.
+
+* DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for code generation, table DDL and stored procedure generation.
+
+* CopyToSQLite. It reads all the schema and creates a new SQLite database file with the same tables and data. If Sql Server CE 4.0 is detected, it can do the same for that database. These databases do not have the full range of data types as other dtabases, so creating tables may fail (e.g. SqlServer CE 4 does not have VARCHAR(MAX)). In addition, copying data may violate foreign key constraints (especially for identity primary keys) and will fail.
+

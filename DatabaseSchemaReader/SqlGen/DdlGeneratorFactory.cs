@@ -34,7 +34,7 @@ namespace DatabaseSchemaReader.SqlGen
                     return new Oracle.TableGenerator(table);
                 case SqlType.MySql:
                     return new MySql.TableGenerator(table);
-                case SqlType.SqLite:
+                case SqlType.SQLite:
                     return new TableGenerator(table);
             }
             return null;
@@ -55,7 +55,7 @@ namespace DatabaseSchemaReader.SqlGen
                     return new Oracle.TablesGenerator(schema);
                 case SqlType.MySql:
                     return new MySql.TablesGenerator(schema);
-                case SqlType.SqLite:
+                case SqlType.SQLite:
                     return new TablesGenerator(schema);
             }
             return null;
@@ -76,7 +76,7 @@ namespace DatabaseSchemaReader.SqlGen
                     return new Oracle.ProcedureGenerator(table);
                 case SqlType.MySql:
                     return new MySql.ProcedureGenerator(table);
-                case SqlType.SqLite:
+                case SqlType.SQLite:
                     return null; //no stored procedures in SqlLite
             }
             return null;
