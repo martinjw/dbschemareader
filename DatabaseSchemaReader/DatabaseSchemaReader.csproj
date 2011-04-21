@@ -90,6 +90,7 @@
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\SqlServerScriptTools.cs" />
+    <Compile Include="Utilities\TopologicalSorter.cs" />
     <Compile Include="Procedures\ResultSetReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

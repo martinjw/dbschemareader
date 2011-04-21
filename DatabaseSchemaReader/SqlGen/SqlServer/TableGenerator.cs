@@ -57,10 +57,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var sql = column.SqlServerDataType();
             if (sql == "BIT") _hasBit = true;
 
-            if (Table.Triggers.Count == 1 && column.IsPrimaryKey)
+            if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))
             {
                 column.IsIdentity = true;
-                //if a table has a trigger, we assume it's an Oracle trigger/sequence which is translated to identity for the pk
             }
             if (column.IsIdentity) sql += " IDENTITY(1,1)";
             if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)

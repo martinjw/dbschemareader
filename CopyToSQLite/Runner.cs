@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
+using System.Diagnostics;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
@@ -71,11 +72,11 @@ namespace CopyToSQLite
             dbCreator.CreateTables(ddl);
 
             //put them in fk dependency order
-            SchemaTablesSorter.Sort(databaseSchema);
+            var sortedTables = SchemaTablesSorter.TopologicalSort(databaseSchema);
 
             var count = databaseSchema.Tables.Count;
             decimal current = 0;
-            foreach (var databaseTable in databaseSchema.Tables)
+            foreach (var databaseTable in sortedTables)
             {
                 var percentage = (int)((current / count) * 100);
                 InvokeProgressChanged(percentage, "Copying table " + databaseTable.Name);
@@ -88,27 +89,17 @@ namespace CopyToSQLite
 
         private bool Copy(IDatabaseCreator dbCreator, DatabaseTable databaseTable)
         {
+            Debug.WriteLine("Copying " + databaseTable.Name);
             var originSql = new SqlWriter(databaseTable, _originType);
             var destinationSql = new SqlWriter(databaseTable, _useSqlServerCe ? SqlType.SqlServer : SqlType.SQLite);
 
             var selectAll = originSql.SelectAllSql();
-            string insert;
             //SQLServerCE and SQLite can't deal with output parameters, so we can't use the standard INSERT.
-            if (_useSqlServerCe)
-            {
-                //for sqlserver, we don't want an output parameter.
-                //there may be FK errors (unless you SET IDENTITY_INSERT myTable ON)
-                insert = destinationSql.InsertSqlWithoutOutputParameter();
-            }
-            else
-            {
-                //Fortunately SQLite allows you to insert "identity" primary keys
-                insert = destinationSql.InsertSqlIncludingIdentity();
-            }
+            string insert = destinationSql.InsertSqlIncludingIdentity();
+            //for sqlserver, we must also allow identity inserts (done in database inserter)
 
-            using (var inserter = new DatabaseInserter(dbCreator.CreateConnection(), insert))
+            using (var inserter = new DatabaseInserterFactory(_useSqlServerCe).CreateDatabaseInserter(dbCreator.CreateConnection(), insert, databaseTable))
             {
-
                 using (var con = _dbFactory.CreateConnection())
                 {
                     con.ConnectionString = _originConnection;
@@ -118,27 +109,30 @@ namespace CopyToSQLite
                         con.Open();
                         using (var rdr = cmd.ExecuteReader())
                         {
-                            if (rdr.HasRows)
-                            {
-                                int i = 0;
-                                while (rdr.Read())
-                                {
-                                    i++;
-                                    //we only do the first 1000 rows. This is for small databases only!
-                                    if (i > _maxiumumRecords) return true;
-                                    var result = CopyRow(databaseTable, destinationSql, rdr, inserter);
-                                    //if there's a problem, stop doing anything
-                                    if (!result)
-                                    {
-                                        LastErrorMessage = inserter.LastErrorMessage;
-                                        return false;
-                                    }
-                                }
-                            }
+                            return ReadRows(rdr, inserter, databaseTable, destinationSql);
                         }
                     }
                 }
             }
+        }
+
+        private bool ReadRows(DbDataReader rdr, DatabaseInserter inserter, DatabaseTable databaseTable, SqlWriter destinationSql)
+        {
+            if (!rdr.HasRows) return true;
+            int i = 0;
+            while (rdr.Read() && i < _maxiumumRecords)
+            {
+                //we only do the first 1000 rows. This is for small databases only!
+                i++;
+                var result = CopyRow(databaseTable, destinationSql, rdr, inserter);
+                //if there's a problem, stop doing anything
+                if (!result)
+                {
+                    LastErrorMessage = inserter.LastErrorMessage;
+                    return false;
+                }
+            }
+            Debug.WriteLine(databaseTable.Name + " copied " + i + " rows");
             return true;
         }
 

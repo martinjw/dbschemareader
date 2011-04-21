@@ -4,20 +4,20 @@ using System.Data.Common;
 
 namespace CopyToSQLite
 {
-    sealed class DatabaseInserter : IDisposable
+    class DatabaseInserter : IDisposable
     {
-        private readonly DbConnection _connection;
+        protected readonly DbConnection Connection;
         private readonly DbCommand _command;
         private readonly DbTransaction _sqLiteTransaction;
 
         public DatabaseInserter(DbConnection connection, string insertSql)
         {
-            _connection = connection;
-            _command = _connection.CreateCommand();
-            _command.Connection = _connection;
+            Connection = connection;
+            _command = Connection.CreateCommand();
+            _command.Connection = Connection;
             _command.CommandText = insertSql;
-            _connection.Open();
-            _sqLiteTransaction = _connection.BeginTransaction();
+            Connection.Open();
+            _sqLiteTransaction = Connection.BeginTransaction();
         }
 
         public bool Insert(IDictionary<string, object> parameters)
@@ -48,12 +48,17 @@ namespace CopyToSQLite
 
         public string LastErrorMessage { get; private set; }
 
+        protected virtual void CompleteTable()
+        {
+        }
+
         public void Dispose()
         {
+            CompleteTable();
             _sqLiteTransaction.Commit();
             _sqLiteTransaction.Dispose();
             _command.Dispose();
-            _connection.Close();
+            Connection.Close();
         }
     }
 }

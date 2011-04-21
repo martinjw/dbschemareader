@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -14,7 +15,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             //don't know provider
             return OracleToSqlServerConversion(dataType, -1, 0, 0);
         }
-        
+
         /// <summary>
         /// Gets the SQLServer datatype definition as string
         /// </summary>
@@ -24,7 +25,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
             var dataType = column.DbDataType.ToUpperInvariant();
             int providerType = -1;
-            if(column.DataType != null) 
+            if (column.DataType != null)
                 providerType = column.DataType.ProviderDbType;
 
             var precision = column.Precision;
@@ -44,18 +45,18 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
             dataType = OracleToSqlServerConversion(dataType, providerType, precision, scale);
 
-            if (dataType == "DATETIME2" || 
+            if (dataType == "DATETIME2" ||
                 dataType == "TIME")
             {
                 dataType = dataType + "(" + column.DateTimePrecision + ")";
             }
 
             //write out SqlServer datatype definition
-            if (dataType == "NVARCHAR" || 
-                dataType == "VARCHAR" || 
-                dataType == "CHAR" || 
-                dataType == "NCHAR" || 
-                dataType == "BINARY" || 
+            if (dataType == "NVARCHAR" ||
+                dataType == "VARCHAR" ||
+                dataType == "CHAR" ||
+                dataType == "NCHAR" ||
+                dataType == "BINARY" ||
                 dataType == "VARBINARY")
             {
                 dataType = dataType + " (" +
@@ -63,7 +64,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                     + ")";
             }
 
-            if (dataType == "NUMERIC" || 
+            if (dataType == "NUMERIC" ||
                 dataType == "DECIMAL")
             {
                 var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
@@ -84,7 +85,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != (int)SqlDbType.Timestamp)
                 dataType = "DATETIME";
             //Oracle numbers- use precise SqlServer versiom
-            if (dataType == "NUMBER") 
+            if (dataType == "NUMBER")
                 dataType = NumberConversion(precision, scale);
             return dataType;
         }
@@ -96,6 +97,23 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (precision == 18 && scale == 0) return "DECIMAL";
             if (precision == 15 && scale == 4) return "MONEY";
             return "NUMERIC";
+        }
+
+        /// <summary>
+        /// If a table has a trigger, we assume it's an Oracle trigger/sequence which is translated to identity for the primary key
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
+        public static bool LooksLikeOracleIdentityColumn(DatabaseTable table, DatabaseColumn column)
+        {
+            if (!column.IsPrimaryKey) return false;
+            if (table.Triggers.Count == 0) return false;
+            //is there a trigger body which looks like it's using a sequence?
+            //if there's a sequence there, it's autogenerating a column - we assume the primary key!
+            return table.Triggers.Any(t => t.TriggerBody
+                                               .ToUpperInvariant()
+                                               .Contains(".NEXTVAL "));
         }
     }
 }

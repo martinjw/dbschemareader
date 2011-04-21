@@ -401,17 +401,17 @@ namespace DatabaseSchemaReader
                     ParameterName("startRow")));
             }
             // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
-            else if (_sqlType == SqlType.SqlServer)
-            {
-                //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
-                sb.AppendLine(EscapedTableName);
-                sb.AppendLine("  ORDER BY  " + orderBy + ")");
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                    "OFFSET ({0}-1) ROWS FETCH NEXT ({1} - {2} +1) ROWS ONLY",
-                    ParameterName("startRow"),
-                    ParameterName("endRow"),
-                    ParameterName("startRow")));
-            }
+            //else if (_sqlType == SqlType.SqlServerCe )
+            //{
+            //    //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
+            //    sb.AppendLine(EscapedTableName);
+            //    sb.AppendLine("  ORDER BY  " + orderBy);
+            //    sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+            //        "OFFSET ({0}-1) ROWS FETCH NEXT ({1} - {2} +1) ROWS ONLY",
+            //        ParameterName("startRow"),
+            //        ParameterName("endRow"),
+            //        ParameterName("startRow")));
+            //}
             else
             {
                 //SQLServer 2005+, Oracle 8+

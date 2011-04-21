@@ -76,6 +76,7 @@
     <Compile Include="SqlGen\SqlWriterOracleTest.cs" />
     <Compile Include="SqlGen\SqlWriterMySqlTest.cs" />
     <Compile Include="SqlGen\WritingSprocsTest.cs" />
+    <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.txt" />

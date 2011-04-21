@@ -6,7 +6,10 @@ using System.Collections.Generic;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
-    public class ForeignKeyGenerator
+    /// <summary>
+    /// Generates foreign keys
+    /// </summary>
+    class ForeignKeyGenerator
     {
         private readonly DatabaseSchema _schema;
 
@@ -49,14 +52,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 foreach (var refs in table.ForeignKeys)
                 {
                     sb.AppendLine();
-                    sb.AppendLine("ALTER TABLE [" + table.Name + "]");
-                    var cols = string.Join(", ", refs.Columns.ToArray());
-                    var refTable = _schema.Tables.Find(t => t.Name == refs.RefersToTable);
-                    var refPrimaryKey = refTable.PrimaryKey;
-                    var refcols = string.Join(", ", refPrimaryKey.Columns.ToArray());
-
-                    sb.AppendLine(" ADD CONSTRAINT [" + refs.Name +
-                        "] FOREIGN KEY (" + cols + ") REFERENCES " + refs.RefersToTable + "(" + refcols + ")");
+                    WriteForeignKey(table, refs, sb);
                     sb.AppendLine("GO");
                 }
 
@@ -64,5 +60,18 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return sb.ToString();
         }
 
+        private void WriteForeignKey(DatabaseTable table, DatabaseConstraint foreignKey, StringBuilder sb)
+        {
+            sb.AppendLine("ALTER TABLE [" + table.Name + "]");
+            var cols = string.Join(", ", foreignKey.Columns.ToArray());
+            var referencedTableName = foreignKey.RefersToTable;
+            //find the referenced table's primary key
+            var refTable = _schema.Tables.Find(t => t.Name == referencedTableName);
+            var refPrimaryKey = refTable.PrimaryKey;
+            var refcols = string.Join(", ", refPrimaryKey.Columns.ToArray());
+
+            sb.AppendLine(" ADD CONSTRAINT [" + foreignKey.Name +
+                          "] FOREIGN KEY (" + cols + ") REFERENCES " + referencedTableName + "(" + refcols + ")");
+        }
     }
 }

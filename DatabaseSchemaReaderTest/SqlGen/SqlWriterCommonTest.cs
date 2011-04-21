@@ -99,12 +99,12 @@ namespace DatabaseSchemaReaderTest.SqlGen
                 {
                     cmd.CommandText = sql;
                     var pageSize = cmd.CreateParameter();
-                    pageSize.ParameterName = "@pageSize";
+                    pageSize.ParameterName = writer.ParameterName("pageSize");
                     pageSize.Value = 4;
                     cmd.Parameters.Add(pageSize);
 
                     var currentPage = cmd.CreateParameter();
-                    currentPage.ParameterName = "@currentPage";
+                    currentPage.ParameterName = writer.ParameterName("currentPage");
                     currentPage.Value = 1;
                     cmd.Parameters.Add(currentPage);
 
@@ -140,12 +140,12 @@ namespace DatabaseSchemaReaderTest.SqlGen
                 {
                     cmd.CommandText = sql;
                     var pageSize = cmd.CreateParameter();
-                    pageSize.ParameterName = "@startRow";
+                    pageSize.ParameterName = writer.ParameterName("startRow");
                     pageSize.Value = 1;
                     cmd.Parameters.Add(pageSize);
 
                     var currentPage = cmd.CreateParameter();
-                    currentPage.ParameterName = "@endRow";
+                    currentPage.ParameterName = writer.ParameterName("endRow");
                     currentPage.Value = 4;
                     cmd.Parameters.Add(currentPage);
 

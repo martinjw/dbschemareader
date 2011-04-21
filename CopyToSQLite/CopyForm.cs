@@ -50,31 +50,36 @@ namespace CopyToSQLite
 
         private void FilePathValidating(object sender, CancelEventArgs e)
         {
+            e.Cancel = IsFilePathInvalid();
+        }
+
+        private bool IsFilePathInvalid()
+        {
             var path = txtFilePath.Text.Trim();
             if (string.IsNullOrEmpty(path))
             {
-                e.Cancel = true;
                 errorProvider1.SetError(txtFilePath, "Must be entered");
-                return;
+                return true;
             }
             var dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir))
             {
-                e.Cancel = true;
                 errorProvider1.SetError(txtFilePath, "Directory does not exist");
-                return;
+                return true;
             }
             if (File.Exists(path))
             {
-                e.Cancel = true;
                 errorProvider1.SetError(txtFilePath, "File already exists");
-                return;
+                return true;
             }
             errorProvider1.SetError(txtFilePath, string.Empty);
+            return false;
         }
 
         private void ReadSchemaClick(object sender, EventArgs e)
         {
+            if (IsFilePathInvalid()) return;
+
             StartWaiting();
             var connectionString = ConnectionString.Text.Trim();
             _providerName = DataProviders.SelectedValue.ToString();

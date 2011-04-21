@@ -70,6 +70,7 @@
     <Compile Include="SqlGen\SqlWriterSQLiteTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerTest.cs" />
     <Compile Include="SqlGen\WritingSprocsTest.cs" />
+    <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2008.csproj">
