@@ -52,7 +52,7 @@ namespace DatabaseSchemaReader
                     _nameEscapeStart = "\""; //double quote (supports single quote and square brackets for compat)
                     _nameEscapeEnd = "\"";
                     break;
-                //case SqlType.SqlServer:
+                //case SqlType.SqlServer: and SqlType.SqlServerCe
                 default:
                     _parameterPrefix = '@';
                     _nameEscapeStart = "[";
@@ -328,17 +328,17 @@ namespace DatabaseSchemaReader
                     ParameterName("pageSize")));
             }
             // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
-            //else if (_sqlType == SqlType.SqlServer)
-            //{
-            //    //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
-            //    sb.AppendLine(EscapedTableName);
-            //    sb.AppendLine("  ORDER BY  " + orderBy + ")");
-            //    sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-            //        "OFFSET (({0}-1) * {1}) ROWS FETCH NEXT {2} ROWS ONLY",
-            //        ParameterName("currentPage"),
-            //        ParameterName("pageSize"),
-            //        ParameterName("pageSize")));
-            //}
+            else if (_sqlType == SqlType.SqlServerCe)
+            {
+                //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
+                sb.AppendLine(EscapedTableName);
+                sb.AppendLine("  ORDER BY  " + orderBy);
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "OFFSET (({0}-1) * {1}) ROWS FETCH NEXT {2} ROWS ONLY",
+                    ParameterName("currentPage"),
+                    ParameterName("pageSize"),
+                    ParameterName("pageSize")));
+            }
             else
             {
                 //SQLServer 2005+, Oracle 8+
@@ -401,17 +401,33 @@ namespace DatabaseSchemaReader
                     ParameterName("startRow")));
             }
             // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
-            //else if (_sqlType == SqlType.SqlServerCe )
-            //{
-            //    //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
-            //    sb.AppendLine(EscapedTableName);
-            //    sb.AppendLine("  ORDER BY  " + orderBy);
-            //    sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-            //        "OFFSET ({0}-1) ROWS FETCH NEXT ({1} - {2} +1) ROWS ONLY",
-            //        ParameterName("startRow"),
-            //        ParameterName("endRow"),
-            //        ParameterName("startRow")));
-            //}
+            else if (_sqlType == SqlType.SqlServerCe)
+            {
+                //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
+                //denali msdn is http://msdn.microsoft.com/en-us/library/ms188385%28v=sql.110%29.aspx#Offset
+                /*
+SELECT DepartmentID, Name, GroupName
+FROM HumanResources.Department
+ORDER BY DepartmentID ASC 
+   OFFSET @StartingRowNumber - 1 ROWS 
+   FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
+                 */
+                //SqlServerCE 4 has this syntax, but it seems more limited 
+                //(apparently you can't use expressions as described in msdn for denali)
+                //ce msdn is http://msdn.microsoft.com/en-us/library/gg699618%28v=SQL.110%29.aspx
+                //
+                sb.AppendLine(EscapedTableName);
+                sb.AppendLine("  ORDER BY  " + orderBy);
+                //OFFSET @StartingRowNumber - 1 ROWS 
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                   "   OFFSET {0} - 1 ROWS",
+                   ParameterName("startRow")));
+                //FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "   FETCH NEXT {0} - {1} + 1 ROWS ONLY",
+                    ParameterName("endRow"),
+                    ParameterName("startRow")));
+            }
             else
             {
                 //SQLServer 2005+, Oracle 8+

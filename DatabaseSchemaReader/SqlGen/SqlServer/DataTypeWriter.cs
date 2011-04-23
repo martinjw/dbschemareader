@@ -8,9 +8,12 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     /// <summary>
     /// Returns a datatype string (will convert common Oracle types to SqlServer)
     /// </summary>
-    static class DataTypeWriter
+    /// <remarks>
+    /// <see cref="DatabaseSchemaReader.SqlGen.SqlServerCe.DataTypeWriter"/> is derived from this for SqlServerCe
+    /// </remarks>
+    class DataTypeWriter
     {
-        public static string SqlServerDataType(string dataType)
+        public string SqlServerDataType(string dataType)
         {
             //don't know provider
             return OracleToSqlServerConversion(dataType, -1, 0, 0);
@@ -21,7 +24,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// </summary>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public static string SqlServerDataType(this DatabaseColumn column)
+        public string SqlServerDataType(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
             int providerType = -1;
@@ -43,7 +46,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 dataType = "NVARCHAR";
                 length = -1;
             }
-            dataType = OracleToSqlServerConversion(dataType, providerType, precision, scale);
+            dataType = ConvertOtherPlatformTypes(dataType, providerType, length, precision, scale);
 
             if (dataType == "DATETIME2" ||
                 dataType == "TIME")
@@ -72,6 +75,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
 
             return dataType;
+        }
+
+        protected virtual string ConvertOtherPlatformTypes(string dataType, int providerType, int? length, int? precision, int? scale)
+        {
+            return OracleToSqlServerConversion(dataType, providerType, precision, scale);
         }
 
         private static string OracleToSqlServerConversion(string dataType, int providerType, int? precision, int? scale)
@@ -105,7 +113,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// <param name="table">The table.</param>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public static bool LooksLikeOracleIdentityColumn(DatabaseTable table, DatabaseColumn column)
+        public bool LooksLikeOracleIdentityColumn(DatabaseTable table, DatabaseColumn column)
         {
             if (!column.IsPrimaryKey) return false;
             if (table.Triggers.Count == 0) return false;

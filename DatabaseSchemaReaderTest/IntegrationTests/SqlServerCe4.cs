@@ -17,23 +17,25 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     /// These are INTEGRATION tests using databases.
     /// </summary>
     [TestClass]
-    public class SqlLite
+    public class SqlServerCe4
     {
+        //MSDN is here: http://msdn.microsoft.com/en-us/library/ff929050%28v=SQL.10%29.aspx
+
+        private const string ProviderName = "System.Data.SqlServerCe.4.0";
+        private const string FilePath = @"C:\Data\northwind.sdf";
 
         [TestMethod]
-        public void SqlLiteTest()
+        public void SqlServerCe4Test()
         {
-            const string providername = "System.Data.SQLite";
-            const string dir = @"C:\Data\northwind.db";
-            if (!File.Exists(dir))
+            if (!File.Exists(FilePath))
             {
-                Assert.Inconclusive("SqlLite test requires database file " + dir);
+                Assert.Inconclusive("SqlServerCe4 test requires database file " + FilePath);
             }
 
-            const string connectionString = @"Data Source=" + dir;
-            ProviderChecker.Check(providername, connectionString);
+            const string connectionString = "Data Source=\"" + FilePath + "\"";
+            ProviderChecker.Check(ProviderName, connectionString);
 
-            var dbReader = new DatabaseReader(connectionString, providername);
+            var dbReader = new DatabaseReader(connectionString, ProviderName);
             var schema = dbReader.ReadAll();
             var orders = schema.FindTableByName("Orders");
             Assert.IsTrue(orders.Columns.Count > 2); //we don't care if it's not standard Northwind

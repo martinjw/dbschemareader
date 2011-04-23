@@ -58,6 +58,7 @@
     <Compile Include="Codegen\NameFixerTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
+    <Compile Include="IntegrationTests\SqlServerCe4.cs" />
     <Compile Include="IntegrationTests\DatabaseReaderTest.cs" />
     <Compile Include="IntegrationTests\DataDirectProvider.cs" />
     <Compile Include="IntegrationTests\DevartProviderTests.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
     <Compile Include="Procedures\RunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlGen\SqlWriterSqlServerCeTest.cs" />
     <Compile Include="SqlGen\SqlWriterCommonTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerTest.cs" />
     <Compile Include="SqlGen\SqlWriterSQLiteTest.cs" />

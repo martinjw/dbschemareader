@@ -35,6 +35,20 @@ namespace DatabaseSchemaReader
                 return (ProviderName.Equals("System.Data.SqlClient", StringComparison.OrdinalIgnoreCase));
             }
         }
+        /// <summary>
+        /// Gets a value indicating whether this instance is SQL Server CE 4.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is SQL Server CE 4; otherwise, <c>false</c>.
+        /// </value>
+        internal bool IsSqlServerCe4
+        {
+            get
+            {
+                //System.Data.SqlServerCe.4.0
+                return (ProviderName.Equals("System.Data.SqlServerCe.4.0", StringComparison.OrdinalIgnoreCase));
+            }
+        }
 
         /// <summary>
         /// Get all data for a specified table name.
@@ -43,7 +57,7 @@ namespace DatabaseSchemaReader
         /// <returns>A dataset containing the tables: Columns, Primary_Keys, Foreign_Keys, Unique_Keys (only filled for Oracle), Indexes, IndexColumns, Triggers</returns>
         public override DataSet Table(string tableName)
         {
-            if (!IsSqlServer && !IsOracle && !IsMySql)
+            if (!IsSqlServer && !IsSqlServerCe4 && !IsOracle && !IsMySql)
                 return base.Table(tableName);
             //more information from sqlserver, oracle and mysql
             var ds = new DataSet();
@@ -143,7 +157,8 @@ ORDER BY OWNER,
         {
             DataTable dt = new DataTable("IdentityColumns");
             dt.Locale = CultureInfo.InvariantCulture;
-            if (!IsSqlServer && !IsMySql) return dt; //Oracle has sequences instead
+
+            if (!IsSqlServerCe4 && !IsSqlServer && !IsMySql) return dt; //Oracle has sequences instead
 
             //create a dataadaptor and fill it
             using (DbDataAdapter da = Factory.CreateDataAdapter())
@@ -161,6 +176,17 @@ WHERE
 (s.name = @schemaOwner OR @schemaOwner IS NULL) AND 
 o.type= 'U' 
 ORDER BY o.name, c.name";
+                else if (IsSqlServerCe4)
+                {
+                    sqlCommand = @"SELECT 
+    NULL SchemaOwner, TABLE_NAME TableName, COLUMN_NAME ColumnName 
+FROM 
+    INFORMATION_SCHEMA.COLUMNS 
+WHERE 
+    (@tableName IS NULL OR TABLE_NAME = @tableName) AND 
+    (@schemaOwner IS NOT NULL OR @schemaOwner IS NULL) AND 
+    AUTOINC_NEXT IS NOT NULL";
+                }
                 else
                     //MySql version using information_schema
                     sqlCommand = @"SELECT 
@@ -174,15 +200,14 @@ WHERE EXTRA = 'auto_increment' AND
 
                 da.SelectCommand = conn.CreateCommand();
                 da.SelectCommand.CommandText = sqlCommand;
-                da.SelectCommand.Parameters.Add(
-                    AddDbParameter("tableName", tableName));
-                da.SelectCommand.Parameters.Add(
-                    AddDbParameter("schemaOwner", Owner));
+
+                AddTableNameSchemaParameters(da.SelectCommand, tableName);
 
                 da.Fill(dt);
                 return dt;
             }
         }
+
 
         public DataTable Triggers(string tableName)
         {
@@ -253,10 +278,7 @@ WHERE o1.XTYPE = 'TR' AND
                 da.SelectCommand = conn.CreateCommand();
                 EnsureOracleBindByName(da.SelectCommand);
                 da.SelectCommand.CommandText = sqlCommand;
-                da.SelectCommand.Parameters.Add(
-                    AddDbParameter("tableName", tableName));
-                da.SelectCommand.Parameters.Add(
-                    AddDbParameter("schemaOwner", Owner));
+                AddTableNameSchemaParameters(da.SelectCommand, tableName);
 
                 da.Fill(dt);
                 return dt;
@@ -409,7 +431,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         /// <param name="tableName">Name of the table. Oracle names can be case sensitive.</param>
         public override DataTable ForeignKeys(string tableName)
         {
-            if (!IsMySql && !IsOracle && !IsSqlServer)
+            if (!IsMySql && !IsOracle && !IsSqlServer && !IsSqlServerCe4)
                 return base.ForeignKeys(tableName);
             return FindKeys(tableName, GetForeignKeyType());
         }
@@ -417,7 +439,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         public override DataTable ForeignKeyColumns(string tableName)
         {
             //doesn't exist in SqlServer- but we've overridden anyway
-            if (IsSqlServer || IsOracle || IsMySql) return new DataTable("ForeignKeyColumns");
+            if (IsSqlServer || IsOracle || IsMySql || IsSqlServerCe4) return new DataTable("ForeignKeyColumns");
             return base.ForeignKeyColumns(tableName);
         }
 
@@ -446,7 +468,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         private DataTable FindKeys(string tableName, string constraintType)
         {
 
-            if (!IsMySql && !IsOracle && !IsSqlServer) return new DataTable();
+            if (!IsMySql && !IsOracle && !IsSqlServer && !IsSqlServerCe4) return new DataTable(constraintType);
 
             //open a connection
             using (DbConnection conn = Factory.CreateConnection())
@@ -459,6 +481,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         private DataTable FindKeys(string tableName, string constraintType, DbConnection conn)
         {
             DataTable dt = new DataTable(constraintType);
+
             if (constraintType == "U" && !IsOracle)
                 return dt; //only Oracle has this concept
 
@@ -471,13 +494,11 @@ ORDER BY OWNER, NAME, TYPE, LINE";
                 da.SelectCommand = conn.CreateCommand();
                 EnsureOracleBindByName(da.SelectCommand);
                 da.SelectCommand.CommandText = sqlCommand;
-                da.SelectCommand.Parameters.Add(
-                   AddDbParameter("tableName", tableName));
-                da.SelectCommand.Parameters.Add(
-                    AddDbParameter("schemaOwner", Owner));
+                AddTableNameSchemaParameters(da.SelectCommand, tableName);
 
                 DbParameter type = Factory.CreateParameter();
                 type.ParameterName = "constraint_type";
+                type.DbType = DbType.String;
                 type.Value = constraintType;
                 da.SelectCommand.Parameters.Add(type);
 
@@ -621,16 +642,25 @@ ORDER BY cons.table_name, cons.constraint_name";
                 da.SelectCommand = conn.CreateCommand();
                 EnsureOracleBindByName(da.SelectCommand);
                 da.SelectCommand.CommandText = sqlCommand;
-                da.SelectCommand.Parameters.Add(
-                   AddDbParameter("tableName", tableName));
-                da.SelectCommand.Parameters.Add(
-                    AddDbParameter("schemaOwner", Owner));
+                AddTableNameSchemaParameters(da.SelectCommand, tableName);
 
                 da.Fill(dt);
                 return dt;
             }
         }
         #endregion
+
+        private void AddTableNameSchemaParameters(DbCommand cmd, string tableName)
+        {
+            var parameter = AddDbParameter("tableName", tableName);
+            //sqlserver ce is picky about null parameter types
+            parameter.DbType = DbType.String;
+            cmd.Parameters.Add(parameter);
+
+            var schemaParameter = AddDbParameter("schemaOwner", Owner);
+            schemaParameter.DbType = DbType.String;
+            cmd.Parameters.Add(schemaParameter);
+        }
         #endregion
     }
 }

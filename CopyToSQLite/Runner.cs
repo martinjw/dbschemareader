@@ -18,6 +18,7 @@ namespace CopyToSQLite
         private readonly DatabaseReader _databaseReader;
         private readonly string _filePath;
         private readonly SqlType _originType;
+        private readonly SqlType _destinationType;
         private DbProviderFactory _dbFactory;
         private string _originConnection;
         private readonly int _maxiumumRecords;
@@ -39,6 +40,7 @@ namespace CopyToSQLite
         {
             _useSqlServerCe = useSqlServerCe;
             _originType = originType;
+            _destinationType = _useSqlServerCe ? SqlType.SqlServerCe : SqlType.SQLite;
             _filePath = filePath;
             _databaseReader = databaseReader;
             _maxiumumRecords = Properties.Settings.Default.MaximumRecords;
@@ -54,7 +56,7 @@ namespace CopyToSQLite
             //for SQLServer CE we are actually using the SqlServer settings
             //CE only supports a subset of SqlServer datatypes and functionality
             //the big problem is VARCHAR(MAX) - CE only has NTEXT.
-            var factory = new DdlGeneratorFactory(_useSqlServerCe ? SqlType.SqlServer : SqlType.SQLite);
+            var factory = new DdlGeneratorFactory(_destinationType);
             var tableGenerator = factory.AllTablesGenerator(databaseSchema);
             tableGenerator.IncludeSchema = false;
             var ddl = tableGenerator.Write();
@@ -91,7 +93,7 @@ namespace CopyToSQLite
         {
             Debug.WriteLine("Copying " + databaseTable.Name);
             var originSql = new SqlWriter(databaseTable, _originType);
-            var destinationSql = new SqlWriter(databaseTable, _useSqlServerCe ? SqlType.SqlServer : SqlType.SQLite);
+            var destinationSql = new SqlWriter(databaseTable, _destinationType);
 
             var selectAll = originSql.SelectAllSql();
             //SQLServerCE and SQLite can't deal with output parameters, so we can't use the standard INSERT.

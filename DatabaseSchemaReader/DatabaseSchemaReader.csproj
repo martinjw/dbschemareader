@@ -135,6 +135,9 @@
     <Compile Include="SqlGen\SqlServer\SqlFormatProvider.cs" />
     <Compile Include="SqlGen\SqlServer\TableGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\TablesGenerator.cs" />
+    <Compile Include="SqlGen\SqlServerCe\DataTypeWriter.cs" />
+    <Compile Include="SqlGen\SqlServerCe\TableGenerator.cs" />
+    <Compile Include="SqlGen\SqlServerCe\TablesGenerator.cs" />
     <Compile Include="SqlWriter.cs" />
   </ItemGroup>
   <ItemGroup>

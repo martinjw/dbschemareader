@@ -6,10 +6,12 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     class TableGenerator : TableGeneratorBase
     {
         private bool _hasBit;
+        protected DataTypeWriter DataTypeWriter;
 
         public TableGenerator(DatabaseTable table)
             : base(table)
         {
+            DataTypeWriter = new DataTypeWriter();
         }
 
         protected override string ConstraintWriter()
@@ -54,7 +56,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 }
             }
 
-            var sql = column.SqlServerDataType();
+            var sql = DataTypeWriter.SqlServerDataType(column);
             if (sql == "BIT") _hasBit = true;
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))

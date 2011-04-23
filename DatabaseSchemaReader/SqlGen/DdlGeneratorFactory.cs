@@ -36,6 +36,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new MySql.TableGenerator(table);
                 case SqlType.SQLite:
                     return new TableGenerator(table);
+                case SqlType.SqlServerCe:
+                    return new SqlServerCe.TableGenerator(table);
             }
             return null;
         }
@@ -57,6 +59,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new MySql.TablesGenerator(schema);
                 case SqlType.SQLite:
                     return new TablesGenerator(schema);
+                case SqlType.SqlServerCe:
+                    return new SqlServerCe.TablesGenerator(schema);
             }
             return null;
         }
@@ -78,6 +82,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new MySql.ProcedureGenerator(table);
                 case SqlType.SQLite:
                     return null; //no stored procedures in SqlLite
+                case SqlType.SqlServerCe:
+                    return null; //no stored procedures in SqlServerCE
             }
             return null;
         }

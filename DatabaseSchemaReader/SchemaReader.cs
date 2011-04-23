@@ -161,12 +161,15 @@ namespace DatabaseSchemaReader
         /// <returns>Datatable with columns OWNER, TABLE_NAME, TYPE</returns>
         public DataTable Views()
         {
+            const string collectionName = "Views";
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, "Views");
-                return conn.GetSchema("Views", restrictions);
+                if (!SchemaCollectionExists(conn, collectionName))
+                    return new DataTable(collectionName); //doesn't exist in SqlServerCe
+                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                return conn.GetSchema(collectionName, restrictions);
             }
         }
 

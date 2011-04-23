@@ -7,6 +7,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     /// </summary>
     internal class ProcedureGenerator : ProcedureGeneratorBase
     {
+        private readonly DataTypeWriter _dataTypeWriter;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcedureGenerator"/> class.
         /// </summary>
@@ -15,6 +17,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             : base(table)
         {
             SqlWriter = new SqlWriter(table, SqlType.SqlServer);
+            _dataTypeWriter = new DataTypeWriter();
         }
 
         protected override IProcedureWriter CreateProcedureWriter(string procName)
@@ -23,11 +26,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         }
         protected override string ColumnDataType(DatabaseColumn column)
         {
-            return column.SqlServerDataType();
+            return _dataTypeWriter.SqlServerDataType(column);
         }
         protected override string ColumnDataType(string dataType)
         {
-            return DataTypeWriter.SqlServerDataType(dataType);
+            return _dataTypeWriter.SqlServerDataType(dataType);
         }
     }
 }

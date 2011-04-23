@@ -21,6 +21,10 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// SQLite
         /// </summary>
-        SQLite
+        SQLite,
+        ///<summary>
+        /// Microsoft SQL Server CE 4
+        ///</summary>
+        SqlServerCe
     }
 }
