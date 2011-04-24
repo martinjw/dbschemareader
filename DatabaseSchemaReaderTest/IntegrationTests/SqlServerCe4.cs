@@ -39,6 +39,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var schema = dbReader.ReadAll();
             var orders = schema.FindTableByName("Orders");
             Assert.IsTrue(orders.Columns.Count > 2); //we don't care if it's not standard Northwind
+
         }
     }
 }

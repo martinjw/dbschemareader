@@ -421,7 +421,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         /// <returns>DataTable with constraint_name, table_name, column_name, ordinal_position</returns>
         public override DataTable PrimaryKeys(string tableName)
         {
-            if (!IsMySql && !IsOracle && !IsSqlServer)
+            if (!IsMySql && !IsOracle && !IsSqlServer && !IsSqlServerCe4)
                 return base.PrimaryKeys(tableName);
             return FindKeys(tableName, GetPrimaryKeyType());
         }
@@ -517,9 +517,9 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         {
             return IsOracle ? "R" : "FOREIGN KEY";
         }
-        private static string GetUniqueKeyType()
+        private string GetUniqueKeyType()
         {
-            return "U";
+            return IsSqlServerCe4 ? "UNIQUE" : "U";
         }
 
         /// <summary>
@@ -549,6 +549,26 @@ WHERE
    (cols.owner = :schemaOwner OR :schemaOwner IS NULL) AND 
 	cons.constraint_type = :constraint_type
 ORDER BY cols.table_name, cols.position";
+            }
+            else if (IsSqlServerCe4)
+            {
+                sqlCommand = @"SELECT
+	KEYCOLUMNS.CONSTRAINT_NAME, 
+	KEYCOLUMNS.TABLE_NAME, 
+	KEYCOLUMNS.COLUMN_NAME, 
+	KEYCOLUMNS.ORDINAL_POSITION,
+	REFS.UNIQUE_CONSTRAINT_NAME, 
+	REFS.UNIQUE_CONSTRAINT_TABLE_NAME AS FK_TABLE,
+	REFS.DELETE_RULE
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS CONS
+	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KEYCOLUMNS
+	 ON CONS.CONSTRAINT_NAME = KEYCOLUMNS.CONSTRAINT_NAME
+	LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS REFS
+	 ON CONS.CONSTRAINT_NAME = REFS.CONSTRAINT_NAME
+WHERE 
+	(CONS.TABLE_NAME = @tableName OR @tableName IS NULL) AND 
+	(@schemaOwner IS NOT NULL OR @schemaOwner IS NULL) AND 
+	CONS.CONSTRAINT_TYPE = @constraint_type";
             }
             else //if (IsSqlServer || IsMySql) //use SQL92 INFORMATION_SCHEMA
             {

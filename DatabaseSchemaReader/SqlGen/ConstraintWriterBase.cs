@@ -59,7 +59,7 @@ namespace DatabaseSchemaReader.SqlGen
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0}{1} 
 ADD CONSTRAINT {2} PRIMARY KEY ({3})",
-                                 IncludeSchema ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
+                                 IncludeSchema && !string.IsNullOrEmpty(_table.SchemaOwner) ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
                                  EscapeName(_table.Name),
                                  EscapeName(pkName),
                                  columnList) + LineEnding();
@@ -119,7 +119,7 @@ ADD CONSTRAINT {2} UNIQUE ({3})",
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0}{1} 
 ADD CONSTRAINT {2} CHECK ({3})",
-                                 IncludeSchema ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
+                                 IncludeSchema && !string.IsNullOrEmpty(_table.SchemaOwner) ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
                                  EscapeName(_table.Name),
                                  EscapeName(name),
                                  expression) + LineEnding();
@@ -156,7 +156,7 @@ ADD CONSTRAINT {2} CHECK ({3})",
 ADD CONSTRAINT {2} FOREIGN KEY 
 ({3}) 
 REFERENCES {4} ({5})",
-                                 IncludeSchema ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
+                                 IncludeSchema && !string.IsNullOrEmpty(_table.SchemaOwner) ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
                                  EscapeName(_table.Name),
                                  EscapeName(foreignKeyName),
                                  columnList,

@@ -39,7 +39,9 @@ namespace DatabaseSchemaReader.SqlGen
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine("CREATE TABLE " + (IncludeSchema ? EscapeName(Table.SchemaOwner) + "." : string.Empty) + EscapeName(TableName));
+            var schemaName = (IncludeSchema && !string.IsNullOrEmpty(Table.SchemaOwner)) ? EscapeName(Table.SchemaOwner) + "." : string.Empty;
+
+            sb.AppendLine("CREATE TABLE " + schemaName + EscapeName(TableName));
             sb.AppendLine("(");
             var columnList = new List<string>();
             foreach (var column in Table.Columns)

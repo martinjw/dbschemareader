@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
@@ -96,7 +97,9 @@ namespace CopyToSQLite
                 "SELECT MAX([{0}])+1 FROM [{1}]",
                 identityColumn,
                 _table.Name);
-            var max = (int)command.ExecuteScalar();
+            var value = command.ExecuteScalar();
+            if (value == DBNull.Value) return; //no data
+            var max = Convert.ToInt32(value);
             command.CommandText = string.Format(CultureInfo.InvariantCulture,
                 "ALTER TABLE [{0}] ALTER COLUMN [{1}] IDENTITY (" + max + ",1)",
                 _table.Name,

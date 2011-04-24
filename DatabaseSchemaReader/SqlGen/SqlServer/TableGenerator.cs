@@ -64,7 +64,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 column.IsIdentity = true;
             }
             if (column.IsIdentity) sql += " IDENTITY(1,1)";
-            if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)
+            if (column.IsPrimaryKey && Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count == 1)
                 sql += " PRIMARY KEY NOT NULL";
             else
                 sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + " " + defaultValue;
