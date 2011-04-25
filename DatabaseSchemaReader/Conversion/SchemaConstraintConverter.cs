@@ -282,7 +282,7 @@ namespace DatabaseSchemaReader.Conversion
                     if (col.Name.Equals(colName, StringComparison.OrdinalIgnoreCase))
                     {
                         col.IsIdentity = true;
-                        col.IsPrimaryKey = true;
+                        //col.IsPrimaryKey = true;
                         break;
                     }
                 }

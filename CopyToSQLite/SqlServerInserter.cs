@@ -90,7 +90,7 @@ namespace CopyToSQLite
         private void ResetIdentity()
         {
             //equal to DBCC CHECKIDENT (tableName)
-            var identityColumn = _table.PrimaryKeyColumn.Name;
+            var identityColumn = _table.Columns.First(c => c.IsIdentity).Name;
 
             var command = Connection.CreateCommand();
             command.CommandText = string.Format(CultureInfo.InvariantCulture,

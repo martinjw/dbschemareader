@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.IO;
@@ -71,25 +72,50 @@ namespace DatabaseSchemaReaderTest.SqlGen
             runner.RunSelectAllSql();
         }
 
-        //[TestMethod] TODO
+        [TestMethod]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServerCe, table, _factory, _connectionString);
+            //arrange
+            var writer = new SqlWriter(table, SqlType.SqlServerCe);
+            var sql = writer.SelectPageSql(); //sane as writer.SelectPageStartToEndRowSql()
+            //parameters are offset and pageSize, not the standard ones (limitations of OFFSET/FETCH in sqlserverCe)
+            var dataTable = new DataTable();
 
-            runner.RunPagingSql();
+            //run generated sql
+            using (var con = _factory.CreateConnection())
+            {
+                con.ConnectionString = _connectionString;
+                using (var cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = sql;
+                    var pageSize = cmd.CreateParameter();
+                    pageSize.ParameterName = writer.ParameterName("pageSize");
+                    pageSize.Value = 2;
+                    cmd.Parameters.Add(pageSize);
+
+                    var currentPage = cmd.CreateParameter();
+                    currentPage.ParameterName = writer.ParameterName("offset");
+                    currentPage.Value = 2;
+                    cmd.Parameters.Add(currentPage);
+
+                    var da = _factory.CreateDataAdapter();
+                    da.SelectCommand = cmd;
+                    da.Fill(dataTable);
+                }
+            }
+
+            //assert
+            Assert.IsTrue(dataTable.Rows.Count > 0, "There should be some categories (this test may fail if database table is empty)");
+            Assert.IsTrue(dataTable.Rows.Count <= 4, "Should only return the page size (or less)");
+            foreach (var column in table.Columns)
+            {
+                var name = column.Name;
+                Assert.IsTrue(dataTable.Columns.Contains(name), "Should retrieve column " + name);
+            }
         }
 
-        //[TestMethod] TODO
-        public void TestGeneratedSqlForPagingStartToEnd()
-        {
-            var table = LoadCategoriesFromNorthwind();
-
-            var runner = new SqlWriterCommonTest(SqlType.SqlServerCe, table, _factory, _connectionString);
-
-            runner.RunPagingStartToEndSql();
-        }
 
         [TestMethod]
         public void TestGeneratedSqlForInsert()

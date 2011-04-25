@@ -22,6 +22,9 @@ namespace DatabaseSchemaReader.CodeGen
         /// </summary>
         public void AddOverrides()
         {
+            //if there is no pk, these won't work
+            if (_table.PrimaryKey == null) return;
+
             _cb.AppendLine("#region overrides");
 
             AddToString();

@@ -287,6 +287,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         /// <remarks>
         /// MySql important: add Allow User Variables=True to connection string
+        /// <para>SqlServerCe: use input params offset and pageSize</para>
         /// </remarks>
         public string SelectPageSql()
         {
@@ -327,17 +328,17 @@ namespace DatabaseSchemaReader
                     ParameterName("pageSize"),
                     ParameterName("pageSize")));
             }
-            // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
+            // //SQLServer 2011 (and SqlServer CE 4.0) syntax.
             else if (_sqlType == SqlType.SqlServerCe)
             {
-                //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
-                sb.AppendLine(EscapedTableName);
-                sb.AppendLine("  ORDER BY  " + orderBy);
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                    "OFFSET (({0}-1) * {1}) ROWS FETCH NEXT {2} ROWS ONLY",
-                    ParameterName("currentPage"),
-                    ParameterName("pageSize"),
-                    ParameterName("pageSize")));
+                WritePagingForSqlServerCe(sb, orderBy);
+                //sb.AppendLine(EscapedTableName);
+                //sb.AppendLine("  ORDER BY  " + orderBy);
+                //sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                //    "OFFSET (({0}-1) * {1}) ROWS FETCH NEXT {2} ROWS ONLY",
+                //    ParameterName("currentPage"),
+                //    ParameterName("pageSize"),
+                //    ParameterName("pageSize")));
             }
             else
             {
@@ -361,6 +362,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         /// <remarks>
         /// MySql important: add Allow User Variables=True to connection string
+        /// <para>SqlServerCe: use input params offset and pageSize</para>
         /// </remarks>
         public string SelectPageStartToEndRowSql()
         {
@@ -400,33 +402,19 @@ namespace DatabaseSchemaReader
                     ParameterName("startRow"),
                     ParameterName("startRow")));
             }
-            // //SQLServer 2011 (and SqlServer CE 4.0) syntax. Coming soon...
+            // //SQLServer 2011 (and SqlServer CE 4.0) syntax.
             else if (_sqlType == SqlType.SqlServerCe)
             {
-                //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
-                //denali msdn is http://msdn.microsoft.com/en-us/library/ms188385%28v=sql.110%29.aspx#Offset
-                /*
-SELECT DepartmentID, Name, GroupName
-FROM HumanResources.Department
-ORDER BY DepartmentID ASC 
-   OFFSET @StartingRowNumber - 1 ROWS 
-   FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
-                 */
-                //SqlServerCE 4 has this syntax, but it seems more limited 
-                //(apparently you can't use expressions as described in msdn for denali)
-                //ce msdn is http://msdn.microsoft.com/en-us/library/gg699618%28v=SQL.110%29.aspx
-                //
-                sb.AppendLine(EscapedTableName);
-                sb.AppendLine("  ORDER BY  " + orderBy);
-                //OFFSET @StartingRowNumber - 1 ROWS 
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                   "   OFFSET {0} - 1 ROWS",
-                   ParameterName("startRow")));
-                //FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                    "   FETCH NEXT {0} - {1} + 1 ROWS ONLY",
-                    ParameterName("endRow"),
-                    ParameterName("startRow")));
+                WritePagingForSqlServerCe(sb, orderBy);
+                //sb.AppendLine(EscapedTableName);
+                //sb.AppendLine("  ORDER BY  " + orderBy);
+                //sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                //                            "   OFFSET {0} - 1 ROWS",
+                //                            ParameterName("startRow")));
+                //sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                //                            "   FETCH NEXT {0} - {1} + 1 ROWS ONLY",
+                //                            ParameterName("endRow"),
+                //                            ParameterName("startRow")));
             }
             else
             {
@@ -442,6 +430,33 @@ ORDER BY DepartmentID ASC
             }
 
             return sb.ToString();
+        }
+
+        private void WritePagingForSqlServerCe(StringBuilder sb, string orderBy)
+        {
+            //Sql Server 2011 will have the ORDER BY x OFFSET n ROWS FETCH NEXT n ROWS ONLY syntax (FETCH now is cursors only) 
+            //denali msdn is http://msdn.microsoft.com/en-us/library/ms188385%28v=sql.110%29.aspx#Offset
+            /*
+SELECT DepartmentID, Name, GroupName
+FROM HumanResources.Department
+ORDER BY DepartmentID ASC 
+OFFSET @StartingRowNumber - 1 ROWS 
+FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
+             */
+            //SqlServerCE 4 has this syntax, but it seems more limited 
+            //(apparently you can't use expressions as described in msdn for denali)
+            //ce msdn is http://msdn.microsoft.com/en-us/library/gg699618%28v=SQL.110%29.aspx
+            //
+            sb.AppendLine(EscapedTableName);
+            sb.AppendLine("  ORDER BY  " + orderBy);
+            //OFFSET @StartingRowNumber - 1 ROWS 
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                                        "   OFFSET {0} ROWS",
+                                        ParameterName("offset")));
+            //FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                                        "   FETCH NEXT {0} ROWS ONLY",
+                                        ParameterName("pageSize")));
         }
 
         /// <summary>

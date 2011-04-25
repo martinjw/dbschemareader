@@ -3,7 +3,7 @@
     /// <summary>
     /// Write a stored procedure
     /// </summary>
-    public interface IProcedureWriter
+    interface IProcedureWriter
     {
         void AddOutputParameter(string parameterName, string dataType);
         void AddParameter(string parameterName, string dataType);

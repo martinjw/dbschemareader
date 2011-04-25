@@ -56,7 +56,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
         protected override void AddTableConstraints(IList<string> columnList)
         {
             var formatter = SqlFormatProvider();
-            if (Table.PrimaryKey.Columns.Count > 1)
+            if (Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count > 1)
             {
                 columnList.Add("PRIMARY KEY (" + GetColumnList(Table.PrimaryKey.Columns) + ")");
             }
