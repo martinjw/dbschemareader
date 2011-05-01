@@ -58,6 +58,26 @@ namespace DatabaseSchemaReader.Conversion
         }
 
         /// <summary>
+        /// Finds the first schema (usually COLUMNS table)
+        /// </summary>
+        public static string FindSchema(DataTable dt)
+        {
+            //sql server
+            string ownerKey = "TABLE_SCHEMA";
+            //oracle
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
+            //Devart.Data.Oracle - TABLE_NAME is NAME
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+
+            //find the first table and return it
+            foreach (DataRow row in dt.Rows)
+            {
+                return row[ownerKey].ToString();
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Converts the "Views" DataTable into <see cref="DatabaseView"/> objects.
         /// </summary>
         public static List<DatabaseView> Views(DataTable dt)
@@ -77,7 +97,7 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.Oracle
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-           
+
             foreach (DataRow row in dt.Rows)
             {
                 DatabaseView t = new DatabaseView();
@@ -182,7 +202,7 @@ namespace DatabaseSchemaReader.Conversion
                 column.Nullable = true;
             else if (nullable.StartsWith("N", StringComparison.OrdinalIgnoreCase)) //N or NO
                 column.Nullable = false;
-                //sqlite has a boolean type
+            //sqlite has a boolean type
             else if ((bool)row[nullableKey])
                 column.Nullable = true;
         }

@@ -25,16 +25,52 @@ namespace DatabaseSchemaReader.DataSchema
             _columns = new List<string>();
         }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the parent table.
+        /// </summary>
+        /// <value>
+        /// The name of the table.
+        /// </value>
         public string TableName { get; set; }
 
+        /// <summary>
+        /// If this is a foreign key constraint, gets or sets the constraint on the foreign key table (i.e. the primary key constraint).
+        /// </summary>
+        /// <value>
+        /// The refers to constraint.
+        /// </value>
         public string RefersToConstraint { get; set; }
 
+        /// <summary>
+        /// If this is a foreign key constraint, gets or sets the foreign key table name. Use <see cref="ReferencedTable"/> to get the foreign key table.
+        /// </summary>
+        /// <value>
+        /// The refers to table.
+        /// </value>
         public string RefersToTable { get; set; }
 
+        /// <summary>
+        /// Gets or sets the delete rule. When a row is deleted from a parent table, the DeleteRule determines what will happen in the columns of the child table (or tables). If the rule is set to Cascade, child rows will be deleted. Other options are SET NULL, SET DEFAULT and NO ACTION.
+        /// </summary>
+        /// <value>
+        /// The delete rule.
+        /// </value>
         public string DeleteRule { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type of the constraint (primary key, foreign key, unique key, check)
+        /// </summary>
+        /// <value>
+        /// The type of the constraint.
+        /// </value>
         public ConstraintType ConstraintType { get; set; }
 
         /// <summary>
@@ -47,6 +83,11 @@ namespace DatabaseSchemaReader.DataSchema
         /// </summary>
         public string Expression { get; set; }
 
+        /// <summary>
+        /// If this is a foreign key constraint, gets or sets the foreign key table.
+        /// </summary>
+        /// <param name="schema">The schema.</param>
+        /// <returns></returns>
         public DatabaseTable ReferencedTable(DatabaseSchema schema)
         {
             if(schema == null) return null;
@@ -59,7 +100,25 @@ namespace DatabaseSchemaReader.DataSchema
                 table.PrimaryKey.Name.Equals(RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
         }
 
+        /// <summary>
+        /// If this is a foreign key constraint, gets the primary key columns of a referenced table.
+        /// </summary>
+        /// <param name="schema">The schema.</param>
+        public IEnumerable<string> ReferencedColumns(DatabaseSchema schema)
+        {
+            var referencedTable = ReferencedTable(schema);
+            if (referencedTable == null) return null;
+            if (referencedTable.PrimaryKey == null) return null; //No primary key defined! 
+            var refColumnList = referencedTable.PrimaryKey.Columns;
+            return refColumnList;
+        }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return Name + " on " + TableName;

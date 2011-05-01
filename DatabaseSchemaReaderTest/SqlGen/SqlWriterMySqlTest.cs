@@ -97,7 +97,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
             //arrange
             var table = LoadCategoriesFromNorthwind();
             var writer = new SqlWriter(table, SqlType.MySql);
-            var sql = writer.InsertSql();
+            //MySQL can only use output parameters with sprocs.
+            var sql = writer.InsertSqlWithoutOutputParameter();
+            Console.WriteLine(sql);
             int identity;
 
             //run generated sql
@@ -111,26 +113,19 @@ namespace DatabaseSchemaReaderTest.SqlGen
                     {
                         cmd.CommandText = sql;
                         cmd.Transaction = transaction;
-                        string identityParameterName = "Id";
                         foreach (var column in table.Columns)
                         {
+                            if(column.IsIdentity) continue;
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
-                            if (column.IsIdentity)
-                            {
-                                identityParameterName = par.ParameterName;
-                                par.Direction = ParameterDirection.Output;
-                                par.DbType = DbType.Int32;
-                            }
-                            else
-                            {
+
                                 object value = DummyDataCreator.CreateData(column);
                                 par.Value = value ?? DBNull.Value;
-                            }
                             cmd.Parameters.Add(par);
                         }
-                        cmd.ExecuteNonQuery();
-                        identity = (int)cmd.Parameters[identityParameterName].Value;
+                        identity = Convert.ToInt32(cmd.ExecuteScalar());
+                        //if using a sproc
+                        //identity = (int)cmd.Parameters[identityParameterName].Value;
                     }
 
                     //explicit rollback. If we errored, implicit rollback.

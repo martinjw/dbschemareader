@@ -29,6 +29,11 @@ namespace DatabaseSchemaReader.DataSchema
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly string _typeName;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DataType"/> class.
+        /// </summary>
+        /// <param name="typeName">Name of the type.</param>
+        /// <param name="netDataType">Type of the net data.</param>
         public DataType(string typeName, string netDataType)
         {
             _typeName = typeName;
@@ -282,6 +287,12 @@ namespace DatabaseSchemaReader.DataSchema
         ///</summary>
         public string LiteralSuffix { get; set; }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return TypeName + " = " + NetDataType;

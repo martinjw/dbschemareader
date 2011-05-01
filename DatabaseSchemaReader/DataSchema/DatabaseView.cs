@@ -16,7 +16,13 @@ namespace DatabaseSchemaReader.DataSchema
         /// </summary>
         /// <value>The SQL.</value>
         public string Sql { get; set; }
-        
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return "View: " + base.ToString();

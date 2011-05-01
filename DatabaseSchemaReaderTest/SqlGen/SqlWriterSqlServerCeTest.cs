@@ -31,7 +31,15 @@ namespace DatabaseSchemaReaderTest.SqlGen
 
         public SqlWriterSqlServerCeTest()
         {
-            _factory = DbProviderFactories.GetFactory(ProviderName);
+            try
+            {
+                _factory = DbProviderFactories.GetFactory(ProviderName);
+
+            }
+            catch
+            {
+                //sqlserver not installed
+            }
         }
 
         private DatabaseTable LoadCategoriesFromNorthwind()

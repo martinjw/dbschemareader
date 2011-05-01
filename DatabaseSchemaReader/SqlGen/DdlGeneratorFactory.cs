@@ -1,5 +1,4 @@
 ﻿using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.SqlGen.SqLite;
 
 namespace DatabaseSchemaReader.SqlGen
 {
@@ -35,7 +34,7 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.MySql:
                     return new MySql.TableGenerator(table);
                 case SqlType.SQLite:
-                    return new TableGenerator(table);
+                    return new SqLite.TableGenerator(table);
                 case SqlType.SqlServerCe:
                     return new SqlServerCe.TableGenerator(table);
             }
@@ -58,7 +57,7 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.MySql:
                     return new MySql.TablesGenerator(schema);
                 case SqlType.SQLite:
-                    return new TablesGenerator(schema);
+                    return new SqLite.TablesGenerator(schema);
                 case SqlType.SqlServerCe:
                     return new SqlServerCe.TablesGenerator(schema);
             }
@@ -84,6 +83,28 @@ namespace DatabaseSchemaReader.SqlGen
                     return null; //no stored procedures in SqlLite
                 case SqlType.SqlServerCe:
                     return null; //no stored procedures in SqlServerCE
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Creates a migration generator (Create Tables, add/alter/drop columns)
+        /// </summary>
+        /// <returns></returns>
+        public IMigrationGenerator MigrationGenerator()
+        {
+            switch (_sqlType)
+            {
+                case SqlType.SqlServer:
+                    return new SqlServer.SqlServerMigrationGenerator();
+                case SqlType.Oracle:
+                    return new MigrationGenerator(SqlType.Oracle);
+                case SqlType.MySql:
+                    return new MySql.MySqlMigrationGenerator();
+                case SqlType.SQLite:
+                    return new SqLite.SqLiteMigrationGenerator();
+                case SqlType.SqlServerCe:
+                    return new SqlServer.SqlServerMigrationGenerator();
             }
             return null;
         }

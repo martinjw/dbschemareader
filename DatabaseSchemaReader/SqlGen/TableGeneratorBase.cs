@@ -46,7 +46,7 @@ namespace DatabaseSchemaReader.SqlGen
             var columnList = new List<string>();
             foreach (var column in Table.Columns)
             {
-                columnList.Add("  " + EscapeName(column.Name) + " " + WriteDataType(column));
+                columnList.Add(WriteColumn(column));
             }
             AddTableConstraints(columnList);
             sb.AppendLine(string.Join("," + Environment.NewLine, columnList.ToArray()));
@@ -62,7 +62,11 @@ namespace DatabaseSchemaReader.SqlGen
             }
 
             return sb.ToString();
+        }
 
+        public string WriteColumn(DatabaseColumn column)
+        {
+            return "  " + EscapeName(column.Name) + " " + WriteDataType(column);
         }
 
     }

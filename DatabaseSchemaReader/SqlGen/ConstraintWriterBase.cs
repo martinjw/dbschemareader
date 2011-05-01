@@ -147,7 +147,8 @@ ADD CONSTRAINT {2} CHECK ({3})",
             //can't find the table. Don't write the fk reference.
             if (referencedTable == null) return null;
 
-            var refColumnList = GetColumnList(referencedTable.PrimaryKey.Columns);
+            var fkTablePks = foreignKey.ReferencedColumns(_table.DatabaseSchema);
+            var refColumnList = GetColumnList(fkTablePks);
 
             var foreignKeyName = ConstraintName(foreignKey.Name);
 

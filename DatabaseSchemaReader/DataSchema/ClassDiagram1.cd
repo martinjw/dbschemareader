@@ -17,7 +17,7 @@
   <Class Name="DatabaseSchemaReader.DataSchema.DatabaseConstraint">
     <Position X="6.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AkAAAAAAAAAAAAAEAAAAAAQAAAAAAAARAAAAAQgAACA=</HashCode>
+      <HashCode>AkAAAQAAAAAAAAAEAAAAAAQAAAAAAAARAAAAAQgAACI=</HashCode>
       <FileName>DataSchema\DatabaseConstraint.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -32,14 +32,17 @@
     </TypeIdentifier>
   </Class>
   <Class Name="DatabaseSchemaReader.DataSchema.DatabaseIndex">
-    <Position X="3" Y="5" Width="1.5" />
+    <Position X="3" Y="5.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAAAAAAAAAgAAgQgAAAA=</HashCode>
+      <HashCode>AAAAAQAAAAAAAAAEAAAAAAQAAAAAAAAAAgAAgQgAAAA=</HashCode>
       <FileName>DataSchema\DatabaseIndex.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="DatabaseSchemaReader.DataSchema.DatabasePackage">
-    <Position X="4.75" Y="5" Width="1.5" />
+    <Position X="4.75" Y="5.5" Width="1.5" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
@@ -49,14 +52,17 @@
     </TypeIdentifier>
   </Class>
   <Class Name="DatabaseSchemaReader.DataSchema.DatabaseSchema">
-    <Position X="6.5" Y="5" Width="1.5" />
+    <Position X="6.5" Y="5.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
     <TypeIdentifier>
-      <HashCode>QgAAACAAAAIAAIAEAAAARAIAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <HashCode>QhAAGCCQAAIEBIAEAAAARAIAAAAAAIACACAAAAEAAAA=</HashCode>
       <FileName>DataSchema\DatabaseSchema.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="DatabaseSchemaReader.DataSchema.DatabaseSequence">
-    <Position X="8.25" Y="5" Width="1.5" />
+    <Position X="8.25" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAEAEAAAAQAAAAAAAAAAAQAgAAAAAA=</HashCode>
       <FileName>DataSchema\DatabaseSequence.cs</FileName>
@@ -64,8 +70,11 @@
   </Class>
   <Class Name="DatabaseSchemaReader.DataSchema.DatabaseStoredProcedure">
     <Position X="3" Y="8.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEQAAQAAQAAAAAAAAIIAAAgACAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAIAEQIAQAAQACAAAAAAIYAAAgACAAAA=</HashCode>
       <FileName>DataSchema\DatabaseStoredProcedure.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -75,7 +84,7 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>ABEQAyEAAgEAAAAkgAAAAAQACAAQAAAKAQAAgArQggA=</HashCode>
+      <HashCode>ABEQAyEAAgEAAAAkgAAAAAQACAAQAAAKAQAAhArQwgA=</HashCode>
       <FileName>DataSchema\DatabaseTable.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -87,7 +96,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="DatabaseSchemaReader.DataSchema.DatabaseUser">
-    <Position X="6.5" Y="8.75" Width="1.5" />
+    <Position X="6.5" Y="9.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DataSchema\DatabaseUser.cs</FileName>
@@ -106,7 +115,7 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>gABAACIIhAAAAAAMAACAAAAAAAAAIBIAAgAQIAAAAAg=</HashCode>
+      <HashCode>gABIAiIIhAAAAAANAACQAAEAAAAEIBIAAgAQIAAAAAg=</HashCode>
       <FileName>DataSchema\DataType.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -120,7 +129,7 @@
   <Enum Name="DatabaseSchemaReader.DataSchema.SqlType">
     <Position X="4.75" Y="12.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAACAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAIAAAAAAAAAAAAACAACAAAAAAEAAAAAAAAAAAA=</HashCode>
       <FileName>DataSchema\SqlType.cs</FileName>
     </TypeIdentifier>
   </Enum>

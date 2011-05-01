@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
+using DatabaseSchemaReader.Conversion;
 
 
 namespace DatabaseSchemaReader
@@ -69,6 +70,11 @@ namespace DatabaseSchemaReader
                 //uses friend access to schemaReader
                 LoadTable(tableName, ds, conn);
                 if (ds.Tables.Count == 0) return null; //no data found
+                if (string.IsNullOrEmpty(Owner))
+                {
+                    //we need schema for constraint look ups
+                    Owner = SchemaConverter.FindSchema(ds.Tables["Columns"]);
+                }
 
                 DataTable pks = FindKeys(tableName, GetPrimaryKeyType(), conn);
                 pks.TableName = "PRIMARY_KEYS";
@@ -572,8 +578,9 @@ WHERE
             }
             else //if (IsSqlServer || IsMySql) //use SQL92 INFORMATION_SCHEMA
             {
-                sqlCommand = @"SELECT cons.constraint_name, 
-cons.table_name, 
+                sqlCommand = @"SELECT DISTINCT
+cons.constraint_name, 
+keycolumns.table_name, 
 column_name, 
 ordinal_position, 
 refs.unique_constraint_name, 
@@ -596,7 +603,7 @@ FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
 		cons2.constraint_schema = refs.constraint_schema AND
 		cons2.constraint_name = refs.unique_constraint_name
 WHERE 
-	(cons.table_name = @tableName OR @tableName IS NULL) AND 
+	(keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
 	(cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
 	cons.constraint_type = @constraint_type";
 

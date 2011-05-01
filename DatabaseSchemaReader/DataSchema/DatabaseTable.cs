@@ -31,6 +31,9 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly List<DatabaseTable> _foreignKeyChildren;
         #endregion
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseTable"/> class.
+        /// </summary>
         public DatabaseTable()
         {
             _columns = new List<DatabaseColumn>();
@@ -42,6 +45,12 @@ namespace DatabaseSchemaReader.DataSchema
             _checkConstraints = new List<DatabaseConstraint>();
         }
 
+        /// <summary>
+        /// Gets or sets the database schema.
+        /// </summary>
+        /// <value>
+        /// The database schema.
+        /// </value>
         public DatabaseSchema DatabaseSchema { get; set; }
 
         /// <summary>
@@ -60,8 +69,17 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public string NetName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the schema owner.
+        /// </summary>
+        /// <value>
+        /// The schema owner.
+        /// </value>
         public string SchemaOwner { get; set; }
 
+        /// <summary>
+        /// Gets the columns.
+        /// </summary>
         public List<DatabaseColumn> Columns { get { return _columns; } }
 
         /// <summary>
@@ -73,6 +91,12 @@ namespace DatabaseSchemaReader.DataSchema
             get { return Columns.FirstOrDefault(c => c.IsPrimaryKey); }
         }
         #region Constraints
+        /// <summary>
+        /// Gets or sets the primary key.
+        /// </summary>
+        /// <value>
+        /// The primary key.
+        /// </value>
         public DatabaseConstraint PrimaryKey
         {
             get { return _primaryKey; }
@@ -82,21 +106,43 @@ namespace DatabaseSchemaReader.DataSchema
                 AddConstraintColumns(value);
             }
         }
+        /// <summary>
+        /// Gets or sets the foreign keys.
+        /// </summary>
+        /// <value>
+        /// The foreign keys.
+        /// </value>
         public List<DatabaseConstraint> ForeignKeys
         {
             get { return _foreignKeys; }
             set { value.ForEach(AddConstraint); }
         }
+        /// <summary>
+        /// Gets or sets the unique keys.
+        /// </summary>
+        /// <value>
+        /// The unique keys.
+        /// </value>
         public List<DatabaseConstraint> UniqueKeys
         {
             get { return _uniqueKeys; }
             set { value.ForEach(AddConstraint); }
         }
+        /// <summary>
+        /// Gets or sets the check constraints.
+        /// </summary>
+        /// <value>
+        /// The check constraints.
+        /// </value>
         public List<DatabaseConstraint> CheckConstraints
         {
             get { return _checkConstraints; }
             set { value.ForEach(AddConstraint); }
         }
+        /// <summary>
+        /// Adds the constraint of any type (primary key, foreign key, unique key, check)
+        /// </summary>
+        /// <param name="con">The constraint.</param>
         public void AddConstraint(DatabaseConstraint con)
         {
             switch (con.ConstraintType)
@@ -154,15 +200,31 @@ namespace DatabaseSchemaReader.DataSchema
         }
         #endregion
 
+        /// <summary>
+        /// Gets the foreign key children.
+        /// </summary>
         public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren;  } }
 
+        /// <summary>
+        /// Gets the triggers.
+        /// </summary>
         public List<DatabaseTrigger> Triggers { get { return _triggers;  } }
 
+        /// <summary>
+        /// Gets or sets the indexes.
+        /// </summary>
+        /// <value>
+        /// The indexes.
+        /// </value>
         public List<DatabaseIndex> Indexes
         {
             get { return _indexes; }
             set { value.ForEach(AddIndex); }
         }
+        /// <summary>
+        /// Adds an index.
+        /// </summary>
+        /// <param name="index">The index.</param>
         public void AddIndex(DatabaseIndex index)
         {
             Indexes.Add(index);
@@ -181,6 +243,11 @@ namespace DatabaseSchemaReader.DataSchema
             }
         }
 
+        /// <summary>
+        /// Finds the column.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
         public DatabaseColumn FindColumn(string name)
         {
             return Columns.Find(delegate(DatabaseColumn col) { return col.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
@@ -201,6 +268,12 @@ namespace DatabaseSchemaReader.DataSchema
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this instance has an identity column.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance has an identity column; otherwise, <c>false</c>.
+        /// </value>
         public bool HasIdentityColumn
         {
             get
@@ -210,6 +283,12 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return Name;

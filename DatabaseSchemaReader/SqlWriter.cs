@@ -182,11 +182,12 @@ namespace DatabaseSchemaReader
         private string PrimaryKeyList()
         {
             //the primary keys as orderBy statements
-            int numPks = PrimaryKeys.Count;
+            var pk = PrimaryKeys;
+            int numPks = pk.Count;
             var pks = new string[numPks];
             for (int i = 0; i < numPks; i++)
             {
-                var pkName = PrimaryKeys[i];
+                var pkName = pk[i];
                 pks[i] = EscapedName(pkName);
             }
             return String.Join(", ", pks);
@@ -571,10 +572,18 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
                     sb.AppendLine(";");
                     sb.Append("SET " + identityParameter + " = SCOPE_IDENTITY();");
                 }
-                else if (_sqlType == SqlType.MySql && useOutputParameter)
+                else if (_sqlType == SqlType.MySql)
                 {
                     sb.AppendLine(";");
-                    sb.Append("SET " + identityParameter + " = LAST_INSERT_ID();");
+                    if (useOutputParameter)
+                    {
+                        //sb.Append("SELECT LAST_INSERT_ID() INTO " + identityParameter + ";");
+                        sb.Append("SET " + identityParameter + " = LAST_INSERT_ID();");
+                    }
+                    else
+                    {
+                        sb.Append("SELECT LAST_INSERT_ID();");
+                    }
                 }
                 else if (_sqlType == SqlType.SQLite)
                 {

@@ -22,16 +22,52 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the database data type as a string (as defined by the database platform)
+        /// </summary>
+        /// <value>
+        /// The type of the db data.
+        /// </value>
         public string DbDataType { get; set; }
 
+        /// <summary>
+        /// If <see cref="IsForeignKey"/> is true, gets or sets the name of the foreign key table. <see cref="ForeignKeyTable"/> may contain the actual table.
+        /// </summary>
+        /// <value>
+        /// The name of the foreign key table.
+        /// </value>
         public string ForeignKeyTableName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the length if this is string (VARCHAR) or character (CHAR) type data. In SQLServer, a length of -1 indicates VARCHAR(MAX).
+        /// </summary>
+        /// <value>
+        /// The length.
+        /// </value>
         public int? Length { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this is nullable.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if nullable; otherwise, <c>false</c>.
+        /// </value>
         public bool Nullable { get; set; }
 
+        /// <summary>
+        /// Gets or sets the ordinal (the order that the columns were defined in the database).
+        /// </summary>
+        /// <value>
+        /// The ordinal.
+        /// </value>
         public int Ordinal { get; set; }
 
+        /// <summary>
+        /// Gets or sets a default value for the column. May be null.
+        /// </summary>
+        /// <value>
+        /// The default value.
+        /// </value>
         public string DefaultValue { get; set; }
 
         /// <summary>
@@ -50,22 +86,64 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public int? Scale { get; set; }
 
+        /// <summary>
+        /// Gets or sets the date time precision (only Oracle).
+        /// </summary>
+        /// <value>
+        /// The date time precision.
+        /// </value>
         public int? DateTimePrecision { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the parent table.
+        /// </summary>
+        /// <value>
+        /// The name of the table.
+        /// </value>
         public string TableName { get; set; }
 
         #endregion
 
         #region Derived properties
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this column is a foreign key.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is foreign key; otherwise, <c>false</c>.
+        /// </value>
         public bool IsForeignKey { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is an identity column (or equivalent)
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is identity; otherwise, <c>false</c>.
+        /// </value>
         public bool IsIdentity { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is indexed.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is indexed; otherwise, <c>false</c>.
+        /// </value>
         public bool IsIndexed { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is part of the primary key.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is primary key; otherwise, <c>false</c>.
+        /// </value>
         public bool IsPrimaryKey { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is part of a unique key.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is unique key; otherwise, <c>false</c>.
+        /// </value>
         public bool IsUniqueKey { get; set; }
 
         /// <summary>
@@ -84,10 +162,28 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public DatabaseTable Table { get; set; }
 
+        /// <summary>
+        /// Gets or sets the database schema. May be null for some platforms (SQLite, SqlServer CE)
+        /// </summary>
+        /// <value>
+        /// The database schema.
+        /// </value>
         public DatabaseSchema DatabaseSchema { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type of the data.
+        /// </summary>
+        /// <value>
+        /// The type of the data.
+        /// </value>
         public DataType DataType { get; set; }
 
+        /// <summary>
+        /// If <see cref="IsForeignKey"/> is true, gets or sets the foreign key table. <see cref="ForeignKeyTableName"/> contains the name of the table.
+        /// </summary>
+        /// <value>
+        /// The foreign key table.
+        /// </value>
         public DatabaseTable ForeignKeyTable { get; set; }
 
         #endregion
@@ -95,6 +191,12 @@ namespace DatabaseSchemaReader.DataSchema
         #region Utility methods
 
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return Name + " (" + DbDataType + ")"

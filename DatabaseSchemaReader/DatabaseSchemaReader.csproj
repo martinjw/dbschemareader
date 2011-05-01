@@ -63,6 +63,10 @@
     <Compile Include="CodeGen\SprocResultWriter.cs" />
     <Compile Include="CodeGen\SprocWriter.cs" />
     <Compile Include="CodeGen\UnitTestWriter.cs" />
+    <Compile Include="Compare\CompareColumns.cs" />
+    <Compile Include="Compare\CompareTables.cs" />
+    <Compile Include="Compare\CompareSchemas.cs" />
+    <Compile Include="Compare\ComparisonWriter.cs" />
     <Compile Include="Conversion\DatabaseColumnExtensions.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
     <Compile Include="Conversion\SchemaConverter.cs" />
@@ -87,9 +91,15 @@
     <Compile Include="DataSchema\DatabaseView.cs" />
     <Compile Include="DataSchema\DataType.cs" />
     <Compile Include="DataSchema\SqlType.cs" />
+    <Compile Include="SqlGen\IMigrationGenerator.cs" />
+    <Compile Include="SqlGen\MigrationGenerator.cs" />
+    <Compile Include="SqlGen\MySql\MySqlMigrationGenerator.cs" />
+    <Compile Include="SqlGen\SqlFormatFactory.cs" />
+    <Compile Include="SqlGen\SqLite\SQLiteMigrationGenerator.cs" />
+    <Compile Include="SqlGen\SqlServer\SqlServerMigrationGenerator.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
-    <Compile Include="Utilities\SqlServerScriptTools.cs" />
+    <Compile Include="Utilities\ScriptTools.cs" />
     <Compile Include="Utilities\TopologicalSorter.cs" />
     <Compile Include="Procedures\ResultSetReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -147,6 +157,7 @@
     <EmbeddedResource Include="CodeGen\Project.xml" />
     <Content Include="README.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -90,6 +90,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var writer = new SqlWriter(_table, _sqlType);
             var sql = writer.SelectPageSql();
             var dataTable = new DataTable();
+            Console.WriteLine(sql);
 
             //run generated sql
             using (var con = _factory.CreateConnection())
@@ -131,6 +132,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var writer = new SqlWriter(_table, _sqlType);
             var sql = writer.SelectPageStartToEndRowSql();
             var dataTable = new DataTable();
+            Console.WriteLine(sql);
 
             //run generated sql
             using (var con = _factory.CreateConnection())

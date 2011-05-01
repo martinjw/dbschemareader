@@ -147,13 +147,15 @@ namespace DatabaseSchemaReader.Conversion
 
 
             //project the sprocs (which won't have packages) into a distinct view
-            DataView sprocNames = new DataView(arguments);
-            sprocNames.Sort = sprocKey;
             DataTable sprocTable;
-            if (packageKey == null)
-                sprocTable = sprocNames.ToTable(true, sprocKey, ownerKey); //distinct
-            else
-                sprocTable = sprocNames.ToTable(true, sprocKey, ownerKey, packageKey);
+            using (DataView sprocNames = new DataView(arguments))
+            {
+                sprocNames.Sort = sprocKey;
+                if (packageKey == null)
+                    sprocTable = sprocNames.ToTable(true, sprocKey, ownerKey); //distinct
+                else
+                    sprocTable = sprocNames.ToTable(true, sprocKey, ownerKey, packageKey);
+            }
 
             //go thru all sprocs with arguments- if not in sproc list, add it
             foreach (DataRow row in sprocTable.Rows)
@@ -167,22 +169,25 @@ namespace DatabaseSchemaReader.Conversion
                     if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
                 }
 
-                DataView dv = new DataView(arguments);
-                //match sproc name and schema
-                dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND [{2}] = '{3}'", sprocKey, name, ownerKey, owner);
-                dv.Sort = ordinalKey;
-                List<DatabaseArgument> args = StoredProcedureArguments(dv);
-
-                DatabaseStoredProcedure sproc = FindStoredProcedureOrFunction(databaseSchema, name, owner, package);
-
-                if (sproc == null) //sproc in a package and not found before?
+                using (DataView dv = new DataView(arguments))
                 {
-                    sproc = CreateProcedureOrFunction(databaseSchema, args);
-                    sproc.Name = name;
-                    sproc.SchemaOwner = owner;
-                    sproc.Package = package;
+                    //match sproc name and schema
+                    dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND [{2}] = '{3}'",
+                                                 sprocKey, name, ownerKey, owner);
+                    dv.Sort = ordinalKey;
+                    List<DatabaseArgument> args = StoredProcedureArguments(dv);
+
+                    DatabaseStoredProcedure sproc = FindStoredProcedureOrFunction(databaseSchema, name, owner, package);
+
+                    if (sproc == null) //sproc in a package and not found before?
+                    {
+                        sproc = CreateProcedureOrFunction(databaseSchema, args);
+                        sproc.Name = name;
+                        sproc.SchemaOwner = owner;
+                        sproc.Package = package;
+                    }
+                    sproc.Arguments.AddRange(args);
                 }
-                sproc.Arguments.AddRange(args);
             }
         }
 

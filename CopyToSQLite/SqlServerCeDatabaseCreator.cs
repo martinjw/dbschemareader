@@ -48,7 +48,7 @@ namespace CopyToSQLite
 
         public void CreateTables(string ddl)
         {
-            var statements = SqlServerScriptTools.SplitScript(ddl);
+            var statements = ScriptTools.SplitScript(ddl);
 
             using (var con = CreateConnection())
             {

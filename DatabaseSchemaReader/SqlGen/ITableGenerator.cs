@@ -1,4 +1,6 @@
-﻿namespace DatabaseSchemaReader.SqlGen
+﻿using DatabaseSchemaReader.DataSchema;
+
+namespace DatabaseSchemaReader.SqlGen
 {
     /// <summary>
     /// Generate a table DDL
@@ -16,5 +18,12 @@
         /// </summary>
         /// <returns></returns>
         string Write();
+
+        /// <summary>
+        /// Writes the column.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
+        string WriteColumn(DatabaseColumn column);
     }
 }

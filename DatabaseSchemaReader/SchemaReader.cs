@@ -95,13 +95,13 @@ namespace DatabaseSchemaReader
         /// <returns>Datatable with columns NAME, ID, CREATEDDATE</returns>
         public DataTable Users()
         {
+            const string collection = "Users";
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                const string collection = "Users";
                 if (!SchemaCollectionExists(conn, collection))
-                    return new DataTable("Users");
+                    return new DataTable(collection);
                 return conn.GetSchema(collection);
             }
         }
@@ -111,12 +111,13 @@ namespace DatabaseSchemaReader
         /// </summary>
         public DataTable Tables()
         {
+            const string collectionName = "Tables";
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, "Tables");
-                return conn.GetSchema("Tables", restrictions);
+                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                return conn.GetSchema(collectionName, restrictions);
             }
         }
 
@@ -138,6 +139,12 @@ namespace DatabaseSchemaReader
             return ds;
         }
 
+        /// <summary>
+        /// Loads the table COLUMNS, INDEXES and INDEXCOLUMNS tables into a dataset.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="ds">The dataset.</param>
+        /// <param name="connection">The connection.</param>
         protected void LoadTable(string tableName, DataSet ds, DbConnection connection)
         {
             DataTable cols = Columns(tableName, connection);
@@ -198,6 +205,11 @@ namespace DatabaseSchemaReader
             return connection.GetSchema("Columns", restrictions);
         }
 
+        /// <summary>
+        /// Gets the indexed columns.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
         public DataTable IndexColumns(string tableName)
         {
             using (DbConnection conn = Factory.CreateConnection())
@@ -217,13 +229,18 @@ namespace DatabaseSchemaReader
             }
         }
 
+        /// <summary>
+        /// Gets the primary keys
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
         public virtual DataTable PrimaryKeys(string tableName)
         {
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collectionName = "PrimaryKeys";
+                const string collectionName = "PrimaryKeys";
                 if (!SchemaCollectionExists(conn, collectionName))
                     return new DataTable(collectionName);
 
@@ -264,7 +281,7 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collectionName = "ForeignKeyColumns";
+                const string collectionName = "ForeignKeyColumns";
                 if (!SchemaCollectionExists(conn, collectionName))
                     return new DataTable(collectionName);
 
@@ -273,6 +290,10 @@ namespace DatabaseSchemaReader
             }
         }
 
+        /// <summary>
+        /// Gets the sequences (if supported, eg Oracle)
+        /// </summary>
+        /// <returns></returns>
         public DataTable Sequences()
         {
             const string name = "Sequences";
@@ -297,16 +318,21 @@ namespace DatabaseSchemaReader
         }
 
         #region Sprocs
+        /// <summary>
+        /// Get all the functions (always empty except for Oracle, as the others mix stored procedures and functions).
+        /// </summary>
+        /// <returns></returns>
         public virtual DataTable Functions()
         {
-            if (!IsOracle) return new DataTable("Functions"); //in sql server, functions are in the sprocs collection.
+            const string collectionName = "Functions";
+            if (!IsOracle) return new DataTable(collectionName); //in sql server, functions are in the sprocs collection.
 
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, "Functions");
-                return conn.GetSchema("Functions", restrictions);
+                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                return conn.GetSchema(collectionName, restrictions);
             }
         }
         /// <summary>
@@ -319,7 +345,7 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collectionName = "Procedures";
+                const string collectionName = "Procedures";
                 if (!SchemaCollectionExists(conn, collectionName)) return new DataTable(collectionName);
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
                 return conn.GetSchema(collectionName, restrictions);
@@ -395,6 +421,12 @@ namespace DatabaseSchemaReader
 
         #region MetadataCollections
 
+        /// <summary>
+        /// check is a schema collection exists.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
         protected bool SchemaCollectionExists(DbConnection connection, string name)
         {
             if (_metadata == null)
@@ -455,6 +487,10 @@ namespace DatabaseSchemaReader
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

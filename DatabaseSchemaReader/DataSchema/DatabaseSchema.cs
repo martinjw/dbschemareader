@@ -42,6 +42,11 @@ namespace DatabaseSchemaReader.DataSchema
             //private constructor used for xmlserialization
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseSchema"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="providerName">Name of the provider.</param>
         public DatabaseSchema(string connectionString, string providerName)
         {
             ConnectionString = connectionString;
@@ -57,32 +62,84 @@ namespace DatabaseSchemaReader.DataSchema
             _dataTypes = new List<DataType>();
         }
 
+        /// <summary>
+        /// Gets the data types.
+        /// </summary>
         public List<DataType> DataTypes { get { return _dataTypes; } }
 
+        /// <summary>
+        /// Gets the stored procedures.
+        /// </summary>
         public List<DatabaseStoredProcedure> StoredProcedures { get { return _storedProcedures; } }
 
+        /// <summary>
+        /// Gets the packages.
+        /// </summary>
         public List<DatabasePackage> Packages { get { return _packages; } }
 
+        /// <summary>
+        /// Gets the tables.
+        /// </summary>
         public List<DatabaseTable> Tables { get { return _tables; } }
 
+        /// <summary>
+        /// Gets the views.
+        /// </summary>
         public List<DatabaseView> Views { get { return _views; } }
 
+        /// <summary>
+        /// Gets the users.
+        /// </summary>
         public List<DatabaseUser> Users { get { return _users; } }
 
+        /// <summary>
+        /// Gets the functions.
+        /// </summary>
         public List<DatabaseFunction> Functions { get { return _functions; } }
 
+        /// <summary>
+        /// Gets the sequences.
+        /// </summary>
         public List<DatabaseSequence> Sequences { get { return _sequences; } }
 
+        /// <summary>
+        /// Gets or sets the provider.
+        /// </summary>
+        /// <value>
+        /// The provider.
+        /// </value>
         public string Provider { get; set; }
+        /// <summary>
+        /// Gets or sets the connection string.
+        /// </summary>
+        /// <value>
+        /// The connection string.
+        /// </value>
         public string ConnectionString { get; set; }
+        /// <summary>
+        /// Gets or sets the owner.
+        /// </summary>
+        /// <value>
+        /// The owner.
+        /// </value>
         public string Owner { get; set; }
 
+        /// <summary>
+        /// Finds a table by name
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
         public DatabaseTable FindTableByName(string name)
         {
             return Tables.Find(delegate(DatabaseTable t2) { return t2.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
         }
 
-
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "Tables: {0}, Views: {1}, StoredProcedures: {2}", Tables.Count, Views.Count, StoredProcedures.Count);

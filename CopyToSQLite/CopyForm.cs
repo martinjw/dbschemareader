@@ -132,6 +132,7 @@ namespace CopyToSQLite
             var result = runner.Execute();
             if (!result) e.Result = runner.LastErrorMessage;
             else e.Result = null;
+            rdr.Dispose();
         }
 
         private void BackgroundCompleted(object sender, RunWorkerCompletedEventArgs e)
