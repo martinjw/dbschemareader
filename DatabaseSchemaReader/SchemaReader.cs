@@ -225,7 +225,16 @@ namespace DatabaseSchemaReader
                 }
 
                 string[] indexColRestrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
-                return conn.GetSchema(collectionName, indexColRestrictions);
+                try
+                {
+                    return conn.GetSchema(collectionName, indexColRestrictions);
+                }
+                catch (DbException exception)
+                {
+                    //Postgresql throws this nasty error with a restriction. We'll carry on.
+                    Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
+                    return new DataTable(collectionName);
+                }
             }
         }
 

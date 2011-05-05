@@ -100,7 +100,7 @@ namespace DatabaseSchemaReader.Conversion
         private static string AddRefersToConstraint(DataRowView row, string refersToKey)
         {
             if (!string.IsNullOrEmpty(refersToKey) && row[refersToKey] != DBNull.Value)
-                return  row[refersToKey].ToString();
+                return row[refersToKey].ToString();
             return null;
         }
 
@@ -186,8 +186,11 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "POSITION";
             if (!dt.Columns.Contains(columnKey)) columnKey = "NAME";
 
+            //postgresql
+            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
 
-            dt.DefaultView.Sort = ordinalKey;
+            if (!string.IsNullOrEmpty(ordinalKey))
+                dt.DefaultView.Sort = ordinalKey;
             //this could be more than one table, so filter the view
             if (!string.IsNullOrEmpty(tableName))
                 dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
@@ -207,11 +210,14 @@ namespace DatabaseSchemaReader.Conversion
                         c.IndexType = row[typekey].ToString();
                     list.Add(c);
                 }
-                int ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
                 string colName = row[columnKey].ToString();
                 DatabaseColumn column = new DatabaseColumn();
                 column.Name = colName;
-                column.Ordinal = ordinal;
+                if (!string.IsNullOrEmpty(ordinalKey))
+                {
+                    int ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
+                    column.Ordinal = ordinal;
+                }
                 c.Columns.Add(column);
             }
             return list;
@@ -237,11 +243,14 @@ namespace DatabaseSchemaReader.Conversion
             const string tableKey = "TABLE_NAME";
             string bodyKey = "TRIGGER_BODY";
             string eventKey = "TRIGGERING_EVENT";
+            string triggerTypeKey = "TRIGGER_TYPE";
             string ownerKey = "OWNER";
             //firebird
             if (!dt.Columns.Contains(ownerKey)) ownerKey = null;
             if (!dt.Columns.Contains(bodyKey)) bodyKey = "SOURCE";
             if (!dt.Columns.Contains(eventKey)) eventKey = "TRIGGER_TYPE";
+
+            if (!dt.Columns.Contains(triggerTypeKey)) triggerTypeKey = null;
 
             //this could be more than one table, so filter the view
             if (!string.IsNullOrEmpty(tableName))
@@ -262,6 +271,10 @@ namespace DatabaseSchemaReader.Conversion
                 c.TableName = row[tableKey].ToString();
                 c.TriggerBody = row[bodyKey].ToString();
                 c.TriggerEvent = row[eventKey].ToString();
+                if (triggerTypeKey != null)
+                {
+                    c.TriggerType = row[triggerTypeKey].ToString();
+                }
             }
             return list;
         }

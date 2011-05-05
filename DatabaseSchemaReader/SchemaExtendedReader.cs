@@ -247,7 +247,8 @@ WHERE EXTRA = 'auto_increment' AND
   TRIGGER_NAME,
   TABLE_NAME,
   TRIGGER_BODY,
-  TRIGGERING_EVENT
+  TRIGGERING_EVENT,
+  TRIGGER_TYPE
 FROM ALL_TRIGGERS
 WHERE STATUS = 'ENABLED' AND 
 (TABLE_NAME = :tableName OR :tableName IS NULL) AND 
@@ -261,7 +262,8 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
   TRIGGER_NAME,
   EVENT_OBJECT_TABLE AS 'TABLE_NAME',
   ACTION_STATEMENT AS 'TRIGGER_BODY',
-  EVENT_MANIPULATION AS 'TRIGGERING_EVENT'
+  EVENT_MANIPULATION AS 'TRIGGERING_EVENT',
+  ACTION_TIMING AS 'TRIGGER_TYPE'
 FROM information_schema.Triggers
 WHERE 
 (EVENT_OBJECT_TABLE = @tableName OR @tableName IS NULL) AND 
@@ -269,13 +271,22 @@ WHERE
                 }
                 else
                 {
+                    //trigger event could be INSERT OR UPDATE
                     sqlCommand = @"SELECT SCHEMA_NAME(o1.uid) AS 'OWNER', 
 o1.NAME AS 'TRIGGER_NAME',
 o2.NAME AS 'TABLE_NAME',
-NULL AS 'TRIGGER_BODY',
-NULL AS 'TRIGGERING_EVENT'
+c.TEXT AS 'TRIGGER_BODY',
+CASE
+    WHEN OBJECTPROPERTY(o1.id, 'ExecIsInsertTrigger') = 1 THEN 'INSERT'
+    WHEN OBJECTPROPERTY(o1.id, 'ExecIsUpdateTrigger') = 1 THEN 'UPDATE'
+    WHEN OBJECTPROPERTY(o1.id, 'ExecIsDeleteTrigger') = 1 THEN 'DELETE'
+END 'TRIGGERING_EVENT',
+CASE WHEN OBJECTPROPERTY(o1.id, 'ExecIsInsteadOfTrigger') = 1
+    THEN 'INSTEAD OF' ELSE 'AFTER'
+END 'TRIGGER_TYPE'
 FROM sysobjects o1
 INNER JOIN sysobjects o2 ON o1.parent_obj = o2.id
+INNER JOIN syscomments c ON o1.id = c.id
 WHERE o1.XTYPE = 'TR' AND 
 (o1.NAME = @tableName OR @tableName IS NULL) AND 
 (SCHEMA_NAME(o1.uid) = @schemaOwner OR @schemaOwner IS NULL)";

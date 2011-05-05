@@ -67,7 +67,7 @@ namespace DatabaseSchemaReader
             for (int i = 0; i < dv.Count; i++)
             {
                 string name = (string)dv[i].Row["RestrictionName"];
-                //Oracle has aan alternative column name
+                //Oracle has an alternative column name
                 if (hasParameterName)
                     paramName = (string)dv[i].Row["ParameterName"];
                 bool found = false;
@@ -77,7 +77,9 @@ namespace DatabaseSchemaReader
                     if (name.Equals("OWNER", StringComparison.OrdinalIgnoreCase) ||
                         paramName.Equals("OWNER", StringComparison.OrdinalIgnoreCase) ||
                         name.Equals("TABLE_SCHEMA", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("PROCEDURE_SCHEMA", StringComparison.OrdinalIgnoreCase))
+                        name.Equals("PROCEDURE_SCHEMA", StringComparison.OrdinalIgnoreCase) ||
+                        //Postgresql uses "Schema"
+                        name.Equals("Schema", StringComparison.OrdinalIgnoreCase))
                     {
                         restrictions[i] = _owner;
                         usedRestriction = true;
