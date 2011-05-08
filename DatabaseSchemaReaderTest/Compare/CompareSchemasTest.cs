@@ -1,6 +1,15 @@
 ﻿using DatabaseSchemaReader.Compare;
 using DatabaseSchemaReader.DataSchema;
+#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#else
+using NUnit.Framework;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestCleanup = NUnit.Framework.TearDownAttribute;
+using TestContext = System.Object;
+#endif
 
 namespace DatabaseSchemaReaderTest.Compare
 {
@@ -15,8 +24,8 @@ namespace DatabaseSchemaReaderTest.Compare
             DatabaseSchema schema2 = CreateSchema();
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.AreEqual(string.Empty, script);
@@ -32,8 +41,8 @@ namespace DatabaseSchemaReaderTest.Compare
             schema2.Tables.Add(CreateProductsTable());
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("CREATE TABLE [Products]"));
@@ -49,8 +58,8 @@ namespace DatabaseSchemaReaderTest.Compare
             DatabaseSchema schema2 = CreateSchema();
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("DROP TABLE [Products]"));
@@ -71,8 +80,8 @@ namespace DatabaseSchemaReaderTest.Compare
             productsTable2.Columns.Add(nameColumn);
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("ADD [Name]"));
@@ -93,8 +102,8 @@ namespace DatabaseSchemaReaderTest.Compare
             schema2.Tables.Add(productsTable2);
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("DROP COLUMN [Name]"));
@@ -117,8 +126,8 @@ namespace DatabaseSchemaReaderTest.Compare
             schema2.Tables.Add(productsTable2);
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("ALTER COLUMN [Name]"));
@@ -134,8 +143,8 @@ namespace DatabaseSchemaReaderTest.Compare
             schema2.Tables[0].UniqueKeys.Add(constraint);
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("ADD CONSTRAINT [UK_NAME] UNIQUE"), script);
@@ -152,8 +161,8 @@ namespace DatabaseSchemaReaderTest.Compare
             schema2.Tables[0].UniqueKeys.Add(constraint2);
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.AreEqual(string.Empty, script);
@@ -172,8 +181,8 @@ namespace DatabaseSchemaReaderTest.Compare
             schema2.Tables[0].UniqueKeys.Add(constraint2);
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("DROP CONSTRAINT [UK_NAME]"), script);
@@ -189,8 +198,8 @@ namespace DatabaseSchemaReaderTest.Compare
             DatabaseSchema schema2 = CreateSchema();
 
             //act
-            var comparison = new CompareSchemas(SqlType.SqlServer);
-            var script = comparison.Execute(schema1, schema2);
+            var comparison = new CompareSchemas(schema1, schema2);
+            var script = comparison.Execute();
 
             //assert
             Assert.IsTrue(script.Contains("DROP CONSTRAINT [UK_NAME]"), script);
@@ -209,7 +218,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
         private static DatabaseSchema CreateSchema()
         {
-            var schema = new DatabaseSchema(null, null);
+            var schema = new DatabaseSchema(null, "System.Data.SqlClient");
 
             var orderTable = new DatabaseTable { Name = "Orders" };
             schema.Tables.Add(orderTable);

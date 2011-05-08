@@ -20,5 +20,12 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
         {
             return null; //doesn't support it
         }
+
+        protected override string DropTriggerFormat
+        {
+            get { return "DROP IF EXISTS TRIGGER {1};"; }
+        }
+
+
     }
 }

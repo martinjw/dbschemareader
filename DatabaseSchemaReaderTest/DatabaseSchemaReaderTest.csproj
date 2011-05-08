@@ -58,6 +58,9 @@
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
+    <Compile Include="Compare\CompareViewsTest.cs" />
+    <Compile Include="Compare\CompareProceduresTest.cs" />
+    <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="IntegrationTests\SqlServerCe4.cs" />

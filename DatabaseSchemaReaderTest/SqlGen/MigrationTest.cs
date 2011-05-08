@@ -41,7 +41,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var unqiueConstraint = MigrationCommon.CreateUniqueConstraint(newColumn);
             var fk = MigrationCommon.CreateForeignKey(table);
 
-            var createTable = migration.CreateTable(table);
+            var createTable = migration.AddTable(table);
             var addColumn = migration.AddColumn(table, newColumn);
             var addUniqueConstraint = migration.AddConstraint(table, unqiueConstraint);
             var addForeignKey = migration.AddConstraint(table, fk);
@@ -51,6 +51,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var dropColumn = migration.DropColumn(table, newColumn);
             var dropTable = migration.DropTable(table);
             var statements = ScriptTools.SplitScript(createTable);
+
+
+            //we need to strip out the "GO" parts from these scripts
 
             using (new TransactionScope())
             {
@@ -69,34 +72,55 @@ namespace DatabaseSchemaReaderTest.SqlGen
                             cmd.ExecuteNonQuery();
                         }
 
-                        Console.WriteLine("Executing " + addColumn);
-                        cmd.CommandText = addColumn;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(addColumn))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
 
-                        Console.WriteLine("Executing " + addUniqueConstraint);
-                        cmd.CommandText = addUniqueConstraint;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(addUniqueConstraint))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
 
-                        Console.WriteLine("Executing " + addForeignKey);
-                        cmd.CommandText = addForeignKey;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(addForeignKey))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
 
 
-                        Console.WriteLine("Executing " + dropForeignKey);
-                        cmd.CommandText = dropForeignKey;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(dropForeignKey))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
 
-                        Console.WriteLine("Executing " + dropUniqueConstraint);
-                        cmd.CommandText = dropUniqueConstraint;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(dropUniqueConstraint))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
 
-                        Console.WriteLine("Executing " + dropColumn);
-                        cmd.CommandText = dropColumn;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(dropColumn))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
 
-                        Console.WriteLine("Executing " + dropTable);
-                        cmd.CommandText = dropTable;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitScript(dropTable))
+                        {
+                            Console.WriteLine("Executing " + statement);
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
                     }
                 }
             }

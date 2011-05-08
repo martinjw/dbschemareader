@@ -88,6 +88,29 @@ namespace DatabaseSchemaReader.SqlGen
         }
 
         /// <summary>
+        /// Internal method to find constraint writer
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <returns></returns>
+        internal ConstraintWriterBase ConstraintWriter(DatabaseTable databaseTable)
+        {
+            switch (_sqlType)
+            {
+                case SqlType.SqlServer:
+                    return new SqlServer.ConstraintWriter(databaseTable);
+                case SqlType.Oracle:
+                    return new Oracle.ConstraintWriter(databaseTable);
+                case SqlType.MySql:
+                    return new MySql.ConstraintWriter(databaseTable);
+                case SqlType.SQLite:
+                    return null; //can't alter constraints after creating table
+                case SqlType.SqlServerCe:
+                    return new SqlServer.ConstraintWriter(databaseTable);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Creates a migration generator (Create Tables, add/alter/drop columns)
         /// </summary>
         /// <returns></returns>
@@ -104,7 +127,7 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.SQLite:
                     return new SqLite.SqLiteMigrationGenerator();
                 case SqlType.SqlServerCe:
-                    return new SqlServer.SqlServerMigrationGenerator();
+                    return new SqlServerCe.SqlServerCeMigrationGenerator();
             }
             return null;
         }

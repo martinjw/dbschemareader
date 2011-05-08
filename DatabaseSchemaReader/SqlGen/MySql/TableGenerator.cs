@@ -6,6 +6,8 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 {
     class TableGenerator : TableGeneratorBase
     {
+        //ENGINE=InnoDB DEFAULT CHARSET=utf8 at the end of the table ddl is implicit
+
         public TableGenerator(DatabaseTable table)
             : base(table)
         {
@@ -21,8 +23,26 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         protected override string WriteDataType(DatabaseColumn column)
         {
             var type = column.MySqlDataType();
-            if (column.IsIdentity) type += " AUTO_INCREMENT";
-            if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)
+            type += (!column.Nullable ? " NOT NULL" : string.Empty);
+
+            if (!string.IsNullOrEmpty(column.DefaultValue))
+            {
+                //No names for constraints
+                const string defaultConstraint = " DEFAULT ";
+                var dataType = column.DbDataType.ToUpperInvariant();
+                if (dataType == "NVARCHAR" || dataType == "VARCHAR" || dataType == "CHAR")
+                {
+                    type += defaultConstraint + "'" + column.DefaultValue + "'";
+                }
+                else //numeric default
+                {
+                    type += defaultConstraint + column.DefaultValue;
+                }
+            }
+
+            //MySql auto-increments MUST BE primary key
+            if (column.IsIdentity) type += " AUTO_INCREMENT PRIMARY KEY";
+            else if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)
                 type += " PRIMARY KEY";
 
             return type;

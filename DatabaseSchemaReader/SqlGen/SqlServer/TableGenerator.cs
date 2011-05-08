@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -17,11 +18,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         protected override string ConstraintWriter()
         {
             var sb = new StringBuilder();
-            var constraintWriter = new ConstraintWriter(Table);
-            constraintWriter.IncludeSchema = IncludeSchema;
+            var constraintWriter = CreateConstraintWriter();
 
-            //single primary keys done inline
-            if (Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count > 1)
+            if (Table.PrimaryKey != null)
             {
                 sb.AppendLine(constraintWriter.WritePrimaryKey());
             }
@@ -30,7 +29,30 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             //looks like a boolean check, skip it
             constraintWriter.CheckConstraintExcluder = check => (_hasBit && check.Expression.Contains(" IN (0, 1)"));
             sb.AppendLine(constraintWriter.WriteCheckConstraints());
+
+            AddIndexes(sb);
+
             return sb.ToString();
+        }
+        protected virtual ConstraintWriter CreateConstraintWriter()
+        {
+            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema };
+        }
+        protected virtual IMigrationGenerator CreateMigrationGenerator()
+        {
+            return new SqlServerMigrationGenerator();
+        }
+        private void AddIndexes(StringBuilder sb)
+        {
+            if (!Table.Indexes.Any()) return;
+
+            var migration = CreateMigrationGenerator();
+            foreach (var index in Table.Indexes)
+            {
+                if(index.IsUnqiueKeyIndex(Table)) continue;
+
+                sb.AppendLine(migration.AddIndex(Table, index));
+            }
         }
 
         protected override ISqlFormatProvider SqlFormatProvider()
@@ -64,8 +86,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 column.IsIdentity = true;
             }
             if (column.IsIdentity) sql += " IDENTITY(1,1)";
-            if (column.IsPrimaryKey && Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count == 1)
-                sql += " PRIMARY KEY NOT NULL";
+            if (column.IsPrimaryKey)
+                sql += " NOT NULL";
             else
                 sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + " " + defaultValue;
             return sql;

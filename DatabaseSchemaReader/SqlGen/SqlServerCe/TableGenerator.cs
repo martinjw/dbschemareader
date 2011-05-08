@@ -12,5 +12,14 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         {
             DataTypeWriter = new DataTypeWriter();
         }
+        //protected override ConstraintWriter CreateConstraintWriter()
+        //{
+        //    return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema };
+        //}
+        protected override IMigrationGenerator CreateMigrationGenerator()
+        {
+            //this will ensure the add constraints don't have schema naming
+            return new SqlServerCeMigrationGenerator();
+        }
     }
 }

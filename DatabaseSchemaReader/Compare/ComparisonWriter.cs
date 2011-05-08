@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 
@@ -11,16 +10,18 @@ namespace DatabaseSchemaReader.Compare
     class ComparisonWriter
     {
         private readonly IMigrationGenerator _migration;
+        private readonly SqlType _sqlType;
 
         public ComparisonWriter(SqlType sqlType)
         {
+            _sqlType = sqlType;
             var ddlFactory = new DdlGeneratorFactory(sqlType);
             _migration = ddlFactory.MigrationGenerator();
         }
 
-        public string WriteTable(DatabaseTable databaseTable)
+        public string AddTable(DatabaseTable databaseTable)
         {
-            return _migration.CreateTable(databaseTable);
+            return _migration.AddTable(databaseTable);
         }
 
         public string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
@@ -51,6 +52,106 @@ namespace DatabaseSchemaReader.Compare
         public string DropTable(DatabaseTable databaseTable)
         {
             return _migration.DropTable(databaseTable);
+        }
+
+        public string AddView(DatabaseView view)
+        {
+            return _migration.AddView(view);
+        }
+
+        public string DropView(DatabaseView view)
+        {
+            return _migration.DropView(view);
+        }
+
+        /// <summary>
+        /// Sanitized comparison of the view sql
+        /// </summary>
+        /// <param name="view1">The view1.</param>
+        /// <param name="view2">The view2.</param>
+        /// <returns></returns>
+        public bool CompareView(string view1, string view2)
+        {
+            //trim any extra whitespace around the sql
+            var sql1 = view1.Trim();
+            var sql2 = view2.Trim();
+            if (_sqlType != SqlType.SqlServerCe && _sqlType != SqlType.SqlServer)
+            {
+                return sql1 == sql2;
+            }
+
+            //the create view could take many forms:
+            //create view "Alphabetical list of products" AS ...
+            //create view [dbo].[Alphabetical list of products] AS ...
+
+            //let's strip that bit for the comparison...
+
+            sql1 = SanitizeSql.StripComments(sql1);
+            sql2 = SanitizeSql.StripComments(sql2);
+
+            var reg = new Regex(@"\bCREATE VIEW\b(.*?)(?=\bAS\b)", RegexOptions.IgnoreCase);
+            var match = reg.Match(sql1);
+            if (match.Success)
+            {
+                sql1 = sql1.Remove(match.Index, match.Length);
+            }
+            match = reg.Match(sql2);
+            if (match.Success)
+            {
+                sql2 = sql2.Remove(match.Index, match.Length);
+            }
+            return sql1 == sql2;
+        }
+
+        public bool CompareProcedure(string procedure1, string procedure2)
+        {
+            //trim any extra whitespace around the sql
+            var sql1 = procedure1.Trim();
+            var sql2 = procedure2.Trim();
+            if (_sqlType != SqlType.SqlServerCe && _sqlType != SqlType.SqlServer)
+            {
+                return sql1 == sql2;
+            }
+
+            sql1 = SanitizeSql.StripComments(sql1);
+            sql2 = SanitizeSql.StripComments(sql2);
+
+            return sql1 == sql2;
+        }
+
+        public string AddProcedure(DatabaseStoredProcedure procedure)
+        {
+            return _migration.AddProcedure(procedure);
+        }
+
+        public string DropProcedure(DatabaseStoredProcedure procedure)
+        {
+            return _migration.DropProcedure(procedure);
+        }
+
+        public string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        {
+            return _migration.AddIndex(databaseTable, index);
+        }
+
+        public string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        {
+            return _migration.DropIndex(databaseTable, index);
+        }
+
+        public string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
+        {
+            return _migration.AddTrigger(databaseTable, trigger);
+        }
+
+        public string DropTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
+        {
+            return _migration.DropTrigger(trigger);
+        }
+
+        public string RunStatements()
+        {
+            return _migration.RunStatements();
         }
     }
 }

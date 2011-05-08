@@ -1,0 +1,139 @@
+﻿using System.Text;
+using System.Collections.Generic;
+using DatabaseSchemaReader.Compare;
+using DatabaseSchemaReader.DataSchema;
+#if !NUNIT
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+#else
+using NUnit.Framework;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestCleanup = NUnit.Framework.TearDownAttribute;
+using TestContext = System.Object;
+#endif
+
+namespace DatabaseSchemaReaderTest.Compare
+{
+    [TestClass]
+    public class CompareViewsTest
+    {
+        [TestMethod]
+        public void WhenViewsIdentical()
+        {
+            //arrange
+            var sb = new StringBuilder();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareViews(sb, writer);
+
+            var baseViews = new List<DatabaseView> { CreateView() };
+            var compareViews = new List<DatabaseView> { CreateView() };
+
+            //act
+            target.Execute(baseViews, compareViews);
+            var result = sb.ToString();
+
+            //assert
+            Assert.IsTrue(string.IsNullOrEmpty(result));
+        }
+
+        [TestMethod]
+        public void WhenViewDropped()
+        {
+            //arrange
+            var sb = new StringBuilder();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareViews(sb, writer);
+
+            var baseViews = new List<DatabaseView> { CreateView() };
+            var compareViews = new List<DatabaseView>();
+
+            //act
+            target.Execute(baseViews, compareViews);
+            var result = sb.ToString();
+
+            //assert
+            Assert.IsTrue(result.Contains("DROP VIEW"));
+        }
+
+        [TestMethod]
+        public void WhenViewAdded()
+        {
+            //arrange
+            var sb = new StringBuilder();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareViews(sb, writer);
+
+            var baseViews = new List<DatabaseView>();
+            var compareViews = new List<DatabaseView> { CreateView() };
+
+            //act
+            target.Execute(baseViews, compareViews);
+            var result = sb.ToString();
+
+            //assert
+            Assert.IsTrue(result.Contains("CREATE VIEW"));
+        }
+
+
+        [TestMethod]
+        public void WhenViewChanged()
+        {
+            //arrange
+            var sb = new StringBuilder();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareViews(sb, writer);
+
+            var baseViews = new List<DatabaseView> { CreateView() };
+            var view = CreateView();
+            view.Sql += " ORDER BY NAME";
+            var compareViews = new List<DatabaseView> { view };
+
+            //act
+            target.Execute(baseViews, compareViews);
+            var result = sb.ToString();
+
+            //assert
+            Assert.IsTrue(result.Contains("DROP VIEW"));
+            Assert.IsTrue(result.Contains("CREATE VIEW"));
+        }
+
+        private static DatabaseView CreateView()
+        {
+            return new DatabaseView { Name = "MyView", Sql = "CREATE VIEW MyView AS SELECT * FROM TABLE" };
+        }
+
+
+
+        [TestMethod]
+        public void WhenViewsIdenticalWithDifferentFormatSql()
+        {
+            //arrange
+            var sb = new StringBuilder();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareViews(sb, writer);
+
+            var databaseView = CreateView();
+            databaseView.Sql = @"
+create view ""Alphabetical list of products"" AS
+SELECT Products.*, Categories.CategoryName
+FROM Categories INNER JOIN Products ON Categories.CategoryID = Products.CategoryID
+WHERE (((Products.Discontinued)=0))
+";
+            var baseViews = new List<DatabaseView> { databaseView };
+            var databaseView2 = CreateView();
+            databaseView2.Sql = @"create view [dbo].[Alphabetical list of products] AS
+SELECT Products.*, Categories.CategoryName
+FROM Categories INNER JOIN Products ON Categories.CategoryID = Products.CategoryID
+WHERE (((Products.Discontinued)=0))";
+            var compareViews = new List<DatabaseView> { databaseView2 };
+
+            //act
+            target.Execute(baseViews, compareViews);
+            var result = sb.ToString();
+
+            //assert
+            Assert.IsTrue(string.IsNullOrEmpty(result));
+        }
+    }
+}

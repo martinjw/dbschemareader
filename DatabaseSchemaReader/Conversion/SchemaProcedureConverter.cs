@@ -161,6 +161,8 @@ namespace DatabaseSchemaReader.Conversion
             foreach (DataRow row in sprocTable.Rows)
             {
                 string name = row[sprocKey].ToString();
+                //a procedure without a name?
+                if(string.IsNullOrEmpty(name)) continue;
                 string owner = row[ownerKey].ToString();
                 string package = null; //for non-Oracle, package is always null
                 if (packageKey != null)

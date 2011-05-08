@@ -57,6 +57,18 @@ namespace DatabaseSchemaReader.DataSchema
         public string TriggerEvent { get; set; }
 
         /// <summary>
+        /// Gets or sets the trigger type.
+        /// </summary>
+        /// <value>
+        /// The trigger type.
+        /// </value>
+        /// <remarks>
+        /// In oracle, one of BEFORE STATEMENT, BEFORE EACH ROW, AFTER STATEMENT, AFTER EACH ROW, INSTEAD OF, COMPOUND
+        /// In SqlServer, our custom SQL uses AFTER and INSTEAD OF
+        /// </remarks>
+        public string TriggerType { get; set; }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>

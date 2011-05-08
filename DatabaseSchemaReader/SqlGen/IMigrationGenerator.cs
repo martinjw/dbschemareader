@@ -8,11 +8,11 @@ namespace DatabaseSchemaReader.SqlGen
     public interface IMigrationGenerator
     {
         /// <summary>
-        /// Writes the table. If any constraints are attached, they are written too (don't write them individually)
+        /// Adds the table. If any primary key, unqiue or check constraints are attached, they are written too (don't write them individually). Foreign keys must be added separately (use <see cref="AddConstraint"/>)
         /// </summary>
         /// <param name="databaseTable">The database table.</param>
         /// <returns></returns>
-        string CreateTable(DatabaseTable databaseTable);
+        string AddTable(DatabaseTable databaseTable);
         /// <summary>
         /// Adds the column.
         /// </summary>
@@ -58,5 +58,69 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="constraint">The constraint.</param>
         /// <returns></returns>
         string DropConstraint(DatabaseTable databaseTable, DatabaseConstraint constraint);
+
+        /// <summary>
+        /// Adds the view.
+        /// </summary>
+        /// <param name="view">The view.</param>
+        /// <returns></returns>
+        string AddView(DatabaseView view);
+
+        /// <summary>
+        /// Drops the view.
+        /// </summary>
+        /// <param name="view">The view.</param>
+        /// <returns></returns>
+        string DropView(DatabaseView view);
+
+        /// <summary>
+        /// Adds the procedure.
+        /// </summary>
+        /// <param name="procedure">The procedure.</param>
+        /// <returns></returns>
+        string AddProcedure(DatabaseStoredProcedure procedure);
+
+        /// <summary>
+        /// Drops the procedure.
+        /// </summary>
+        /// <param name="procedure">The procedure.</param>
+        /// <returns></returns>
+        string DropProcedure(DatabaseStoredProcedure procedure);
+
+        /// <summary>
+        /// Adds the index.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        string AddIndex(DatabaseTable databaseTable, DatabaseIndex index);
+
+        /// <summary>
+        /// Drops the index.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        string DropIndex(DatabaseTable databaseTable, DatabaseIndex index);
+
+        /// <summary>
+        /// Adds the trigger.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="trigger">The trigger.</param>
+        /// <returns></returns>
+        string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger);
+
+        /// <summary>
+        /// Drops the trigger.
+        /// </summary>
+        /// <param name="trigger">The trigger.</param>
+        /// <returns></returns>
+        string DropTrigger(DatabaseTrigger trigger);
+
+        /// <summary>
+        /// Runs a batch of statements. May be needed before a script block.
+        /// </summary>
+        string RunStatements();
     }
 }

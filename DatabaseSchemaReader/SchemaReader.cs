@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlTypes;
 using System.Globalization;
 
 namespace DatabaseSchemaReader
@@ -235,6 +236,13 @@ namespace DatabaseSchemaReader
                     Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
                     return new DataTable(collectionName);
                 }
+                catch (SqlNullValueException exception)
+                {
+                    //MySQL throws this nasty error with a restriction. We'll carry on.
+                    Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
+                    return new DataTable(collectionName);
+                }
+
             }
         }
 

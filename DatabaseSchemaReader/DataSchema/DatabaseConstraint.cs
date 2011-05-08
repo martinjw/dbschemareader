@@ -66,6 +66,14 @@ namespace DatabaseSchemaReader.DataSchema
         public string DeleteRule { get; set; }
 
         /// <summary>
+        /// Gets or sets the update rule. When a row is updated in a parent table, the UpdateRule determines what will happen in the columns of the child table (or tables). Options are CASCADE, RESTRICT, NO ACTION, SET NULL, SET DEFAULT
+        /// </summary>
+        /// <value>
+        /// The update rule.
+        /// </value>
+        public string UpdateRule { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of the constraint (primary key, foreign key, unique key, check)
         /// </summary>
         /// <value>

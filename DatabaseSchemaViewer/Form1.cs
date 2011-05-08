@@ -33,12 +33,22 @@ namespace DatabaseSchemaViewer
             {
                 e.Cancel = true;
                 errorProvider1.SetError(ConnectionString, "Should not be empty");
+                return;
             }
-            else
+            try
             {
-                errorProvider1.SetError(ConnectionString, string.Empty);
-
+                var factory = DbProviderFactories.GetFactory(DataProviders.SelectedValue.ToString());
+                var csb = factory.CreateConnectionStringBuilder();
+                csb.ConnectionString = connectionString;
             }
+            catch (ArgumentException)
+            {
+                e.Cancel = true;
+                errorProvider1.SetError(ConnectionString, "Invalid connection string");
+                return;
+            }
+
+            errorProvider1.SetError(ConnectionString, string.Empty);
         }
 
         private void ReadSchemaClick(object sender, EventArgs e)
@@ -94,16 +104,27 @@ namespace DatabaseSchemaViewer
                 {
                     SchemaToTreeview.PopulateTreeView(_databaseSchema, treeView1);
                     toolStripButton1.Enabled = true;
+                    toolStripButton2.Enabled = true;
                 }
             }
             StopWaiting();
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void CodeGenClick(object sender, EventArgs e)
         {
             if (_databaseSchema == null) return;
 
             using (var f = new CodeGenForm(_databaseSchema))
+            {
+                f.ShowDialog();
+            }
+        }
+
+        private void CompareClick(object sender, EventArgs e)
+        {
+            if (_databaseSchema == null) return;
+
+            using (var f = new CompareForm(_databaseSchema))
             {
                 f.ShowDialog();
             }
@@ -115,7 +136,5 @@ namespace DatabaseSchemaViewer
 
             Properties.Settings.Default.Save();
         }
-
-
     }
 }

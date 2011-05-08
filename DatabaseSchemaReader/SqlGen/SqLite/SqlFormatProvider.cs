@@ -9,7 +9,12 @@
 
         public string LineEnding()
         {
-            return @";";
+            return ";";
+        }
+
+        public string RunStatements()
+        {
+            return string.Empty;
         }
     }
 }

@@ -67,6 +67,11 @@
     <Compile Include="Compare\CompareTables.cs" />
     <Compile Include="Compare\CompareSchemas.cs" />
     <Compile Include="Compare\ComparisonWriter.cs" />
+    <Compile Include="Compare\CompareViews.cs" />
+    <Compile Include="Compare\CompareProcedures.cs" />
+    <Compile Include="Compare\CompareConstraints.cs" />
+    <Compile Include="Compare\CompareIndexes.cs" />
+    <Compile Include="Compare\SanitizeSql.cs" />
     <Compile Include="Conversion\DatabaseColumnExtensions.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
     <Compile Include="Conversion\SchemaConverter.cs" />

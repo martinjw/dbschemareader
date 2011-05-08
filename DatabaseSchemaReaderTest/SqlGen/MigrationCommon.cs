@@ -116,7 +116,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var unqiueConstraint = CreateUniqueConstraint(newColumn);
             var fk = CreateForeignKey(table);
 
-            var createTable = migrationGenerator.CreateTable(table);
+            var createTable = migrationGenerator.AddTable(table);
             var addColumn = migrationGenerator.AddColumn(table, newColumn);
             var addUniqueConstraint = migrationGenerator.AddConstraint(table, unqiueConstraint);
             var addForeignKey = migrationGenerator.AddConstraint(table, fk);

@@ -53,6 +53,9 @@
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
+    <Compile Include="Compare\CompareViewsTest.cs" />
+    <Compile Include="Compare\CompareProceduresTest.cs" />
+    <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="IntegrationTests\SqlServerCe4.cs" />
@@ -68,10 +71,10 @@
     <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
     <Compile Include="Procedures\RunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlGen\MigrationCommon.cs" />
     <Compile Include="SqlGen\MigrationMySqlTest.cs" />
-    <Compile Include="SqlGen\MigrationOracleTest.cs" />
     <Compile Include="SqlGen\MigrationSQLiteTest.cs" />
+    <Compile Include="SqlGen\MigrationCommon.cs" />
+    <Compile Include="SqlGen\MigrationOracleTest.cs" />
     <Compile Include="SqlGen\MigrationTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerCeTest.cs" />
     <Compile Include="SqlGen\SqlWriterCommonTest.cs" />

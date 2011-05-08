@@ -76,6 +76,13 @@
       <DependentUpon>CodeGenForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CodeWriterRunner.cs" />
+    <Compile Include="CompareForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CompareForm.Designer.cs">
+      <DependentUpon>CompareForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CompareRunner.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,6 +93,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="CodeGenForm.resx">
       <DependentUpon>CodeGenForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CompareForm.resx">
+      <DependentUpon>CompareForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
@@ -100,6 +110,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="ScriptForm.resx">
+      <DependentUpon>ScriptForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
@@ -113,6 +126,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="SchemaToTreeview.cs" />
+    <Compile Include="ScriptForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ScriptForm.Designer.cs">
+      <DependentUpon>ScriptForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TaskRunner.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -31,6 +31,7 @@ namespace DatabaseSchemaReader.Conversion
             string refersToTableKey = "FK_TABLE";
             const string expression = "EXPRESSION";
             string deleteRuleKey = "DELETE_RULE";
+            string updateRuleKey = "UPDATE_RULE";
             //oracle
             if (!dt.Columns.Contains(key)) key = "FOREIGN_KEY_CONSTRAINT_NAME";
             if (!dt.Columns.Contains(tableKey)) tableKey = "FOREIGN_KEY_TABLE_NAME";
@@ -46,6 +47,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(refersToKey)) refersToKey = null;
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = null;
             if (!dt.Columns.Contains(deleteRuleKey)) deleteRuleKey = null;
+            if (!dt.Columns.Contains(updateRuleKey)) updateRuleKey = null;
             //not present if separate foreign key columns
             if (!dt.Columns.Contains(columnKey)) columnKey = null;
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
@@ -75,7 +77,8 @@ namespace DatabaseSchemaReader.Conversion
                         c.RefersToConstraint = AddRefersToConstraint(row, refersToKey);
                         if (!string.IsNullOrEmpty(refersToTableKey))
                             c.RefersToTable = row[refersToTableKey].ToString();
-                        AddDeleteRule(row, deleteRuleKey, c);
+                        c.DeleteRule = AddDeleteUpdateRule(row, deleteRuleKey);
+                        c.UpdateRule = AddDeleteUpdateRule(row, updateRuleKey);
                     }
                 }
                 AddConstraintColumns(row, columnKey, constraintType, c);
@@ -111,13 +114,14 @@ namespace DatabaseSchemaReader.Conversion
             constraint.Columns.Add(col); //assume they are in the right order
         }
 
-        private static void AddDeleteRule(DataRowView row, string deleteRuleKey, DatabaseConstraint constraint)
+        private static string AddDeleteUpdateRule(DataRowView row, string deleteUpdateRuleKey)
         {
-            if (string.IsNullOrEmpty(deleteRuleKey)) return;
+            if (string.IsNullOrEmpty(deleteUpdateRuleKey)) return null;
 
-            string deleteRule = row[deleteRuleKey].ToString();
-            if (!string.IsNullOrEmpty(deleteRule) && !deleteRule.Equals("NO ACTION", StringComparison.OrdinalIgnoreCase))
-                constraint.DeleteRule = deleteRule;
+            string rule = row[deleteUpdateRuleKey].ToString();
+            if (!string.IsNullOrEmpty(rule) && !rule.Equals("NO ACTION", StringComparison.OrdinalIgnoreCase))
+               return rule;
+            return null;
         }
 
         /// <summary>

@@ -41,7 +41,7 @@ namespace DatabaseSchemaViewer
                 Message =
                     @"An IO error occurred while writing the file.\n" + exception.Message;
             }
-                return false;
+            return false;
         }
 
         public bool RunSprocs(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
@@ -53,7 +53,7 @@ namespace DatabaseSchemaViewer
             }
 
             var gen = new DdlGeneratorFactory(dialect).ProcedureGenerator(table);
-            if(gen == null)
+            if (gen == null)
             {
                 //there is no sproc provider (SQLite)
                 Message = @"There is no sproc generator";

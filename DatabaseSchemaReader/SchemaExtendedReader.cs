@@ -553,7 +553,8 @@ cols.column_name,
 cols.position AS ordinal_position, 
 cons.r_constraint_name AS unique_constraint_name, 
 cons2.table_name AS fk_table,
-cons.delete_rule
+cons.delete_rule,
+NULL AS update_rule
 FROM all_constraints cons
 INNER JOIN all_cons_columns cols 
   ON cons.constraint_name = cols.constraint_name
@@ -576,7 +577,8 @@ ORDER BY cols.table_name, cols.position";
 	KEYCOLUMNS.ORDINAL_POSITION,
 	REFS.UNIQUE_CONSTRAINT_NAME, 
 	REFS.UNIQUE_CONSTRAINT_TABLE_NAME AS FK_TABLE,
-	REFS.DELETE_RULE
+	REFS.DELETE_RULE,
+    REFS.UPDATE_RULE
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS CONS
 	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KEYCOLUMNS
 	 ON CONS.CONSTRAINT_NAME = KEYCOLUMNS.CONSTRAINT_NAME
@@ -587,7 +589,7 @@ WHERE
 	(@schemaOwner IS NOT NULL OR @schemaOwner IS NULL) AND 
 	CONS.CONSTRAINT_TYPE = @constraint_type";
             }
-            else //if (IsSqlServer || IsMySql) //use SQL92 INFORMATION_SCHEMA
+            else if (IsMySql) //in MySQL, different constraints for different tables can have the same name (eg Primary)
             {
                 sqlCommand = @"SELECT DISTINCT
 cons.constraint_name, 
@@ -596,13 +598,50 @@ column_name,
 ordinal_position, 
 refs.unique_constraint_name, 
 cons2.table_name AS fk_table,
-NULL AS delete_rule
+refs.delete_rule AS delete_rule,
+refs.update_rule AS update_rule
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
 	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS keycolumns
 		ON (cons.constraint_catalog = keycolumns.constraint_catalog
 			OR cons.constraint_catalog IS NULL) AND
 		cons.constraint_schema = keycolumns.constraint_schema AND
-		cons.constraint_name = keycolumns.constraint_name
+		cons.constraint_name = keycolumns.constraint_name AND
+        cons.table_name = keycolumns.table_name
+	LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS refs
+		ON (cons.constraint_catalog = refs.constraint_catalog
+			OR cons.constraint_catalog IS NULL) AND
+		cons.constraint_schema = refs.constraint_schema AND
+		cons.constraint_name = refs.constraint_name AND
+        cons.table_name = refs.table_name
+	LEFT OUTER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons2
+		ON (cons2.constraint_catalog = refs.constraint_catalog
+			OR cons2.constraint_catalog IS NULL) AND
+		cons2.constraint_schema = refs.constraint_schema AND
+		cons2.constraint_name = refs.unique_constraint_name AND
+        cons2.table_name = refs.referenced_table_name
+WHERE 
+	(keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
+	(cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
+	cons.constraint_type = @constraint_type";
+            }
+            else //if (IsSqlServer) //use SQL92 INFORMATION_SCHEMA
+            {
+                sqlCommand = @"SELECT DISTINCT
+cons.constraint_name, 
+keycolumns.table_name, 
+column_name, 
+ordinal_position, 
+refs.unique_constraint_name, 
+cons2.table_name AS fk_table,
+refs.delete_rule AS delete_rule,
+refs.update_rule AS update_rule
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
+	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS keycolumns
+		ON (cons.constraint_catalog = keycolumns.constraint_catalog
+			OR cons.constraint_catalog IS NULL) AND
+		cons.constraint_schema = keycolumns.constraint_schema AND
+		cons.constraint_name = keycolumns.constraint_name AND
+        cons.table_name = keycolumns.table_name
 	LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS refs
 		ON (cons.constraint_catalog = refs.constraint_catalog
 			OR cons.constraint_catalog IS NULL) AND

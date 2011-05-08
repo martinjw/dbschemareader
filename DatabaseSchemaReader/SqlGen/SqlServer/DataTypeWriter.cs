@@ -95,6 +95,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             //Oracle numbers- use precise SqlServer versiom
             if (dataType == "NUMBER")
                 dataType = NumberConversion(precision, scale);
+            //not an exact match
+            if (dataType == "XMLTYPE") dataType = "XML";
             return dataType;
         }
 

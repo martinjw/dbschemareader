@@ -9,9 +9,15 @@
 
         public string LineEnding()
         {
+            return ";";
+        }
+
+
+        public string RunStatements()
+        {
             return @"
 GO
-";
+"; ;
         }
     }
 }

@@ -57,12 +57,15 @@ namespace CopyToSQLite
                     cmd.Connection = con;
                     con.Open();
                     //break dll into separate statements and execute them.
-                    foreach (var statement in statements)
+                    foreach (var batch in statements)
                     {
-                        //ignore the drop table bit, which has no useful commands
-                        if (statement.Contains(Environment.NewLine + "-- DROP TABLE")) continue;
-                        cmd.CommandText = statement;
-                        cmd.ExecuteNonQuery();
+                        foreach (var statement in ScriptTools.SplitBySemiColon(batch))
+                        {
+                            //ignore the drop table bit, which has no useful commands
+                            if (statement.Contains(Environment.NewLine + "-- DROP TABLE")) continue;
+                            cmd.CommandText = statement;
+                            cmd.ExecuteNonQuery();
+                        }
                     }
                 }
             }

@@ -113,11 +113,32 @@ If a stored procedure has ResultSets (if you used ResultSetReader), a typed resu
 
 It also writes a VS2008 v3.5 csproj file, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
 
+===Comparisons===
+
+You can compare the schemas of two databases to get a diff script. 
+//load your schemas
+var schema1 = new DatabaseReader(connectionString, providername).ReadAll();
+var schema2 = new DatabaseReader(connectionString2, providername).ReadAll();
+
+//compare
+var comparison = new CompareSchemas(schema1, schema2);
+var script = comparison.Execute();
+
+The script will include the migrations needed to transform schema1 into schema2.
+The migrations will include create/drop/alter tables, columns, constraints and indexes.
+It also supports views and stored procedures.
+
+The migrations are simple. Complicated migrations are not supported (for example changing a column datatype which would require an explicit cast). The order of the migrations may not be correct (if one change depends on another change made later in the generated script).
+
+For more advanced use, SqlCompare and other commercial tools are recommended.
+
 ===UIs===
 
 There are two simple UIs.
 
-* DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for code generation, table DDL and stored procedure generation.
+* DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for 
+ - code generation, table DDL and stored procedure generation.
+ - comparing the schema to another database.
 
 * CopyToSQLite. It reads all the schema and creates a new SQLite database file with the same tables and data. If Sql Server CE 4.0 is detected, it can do the same for that database. These databases do not have the full range of data types as other dtabases, so creating tables may fail (e.g. SqlServer CE 4 does not have VARCHAR(MAX)). In addition, copying data may violate foreign key constraints (especially for identity primary keys) and will fail.
 

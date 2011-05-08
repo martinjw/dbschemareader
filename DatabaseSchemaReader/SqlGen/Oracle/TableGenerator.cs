@@ -55,6 +55,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             var dataType = column.DbDataType.ToUpperInvariant();
             var precision = column.Precision;
             var scale = column.Scale;
+            var length = column.Length;
 
             if (dataType == "BOOLEAN")
             {
@@ -64,10 +65,16 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             }
             //sql server to oracle translation
             if (dataType == "VARBINARY" || dataType == "IMAGE") dataType = "BLOB";
-            if (dataType == "NVARCHAR" && column.Length > 4000) dataType = "CLOB";
+            if (dataType == "NVARCHAR" && length > 4000) dataType = "CLOB";
             if (dataType == "NVARCHAR") dataType = "NVARCHAR2";
             if (dataType == "VARCHAR") dataType = "VARCHAR2";
             if (dataType == "NTEXT" || dataType == "TEXT") dataType = "CLOB";
+            if (dataType == "UNIQUEIDENTIFIER")
+            {
+                dataType = "RAW";
+                length = 16;
+            }
+            if (dataType == "XML") dataType = "XMLTYPE";
             //Dates in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D.
             if (dataType == "DATETIME") dataType = "DATE";
             if (dataType == "NUMERIC") dataType = "NUMBER";
@@ -106,20 +113,20 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             if (dataType == "NVARCHAR2")
             {
                 //don't specify "CHAR" for NVARCHAR2
-                sql = dataType + " (" + column.Length + ")";
+                sql = dataType + " (" + length + ")";
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = AddQuotedDefault(column);
             }
             if (dataType == "VARCHAR2")
             {
                 //assume it's CHAR rather than bytes
-                sql = dataType + " (" + column.Length + " CHAR)";
+                sql = dataType + " (" + length + " CHAR)";
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = AddQuotedDefault(column);
             }
             if (dataType == "CHAR" || dataType == "NCHAR")
             {
-                sql = dataType + " (" + column.Length + ")";
+                sql = dataType + " (" + length + ")";
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = AddQuotedDefault(column);
             }
@@ -135,6 +142,10 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 sql = "REAL";
                 if (!string.IsNullOrEmpty(column.DefaultValue))
                     defaultValue = " DEFAULT " + column.DefaultValue;
+            }
+            if (dataType == "RAW")
+            {
+                sql = "RAW(" + length + ")";
             }
 
 

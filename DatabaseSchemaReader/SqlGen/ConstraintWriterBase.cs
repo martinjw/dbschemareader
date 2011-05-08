@@ -22,10 +22,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             return SqlFormatProvider().Escape(name);
         }
-        private string LineEnding()
-        {
-            return SqlFormatProvider().LineEnding();
-        }
+
         public bool IncludeSchema { get; set; }
 
         protected virtual int MaximumNameLength
@@ -57,13 +54,10 @@ namespace DatabaseSchemaReader.SqlGen
             var pkName = ConstraintName(_table.PrimaryKey.Name);
 
             return string.Format(CultureInfo.InvariantCulture,
-                                 @"ALTER TABLE {0}{1} 
-ADD CONSTRAINT {2} PRIMARY KEY ({3})",
-                                 IncludeSchema && !string.IsNullOrEmpty(_table.SchemaOwner) ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
-                                 EscapeName(_table.Name),
+                                 @"ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY ({2})",
+                                 TableName(_table),
                                  EscapeName(pkName),
-                                 columnList) + LineEnding();
-
+                                 columnList) + SqlFormatProvider().LineEnding();
         }
 
         public string WriteUniqueKeys()
@@ -76,6 +70,10 @@ ADD CONSTRAINT {2} PRIMARY KEY ({3})",
             return sb.ToString();
         }
 
+        protected virtual string AddUniqueConstraintFormat
+        {
+            get { return "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})"; }
+        }
         private string WriteUniqueKey(DatabaseConstraint uniqueKey)
         {
             var columnList = GetColumnList(uniqueKey.Columns);
@@ -83,12 +81,10 @@ ADD CONSTRAINT {2} PRIMARY KEY ({3})",
             var name = ConstraintName(uniqueKey.Name);
 
             return string.Format(CultureInfo.InvariantCulture,
-                                 @"ALTER TABLE {0}{1} 
-ADD CONSTRAINT {2} UNIQUE ({3})",
-                                 IncludeSchema ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
-                                 EscapeName(_table.Name),
+                                 AddUniqueConstraintFormat,
+                                 TableName(_table),
                                  EscapeName(name),
-                                 columnList) + LineEnding();
+                                 columnList) + SqlFormatProvider().LineEnding();
 
         }
 
@@ -117,12 +113,10 @@ ADD CONSTRAINT {2} UNIQUE ({3})",
             var name = ConstraintName(checkConstraint.Name);
 
             return string.Format(CultureInfo.InvariantCulture,
-                                 @"ALTER TABLE {0}{1} 
-ADD CONSTRAINT {2} CHECK ({3})",
-                                 IncludeSchema && !string.IsNullOrEmpty(_table.SchemaOwner) ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
-                                 EscapeName(_table.Name),
+                                 @"ALTER TABLE {0} ADD CONSTRAINT {1} CHECK ({2})",
+                                 TableName(_table),
                                  EscapeName(name),
-                                 expression) + LineEnding();
+                                 expression) + SqlFormatProvider().LineEnding();
 
         }
 
@@ -138,32 +132,62 @@ ADD CONSTRAINT {2} CHECK ({3})",
 
         private string WriteForeignKey(DatabaseConstraint foreignKey)
         {
-            var columnList = GetColumnList(foreignKey.Columns);
-            //table must have schema so we can navigate to the referenced table
-            if (_table.DatabaseSchema == null)
-                throw new InvalidOperationException("Cannot navigate databaseSchema to find referenced tables");
-
-            var referencedTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
-            //can't find the table. Don't write the fk reference.
-            if (referencedTable == null) return null;
-
             var fkTablePks = foreignKey.ReferencedColumns(_table.DatabaseSchema);
-            var refColumnList = GetColumnList(fkTablePks);
+            //if we can't find other table, we won't list the fk table primary key columns - it *should* be automatic
+            //in practice, SQLServer/Oracle are ok but MySQL will error 
+            var fkColumnList = fkTablePks == null ? string.Empty : " (" + GetColumnList(fkTablePks) + ")";
 
-            var foreignKeyName = ConstraintName(foreignKey.Name);
+            var deleteUpdateRule = string.Empty;
+            if (!string.IsNullOrEmpty(foreignKey.DeleteRule))
+            {
+                // { CASCADE | NO ACTION | SET DEFAULT | SET NULL }
+                deleteUpdateRule = " ON DELETE " + foreignKey.DeleteRule;
+            }
+            if (!string.IsNullOrEmpty(foreignKey.UpdateRule))
+            {
+                // { CASCADE | NO ACTION | SET DEFAULT | SET NULL }
+                deleteUpdateRule += " ON UPDATE " + foreignKey.UpdateRule;
+            }
 
+            //arguably we should fully qualify the refersToTable with its schema
             return string.Format(CultureInfo.InvariantCulture,
-                                 @"ALTER TABLE {0}{1} 
-ADD CONSTRAINT {2} FOREIGN KEY 
-({3}) 
-REFERENCES {4} ({5})",
-                                 IncludeSchema && !string.IsNullOrEmpty(_table.SchemaOwner) ? EscapeName(_table.SchemaOwner) + "." : string.Empty,
-                                 EscapeName(_table.Name),
-                                 EscapeName(foreignKeyName),
-                                 columnList,
+                                 "ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}{4}{5}",
+                                 TableName(_table),
+                                 EscapeName(foreignKey.Name),
+                                 GetColumnList(foreignKey.Columns),
                                  EscapeName(foreignKey.RefersToTable),
-                                 refColumnList) + LineEnding();
+                                 fkColumnList,
+                                 deleteUpdateRule) + SqlFormatProvider().LineEnding();
+        }
 
+        public string WriteConstraint(DatabaseConstraint constraint)
+        {
+            switch (constraint.ConstraintType)
+            {
+                case ConstraintType.PrimaryKey:
+                    return WritePrimaryKey();
+                case ConstraintType.UniqueKey:
+                    return WriteUniqueKey(constraint);
+                case ConstraintType.ForeignKey:
+                    return WriteForeignKey(constraint);
+                case ConstraintType.Check:
+                    return WriteCheckConstraint(constraint);
+            }
+            return string.Empty;
+        }
+
+        private string TableName(DatabaseTable databaseTable)
+        {
+            return SchemaPrefix(databaseTable.SchemaOwner) + EscapeName(databaseTable.Name);
+        }
+
+        private string SchemaPrefix(string schema)
+        {
+            if (IncludeSchema && !string.IsNullOrEmpty(schema))
+            {
+                return EscapeName(schema) + ".";
+            }
+            return string.Empty;
         }
 
         private string ConstraintName(string name)
