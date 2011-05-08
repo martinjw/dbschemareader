@@ -49,10 +49,11 @@
             // 
             // CompareSchema
             // 
-            this.CompareSchema.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CompareSchema.Location = new System.Drawing.Point(38, 171);
+            this.CompareSchema.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.CompareSchema.Location = new System.Drawing.Point(35, 171);
             this.CompareSchema.Name = "CompareSchema";
-            this.CompareSchema.Size = new System.Drawing.Size(381, 80);
+            this.CompareSchema.Size = new System.Drawing.Size(632, 80);
             this.CompareSchema.TabIndex = 4;
             this.CompareSchema.Text = "Compare Schema";
             this.CompareSchema.UseVisualStyleBackColor = true;
