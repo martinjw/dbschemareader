@@ -86,6 +86,8 @@ namespace DatabaseSchemaReader.Conversion
             string key = "TABLE_NAME"; //yep, it's Table_Name in SqlServer.
             string ownerKey = "TABLE_SCHEMA";
             string definition = "TEXT";
+            //mysql
+            if (!dt.Columns.Contains(definition)) definition = "VIEW_DEFINITION";
             //firebird
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "VIEW_SCHEMA"; //always null
             if (!dt.Columns.Contains(definition)) definition = "DEFINITION";
