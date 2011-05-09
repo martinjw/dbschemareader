@@ -48,6 +48,7 @@
             this.TargetGroupBox = new System.Windows.Forms.GroupBox();
             this.SqlServerCE4Radio = new System.Windows.Forms.RadioButton();
             this.SQLLiteRadio = new System.Windows.Forms.RadioButton();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.TargetGroupBox.SuspendLayout();
@@ -83,8 +84,9 @@
             // 
             // ConnectionString
             // 
-            this.ConnectionString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.ConnectionString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ConnectionString.ContextMenuStrip = this.contextMenuStrip1;
             this.ConnectionString.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::CopyToSQLite.Properties.Settings.Default, "ConnectionString", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.ConnectionString.Location = new System.Drawing.Point(6, 75);
             this.ConnectionString.Name = "ConnectionString";
@@ -95,8 +97,8 @@
             // 
             // ReadSchema
             // 
-            this.ReadSchema.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.ReadSchema.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ReadSchema.Location = new System.Drawing.Point(6, 220);
             this.ReadSchema.Name = "ReadSchema";
             this.ReadSchema.Size = new System.Drawing.Size(570, 61);
@@ -116,8 +118,8 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(6, 287);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(570, 23);
@@ -171,8 +173,8 @@
             // 
             // txtFilePath
             // 
-            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFilePath.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::CopyToSQLite.Properties.Settings.Default, "SqLiteFilePath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtFilePath.Location = new System.Drawing.Point(6, 194);
             this.txtFilePath.Name = "txtFilePath";
@@ -237,6 +239,11 @@
             this.SQLLiteRadio.Text = "SQLite";
             this.SQLLiteRadio.UseVisualStyleBackColor = true;
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
             // CopyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -291,6 +298,7 @@
         private System.Windows.Forms.GroupBox TargetGroupBox;
         private System.Windows.Forms.RadioButton SqlServerCE4Radio;
         private System.Windows.Forms.RadioButton SQLLiteRadio;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
     }
 }
 

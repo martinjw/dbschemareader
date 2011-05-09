@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using DatabaseSchemaReader.DataSchema;
@@ -23,7 +24,7 @@ namespace DatabaseSchemaViewer
             FillViews(treeRoot, schema);
             FillSprocs(treeRoot, schema.StoredProcedures);
             FillFunctions(treeRoot, schema);
-            if(schema.Packages.Count > 0) FillPackages(treeRoot, schema);
+            if (schema.Packages.Count > 0) FillPackages(treeRoot, schema);
             FillUsers(treeRoot, schema);
 
             treeView1.EndUpdate();
@@ -44,9 +45,11 @@ namespace DatabaseSchemaViewer
         {
             var root = new TreeNode("Stored Procedures");
             treeRoot.Nodes.Add(root);
-            foreach (var storedProcedure in storedProcedures)
+            foreach (var storedProcedure in storedProcedures.OrderBy(x => x.SchemaOwner).ThenBy(x => x.Name))
             {
-                var node = new TreeNode(storedProcedure.Name);
+                var name = storedProcedure.Name;
+                if (!string.IsNullOrEmpty(storedProcedure.SchemaOwner)) name = storedProcedure.SchemaOwner + "." + name;
+                var node = new TreeNode(name);
                 node.ToolTipText = storedProcedure.Sql;
                 root.Nodes.Add(node);
                 FillArguments(node, storedProcedure.Arguments);
@@ -58,9 +61,11 @@ namespace DatabaseSchemaViewer
         {
             var root = new TreeNode("Functions");
             treeRoot.Nodes.Add(root);
-            foreach (var function in schema.Functions)
+            foreach (var function in schema.Functions.OrderBy(x => x.SchemaOwner).ThenBy(x => x.Name))
             {
-                var node = new TreeNode(function.Name);
+                var name = function.Name;
+                if (!string.IsNullOrEmpty(function.SchemaOwner)) name = function.SchemaOwner + "." + name;
+                var node = new TreeNode(name);
                 node.ToolTipText = function.Sql;
                 root.Nodes.Add(node);
                 FillArguments(node, function.Arguments);
@@ -101,8 +106,11 @@ namespace DatabaseSchemaViewer
                     {
                         sb.Append("(");
                         sb.Append(argument.Precision);
-                        sb.Append(",");
-                        sb.Append(argument.Scale);
+                        if (argument.Scale > 0)
+                        {
+                            sb.Append(",");
+                            sb.Append(argument.Scale);
+                        }
                         sb.Append(")");
                     }
                 }
@@ -118,9 +126,11 @@ namespace DatabaseSchemaViewer
         {
             var viewRoot = new TreeNode("Views");
             treeRoot.Nodes.Add(viewRoot);
-            foreach (var view in schema.Views)
+            foreach (var view in schema.Views.OrderBy(x => x.SchemaOwner).ThenBy(x => x.Name))
             {
-                var viewNode = new TreeNode(view.Name);
+                var name = view.Name;
+                if (!string.IsNullOrEmpty(view.SchemaOwner)) name = view.SchemaOwner + "." + name;
+                var viewNode = new TreeNode(name);
                 viewNode.ToolTipText = view.Sql;
                 viewRoot.Nodes.Add(viewNode);
                 foreach (var column in view.Columns)
@@ -135,9 +145,11 @@ namespace DatabaseSchemaViewer
             var tableRoot = new TreeNode("Tables");
             treeRoot.Nodes.Add(tableRoot);
 
-            foreach (var table in schema.Tables)
+            foreach (var table in schema.Tables.OrderBy(x => x.SchemaOwner).ThenBy(x => x.Name))
             {
-                var tableNode = new TreeNode(table.Name);
+                var name = table.Name;
+                if (!string.IsNullOrEmpty(table.SchemaOwner)) name = table.SchemaOwner + "." + name;
+                var tableNode = new TreeNode(name);
                 tableRoot.Nodes.Add(tableNode);
                 foreach (var column in table.Columns)
                 {

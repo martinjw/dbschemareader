@@ -250,6 +250,11 @@ namespace DatabaseSchemaViewer
 
         private void CodeGenFormFormClosing(object sender, FormClosingEventArgs e)
         {
+            if (e.Cancel)
+            {
+                e.Cancel = false;
+                return;
+            }
             Properties.Settings.Default.Save();
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data.Common;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
@@ -24,16 +25,42 @@ namespace DatabaseSchemaViewer
         private void Form1_Load(object sender, EventArgs e)
         {
             DataProviders.SelectedValue = Properties.Settings.Default.Provider;
+            //add sample connection strings
+            contextMenuStrip1.Items.Clear();
+            contextMenuStrip1.Items.Add("Firebird (Employee)").Click += (s, ev) => FillConnectionString( @"User=SYSDBA;Password=masterkey;Database=C:\Program Files\Firebird\Firebird_2_1\examples\empbuild\EMPLOYEE.FDB;Server=localhost; Connection lifetime=15;Pooling=true");
+            contextMenuStrip1.Items.Add("MySQL (Northwind)").Click += (s, ev) => FillConnectionString( @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;");
+            contextMenuStrip1.Items.Add("MySQL (Sakila)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Sakila;Allow User Variables=True;", @"Sakila");
+            contextMenuStrip1.Items.Add("Oracle XE - TNS (HR)").Click += (s, ev) => FillConnectionString( @"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;", @"HR");
+            contextMenuStrip1.Items.Add("Oracle XE (HR)").Click += (s, ev) => FillConnectionString(
+                @"Data Source=XE;User Id=HR;Password=HR;", @"HR");
+            contextMenuStrip1.Items.Add("Postgresql (world)").Click += (s, ev) => FillConnectionString( @"Server=127.0.0.1;User id=postgres;password=sql;database=world;");
+            contextMenuStrip1.Items.Add("SQLite (Northwind)").Click += (s, ev) => FillConnectionString( @"Data Source=C:\Data\northwind.db;");
+            contextMenuStrip1.Items.Add("SQLite (Chinook)").Click += (s, ev) => FillConnectionString( @"Data Source=C:\Data\Chinook_Sqlite.sqlite;");
+            contextMenuStrip1.Items.Add("Sql Server Express (AdventureWorks)").Click += (s, ev) => FillConnectionString(
+                @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks");
+            contextMenuStrip1.Items.Add("Sql Server Express (Northwind)").Click += (s, ev) => FillConnectionString( @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind");
+            contextMenuStrip1.Items.Add("SqlServerCe (Chinook)").Click += (s, ev) => FillConnectionString( @"Data Source=""C:\Data\Chinook_SqlServerCompact.sdf"";");
+            //don't use the C:\Program Files\Microsoft SQL Server Compact Edition\v4.0\Samples version as you need admin rights
+            contextMenuStrip1.Items.Add("SqlServerCe (Northwind)").Click += (s, ev) => FillConnectionString( @"Data Source=""C:\Data\northwind.sdf"";");
         }
 
-        private void ConnectionStringValidating(object sender, CancelEventArgs e)
+        private void FillConnectionString(string connectionString)
+        {
+            FillConnectionString(connectionString, string.Empty);
+        }
+        private void FillConnectionString(string connectionString, string schema)
+        {
+            ConnectionString.Text = connectionString;
+            SchemaOwner.Text = schema;
+        }
+
+        private bool IsConnectionStringValid()
         {
             string connectionString = ConnectionString.Text.Trim();
             if (string.IsNullOrEmpty(connectionString))
             {
-                e.Cancel = true;
                 errorProvider1.SetError(ConnectionString, "Should not be empty");
-                return;
+                return false;
             }
             try
             {
@@ -43,19 +70,28 @@ namespace DatabaseSchemaViewer
             }
             catch (ArgumentException)
             {
-                e.Cancel = true;
                 errorProvider1.SetError(ConnectionString, "Invalid connection string");
-                return;
+                return false;
+            }
+            catch (ConfigurationErrorsException)
+            {
+                errorProvider1.SetError(DataProviders, "This provider isn't available");
+                return false;
             }
 
+            errorProvider1.SetError(DataProviders, string.Empty);
             errorProvider1.SetError(ConnectionString, string.Empty);
+            return true;
         }
 
         private void ReadSchemaClick(object sender, EventArgs e)
         {
-            StartWaiting();
+            if (!IsConnectionStringValid()) return;
+
             var connectionString = ConnectionString.Text.Trim();
             var providerName = DataProviders.SelectedValue.ToString();
+
+            StartWaiting();
             var rdr = new DatabaseReader(connectionString, providerName);
             var owner = SchemaOwner.Text.Trim();
             if (!string.IsNullOrEmpty(owner))
@@ -132,6 +168,11 @@ namespace DatabaseSchemaViewer
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (e.Cancel)
+            {
+                e.Cancel = false;
+                return;
+            }
             Properties.Settings.Default.Provider = DataProviders.SelectedValue.ToString();
 
             Properties.Settings.Default.Save();

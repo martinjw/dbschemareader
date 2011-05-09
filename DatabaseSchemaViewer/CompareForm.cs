@@ -22,6 +22,9 @@ namespace DatabaseSchemaViewer
         private void CompareFormLoad(object sender, EventArgs e)
         {
             labOriginDatabase.Text = _databaseSchema.ConnectionString;
+
+            contextMenuStrip1.Items.Clear();
+            contextMenuStrip1.Items.Add(_databaseSchema.ConnectionString).Click += (s, ev) => ConnectionString.Text = _databaseSchema.ConnectionString;
         }
 
 
@@ -122,6 +125,15 @@ namespace DatabaseSchemaViewer
             progressBar1.Value = 0;
             progressBar1.Visible = true;
             Update();
+        }
+
+        private void CompareForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.Cancel)
+            {
+                e.Cancel = false;
+                return;
+            }
         }
     }
 }

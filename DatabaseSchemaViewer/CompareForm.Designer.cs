@@ -41,6 +41,7 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.groupBox1.SuspendLayout();
             this.Database.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -63,9 +64,9 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(12, 285);
+            this.progressBar1.Location = new System.Drawing.Point(35, 285);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(658, 23);
+            this.progressBar1.Size = new System.Drawing.Size(632, 23);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBar1.TabIndex = 4;
             this.progressBar1.Visible = false;
@@ -96,6 +97,7 @@
             // 
             this.ConnectionString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.ConnectionString.ContextMenuStrip = this.contextMenuStrip1;
             this.ConnectionString.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CompareConnectionString", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.ConnectionString.Location = new System.Drawing.Point(23, 44);
             this.ConnectionString.Name = "ConnectionString";
@@ -148,6 +150,11 @@
             // 
             this.errorProvider1.ContainerControl = this;
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
             // CompareForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -161,6 +168,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CompareForm";
             this.Text = "CompareForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CompareForm_FormClosing);
             this.Load += new System.EventHandler(this.CompareFormLoad);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -187,5 +195,6 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
     }
 }
