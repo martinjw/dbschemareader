@@ -11,7 +11,7 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.Migrations
 {
     [TestClass]
     public class MigrationOracleTest
@@ -26,6 +26,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var tableName = MigrationCommon.FindFreeTableName(ProviderName, ConnectionString);
             var migration = new DdlGeneratorFactory(SqlType.Oracle).MigrationGenerator();
 
+            //Oracle DDL isn't transactional. If it fails, you'll find my test tables in your database.
             MigrationCommon.ExecuteScripts(ProviderName, ConnectionString, tableName, migration);
         }
     }

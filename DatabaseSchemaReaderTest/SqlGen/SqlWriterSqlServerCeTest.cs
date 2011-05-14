@@ -133,6 +133,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var writer = new SqlWriter(table, SqlType.SqlServerCe);
             //can't insert identity, and no output parameters
             var sql = writer.InsertSqlWithoutOutputParameter();
+            Console.WriteLine(sql);
             int identity;
 
             //run generated sql

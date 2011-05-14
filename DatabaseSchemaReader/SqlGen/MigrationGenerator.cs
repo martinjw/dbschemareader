@@ -175,7 +175,7 @@ namespace DatabaseSchemaReader.SqlGen
             return sql + _sqlFormatProvider.RunStatements();
         }
 
-        public string DropProcedure(DatabaseStoredProcedure procedure)
+        public virtual string DropProcedure(DatabaseStoredProcedure procedure)
         {
             return string.Format(CultureInfo.InvariantCulture,
                 "DROP PROCEDURE {0}{1};",
@@ -183,7 +183,40 @@ namespace DatabaseSchemaReader.SqlGen
                 Escape(procedure.Name));
         }
 
-        public string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)
+
+        public virtual string DropFunction(DatabaseFunction function)
+        {
+            return "DROP FUNCTION " + SchemaPrefix(function.SchemaOwner) + Escape(function.Name) + ";";
+        }
+
+        public virtual string AddFunction(DatabaseFunction function)
+        {
+            var sql = function.Sql;
+            if (string.IsNullOrEmpty(sql))
+            {
+                //without the sql, we can't do anything
+                return "-- add function " + function.Name;
+            }
+            if (sql.TrimStart().StartsWith("FUNCTION ", StringComparison.OrdinalIgnoreCase))
+            {
+                return "CREATE " + sql + _sqlFormatProvider.RunStatements();
+            }
+            //helpfully, SqlServer includes the create statement
+            //MySQL doesn't, so this will need to be overridden
+            return sql + _sqlFormatProvider.RunStatements();
+        }
+
+        public virtual string DropPackage(DatabasePackage package)
+        {
+            return null; //only applies to Oracle, so see it's override
+        }
+
+        public virtual string AddPackage(DatabasePackage package)
+        {
+            return null; //only applies to Oracle, so see it's override
+        }
+
+        public virtual string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
             return string.Format(CultureInfo.InvariantCulture,
                 "DROP INDEX {0}{1} ON {2};",
@@ -192,44 +225,14 @@ namespace DatabaseSchemaReader.SqlGen
                 TableName(databaseTable));
         }
 
-        public string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
+        public virtual string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
         {
-            //sqlserver: 
-            //CREATE TRIGGER (triggerName) 
-            //ON (tableName) 
-            //(FOR | AFTER | INSTEAD OF) ( [INSERT ] [ , ] [ UPDATE ] [ , ] [ DELETE ])
-            //AS (sql_statement); GO 
-
-            //oracle: 
-            //CREATE (OR REPLACE) TRIGGER (triggerName) 
-            //(BEFORE | AFTER | INSTEAD OF) ([INSERT ] [ OR ] [ UPDATE ] [ OR ] [ DELETE ])
-            //ON (tableName) 
-            //(FOR EACH ROW)
-            //(sql_statement); /
-
-            //sqlite: 
-            //CREATE TRIGGER (triggerName) (IF NOT EXITSTS)
-            //(BEFORE | AFTER | INSTEAD OF) ([INSERT ] | [ UPDATE (OF Column) ] | [ DELETE ])
-            //ON (tableName) 
-            //(FOR EACH ROW)
-            //BEGIN (sql_statement); END
-
-            //mysql
-            //CREATE TRIGGER (triggerName)
-            //(BEFORE | AFTER) ([INSERT ] | [ UPDATE (OF Column) ] | [ DELETE ])
-            //ON (tableName) 
-            //FOR EACH ROW (sql_statement)
-
             return string.Format(CultureInfo.InvariantCulture,
-                @"CREATE TRIGGER {0}{1} {2} ON {3} 
-BEGIN 
-{4}
-END;",
+                @"-- CREATE TRIGGER {0}{1} {2} ON {3};",
                 SchemaPrefix(trigger.SchemaOwner),
                 Escape(trigger.Name),
                 trigger.TriggerEvent,
-                TableName(databaseTable),
-                trigger.TriggerBody);
+                TableName(databaseTable));
         }
         protected virtual string DropTriggerFormat
         {
@@ -248,10 +251,30 @@ END;",
             return _sqlFormatProvider.RunStatements();
         }
 
+        public string DropSequence(DatabaseSequence sequence)
+        {
+            return "DROP SEQUENCE " + SchemaPrefix(sequence.SchemaOwner) + Escape(sequence.Name) + ";";
+        }
+
+        public string AddSequence(DatabaseSequence sequence)
+        {
+            //amazingly SQLServer Denali has the same syntax as Oracle. http://msdn.microsoft.com/en-us/library/ff878091%28v=SQL.110%29.aspx
+            return "CREATE SEQUENCE " + SchemaPrefix(sequence.SchemaOwner) + Escape(sequence.Name) + " INCREMENT BY " + sequence.IncrementBy + " MINVALUE " + sequence.MininumValue + " MAXVALUE " + sequence.MaximumValue + ";";
+        }
+
         public string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
+            if (index.Columns.Count == 0)
+            {
+                //IndexColumns errors 
+                return "-- add index " + index.Name + " (unknown columns)";
+            }
+            //we could plug in "CLUSTERED" or "PRIMARY XML" from index.IndexType here
+            var indexType = index.IsUnique ? "UNIQUE " : string.Empty;
+
             return string.Format(CultureInfo.InvariantCulture,
-                "CREATE INDEX {0} ON {1}({2})",
+                "CREATE {0}INDEX {1} ON {2}({3})",
+                indexType, //must have trailing space
                 Escape(index.Name),
                 TableName(databaseTable),
                 GetColumnList(index.Columns.Select(i => i.Name))) + LineEnding();
@@ -334,12 +357,15 @@ END;",
         /// <summary>
         /// Gets the escaped table name (prefixed with schema if present)
         /// </summary>
-        private string TableName(DatabaseTable databaseTable)
+        protected string TableName(DatabaseTable databaseTable)
         {
             return SchemaPrefix(databaseTable.SchemaOwner) + Escape(databaseTable.Name);
         }
 
-        private string SchemaPrefix(string schema)
+        /// <summary>
+        /// If there is a schema (eg "dbo") returns it escaped with trailing dot ("[dbo].")
+        /// </summary>
+        protected string SchemaPrefix(string schema)
         {
             if (!_noSchema && !string.IsNullOrEmpty(schema))
             {

@@ -8,7 +8,7 @@ using DatabaseSchemaReader.SqlGen;
 using DatabaseSchemaReader.Utilities;
 using DatabaseSchemaReaderTest.IntegrationTests;
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.Migrations
 {
     class MigrationCommon
     {
@@ -97,6 +97,18 @@ namespace DatabaseSchemaReaderTest.SqlGen
             return constraint;
         }
 
+        public static DatabaseIndex CreateUniqueIndex(DatabaseColumn column, string name)
+        {
+            //a unique index isn't exactly the same as a unique constraint (except in MySql)
+            var index = new DatabaseIndex
+            {
+                Name = "UI_" + name,
+                IsUnique = true
+            };
+            index.Columns.Add(column);
+            return index;
+        }
+
         public static DatabaseConstraint CreateForeignKey(DatabaseTable databaseTable)
         {
             var constraint = new DatabaseConstraint
@@ -113,16 +125,19 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             var table = CreateTestTable(tableName);
             var newColumn = CreateNewColumn();
-            var unqiueConstraint = CreateUniqueConstraint(newColumn);
+            var uniqueConstraint = CreateUniqueConstraint(newColumn);
             var fk = CreateForeignKey(table);
+            var index = CreateUniqueIndex(newColumn, tableName);
 
             var createTable = migrationGenerator.AddTable(table);
             var addColumn = migrationGenerator.AddColumn(table, newColumn);
-            var addUniqueConstraint = migrationGenerator.AddConstraint(table, unqiueConstraint);
+            var addUniqueConstraint = migrationGenerator.AddConstraint(table, uniqueConstraint);
             var addForeignKey = migrationGenerator.AddConstraint(table, fk);
+            var addUniqueIndex = migrationGenerator.AddIndex(table, index);
 
+            var dropUniqueIndex = migrationGenerator.DropIndex(table, index);
             var dropForeignKey = migrationGenerator.DropConstraint(table, fk);
-            var dropUniqueConstraint = migrationGenerator.DropConstraint(table, unqiueConstraint);
+            var dropUniqueConstraint = migrationGenerator.DropConstraint(table, uniqueConstraint);
             var dropColumn = migrationGenerator.DropColumn(table, newColumn);
             var dropTable = migrationGenerator.DropTable(table);
 
@@ -137,63 +152,38 @@ namespace DatabaseSchemaReaderTest.SqlGen
                     using (var tx = con.BeginTransaction())
                     {
                         cmd.Transaction = tx;
-                        foreach (var statement in ScriptTools.SplitBySemiColon(createTable))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, createTable);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(addColumn))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addColumn);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(addUniqueConstraint))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addUniqueConstraint);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(addForeignKey))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addForeignKey);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(dropForeignKey))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, dropForeignKey);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(dropUniqueConstraint))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, dropUniqueConstraint);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(dropColumn))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        //now we've dropped the unique constraint, add a unique index
+                        Execute(cmd, addUniqueIndex);
 
-                        foreach (var statement in ScriptTools.SplitBySemiColon(dropTable))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, dropUniqueIndex);
+
+                        Execute(cmd, dropColumn);
+
+                        Execute(cmd, dropTable);
                     }
                 }
+            }
+        }
+
+        private static void Execute(DbCommand cmd, string statements)
+        {
+            foreach (var statement in ScriptTools.SplitBySemiColon(statements))
+            {
+                Console.WriteLine("Executing " + statement);
+                cmd.CommandText = statement;
+                cmd.ExecuteNonQuery();
             }
         }
 

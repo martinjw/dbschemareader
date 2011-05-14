@@ -46,5 +46,20 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var orders = schema.FindTableByName("country");
             Assert.AreEqual(15, orders.Columns.Count);
         }
+
+        [TestMethod]
+        public void TestDevartPostgreSql()
+        {
+            //http://www.devart.com/dotconnect/postgresql/docs/MetaData.html
+            const string providername = "Devart.Data.PostgreSql";
+            const string connectionString = @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
+            var schema = dbReader.ReadAll();
+            var orders = schema.FindTableByName("country");
+            Assert.AreEqual(15, orders.Columns.Count);
+        }
     }
 }

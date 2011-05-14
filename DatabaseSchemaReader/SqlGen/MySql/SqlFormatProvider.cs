@@ -14,7 +14,7 @@
 
         public string RunStatements()
         {
-            return string.Empty;
+            return ";";
         }
     }
 }

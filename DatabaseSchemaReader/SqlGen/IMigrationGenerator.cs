@@ -122,5 +122,46 @@ namespace DatabaseSchemaReader.SqlGen
         /// Runs a batch of statements. May be needed before a script block.
         /// </summary>
         string RunStatements();
+
+        /// <summary>
+        /// Drops the sequence.
+        /// </summary>
+        /// <param name="sequence">The sequence.</param>
+        /// <returns></returns>
+        string DropSequence(DatabaseSequence sequence);
+
+        /// <summary>
+        /// Adds the sequence.
+        /// </summary>
+        /// <param name="sequence">The sequence.</param>
+        /// <returns></returns>
+        string AddSequence(DatabaseSequence sequence);
+
+        /// <summary>
+        /// Drops the function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns></returns>
+        string DropFunction(DatabaseFunction function);
+        /// <summary>
+        /// Adds the function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns></returns>
+        string AddFunction(DatabaseFunction function);
+
+        /// <summary>
+        /// Drops the package.
+        /// </summary>
+        /// <param name="package">The package.</param>
+        /// <returns></returns>
+        string DropPackage(DatabasePackage package);
+
+        /// <summary>
+        /// Adds the package.
+        /// </summary>
+        /// <param name="package">The package.</param>
+        /// <returns></returns>
+        string AddPackage(DatabasePackage package);
     }
 }

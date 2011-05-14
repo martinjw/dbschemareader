@@ -87,6 +87,8 @@ namespace DatabaseSchemaReader
             //override how column parameters are formatted
             if (FormatParameter != null)
                 columnName = FormatParameter(columnName);
+            //spaces are valid in escaped names, but definitely not in parameters
+            if (columnName.Contains(" ")) columnName = columnName.Replace(" ", "");
 
             if (!InStoredProcedure)
                 columnName = _parameterPrefix + columnName;

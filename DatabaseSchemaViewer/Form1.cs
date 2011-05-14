@@ -17,9 +17,11 @@ namespace DatabaseSchemaViewer
             InitializeComponent();
 
             var dt = DbProviderFactories.GetFactoryClasses();
+            const string invariantname = "InvariantName";
+            dt.DefaultView.Sort = invariantname;
             DataProviders.DataSource = dt;
-            DataProviders.DisplayMember = "InvariantName";
-            DataProviders.ValueMember = "InvariantName";
+            DataProviders.DisplayMember = invariantname;
+            DataProviders.ValueMember = invariantname;
         }
 
         private void Form1_Load(object sender, EventArgs e)

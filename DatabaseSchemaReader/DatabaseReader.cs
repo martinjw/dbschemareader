@@ -147,7 +147,10 @@ namespace DatabaseSchemaReader
             DataTable uks = _sr.UniqueKeys(null);
             DataTable ids = _sr.IdentityColumns(null);
             DataTable cks = _sr.CheckConstraints(null);
-            DataTable indexes = _sr.IndexColumns(null);
+            DataTable indexes = _sr.Indexes(null);
+            DataTable indexColumns = _sr.IndexColumns(null);
+            //MySql and Postgresql only allow indexcolumns per table
+            bool noIndexColumns = (indexColumns.Rows.Count == 0 && indexes.Rows.Count > 0);
             DataTable triggers = _sr.Triggers(null);
             List<DatabaseTable> tables = SchemaConverter.Tables(dt);
             tables.Sort(delegate(DatabaseTable t1, DatabaseTable t2)
@@ -159,12 +162,17 @@ namespace DatabaseSchemaReader
             {
                 table.Columns.AddRange(SchemaConverter.Columns(cols, table.Name));
                 List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(pks, ConstraintType.PrimaryKey, table.Name);
-                if (pkConstraints.Count > 0) table.PrimaryKey = pkConstraints[0];
+                PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
                 table.ForeignKeys = SchemaConstraintConverter.Constraints(fks, ConstraintType.ForeignKey, table.Name);
                 SchemaConstraintConverter.AddForeignKeyColumns(fkcols, table);
                 table.UniqueKeys = SchemaConstraintConverter.Constraints(uks, ConstraintType.UniqueKey, table.Name);
                 table.CheckConstraints = SchemaConstraintConverter.Constraints(cks, ConstraintType.Check, table.Name);
-                table.Indexes = SchemaConstraintConverter.Indexes(indexes, table.Name);
+                SchemaConstraintConverter.Indexes(indexes, table.Name, table.Indexes);
+                if (noIndexColumns)
+                {
+                    indexColumns = _sr.IndexColumns(table.Name);
+                }
+                SchemaConstraintConverter.Indexes(indexColumns, table.Name, table.Indexes);
                 SchemaConstraintConverter.AddIdentity(ids, table);
                 table.Triggers.Clear();
                 table.Triggers.AddRange(SchemaConstraintConverter.Triggers(triggers, table.Name));
@@ -223,7 +231,7 @@ namespace DatabaseSchemaReader
             if (ds.Tables.Contains("Primary_Keys"))
             {
                 List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["Primary_Keys"], ConstraintType.PrimaryKey);
-                if (pkConstraints.Count > 0) table.PrimaryKey = pkConstraints[0];
+                PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
             }
             if (ds.Tables.Contains("Foreign_Keys"))
                 table.ForeignKeys = SchemaConstraintConverter.Constraints(ds.Tables["Foreign_Keys"], ConstraintType.ForeignKey);

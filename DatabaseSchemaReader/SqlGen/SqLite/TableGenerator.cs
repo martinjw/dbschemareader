@@ -24,7 +24,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
         protected override string WriteDataType(DatabaseColumn column)
         {
             var type = DataTypeWriter.SqLiteDataType(column);
-            if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)
+            if (column.IsPrimaryKey && (Table.PrimaryKey == null || Table.PrimaryKey.Columns.Count == 1))
             {
                 type += " PRIMARY KEY";
                 if (column.IsIdentity) type += " AUTOINCREMENT";
@@ -76,8 +76,19 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                 var referencedTable = foreignKey.ReferencedTable(Table.DatabaseSchema);
                 //can't find the table. Don't write the fk reference.
                 if (referencedTable == null) continue;
-
-                var refColumnList = GetColumnList(referencedTable.PrimaryKey.Columns);
+                string refColumnList;
+                if (referencedTable.PrimaryKey == null && referencedTable.PrimaryKeyColumn != null)
+                {
+                    refColumnList = referencedTable.PrimaryKeyColumn.Name;
+                }
+                else if (referencedTable.PrimaryKey == null)
+                {
+                    continue; //can't find the primary key
+                }
+                else
+                {
+                    refColumnList = GetColumnList(referencedTable.PrimaryKey.Columns);
+                }
 
                 columnList.Add(string.Format(CultureInfo.InvariantCulture,
                     "FOREIGN KEY ({0}) REFERENCES {1} ({2})",

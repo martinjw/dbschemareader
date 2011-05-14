@@ -121,7 +121,7 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.SqlServer:
                     return new SqlServer.SqlServerMigrationGenerator();
                 case SqlType.Oracle:
-                    return new MigrationGenerator(SqlType.Oracle);
+                    return new Oracle.OracleMigrationGenerator();
                 case SqlType.MySql:
                     return new MySql.MySqlMigrationGenerator();
                 case SqlType.SQLite:

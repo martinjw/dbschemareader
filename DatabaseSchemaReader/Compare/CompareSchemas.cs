@@ -74,6 +74,10 @@ namespace DatabaseSchemaReader.Compare
             var comparedTables = SchemaTablesSorter.TopologicalSort(_compareSchema);
             compareTables.Execute(_baseSchema.Tables, comparedTables);
 
+            //compare sequences
+            var compareSequences = new CompareSequences(sb, _writer);
+            compareSequences.Execute(_baseSchema.Sequences, _compareSchema.Sequences);
+
             //compare views
             var compareViews = new CompareViews(sb, _writer);
             compareViews.Execute(_baseSchema.Views, _compareSchema.Views);
@@ -81,10 +85,12 @@ namespace DatabaseSchemaReader.Compare
             //compare stored procedures and functions
             var compareProcedures = new CompareProcedures(sb, _writer);
             compareProcedures.Execute(_baseSchema.StoredProcedures,_compareSchema.StoredProcedures);
+            var compareFunctions = new CompareFunctions(sb, _writer);
+            compareFunctions.Execute(_baseSchema.Functions, _compareSchema.Functions);
 
             //compare packages
-
-            //compare sequences
+            var comparePackages = new ComparePackages(sb, _writer);
+            comparePackages.Execute(_baseSchema.Packages, _compareSchema.Packages);
 
             return sb.ToString();
         }

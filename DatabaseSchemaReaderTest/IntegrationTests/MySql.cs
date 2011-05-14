@@ -15,7 +15,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     /// <summary>
     /// These are INTEGRATION tests using databases.
     /// The following databases should exist on localhost:
-    ///     MySQL with Northwind (user id root, passwod mysql)
+    ///     MySQL with sakila (user id root, passwod mysql)
     /// </summary>
     [TestClass]
     public class MySql
@@ -24,16 +24,16 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void MySqlTest()
         {
             const string providername = "MySql.Data.MySqlClient";
-            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
+            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
-            var orders = schema.FindTableByName("Orders");
-            Assert.AreEqual(14, orders.Columns.Count);
+            var orders = schema.FindTableByName("country");
+            Assert.AreEqual(3, orders.Columns.Count);
 
-            var table = dbReader.Table("Orders");
-            Assert.AreEqual(14, table.Columns.Count);
+            var table = dbReader.Table("city");
+            Assert.AreEqual(4, table.Columns.Count);
         }
     }
 }

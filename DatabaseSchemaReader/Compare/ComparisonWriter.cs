@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 
@@ -153,5 +154,36 @@ namespace DatabaseSchemaReader.Compare
         {
             return _migration.RunStatements();
         }
+
+        public string DropSequence(DatabaseSequence sequence)
+        {
+            return _migration.DropSequence(sequence);
+        }
+
+        public string AddSequence(DatabaseSequence sequence)
+        {
+            return _migration.AddSequence(sequence);
+        }
+
+        public string DropFunction(DatabaseFunction function)
+        {
+            return _migration.DropFunction(function);
+        }
+
+        public string AddFunction(DatabaseFunction function)
+        {
+            return _migration.AddFunction(function);
+        }
+
+        public string AddPackage(DatabasePackage package)
+        {
+            return _migration.AddPackage(package);
+        }
+
+        public string DropPackage(DatabasePackage package)
+        {
+            return _migration.DropPackage(package);
+        }
+
     }
 }

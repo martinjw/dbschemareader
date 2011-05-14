@@ -37,6 +37,10 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(tableKey)) tableKey = "FOREIGN_KEY_TABLE_NAME";
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "PRIMARY_KEY_TABLE_NAME";
             if (!dt.Columns.Contains(refersToKey)) refersToKey = "PRIMARY_KEY_CONSTRAINT_NAME";
+            //devart.data.postgresql
+            if (!dt.Columns.Contains(key)) key = "NAME";
+            if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
+
             //firebird
             if (!dt.Columns.Contains(key)) key = "PK_NAME";
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "REFERENCED_TABLE_NAME";
@@ -120,7 +124,7 @@ namespace DatabaseSchemaReader.Conversion
 
             string rule = row[deleteUpdateRuleKey].ToString();
             if (!string.IsNullOrEmpty(rule) && !rule.Equals("NO ACTION", StringComparison.OrdinalIgnoreCase))
-               return rule;
+                return rule;
             return null;
         }
 
@@ -131,9 +135,12 @@ namespace DatabaseSchemaReader.Conversion
         {
             if (dt.Rows.Count == 0) return; //no rows to add
             if (table.ForeignKeys.Count == 0) return; //no fks to match
-            const string key = "CONSTRAINT_NAME";
-            const string tableKey = "TABLE_NAME";
-            const string columnKey = "COLUMN_NAME";
+            string key = "CONSTRAINT_NAME";
+            string tableKey = "TABLE_NAME";
+            string columnKey = "COLUMN_NAME";
+            if (!dt.Columns.Contains(key)) key = "foreignkey";
+            if (!dt.Columns.Contains(tableKey)) tableKey = "table";
+            if (!dt.Columns.Contains(columnKey)) columnKey = "name";
 
             //this could be more than one table, so filter the view
             dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + table.Name + "'";
@@ -166,8 +173,22 @@ namespace DatabaseSchemaReader.Conversion
         public static List<DatabaseIndex> Indexes(DataTable dt, string tableName)
         {
             List<DatabaseIndex> list = new List<DatabaseIndex>();
+            Indexes(dt, tableName, list);
+            return list;
+        }
+
+        /// <summary>
+        /// Converts the "IndexColumns" DataTable into <see cref="DatabaseIndex"/> objects
+        /// </summary>
+        public static void Indexes(DataTable dt, string tableName, List<DatabaseIndex> list)
+        {
+            if (list == null) list = new List<DatabaseIndex>();
+
             //Npgsql
-            if (dt.Columns.Count == 0) return list;
+            if (dt.Columns.Count == 0) return;
+
+            string uniqueKey = "UNIQUE";
+            string primaryKey = "PRIMARY";
 
             //sql server
             string key = "CONSTRAINT_NAME";
@@ -177,21 +198,39 @@ namespace DatabaseSchemaReader.Conversion
             string ordinalKey = "ORDINAL_POSITION";
             //oracle
             string typekey = "INDEX_TYPE";
-            if (!dt.Columns.Contains(typekey)) typekey = null; //sql server n/a
+            if (!dt.Columns.Contains(schemaKey)) schemaKey = "INDEX_SCHEMA";
+            if (!dt.Columns.Contains(schemaKey)) schemaKey = "OWNER";
             if (!dt.Columns.Contains(key)) key = "INDEX_NAME";
             if (!dt.Columns.Contains(schemaKey)) schemaKey = "INDEX_OWNER";
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "COLUMN_POSITION";
+            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "UNIQUENESS";
             //mysql
             if (!dt.Columns.Contains(schemaKey)) schemaKey = "INDEX_SCHEMA";
             //Devart.Data.Oracle
-            if (!dt.Columns.Contains(key)) key = "INDEX";
+            if (!dt.Columns.Contains(key)) key = "INDEX"; //IndexColumns
+            if (!dt.Columns.Contains(key)) key = "NAME"; //Indexes
+            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "ISUNIQUE";
             if (!dt.Columns.Contains(schemaKey)) schemaKey = "SCHEMA";
             if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "POSITION";
             if (!dt.Columns.Contains(columnKey)) columnKey = "NAME";
-
+            //devart.data.postgresql
+            if (!dt.Columns.Contains(key)) key = "indexname";
+            //sqlite
+            if (!dt.Columns.Contains(primaryKey)) primaryKey = "PRIMARY_KEY";
             //postgresql
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
+            //sqlserver 2008 - HEAP CLUSTERED NONCLUSTERED XML SPATIAL
+            //sys_indexes has is_unique but it's not exposed. 
+            if (!dt.Columns.Contains(typekey)) typekey = "type_desc";
+
+            //pre 2008 sql server
+            if (!dt.Columns.Contains(typekey)) typekey = null;
+
+            //indexes and not indexcolumns
+            if (!dt.Columns.Contains(columnKey)) columnKey = null;
+            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
+            if (!dt.Columns.Contains(primaryKey)) primaryKey = null;
 
             if (!string.IsNullOrEmpty(ordinalKey))
                 dt.DefaultView.Sort = ordinalKey;
@@ -212,9 +251,19 @@ namespace DatabaseSchemaReader.Conversion
                     c.TableName = row[tableKey].ToString();
                     if (typekey != null)
                         c.IndexType = row[typekey].ToString();
+                    if (FindBoolean(row, uniqueKey, "UNIQUE"))
+                    {
+                        c.IsUnique = true;
+                        c.IndexType = "UNIQUE";
+                    }
+                    if (FindBoolean(row, primaryKey, string.Empty))
+                        c.IndexType = "PRIMARY"; //primary keys should be unique too
                     list.Add(c);
                 }
+                if (string.IsNullOrEmpty(columnKey)) continue;
+
                 string colName = row[columnKey].ToString();
+                if (string.IsNullOrEmpty(colName)) continue;
                 DatabaseColumn column = new DatabaseColumn();
                 column.Name = colName;
                 if (!string.IsNullOrEmpty(ordinalKey))
@@ -224,7 +273,18 @@ namespace DatabaseSchemaReader.Conversion
                 }
                 c.Columns.Add(column);
             }
-            return list;
+        }
+
+        private static bool FindBoolean(DataRowView row, string key, string trueText)
+        {
+            if (key == null) return false;
+            var o = row[key];
+            if (o == DBNull.Value) return false;
+            if (o.GetType() == typeof(string))
+            {
+                return (o.Equals(trueText));
+            }
+            return (bool)o;
         }
 
         /// <summary>
@@ -244,7 +304,7 @@ namespace DatabaseSchemaReader.Conversion
             if (dt.Columns.Count == 0) return list;
             //sql server
             string key = "TRIGGER_NAME";
-            const string tableKey = "TABLE_NAME";
+            string tableKey = "TABLE_NAME";
             string bodyKey = "TRIGGER_BODY";
             string eventKey = "TRIGGERING_EVENT";
             string triggerTypeKey = "TRIGGER_TYPE";
@@ -253,11 +313,15 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = null;
             if (!dt.Columns.Contains(bodyKey)) bodyKey = "SOURCE";
             if (!dt.Columns.Contains(eventKey)) eventKey = "TRIGGER_TYPE";
+            if (!dt.Columns.Contains(bodyKey)) bodyKey = "BODY";
 
+            if (!dt.Columns.Contains(tableKey)) tableKey = null;
+            if (!dt.Columns.Contains(bodyKey)) bodyKey = null;
+            if (!dt.Columns.Contains(eventKey)) eventKey = null;
             if (!dt.Columns.Contains(triggerTypeKey)) triggerTypeKey = null;
 
             //this could be more than one table, so filter the view
-            if (!string.IsNullOrEmpty(tableName))
+            if (!string.IsNullOrEmpty(tableName) && !string.IsNullOrEmpty(tableKey))
                 dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
 
             foreach (DataRowView row in dt.DefaultView)
@@ -272,9 +336,12 @@ namespace DatabaseSchemaReader.Conversion
                         c.SchemaOwner = row[ownerKey].ToString();
                     list.Add(c);
                 }
-                c.TableName = row[tableKey].ToString();
-                c.TriggerBody = row[bodyKey].ToString();
-                c.TriggerEvent = row[eventKey].ToString();
+                if (!string.IsNullOrEmpty(tableKey))
+                    c.TableName = row[tableKey].ToString();
+                if (!string.IsNullOrEmpty(bodyKey))
+                    c.TriggerBody = row[bodyKey].ToString();
+                if (!string.IsNullOrEmpty(eventKey))
+                    c.TriggerEvent = row[eventKey].ToString();
                 if (triggerTypeKey != null)
                 {
                     c.TriggerType = row[triggerTypeKey].ToString();

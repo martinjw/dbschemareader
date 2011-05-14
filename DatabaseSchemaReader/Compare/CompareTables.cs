@@ -59,7 +59,8 @@ namespace DatabaseSchemaReader.Compare
                 compareIndexes.Execute(databaseTable, match);
 
                 //triggers
-                //databaseTable.Triggers
+                var compareTriggers = new CompareTriggers(_sb, _writer);
+                compareTriggers.Execute(databaseTable, match);
             }
 
 
@@ -69,6 +70,10 @@ namespace DatabaseSchemaReader.Compare
                 foreach (var foreignKey in databaseTable.ForeignKeys)
                 {
                     _sb.AppendLine(_writer.AddConstraint(databaseTable, foreignKey));
+                }
+                foreach (var trigger in databaseTable.Triggers)
+                {
+                    _sb.AppendLine(_writer.AddTrigger(databaseTable, trigger));
                 }
             }
         }

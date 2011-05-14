@@ -76,11 +76,12 @@
     <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
     <Compile Include="Procedures\RunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlGen\MigrationMySqlTest.cs" />
-    <Compile Include="SqlGen\MigrationSQLiteTest.cs" />
-    <Compile Include="SqlGen\MigrationCommon.cs" />
-    <Compile Include="SqlGen\MigrationOracleTest.cs" />
-    <Compile Include="SqlGen\MigrationTest.cs" />
+    <Compile Include="SqlGen\Migrations\MigrationSqlServerCeTest.cs" />
+    <Compile Include="SqlGen\Migrations\MigrationMySqlTest.cs" />
+    <Compile Include="SqlGen\Migrations\MigrationSQLiteTest.cs" />
+    <Compile Include="SqlGen\Migrations\MigrationCommon.cs" />
+    <Compile Include="SqlGen\Migrations\MigrationOracleTest.cs" />
+    <Compile Include="SqlGen\Migrations\MigrationSqlServerTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerCeTest.cs" />
     <Compile Include="SqlGen\SqlWriterCommonTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerTest.cs" />

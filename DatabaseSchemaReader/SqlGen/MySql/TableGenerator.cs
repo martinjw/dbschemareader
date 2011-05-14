@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
@@ -70,7 +71,33 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 
             sb.AppendLine(constraintWriter.WriteUniqueKeys());
             sb.AppendLine(constraintWriter.WriteCheckConstraints());
+
+            AddIndexes(sb);
+
             return sb.ToString();
+        }
+        protected virtual IMigrationGenerator CreateMigrationGenerator()
+        {
+            return new MySqlMigrationGenerator();
+        }
+        private void AddIndexes(StringBuilder sb)
+        {
+            if (!Table.Indexes.Any()) return;
+
+            var migration = CreateMigrationGenerator();
+            foreach (var index in Table.Indexes)
+            {
+                if (index.IsUnqiueKeyIndex(Table)) continue;
+
+                if (index.Columns.Count == 0)
+                {
+                    //IndexColumns errors 
+                    sb.AppendLine("-- add index " + index.Name + " (unknown columns)");
+                    continue;
+                }
+
+                sb.AppendLine(migration.AddIndex(Table, index));
+            }
         }
 
         private static bool ExcludeCheckConstraint(DatabaseConstraint check)

@@ -39,6 +39,8 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.Oracle - TABLE_NAME is NAME
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            //Devart.Data.PostgreSql
+            if (!dt.Columns.Contains(typeKey)) typeKey = "tabletype";
 
             foreach (DataRow row in dt.Rows)
             {
@@ -126,8 +128,8 @@ namespace DatabaseSchemaReader.Conversion
         {
             List<DatabaseColumn> list = new List<DatabaseColumn>();
             //sql server
-            const string key = "column_name";
-            const string tableKey = "table_name";
+            string key = "column_name";
+            string tableKey = "table_name";
             string ordinalKey = "ordinal_position";
             string datatypeKey = "data_type";
             string nullableKey = "is_nullable";
@@ -144,17 +146,25 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(precisionKey)) precisionKey = "precision";
             if (!dt.Columns.Contains(scaleKey)) scaleKey = "scale";
             if (!dt.Columns.Contains(dateTimePrecision)) dateTimePrecision = null;
-            if (!dt.Columns.Contains(defaultKey)) defaultKey = null; //not in Oracle catalog
             //sqlite
             string autoIncrementKey = "AUTOINCREMENT";
             string primaryKeyKey = "PRIMARY_KEY";
             string uniqueKey = "UNIQUE";
-            if (!dt.Columns.Contains(autoIncrementKey)) autoIncrementKey = null;
-            if (!dt.Columns.Contains(primaryKeyKey)) primaryKeyKey = null;
-            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
             //firebird
             if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "column_data_type";
             if (!dt.Columns.Contains(lengthKey)) lengthKey = "COLUMN_SIZE";
+            //devart.Data.PostgreSql
+            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "position";
+            if (!dt.Columns.Contains(tableKey)) tableKey = "table";
+            if (!dt.Columns.Contains(key)) key = "name";
+            if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "typename";
+            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "isunique";
+            if (!dt.Columns.Contains(defaultKey)) defaultKey = "defaultvalue";
+
+            if (!dt.Columns.Contains(defaultKey)) defaultKey = null; //not in Oracle catalog
+            if (!dt.Columns.Contains(autoIncrementKey)) autoIncrementKey = null;
+            if (!dt.Columns.Contains(primaryKeyKey)) primaryKeyKey = null;
+            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
 
             CreateDefaultView(dt, ordinalKey, tableKey, tableName);
 
@@ -181,7 +191,7 @@ namespace DatabaseSchemaReader.Conversion
                     column.IsPrimaryKey = true;
                 if (!string.IsNullOrEmpty(autoIncrementKey) && (bool)row[autoIncrementKey])
                     column.IsIdentity = true;
-                if (!string.IsNullOrEmpty(uniqueKey) && (bool)row[uniqueKey])
+                if (!string.IsNullOrEmpty(uniqueKey) && CastToBoolean(row, uniqueKey))
                     column.IsUniqueKey = true;
 
                 list.Add(column);
@@ -196,17 +206,21 @@ namespace DatabaseSchemaReader.Conversion
             if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(new[] { ' ', '\'', '=' });
         }
 
+        private static bool CastToBoolean(DataRowView row, string key)
+        {
+            string nullable = row[key].ToString();
+            //could be Y, YES, N, NO, true, false.
+            if (nullable.StartsWith("Y", StringComparison.OrdinalIgnoreCase) || nullable.StartsWith("T", StringComparison.OrdinalIgnoreCase)) //Y or YES
+                return true;
+            if (nullable.StartsWith("N", StringComparison.OrdinalIgnoreCase) || nullable.StartsWith("F", StringComparison.OrdinalIgnoreCase)) //N or NO
+                return false;
+            //sqlite has a boolean type
+            return ((bool)row[key]);
+        }
+
         private static void AddNullability(DataRowView row, string nullableKey, DatabaseColumn column)
         {
-            string nullable = row[nullableKey].ToString();
-            //could be Y, YES, N, NO, true, false.
-            if (nullable.StartsWith("Y", StringComparison.OrdinalIgnoreCase)) //Y or YES
-                column.Nullable = true;
-            else if (nullable.StartsWith("N", StringComparison.OrdinalIgnoreCase)) //N or NO
-                column.Nullable = false;
-            //sqlite has a boolean type
-            else if ((bool)row[nullableKey])
-                column.Nullable = true;
+            column.Nullable = CastToBoolean(row, nullableKey);
         }
 
         private static void CreateDefaultView(DataTable dt, string ordinalKey, string tableKey, string tableName)

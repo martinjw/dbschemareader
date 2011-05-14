@@ -367,16 +367,16 @@ AND OBJECT_TYPE  = 'FUNCTION'";
                         //sqlServer2000 InformationSchema cuts the source after 4k, so use sq_help
                         //http://msdn.microsoft.com/en-us/library/ms178618.aspx type is sproc, function or CLR procedure
                         sqlCommand = @"SELECT
-	OBJECT_SCHEMA_NAME(o.object_id) AS ""OWNER"",
-	OBJECT_NAME(sm.object_id) AS ""NAME"",
-	o.type AS ""TYPE"", 
-	sm.definition As ""TEXT""
+    OBJECT_SCHEMA_NAME(o.object_id) AS ""OWNER"",
+    OBJECT_NAME(sm.object_id) AS ""NAME"",
+    o.type AS ""TYPE"", 
+    sm.definition As ""TEXT""
 FROM sys.sql_modules AS sm
-	JOIN sys.objects AS o 
-		ON sm.object_id = o.object_id
+    JOIN sys.objects AS o 
+        ON sm.object_id = o.object_id
 WHERE (o.type = N'P' OR o.type = N'FN' OR o.type='PC' OR o.type='V')
-	AND (OBJECT_SCHEMA_NAME(o.object_id) = @schemaOwner OR @schemaOwner IS NULL)
-	AND (OBJECT_NAME(sm.object_id) = @name OR @name IS NULL)
+    AND (OBJECT_SCHEMA_NAME(o.object_id) = @schemaOwner OR @schemaOwner IS NULL)
+    AND (OBJECT_NAME(sm.object_id) = @name OR @name IS NULL)
 ORDER BY o.type;";
                     }
                     else if (IsOracle)
@@ -565,29 +565,29 @@ LEFT OUTER JOIN all_constraints cons2
 WHERE 
    (cols.table_name = :tableName OR :tableName IS NULL) AND 
    (cols.owner = :schemaOwner OR :schemaOwner IS NULL) AND 
-	cons.constraint_type = :constraint_type
+    cons.constraint_type = :constraint_type
 ORDER BY cols.table_name, cols.position";
             }
             else if (IsSqlServerCe4)
             {
                 sqlCommand = @"SELECT
-	KEYCOLUMNS.CONSTRAINT_NAME, 
-	KEYCOLUMNS.TABLE_NAME, 
-	KEYCOLUMNS.COLUMN_NAME, 
-	KEYCOLUMNS.ORDINAL_POSITION,
-	REFS.UNIQUE_CONSTRAINT_NAME, 
-	REFS.UNIQUE_CONSTRAINT_TABLE_NAME AS FK_TABLE,
-	REFS.DELETE_RULE,
+    KEYCOLUMNS.CONSTRAINT_NAME, 
+    KEYCOLUMNS.TABLE_NAME, 
+    KEYCOLUMNS.COLUMN_NAME, 
+    KEYCOLUMNS.ORDINAL_POSITION,
+    REFS.UNIQUE_CONSTRAINT_NAME, 
+    REFS.UNIQUE_CONSTRAINT_TABLE_NAME AS FK_TABLE,
+    REFS.DELETE_RULE,
     REFS.UPDATE_RULE
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS CONS
-	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KEYCOLUMNS
-	 ON CONS.CONSTRAINT_NAME = KEYCOLUMNS.CONSTRAINT_NAME
-	LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS REFS
-	 ON CONS.CONSTRAINT_NAME = REFS.CONSTRAINT_NAME
+    INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KEYCOLUMNS
+     ON CONS.CONSTRAINT_NAME = KEYCOLUMNS.CONSTRAINT_NAME
+    LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS REFS
+     ON CONS.CONSTRAINT_NAME = REFS.CONSTRAINT_NAME
 WHERE 
-	(CONS.TABLE_NAME = @tableName OR @tableName IS NULL) AND 
-	(@schemaOwner IS NOT NULL OR @schemaOwner IS NULL) AND 
-	CONS.CONSTRAINT_TYPE = @constraint_type";
+    (CONS.TABLE_NAME = @tableName OR @tableName IS NULL) AND 
+    (@schemaOwner IS NOT NULL OR @schemaOwner IS NULL) AND 
+    CONS.CONSTRAINT_TYPE = @constraint_type";
             }
             else if (IsMySql) //in MySQL, different constraints for different tables can have the same name (eg Primary)
             {
@@ -601,28 +601,28 @@ cons2.table_name AS fk_table,
 refs.delete_rule AS delete_rule,
 refs.update_rule AS update_rule
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
-	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS keycolumns
-		ON (cons.constraint_catalog = keycolumns.constraint_catalog
-			OR cons.constraint_catalog IS NULL) AND
-		cons.constraint_schema = keycolumns.constraint_schema AND
-		cons.constraint_name = keycolumns.constraint_name AND
+    INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS keycolumns
+        ON (cons.constraint_catalog = keycolumns.constraint_catalog
+            OR cons.constraint_catalog IS NULL) AND
+        cons.constraint_schema = keycolumns.constraint_schema AND
+        cons.constraint_name = keycolumns.constraint_name AND
         cons.table_name = keycolumns.table_name
-	LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS refs
-		ON (cons.constraint_catalog = refs.constraint_catalog
-			OR cons.constraint_catalog IS NULL) AND
-		cons.constraint_schema = refs.constraint_schema AND
-		cons.constraint_name = refs.constraint_name AND
+    LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS refs
+        ON (cons.constraint_catalog = refs.constraint_catalog
+            OR cons.constraint_catalog IS NULL) AND
+        cons.constraint_schema = refs.constraint_schema AND
+        cons.constraint_name = refs.constraint_name AND
         cons.table_name = refs.table_name
-	LEFT OUTER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons2
-		ON (cons2.constraint_catalog = refs.constraint_catalog
-			OR cons2.constraint_catalog IS NULL) AND
-		cons2.constraint_schema = refs.constraint_schema AND
-		cons2.constraint_name = refs.unique_constraint_name AND
+    LEFT OUTER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons2
+        ON (cons2.constraint_catalog = refs.constraint_catalog
+            OR cons2.constraint_catalog IS NULL) AND
+        cons2.constraint_schema = refs.constraint_schema AND
+        cons2.constraint_name = refs.unique_constraint_name AND
         cons2.table_name = refs.referenced_table_name
 WHERE 
-	(keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
-	(cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
-	cons.constraint_type = @constraint_type";
+    (keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
+    (cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
+    cons.constraint_type = @constraint_type";
             }
             else //if (IsSqlServer) //use SQL92 INFORMATION_SCHEMA
             {
@@ -636,26 +636,26 @@ cons2.table_name AS fk_table,
 refs.delete_rule AS delete_rule,
 refs.update_rule AS update_rule
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
-	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS keycolumns
-		ON (cons.constraint_catalog = keycolumns.constraint_catalog
-			OR cons.constraint_catalog IS NULL) AND
-		cons.constraint_schema = keycolumns.constraint_schema AND
-		cons.constraint_name = keycolumns.constraint_name AND
+    INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS keycolumns
+        ON (cons.constraint_catalog = keycolumns.constraint_catalog
+            OR cons.constraint_catalog IS NULL) AND
+        cons.constraint_schema = keycolumns.constraint_schema AND
+        cons.constraint_name = keycolumns.constraint_name AND
         cons.table_name = keycolumns.table_name
-	LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS refs
-		ON (cons.constraint_catalog = refs.constraint_catalog
-			OR cons.constraint_catalog IS NULL) AND
-		cons.constraint_schema = refs.constraint_schema AND
-		cons.constraint_name = refs.constraint_name
-	LEFT OUTER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons2
-		ON (cons2.constraint_catalog = refs.constraint_catalog
-			OR cons2.constraint_catalog IS NULL) AND
-		cons2.constraint_schema = refs.constraint_schema AND
-		cons2.constraint_name = refs.unique_constraint_name
+    LEFT OUTER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS refs
+        ON (cons.constraint_catalog = refs.constraint_catalog
+            OR cons.constraint_catalog IS NULL) AND
+        cons.constraint_schema = refs.constraint_schema AND
+        cons.constraint_name = refs.constraint_name
+    LEFT OUTER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons2
+        ON (cons2.constraint_catalog = refs.constraint_catalog
+            OR cons2.constraint_catalog IS NULL) AND
+        cons2.constraint_schema = refs.constraint_schema AND
+        cons2.constraint_name = refs.unique_constraint_name
 WHERE 
-	(keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
-	(cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
-	cons.constraint_type = @constraint_type";
+    (keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
+    (cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
+    cons.constraint_type = @constraint_type";
 
             }
             return sqlCommand;
@@ -672,10 +672,10 @@ cons.table_name,
 cons.search_condition AS Expression
 FROM all_constraints cons
  WHERE 
-	(cons.table_name = :tableName OR :tableName IS NULL) AND 
-	(cons.owner = :schemaOwner OR :schemaOwner IS NULL) AND 
-	 cons.constraint_type = 'C' AND 
-	 cons.generated <> 'GENERATED NAME'
+    (cons.table_name = :tableName OR :tableName IS NULL) AND 
+    (cons.owner = :schemaOwner OR :schemaOwner IS NULL) AND 
+     cons.constraint_type = 'C' AND 
+     cons.generated <> 'GENERATED NAME'
 ORDER BY cons.table_name, cons.constraint_name";
             }
             else if (IsSqlServer) //use SQL92 INFORMATION_SCHEMA
@@ -691,9 +691,9 @@ INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS cons2
   cons2.constraint_schema = cons.constraint_schema AND
   cons2.constraint_name = cons.constraint_name
 WHERE 
-	(cons.table_name = @tableName OR @tableName IS NULL) AND 
-	(cons.constraint_catalog = @schemaOwner OR @schemaOwner IS NULL) AND 
-	 cons.constraint_type = 'CHECK'
+    (cons.table_name = @tableName OR @tableName IS NULL) AND 
+    (cons.constraint_catalog = @schemaOwner OR @schemaOwner IS NULL) AND 
+     cons.constraint_type = 'CHECK'
 ORDER BY cons.table_name, cons.constraint_name";
             }
             return sqlCommand;

@@ -18,9 +18,11 @@ namespace CopyToSQLite
             InitializeComponent();
 
             var dt = DbProviderFactories.GetFactoryClasses();
+            const string invariantname = "InvariantName";
+            dt.DefaultView.Sort = invariantname;
             DataProviders.DataSource = dt;
-            DataProviders.DisplayMember = "InvariantName";
-            DataProviders.ValueMember = "InvariantName";
+            DataProviders.DisplayMember = invariantname;
+            DataProviders.ValueMember = invariantname;
             if (dt.Select("[InvariantName] = 'System.Data.SqlServerCe.4.0'").Length == 1)
             {
                 WarningLabel.Text = WarningLabel.Text.Replace("SQLite", "SQLite or SqlServer CE 4");

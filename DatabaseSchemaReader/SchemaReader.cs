@@ -207,6 +207,49 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Gets the indexes. 
+        /// </summary>
+        /// <param name="tableName">Name of the table (or null for all tables).</param>
+        /// <returns></returns>
+        public DataTable Indexes(string tableName)
+        {
+            using (DbConnection conn = Factory.CreateConnection())
+            {
+                conn.ConnectionString = ConnectionString;
+                conn.Open();
+                const string collectionName = "Indexes";
+                if (!SchemaCollectionExists(conn, collectionName))
+                {
+                        return new DataTable(collectionName);
+                }
+
+                return RunGetSchema(conn, collectionName, tableName);
+            }
+        }
+
+        private DataTable RunGetSchema(DbConnection conn, string collectionName, string tableName)
+        {
+            string[] restrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
+            try
+            {
+                return conn.GetSchema(collectionName, restrictions);
+            }
+            catch (DbException exception)
+            {
+                //Postgresql throws this nasty error with a restriction. We'll carry on.
+                Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
+                return new DataTable(collectionName);
+            }
+            catch (SqlNullValueException exception)
+            {
+                //MySQL can't run this without a table (it does a SHOW INDEX FROM table so you get the above error)
+                Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
+                return new DataTable(collectionName);
+            }
+        }
+
+
+        /// <summary>
         /// Gets the indexed columns.
         /// </summary>
         /// <param name="tableName">Name of the table.</param>
@@ -225,24 +268,7 @@ namespace DatabaseSchemaReader
                         return new DataTable(collectionName);
                 }
 
-                string[] indexColRestrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
-                try
-                {
-                    return conn.GetSchema(collectionName, indexColRestrictions);
-                }
-                catch (DbException exception)
-                {
-                    //Postgresql throws this nasty error with a restriction. We'll carry on.
-                    Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
-                    return new DataTable(collectionName);
-                }
-                catch (SqlNullValueException exception)
-                {
-                    //MySQL throws this nasty error with a restriction. We'll carry on.
-                    Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
-                    return new DataTable(collectionName);
-                }
-
+                return RunGetSchema(conn, collectionName, tableName);
             }
         }
 
@@ -342,12 +368,14 @@ namespace DatabaseSchemaReader
         public virtual DataTable Functions()
         {
             const string collectionName = "Functions";
-            if (!IsOracle) return new DataTable(collectionName); //in sql server, functions are in the sprocs collection.
+            //if (!IsOracle) return new DataTable(collectionName); //in sql server, functions are in the sprocs collection.
 
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
+                if (!SchemaCollectionExists(conn, collectionName))
+                    return new DataTable(collectionName);
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }

@@ -163,6 +163,8 @@ namespace DatabaseSchemaViewer
 
         private static void FillIndexes(DatabaseTable table, TreeNode tableNode)
         {
+            if (!table.Indexes.Any()) return;
+
             var indexRoot = new TreeNode("Indexes");
             tableNode.Nodes.Add(indexRoot);
             foreach (var index in table.Indexes)
@@ -216,16 +218,14 @@ namespace DatabaseSchemaViewer
 
         private static void FillTriggers(DatabaseTable table, TreeNode tableNode)
         {
-            if (table.Triggers.Count > 0)
+            if (!table.Triggers.Any()) return;
+            var triggerRoot = new TreeNode("Triggers");
+            tableNode.Nodes.Add(triggerRoot);
+            foreach (var trigger in table.Triggers)
             {
-                var triggerRoot = new TreeNode("Triggers");
-                tableNode.Nodes.Add(triggerRoot);
-                foreach (var trigger in table.Triggers)
-                {
-                    var triggerNode = new TreeNode(trigger.Name);
-                    triggerNode.ToolTipText = trigger.TriggerBody;
-                    triggerRoot.Nodes.Add(triggerNode);
-                }
+                var triggerNode = new TreeNode(trigger.Name);
+                triggerNode.ToolTipText = trigger.TriggerBody;
+                triggerRoot.Nodes.Add(triggerNode);
             }
         }
 
@@ -235,19 +235,22 @@ namespace DatabaseSchemaViewer
             sb.Append(column.Name);
             sb.Append(" ");
             sb.Append(column.DbDataType);
-            if (column.DataType.IsString)
+            if (column.DataType != null)
             {
-                sb.Append("(");
-                sb.Append(column.Length);
-                sb.Append(")");
-            }
-            else if (column.DataType.IsNumeric)
-            {
-                sb.Append("(");
-                sb.Append(column.Precision);
-                sb.Append(",");
-                sb.Append(column.Scale);
-                sb.Append(")");
+                if (column.DataType.IsString)
+                {
+                    sb.Append("(");
+                    sb.Append(column.Length);
+                    sb.Append(")");
+                }
+                else if (column.DataType.IsNumeric)
+                {
+                    sb.Append("(");
+                    sb.Append(column.Precision);
+                    sb.Append(",");
+                    sb.Append(column.Scale);
+                    sb.Append(")");
+                }
             }
             if (column.IsPrimaryKey)
             {

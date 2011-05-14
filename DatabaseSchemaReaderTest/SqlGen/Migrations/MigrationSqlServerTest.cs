@@ -15,16 +15,16 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.Migrations
 {
     [TestClass]
-    public class MigrationTest
+    public class MigrationSqlServerTest
     {
         private const string ProviderName = "System.Data.SqlClient";
         private const string ConnectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
         private readonly DbProviderFactory _factory;
 
-        public MigrationTest()
+        public MigrationSqlServerTest()
         {
             _factory = DbProviderFactories.GetFactory(ProviderName);
         }
@@ -40,12 +40,15 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var newColumn = MigrationCommon.CreateNewColumn();
             var unqiueConstraint = MigrationCommon.CreateUniqueConstraint(newColumn);
             var fk = MigrationCommon.CreateForeignKey(table);
+            var index = MigrationCommon.CreateUniqueIndex(newColumn, tableName);
 
             var createTable = migration.AddTable(table);
             var addColumn = migration.AddColumn(table, newColumn);
             var addUniqueConstraint = migration.AddConstraint(table, unqiueConstraint);
             var addForeignKey = migration.AddConstraint(table, fk);
+            var addUniqueIndex = migration.AddIndex(table, index);
 
+            var dropUniqueIndex = migration.DropIndex(table, index);
             var dropForeignKey = migration.DropConstraint(table, fk);
             var dropUniqueConstraint = migration.DropConstraint(table, unqiueConstraint);
             var dropColumn = migration.DropColumn(table, newColumn);
@@ -72,57 +75,36 @@ namespace DatabaseSchemaReaderTest.SqlGen
                             cmd.ExecuteNonQuery();
                         }
 
-                        foreach (var statement in ScriptTools.SplitScript(addColumn))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addColumn);
 
-                        foreach (var statement in ScriptTools.SplitScript(addUniqueConstraint))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addUniqueConstraint);
 
-                        foreach (var statement in ScriptTools.SplitScript(addForeignKey))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addForeignKey);
 
 
-                        foreach (var statement in ScriptTools.SplitScript(dropForeignKey))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, dropForeignKey);
 
-                        foreach (var statement in ScriptTools.SplitScript(dropUniqueConstraint))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, dropUniqueConstraint);
 
-                        foreach (var statement in ScriptTools.SplitScript(dropColumn))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, addUniqueIndex);
 
-                        foreach (var statement in ScriptTools.SplitScript(dropTable))
-                        {
-                            Console.WriteLine("Executing " + statement);
-                            cmd.CommandText = statement;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Execute(cmd, dropUniqueIndex);
+
+                        Execute(cmd, dropColumn);
+
+                        Execute(cmd, dropTable);
                     }
                 }
+            }
+        }
+
+        private static void Execute(DbCommand cmd, string statements)
+        {
+            foreach (var statement in ScriptTools.SplitScript(statements))
+            {
+                Console.WriteLine("Executing " + statement);
+                cmd.CommandText = statement;
+                cmd.ExecuteNonQuery();
             }
         }
     }

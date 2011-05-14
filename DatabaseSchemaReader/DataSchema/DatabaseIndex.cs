@@ -62,6 +62,14 @@ namespace DatabaseSchemaReader.DataSchema
         public string IndexType { get; set; }
 
         /// <summary>
+        /// Gets or sets whether this is a unique index
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this index is unique; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsUnique { get; set; }
+
+        /// <summary>
         /// Gets the indexed columns.
         /// </summary>
         public List<DatabaseColumn> Columns { get { return _columns; } }
