@@ -43,6 +43,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             var scale = column.Scale;
             var length = column.Length;
 
+            dataType = PostgreSqlToSqlServerConversion(dataType);
             //oracle to sql server translation
             dataType = SqlServerToOracleConversion(dataType, providerType, length);
 
@@ -62,6 +63,27 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             if (column.DataType != null)
                 providerType = column.DataType.ProviderDbType;
             return providerType;
+        }
+
+        private static string PostgreSqlToSqlServerConversion(string dataType)
+        {
+            //PostgreSql specific types and the SqlServer equivalent
+            if (dataType == "VARCHAR") return "NVARCHAR2";
+            if (dataType == "CHARACTER VARYING") return "NVARCHAR2";
+            if (dataType == "CHARACTER") return "NCHAR";
+            if (dataType == "BPCHAR") return "NCHAR";
+            if (dataType == "INTEGER") return "NUMBER(10)";
+            if (dataType == "INT4") return "NUMBER(10)";
+            if (dataType == "SERIAL") return "NUMBER(10)";
+            if (dataType == "BIGSERIAL") return "BIGINT";
+            if (dataType == "INT8") return "BIGINT";
+            if (dataType == "INT2") return "SMALLINT";
+            if (dataType == "FLOAT4") return "REAL";
+            if (dataType == "BYTEA") return "BLOB";
+            if (dataType == "UUID") return "RAW(16)";
+            if (dataType == "OID") return "BLOB";
+            if (dataType == "XML") return "XMLTYPE";
+            return dataType;
         }
 
         private static string SqlServerToOracleConversion(string dataType, int providerType, int? length)

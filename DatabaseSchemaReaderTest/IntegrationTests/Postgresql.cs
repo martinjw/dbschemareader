@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader;
+﻿using System;
+using DatabaseSchemaReader;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -27,7 +28,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         //			<remove invariant="Npgsql" />
         //			<add name="Npgsql Data Provider" invariant="Npgsql"
         //				 description=".Net Framework Data Provider for Postgresql Server"
-        //				 type="Npgsql.NpgsqlFactory, Npgsql, Version=2.0.11.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7"/>
+        //				 type="Npgsql.NpgsqlFactory, Npgsql, Version=2.0.11.91, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7"/>
         //		</DbProviderFactories>
         //	</system.data>
         //also reference Npgsql.dll and Mono.Security.dll
@@ -58,6 +59,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var dbReader = new DatabaseReader(connectionString, providername);
             dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
             var schema = dbReader.ReadAll();
+
             var orders = schema.FindTableByName("country");
             Assert.AreEqual(15, orders.Columns.Count);
         }

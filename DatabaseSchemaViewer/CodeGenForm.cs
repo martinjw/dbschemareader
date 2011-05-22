@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaViewer
@@ -30,6 +31,14 @@ namespace DatabaseSchemaViewer
             RadioCheckedChanged(this, EventArgs.Empty);
 
             errorProvider1.SetError(txtFilePath, string.Empty);
+        }
+
+
+        private void CodeGenFormLoad(object sender, EventArgs e)
+        {
+            var sqlType = ProviderToSqlType.Convert(_databaseSchema.Provider);
+            if (sqlType.HasValue)
+                cmbDialect.SelectedItem = sqlType;
         }
 
         private void GenerateClick(object sender, EventArgs e)
@@ -257,7 +266,5 @@ namespace DatabaseSchemaViewer
             }
             Properties.Settings.Default.Save();
         }
-
-
     }
 }

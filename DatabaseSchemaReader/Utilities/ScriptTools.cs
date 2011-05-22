@@ -39,7 +39,8 @@ namespace DatabaseSchemaReader.Utilities
             var separator = new[] { ";" };
             return script.Split(separator, StringSplitOptions.RemoveEmptyEntries)
                 //remove line feeds
-                .Where(s => s.Trim().Length > 0)
+                .Select(s=> s.Trim())
+                .Where(s => s.Length > 0)
                 .ToArray();
         }
     }

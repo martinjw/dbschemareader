@@ -3,6 +3,8 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Globalization;
+using DatabaseSchemaReader.Conversion;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader
 {
@@ -37,9 +39,6 @@ namespace DatabaseSchemaReader
         //}
         //#endregion
 
-        protected readonly string ConnectionString;
-        protected readonly DbProviderFactory Factory;
-        protected readonly string ProviderName;
         private DataTable _metadata;
         private SchemaRestrictions _restrictions;
 
@@ -59,36 +58,43 @@ namespace DatabaseSchemaReader
 
             ConnectionString = connectionString;
             ProviderName = providerName;
+            ProviderType = ProviderToSqlType.Convert(providerName);
             Factory = DbProviderFactories.GetFactory(ProviderName);
         }
 
-        /// <summary>
-        /// There are a number of special-cases for Oracle, so we check the provider string
-        /// </summary>
-        internal bool IsOracle
-        {
-            get
-            {
-                //System.Data.OracleClient and Oracle.DataAccess.Client
-                return (ProviderName.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1);
-                //System.Data.OleDb could be using Provider=msdaora (or Provider=OraOLEDB.Oracle) but the schema collections are more limited
-            }
-        }
-        internal bool IsMySql
-        {
-            get
-            {
-                //MySql
-                return (ProviderName.Equals("MySql.Data.MySqlClient", StringComparison.OrdinalIgnoreCase));
-            }
-        }
 
         /// <summary>
         /// Gets or sets the owner (for Oracle) /schema (for SqlServer) / database (MySql). Always set it with Oracle; if you use other than dbo in SqlServer you should also set it. 
         /// If it is null or empty, all owners are returned.
         /// </summary>
+        /// 
         public string Owner { get; set; }
 
+        /// <summary>
+        /// Gets the connection string.
+        /// </summary>
+        public string ConnectionString { get; private set; }
+
+        /// <summary>
+        /// Gets the invariant name of the provider.
+        /// </summary>
+        /// <value>
+        /// The name of the provider.
+        /// </value>
+        public string ProviderName { get; private set; }
+
+        /// <summary>
+        /// Gets the type of the provider (if a known type)
+        /// </summary>
+        /// <value>
+        /// The type of the provider.
+        /// </value>
+        public SqlType? ProviderType { get; private set; }
+
+        /// <summary>
+        /// Gets the DbProviderFactory.
+        /// </summary>
+        protected internal DbProviderFactory Factory { get; private set; }
 
         /// <summary>
         /// DataTable of all users
@@ -126,16 +132,19 @@ namespace DatabaseSchemaReader
         /// Get all data for a specified table name.
         /// </summary>
         /// <param name="tableName">Name of the table. Oracle names can be case sensitive.</param>
-        /// <returns>A dataset containing the tables: Columns, Indexes, IndexColumns</returns>
+        /// <returns>A dataset containing the tables: Columns, Indexes, IndexColumns, PrimaryKeys, ForeignKeys, ForeignKeyColumns</returns>
         public virtual DataSet Table(string tableName)
         {
             var ds = new DataSet();
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
 
-                LoadTable(tableName, ds, conn);
+                LoadTable(tableName, ds, connection);
+                ds.Tables.Add(PrimaryKeys(tableName, connection));
+                ds.Tables.Add(ForeignKeys(tableName, connection));
+                ds.Tables.Add(ForeignKeyColumns(tableName, connection));
             }
             return ds;
         }
@@ -152,15 +161,12 @@ namespace DatabaseSchemaReader
             if (cols.Rows.Count == 0) return; //no columns found
             ds.Tables.Add(cols);
 
-            string[] indexRestrictions = SchemaRestrictions.ForTable(connection, "Indexes", tableName);
-            ds.Tables.Add(connection.GetSchema("Indexes", indexRestrictions));
-
-            const string collectionName = "IndexColumns";
-            if (SchemaCollectionExists(connection, collectionName))
-            {
-                string[] indexColRestrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
-                ds.Tables.Add(connection.GetSchema(collectionName, indexColRestrictions));
-            }
+            var indexes = Indexes(tableName, connection);
+            ds.Tables.Add(indexes);
+            var indexColumns = IndexColumns(tableName, connection);
+            //if indexColumns isn't available it returns indexes again
+            if (indexColumns.TableName != indexes.TableName)
+                ds.Tables.Add(indexColumns);
         }
 
         /// <summary>
@@ -217,14 +223,19 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                const string collectionName = "Indexes";
-                if (!SchemaCollectionExists(conn, collectionName))
-                {
-                        return new DataTable(collectionName);
-                }
-
-                return RunGetSchema(conn, collectionName, tableName);
+                return Indexes(tableName, conn);
             }
+        }
+
+        private DataTable Indexes(string tableName, DbConnection conn)
+        {
+            const string collectionName = "Indexes";
+            if (!SchemaCollectionExists(conn, collectionName))
+            {
+                return new DataTable(collectionName);
+            }
+
+            return RunGetSchema(conn, collectionName, tableName);
         }
 
         private DataTable RunGetSchema(DbConnection conn, string collectionName, string tableName)
@@ -260,16 +271,21 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collectionName = "IndexColumns";
-                if (!SchemaCollectionExists(conn, collectionName))
-                {
-                    collectionName = "Indexes";
-                    if (!SchemaCollectionExists(conn, collectionName))
-                        return new DataTable(collectionName);
-                }
-
-                return RunGetSchema(conn, collectionName, tableName);
+                return IndexColumns(tableName, conn);
             }
+        }
+
+        private DataTable IndexColumns(string tableName, DbConnection conn)
+        {
+            string collectionName = "IndexColumns";
+            if (!SchemaCollectionExists(conn, collectionName))
+            {
+                collectionName = "Indexes";
+                if (!SchemaCollectionExists(conn, collectionName))
+                    return new DataTable(collectionName);
+            }
+
+            return RunGetSchema(conn, collectionName, tableName);
         }
 
         /// <summary>
@@ -283,13 +299,24 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                const string collectionName = "PrimaryKeys";
-                if (!SchemaCollectionExists(conn, collectionName))
-                    return new DataTable(collectionName);
-
-                string[] restrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
-                return conn.GetSchema(collectionName, restrictions);
+                return PrimaryKeys(tableName, conn);
             }
+        }
+
+        /// <summary>
+        /// Gets the primary keys
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable PrimaryKeys(string tableName, DbConnection connection)
+        {
+            const string collectionName = "PrimaryKeys";
+            if (!SchemaCollectionExists(connection, collectionName))
+                return new DataTable(collectionName);
+
+            string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
+            return connection.GetSchema(collectionName, restrictions);
         }
 
         /// <summary>
@@ -301,17 +328,30 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collectionName = "Foreign Keys";
-                if (!SchemaCollectionExists(conn, collectionName))
-                {
-                    collectionName = "ForeignKeys";
-                    if (!SchemaCollectionExists(conn, collectionName))
-                        return new DataTable(collectionName);
-                }
-
-                string[] restrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
-                return conn.GetSchema(collectionName, restrictions);
+                return ForeignKeys(tableName, conn);
             }
+        }
+
+        /// <summary>
+        /// Finds the foreign keys.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable ForeignKeys(string tableName, DbConnection connection)
+        {
+            string collectionName = "Foreign Keys";
+            if (!SchemaCollectionExists(connection, collectionName))
+            {
+                collectionName = "ForeignKeys";
+                if (!SchemaCollectionExists(connection, collectionName))
+                    return new DataTable(collectionName);
+            }
+            if (!SchemaCollectionExists(connection, collectionName))
+                return new DataTable(collectionName);
+
+            string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
+            return connection.GetSchema(collectionName, restrictions);
         }
 
         /// <summary>
@@ -324,13 +364,27 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                const string collectionName = "ForeignKeyColumns";
-                if (!SchemaCollectionExists(conn, collectionName))
-                    return new DataTable(collectionName);
-
-                string[] restrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
-                return conn.GetSchema(collectionName, restrictions);
+                return ForeignKeyColumns(tableName, conn);
             }
+        }
+
+        /// <summary>
+        /// Finds the foreign key columns.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable ForeignKeyColumns(string tableName, DbConnection connection)
+        {
+            const string collectionName = "ForeignKeyColumns";
+            if (!SchemaCollectionExists(connection, collectionName))
+                return new DataTable(collectionName);
+
+            string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
+            var dt = connection.GetSchema(collectionName, restrictions);
+            if (dt.TableName != collectionName) //devart postgresql returns a table called IndexColumns.
+                dt.TableName = collectionName;
+            return dt;
         }
 
         /// <summary>
@@ -339,22 +393,58 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public DataTable Sequences()
         {
-            const string name = "Sequences";
-            if (!IsOracle) return new DataTable(name);
+            const string collectionName = "Sequences";
 
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, name);
-                return conn.GetSchema(name, restrictions);
+                if (!SchemaCollectionExists(conn, collectionName))
+                    return new DataTable(collectionName);
+                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                return conn.GetSchema(collectionName, restrictions);
             }
         }
 
+        /// <summary>
+        /// Gets the triggers (if supported)
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        public DataTable Triggers(string tableName)
+        {
+            using (DbConnection conn = Factory.CreateConnection())
+            {
+                conn.ConnectionString = ConnectionString;
+                conn.Open();
+                return Triggers(tableName, conn);
+            }
+        }
+
+        /// <summary>
+        /// Gets the triggers (if supported)
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable Triggers(string tableName, DbConnection connection)
+        {
+            return GenericCollection("Triggers", connection, tableName);
+        }
+
+        /// <summary>
+        /// Retrieve a generic collection.
+        /// </summary>
+        /// <param name="collectionName">Name of the collection.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
         protected DataTable GenericCollection(string collectionName, DbConnection connection, string tableName)
         {
             if (SchemaCollectionExists(connection, collectionName))
+            {
                 return connection.GetSchema(collectionName, SchemaRestrictions.ForTable(connection, collectionName, tableName));
+            }
             DataTable dt = new DataTable(collectionName);
             dt.Locale = CultureInfo.InvariantCulture;
             return dt;
@@ -367,19 +457,30 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public virtual DataTable Functions()
         {
-            const string collectionName = "Functions";
             //if (!IsOracle) return new DataTable(collectionName); //in sql server, functions are in the sprocs collection.
 
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                if (!SchemaCollectionExists(conn, collectionName))
-                    return new DataTable(collectionName);
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
-                return conn.GetSchema(collectionName, restrictions);
+                return Functions(conn);
             }
         }
+
+        /// <summary>
+        /// Get all the functions (always empty except for Oracle, as the others mix stored procedures and functions).
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable Functions(DbConnection connection)
+        {
+            const string collectionName = "Functions";
+            if (!SchemaCollectionExists(connection, collectionName))
+                return new DataTable(collectionName);
+            string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
+            return connection.GetSchema(collectionName, restrictions);
+        }
+
         /// <summary>
         /// Get all the stored procedures (owner required for Oracle- otherwise null).
         /// NB: in oracle does not get stored procedures in packages
@@ -408,8 +509,9 @@ namespace DatabaseSchemaReader
                 conn.Open();
                 //different collections here- we could just if(IsOracle)
                 string collectionName = "ProcedureParameters";
-                if (IsMySql) collectionName = "Procedure Parameters";
-                else if (IsOracle) collectionName = "Arguments"; //Oracle, assume packages
+                if (!SchemaCollectionExists(conn, collectionName)) collectionName = "Arguments";
+                if (ProviderType == SqlType.MySql) collectionName = "Procedure Parameters";
+                else if (ProviderType == SqlType.Oracle) collectionName = "Arguments"; //Oracle, assume packages
                 if (!SchemaCollectionExists(conn, collectionName)) return new DataTable(collectionName);
 
                 string[] restrictions = SchemaRestrictions.ForRoutine(conn, collectionName, storedProcedureName);
@@ -428,7 +530,7 @@ namespace DatabaseSchemaReader
                 conn.Open();
                 //for SqlServer the restriction doesn't apply
                 string collectionName = "ProcedureParameters";
-                if (IsOracle)
+                if (ProviderType == SqlType.Oracle)
                     collectionName = "Arguments"; //Oracle, we assume you mean packages
                 if (!SchemaCollectionExists(conn, collectionName)) return new DataTable();
 
@@ -519,6 +621,7 @@ namespace DatabaseSchemaReader
                 }
             }
         }
+
         #endregion
 
         #region Implementation of IDisposable

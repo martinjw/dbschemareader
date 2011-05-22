@@ -62,7 +62,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             }
             foreach (var uniqueKey in Table.UniqueKeys)
             {
-                columnList.Add("UNIQUE KEY (" + GetColumnList(uniqueKey.Columns) + ")");
+                columnList.Add("UNIQUE (" + GetColumnList(uniqueKey.Columns) + ")");
             }
             foreach (var checkConstraint in Table.CheckConstraints)
             {

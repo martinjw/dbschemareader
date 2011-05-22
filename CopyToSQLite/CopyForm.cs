@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.IO;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
+using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace CopyToSQLite
@@ -145,16 +146,8 @@ namespace CopyToSQLite
 
         private SqlType OriginSqlType()
         {
-            if (_providerName.Equals("System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
-                return SqlType.SqlServer;
-            if (_providerName.Equals("System.Data.SQLite", StringComparison.OrdinalIgnoreCase))
-                return SqlType.SQLite;
-            if (_providerName.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1)
-                return SqlType.Oracle;
-            if (_providerName.Equals("MySql.Data.MySqlClient", StringComparison.OrdinalIgnoreCase))
-                return SqlType.MySql;
-            //could be something we don't have a direct syntax for
-            return SqlType.SqlServer;
+            var sqlType = ProviderToSqlType.Convert(_providerName);
+            return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
         }
 
         private void BackgroundDoWork(object sender, DoWorkEventArgs e)

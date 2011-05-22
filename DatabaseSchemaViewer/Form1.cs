@@ -70,6 +70,11 @@ namespace DatabaseSchemaViewer
                 var csb = factory.CreateConnectionStringBuilder();
                 csb.ConnectionString = connectionString;
             }
+            catch (NotSupportedException)
+            {
+                errorProvider1.SetError(ConnectionString, "Invalid connection string");
+                return false;
+            }
             catch (ArgumentException)
             {
                 errorProvider1.SetError(ConnectionString, "Invalid connection string");

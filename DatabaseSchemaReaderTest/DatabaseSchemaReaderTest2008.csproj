@@ -77,6 +77,8 @@
     <Compile Include="SqlGen\Migrations\MigrationSQLiteTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationSqlServerCeTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationSqlServerTest.cs" />
+    <Compile Include="SqlGen\PostgreSql\DataTypesTest.cs" />
+    <Compile Include="SqlGen\SqlWriterPostgreSqlTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerCeTest.cs" />
     <Compile Include="SqlGen\SqlWriterCommonTest.cs" />
     <Compile Include="SqlGen\SqlWriterSqlServerTest.cs" />

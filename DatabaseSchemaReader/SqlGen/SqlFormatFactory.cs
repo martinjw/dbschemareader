@@ -14,6 +14,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new MySql.SqlFormatProvider();
                 case SqlType.SQLite:
                     return new SqLite.SqlFormatProvider();
+                case SqlType.PostgreSql:
+                    return new PostgreSql.SqlFormatProvider();
                 default:
                     return new SqlServer.SqlFormatProvider();
             }

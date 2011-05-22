@@ -41,6 +41,8 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
             //Devart.Data.PostgreSql
             if (!dt.Columns.Contains(typeKey)) typeKey = "tabletype";
+            //Devart.Data.MySQL
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
 
             foreach (DataRow row in dt.Rows)
             {
@@ -48,7 +50,10 @@ namespace DatabaseSchemaReader.Conversion
                 //Sql server has base tables and views. Oracle has system and user
                 if (!type.Equals("TABLE", StringComparison.OrdinalIgnoreCase) &&
                     !type.Equals("BASE TABLE", StringComparison.OrdinalIgnoreCase) &&
-                   !type.Equals("User", StringComparison.OrdinalIgnoreCase)) continue;
+                   !type.Equals("User", StringComparison.OrdinalIgnoreCase) &&
+                   //MySQL types are something different
+                   !type.Equals("InnoDB", StringComparison.OrdinalIgnoreCase) &&
+                   !type.Equals("MyISAM", StringComparison.OrdinalIgnoreCase)) continue;
                 DatabaseTable t = new DatabaseTable();
                 t.Name = row[key].ToString();
                 //exclude Oracle bin tables
@@ -101,6 +106,8 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.Oracle
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            //Devart.Data.MySQL
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
 
             foreach (DataRow row in dt.Rows)
             {

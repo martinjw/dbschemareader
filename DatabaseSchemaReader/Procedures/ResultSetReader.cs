@@ -64,39 +64,46 @@ namespace DatabaseSchemaReader.Procedures
             if (_isOracle && !procedure.Arguments.Any(a => a.DatabaseDataType == "REF CURSOR"))
                 return;
 
-            var resultSet = new DataSet { Locale = CultureInfo.InvariantCulture };
-
-            using (DbConnection connection = _factory.CreateConnection())
+            using (var resultSet = new DataSet { Locale = CultureInfo.InvariantCulture })
             {
-                connection.ConnectionString = _schema.ConnectionString;
-                var command = _factory.CreateCommand();
-                command.Connection = connection;
-                command.CommandText = executionName;
-                command.CommandTimeout = 5;
-                command.CommandType = CommandType.StoredProcedure;
-
-                AddParameters(procedure, command);
-
-                connection.Open();
-                var tx = connection.BeginTransaction();
-                command.Transaction = tx;
-
-                var adapter = _factory.CreateDataAdapter();
-                adapter.SelectCommand = command;
-
-                try
+                using (DbConnection connection = _factory.CreateConnection())
                 {
-                    adapter.FillSchema(resultSet, SchemaType.Source);
+                    connection.ConnectionString = _schema.ConnectionString;
+                    using (var command = _factory.CreateCommand())
+                    {
+                        command.Connection = connection;
+                        command.CommandText = executionName;
+                        command.CommandTimeout = 5;
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        AddParameters(procedure, command);
+
+                        connection.Open();
+                        using (DbTransaction tx = connection.BeginTransaction())
+                        {
+                            command.Transaction = tx;
+
+                            using (DbDataAdapter adapter = _factory.CreateDataAdapter())
+                            {
+                                adapter.SelectCommand = command;
+
+                                try
+                                {
+                                    adapter.FillSchema(resultSet, SchemaType.Source);
+                                }
+                                catch (DbException exception)
+                                {
+                                    //ignore any db exceptions
+                                    Debug.WriteLine(executionName + Environment.NewLine
+                                                    + exception.Message);
+                                }
+                            }
+                            tx.Rollback();
+                        }
+                    }
                 }
-                catch (DbException exception)
-                {
-                    //ignore any db exceptions
-                    Debug.WriteLine(executionName + Environment.NewLine
-                        + exception.Message);
-                }
-                tx.Rollback();
+                UpdateProcedure(procedure, resultSet);
             }
-            UpdateProcedure(procedure, resultSet);
         }
 
         private static void UpdateProcedure(DatabaseStoredProcedure procedure, DataSet resultSet)

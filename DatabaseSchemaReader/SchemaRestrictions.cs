@@ -78,6 +78,8 @@ namespace DatabaseSchemaReader
                         paramName.Equals("OWNER", StringComparison.OrdinalIgnoreCase) ||
                         name.Equals("TABLE_SCHEMA", StringComparison.OrdinalIgnoreCase) ||
                         name.Equals("PROCEDURE_SCHEMA", StringComparison.OrdinalIgnoreCase) ||
+                        //Devart MySql
+                        name.Equals("DATABASENAME", StringComparison.OrdinalIgnoreCase) ||
                         //Postgresql uses "Schema"
                         name.Equals("Schema", StringComparison.OrdinalIgnoreCase))
                     {

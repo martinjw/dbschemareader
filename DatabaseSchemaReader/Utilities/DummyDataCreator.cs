@@ -44,7 +44,12 @@ namespace DatabaseSchemaReader.Utilities
                 return 1;
             }
             if (dataType.IsString)
-                return GenerateString(maxLength.GetValueOrDefault());
+            {
+                var length = maxLength.GetValueOrDefault();
+                //a weird error in the devart postgresql provider puts length of char fields in precision
+                if (length < 1 && precision > 1) length = precision.Value;
+                return GenerateString(length);
+            }
             if (dataType.IsDateTime)
                 return DateTime.Now;
             if (dataType.GetNetType() == typeof(byte[]))

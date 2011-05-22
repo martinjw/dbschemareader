@@ -62,7 +62,8 @@ namespace CopyToSQLite
                         foreach (var statement in ScriptTools.SplitBySemiColon(batch))
                         {
                             //ignore the drop table bit, which has no useful commands
-                            if (statement.Contains(Environment.NewLine + "-- DROP TABLE")) continue;
+                            if (statement.StartsWith("-- DROP TABLE", StringComparison.OrdinalIgnoreCase)) continue;
+                            if (statement.StartsWith("-- ALTER TABLE", StringComparison.OrdinalIgnoreCase)) continue;
                             cmd.CommandText = statement;
                             cmd.ExecuteNonQuery();
                         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -207,7 +208,7 @@ namespace DatabaseSchemaViewer
             constraintRoot.Nodes.Add(node);
             if (constraint.ConstraintType == ConstraintType.Check)
             {
-                constraintRoot.ToolTipText = constraint.Expression;
+                node.ToolTipText = constraint.Expression;
             }
             foreach (var column in constraint.Columns)
             {
@@ -240,7 +241,8 @@ namespace DatabaseSchemaViewer
                 if (column.DataType.IsString)
                 {
                     sb.Append("(");
-                    sb.Append(column.Length);
+                    var length = column.Length.GetValueOrDefault();
+                    sb.Append(length != -1? length.ToString(CultureInfo.InvariantCulture) : "MAX");
                     sb.Append(")");
                 }
                 else if (column.DataType.IsNumeric)

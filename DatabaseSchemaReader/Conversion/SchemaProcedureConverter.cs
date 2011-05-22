@@ -26,15 +26,23 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(minValueKey)) minValueKey = "MINVALUE";
             if (!dt.Columns.Contains(maxValueKey)) maxValueKey = "MAXVALUE";
             if (!dt.Columns.Contains(incrementKey)) incrementKey = "INCREMENTBY";
+            //Devart.Data.PostgreSql
+            if (!dt.Columns.Contains(minValueKey)) minValueKey = null;
+            if (!dt.Columns.Contains(maxValueKey)) maxValueKey = null;
+            if (!dt.Columns.Contains(incrementKey)) incrementKey = null;
+
 
             foreach (DataRow row in dt.Rows)
             {
                 DatabaseSequence seq = new DatabaseSequence();
                 seq.Name = row[key].ToString();
                 seq.SchemaOwner = row[ownerKey].ToString();
-                seq.MininumValue = GetNullableDecimal(row[minValueKey]);
-                seq.MaximumValue = GetNullableDecimal(row[maxValueKey]);
-                seq.IncrementBy = GetNullableInt(row[incrementKey]) ?? 1;
+                if (!string.IsNullOrEmpty(minValueKey))
+                    seq.MininumValue = GetNullableDecimal(row[minValueKey]);
+                if (!string.IsNullOrEmpty(maxValueKey))
+                    seq.MaximumValue = GetNullableDecimal(row[maxValueKey]);
+                if (!string.IsNullOrEmpty(incrementKey))
+                    seq.IncrementBy = GetNullableInt(row[incrementKey]) ?? 1;
                 list.Add(seq);
             }
             return list;
@@ -47,12 +55,16 @@ namespace DatabaseSchemaReader.Conversion
             string key = "OBJECT_NAME";
             string ownerKey = "OWNER";
             string sqlKey = "SQL";
+            string langKey = "LANGUAGE";
             //devart
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            if (!dt.Columns.Contains(sqlKey)) sqlKey = "BODY";
             //other
             if (!dt.Columns.Contains(ownerKey)) ownerKey = null;
             if (!dt.Columns.Contains(sqlKey)) sqlKey = null;
+            if (!dt.Columns.Contains(langKey)) langKey = null;
+
             foreach (DataRow row in dt.Rows)
             {
                 DatabaseFunction fun = new DatabaseFunction();
@@ -60,6 +72,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (!string.IsNullOrEmpty(ownerKey))
                     fun.SchemaOwner = row[ownerKey].ToString();
                 if (sqlKey != null) fun.Sql = row[sqlKey].ToString();
+                if (langKey != null) fun.Language = row[langKey].ToString();
                 list.Add(fun);
             }
             return list;
@@ -88,6 +101,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
             if (packageKey == null && dt.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
 
             foreach (DataRow row in dt.Rows)
             {
@@ -145,6 +159,9 @@ namespace DatabaseSchemaReader.Conversion
             if (!arguments.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
             if (packageKey == null && arguments.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
 
+            //Devart.Data.PostgreSql
+            if (!arguments.Columns.Contains(sprocKey)) sprocKey = "ROUTINE";
+
 
             //project the sprocs (which won't have packages) into a distinct view
             DataTable sprocTable;
@@ -162,7 +179,7 @@ namespace DatabaseSchemaReader.Conversion
             {
                 string name = row[sprocKey].ToString();
                 //a procedure without a name?
-                if(string.IsNullOrEmpty(name)) continue;
+                if (string.IsNullOrEmpty(name)) continue;
                 string owner = row[ownerKey].ToString();
                 string package = null; //for non-Oracle, package is always null
                 if (packageKey != null)

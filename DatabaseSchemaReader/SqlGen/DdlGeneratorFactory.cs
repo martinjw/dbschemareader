@@ -37,6 +37,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqLite.TableGenerator(table);
                 case SqlType.SqlServerCe:
                     return new SqlServerCe.TableGenerator(table);
+                case SqlType.PostgreSql:
+                    return new PostgreSql.TableGenerator(table);
             }
             return null;
         }
@@ -60,6 +62,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqLite.TablesGenerator(schema);
                 case SqlType.SqlServerCe:
                     return new SqlServerCe.TablesGenerator(schema);
+                case SqlType.PostgreSql:
+                    return new PostgreSql.TablesGenerator(schema);
             }
             return null;
         }
@@ -83,6 +87,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return null; //no stored procedures in SqlLite
                 case SqlType.SqlServerCe:
                     return null; //no stored procedures in SqlServerCE
+                case SqlType.PostgreSql:
+                    return null; //for now
             }
             return null;
         }
@@ -106,6 +112,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return null; //can't alter constraints after creating table
                 case SqlType.SqlServerCe:
                     return new SqlServer.ConstraintWriter(databaseTable);
+                case SqlType.PostgreSql:
+                    return new PostgreSql.ConstraintWriter(databaseTable);
             }
             return null;
         }
@@ -128,6 +136,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqLite.SqLiteMigrationGenerator();
                 case SqlType.SqlServerCe:
                     return new SqlServerCe.SqlServerCeMigrationGenerator();
+                case SqlType.PostgreSql:
+                    return new PostgreSql.PostgreSqlMigrationGenerator();
             }
             return null;
         }

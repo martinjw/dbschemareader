@@ -1,5 +1,5 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
+using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
 
@@ -39,27 +39,10 @@ namespace DatabaseSchemaReader.Compare
         }
 
 
-        private SqlType? FindSqlType(DatabaseSchema databaseSchema)
+        private static SqlType? FindSqlType(DatabaseSchema databaseSchema)
         {
             var providerName = databaseSchema.Provider;
-            if (string.IsNullOrEmpty(providerName)) return null;
-            if (providerName.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                return SqlType.Oracle;
-            }
-            if (providerName.IndexOf("MySql", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                return SqlType.MySql;
-            }
-            if (providerName.IndexOf("Sqlite", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                return SqlType.SQLite;
-            }
-            if (providerName.IndexOf("SqlServerCe.4.0", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                return SqlType.SqlServerCe;
-            }
-            return SqlType.SqlServer;
+            return ProviderToSqlType.Convert(providerName);
         }
         /// <summary>
         /// Run the comparison.

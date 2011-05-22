@@ -18,7 +18,7 @@ namespace DatabaseSchemaReader.SqlGen
             }
             foreach (var table in schema.Tables)
             {
-                sb.AppendLine("-- DROP TABLE " + formatter.Escape(table.Name) + " CASCADE CONSTRAINTS;");
+                sb.AppendLine("-- DROP TABLE " + formatter.Escape(table.Name) + ";");
             }
             return sb.ToString();
         }

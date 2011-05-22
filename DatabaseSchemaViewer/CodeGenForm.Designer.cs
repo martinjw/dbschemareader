@@ -280,6 +280,7 @@
             this.Controls.Add(this.label1);
             this.Name = "CodeGenForm";
             this.Text = "Code Generation";
+            this.Load += new System.EventHandler(this.CodeGenFormLoad);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CodeGenFormFormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.statusStrip1.ResumeLayout(false);

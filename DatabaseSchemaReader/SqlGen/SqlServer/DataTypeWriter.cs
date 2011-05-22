@@ -79,24 +79,45 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         protected virtual string ConvertOtherPlatformTypes(string dataType, int providerType, int? length, int? precision, int? scale)
         {
+            dataType = PostgreSqlToSqlServerConversion(dataType);
             return OracleToSqlServerConversion(dataType, providerType, precision, scale);
+        }
+        private static string PostgreSqlToSqlServerConversion(string dataType)
+        {
+            //PostgreSql specific types and the SqlServer equivalent
+            if (dataType == "VARCHAR") return "NVARCHAR";
+            if (dataType == "CHARACTER VARYING") return "NVARCHAR";
+            if (dataType == "CHARACTER") return "NCHAR";
+            if (dataType == "BPCHAR") return "NCHAR";
+            if (dataType == "INTEGER") return "INT";
+            if (dataType == "INT4") return "INT";
+            if (dataType == "SERIAL") return "INT";
+            if (dataType == "BIGSERIAL") return "BIGINT";
+            if (dataType == "INT8") return "BIGINT";
+            if (dataType == "INT2") return "SMALLINT";
+            if (dataType == "FLOAT4") return "REAL";
+            if (dataType == "DOUBLE PRECISION") return "FLOAT";
+            if (dataType == "BYTEA") return "VARBINARY";
+            if (dataType == "UUID") return "UNIQUEIDENTIFIER";
+            if (dataType == "OID") return "VARBINARY";
+            return dataType;
         }
 
         private static string OracleToSqlServerConversion(string dataType, int providerType, int? precision, int? scale)
         {
-            if (dataType == "VARCHAR2") dataType = "NVARCHAR";
-            if (dataType == "NVARCHAR2") dataType = "NVARCHAR";
-            //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
+            if (dataType == "VARCHAR2") return "NVARCHAR";
+            if (dataType == "NVARCHAR2") return "NVARCHAR";
+                //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
             if (dataType == "DATE" && providerType != (int)SqlDbType.Date)
-                dataType = "DATETIME";
-            //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
+                return "DATETIME";
+                //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
             if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != (int)SqlDbType.Timestamp)
-                dataType = "DATETIME";
-            //Oracle numbers- use precise SqlServer versiom
+                return "DATETIME";
+                //Oracle numbers- use precise SqlServer versiom
             if (dataType == "NUMBER")
-                dataType = NumberConversion(precision, scale);
-            //not an exact match
-            if (dataType == "XMLTYPE") dataType = "XML";
+                return NumberConversion(precision, scale);
+                //not an exact match
+            if (dataType == "XMLTYPE") return "XML";
             return dataType;
         }
 

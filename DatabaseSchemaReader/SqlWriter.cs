@@ -37,15 +37,20 @@ namespace DatabaseSchemaReader
             _nameEscapeEnd = null;
             switch (sqlType)
             {
+                case SqlType.MySql:
+                    _parameterPrefix = '?'; //or @ but can conflict with variables
+                    _nameEscapeStart = "`"; //backtick, not single apos
+                    _nameEscapeEnd = "`";
+                    break;
                 case SqlType.Oracle:
                     _parameterPrefix = ':';
                     _nameEscapeStart = "\"";
                     _nameEscapeEnd = "\"";
                     break;
-                case SqlType.MySql:
-                    _parameterPrefix = '?'; //or @ but can conflict with variables
-                    _nameEscapeStart = "`"; //backtick, not single apos
-                    _nameEscapeEnd = "`";
+                case SqlType.PostgreSql:
+                    _parameterPrefix = ':';
+                    _nameEscapeStart = "\"";
+                    _nameEscapeEnd = "\"";
                     break;
                 case SqlType.SQLite:
                     _parameterPrefix = '@'; //can also be $
@@ -311,7 +316,7 @@ namespace DatabaseSchemaReader
             {
                 //outside storedprocedures, consider the LIMIT offset,pageSize syntax
                 sb.AppendLine(" (SELECT");
-                sb.AppendLine("  (@rownum:=@rownum+1) as rowNumber,");
+                sb.AppendLine("  (@rownum:= @rownum+1) as rowNumber,");
                 sb.AppendLine(columns);
                 sb.AppendLine("  FROM " + EscapedTableName);
                 sb.AppendLine("  ORDER BY  " + orderBy + ")");
@@ -319,6 +324,18 @@ namespace DatabaseSchemaReader
                 sb.AppendLine(" WHERE");
                 sb.AppendLine("   rowNumber >= (" + ParameterName("pageSize") + " * (" + ParameterName("currentPage") + " - 1))");
                 sb.AppendLine("   AND rowNumber <= (" + ParameterName("pageSize") + " * " + ParameterName("currentPage") + ")");
+            }
+            else if (_sqlType == SqlType.PostgreSql)
+            {
+                sb.AppendLine(EscapedTableName);
+                sb.AppendLine("  ORDER BY  " + orderBy);
+                //[LIMIT { number | ALL }] [OFFSET number]
+                //NB: we use 1-based page numbers, so add a -1 here!
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "LIMIT {0} OFFSET (({1}-1) * {2})",
+                    ParameterName("pageSize"),
+                    ParameterName("currentPage"),
+                    ParameterName("pageSize")));
             }
             else if (_sqlType == SqlType.SQLite)
             {
@@ -394,6 +411,18 @@ namespace DatabaseSchemaReader
                 sb.AppendLine(" WHERE");
                 sb.AppendLine("   rowNumber >= " + ParameterName("startRow"));
                 sb.AppendLine("   AND rowNumber <= " + ParameterName("endRow"));
+            }
+            else if (_sqlType == SqlType.PostgreSql)
+            {
+                sb.AppendLine(EscapedTableName);
+                sb.AppendLine("  ORDER BY  " + orderBy);
+                //[LIMIT { number | ALL }] [OFFSET number]
+                //NB: we use 1-based page numbers, so add a -1 here!
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "LIMIT ({0} - {1} + 1) OFFSET ({2}-1)",
+                    ParameterName("endRow"),
+                    ParameterName("startRow"),
+                    ParameterName("startRow")));
             }
             else if (_sqlType == SqlType.SQLite)
             {
@@ -586,6 +615,13 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
                     {
                         sb.Append("SELECT LAST_INSERT_ID();");
                     }
+                }
+                else if (_sqlType == SqlType.PostgreSql)
+                {
+                    sb.AppendLine(";");
+                    //default sequence name is tablename_colname_seq
+                    var seq = _table.Name + "_" + ((_table.PrimaryKeyColumn != null) ? _table.PrimaryKeyColumn.Name : null) + "_seq";
+                    sb.Append("SELECT currval('" + seq + "');");
                 }
                 else if (_sqlType == SqlType.SQLite)
                 {

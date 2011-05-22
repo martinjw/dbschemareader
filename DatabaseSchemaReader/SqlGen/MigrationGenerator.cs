@@ -290,7 +290,8 @@ namespace DatabaseSchemaReader.SqlGen
         }
 
         protected virtual bool SupportsDropColumn { get { return true; } }
-        public string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
+
+        public virtual string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             if (!SupportsDropColumn)
             {

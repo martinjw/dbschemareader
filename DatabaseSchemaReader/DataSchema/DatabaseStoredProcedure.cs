@@ -74,12 +74,20 @@ namespace DatabaseSchemaReader.DataSchema
         public string Package { get; set; }
 
         /// <summary>
-        /// Gets or sets the SQL.
+        /// Gets or sets the body SQL.
         /// </summary>
         /// <value>
-        /// The SQL.
+        /// The body SQL.
         /// </value>
         public string Sql { get; set; }
+
+        /// <summary>
+        /// Gets or sets the language (for instance, PostgreSql).
+        /// </summary>
+        /// <value>
+        /// The language.
+        /// </value>
+        public string Language { get; set; }
 
         /// <summary>
         /// Gets the arguments.

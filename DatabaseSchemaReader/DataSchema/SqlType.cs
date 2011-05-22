@@ -25,6 +25,10 @@ namespace DatabaseSchemaReader.DataSchema
         ///<summary>
         /// Microsoft SQL Server CE 4
         ///</summary>
-        SqlServerCe
+        SqlServerCe,
+        /// <summary>
+        /// PostgreSql
+        /// </summary>
+        PostgreSql
     }
 }

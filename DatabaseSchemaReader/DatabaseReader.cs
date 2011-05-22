@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders;
 
 namespace DatabaseSchemaReader
 {
@@ -12,7 +13,7 @@ namespace DatabaseSchemaReader
     /// Uses <see cref="SchemaReader"/> to read database schema into schema objects (rather than DataTables). 
     /// </summary>
     /// <remarks>
-    /// Either load independent objects (list of Tables, StoredProcedures), fuller informarion (a Table with all Columns, constraints...), or full database schemas (<see cref="ReadAll"/>: all tables, views, stored procedures with all information; the DatabaseSchema object will hook up the relationships). Obviously the fuller versions will be slow on moderate to large databases.
+    /// Either load independent objects (list of Tables, StoredProcedures), fuller information (a Table with all Columns, constraints...), or full database schemas (<see cref="ReadAll"/>: all tables, views, stored procedures with all information; the DatabaseSchema object will hook up the relationships). Obviously the fuller versions will be slow on moderate to large databases.
     /// </remarks>
     public class DatabaseReader : IDisposable
     {
@@ -28,6 +29,28 @@ namespace DatabaseSchemaReader
         public DatabaseReader(string connectionString, string providerName)
         {
             _sr = new SchemaExtendedReader(connectionString, providerName);
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                var type = ProviderToSqlType.Convert(providerName);
+                switch (type)
+                {
+                    case SqlType.Oracle:
+                        _sr = new OracleSchemaReader(connectionString, providerName);
+                        break;
+                    case SqlType.SqlServer:
+                        _sr = new SqlServerSchemaReader(connectionString, providerName);
+                        break;
+                    case SqlType.SqlServerCe:
+                        _sr = new SqlServerCeSchemaReader(connectionString, providerName);
+                        break;
+                    case SqlType.MySql:
+                        _sr = new MySqlSchemaReader(connectionString, providerName);
+                        break;
+                    case SqlType.PostgreSql:
+                        _sr = new PostgreSqlSchemaReader(connectionString, providerName);
+                        break;
+                }
+            }
             _db = new DatabaseSchema(connectionString, providerName);
         }
 
@@ -78,21 +101,11 @@ namespace DatabaseSchemaReader
             AllTables();
             AllViews();
 
-            try
-            {
-                DataTable functions = _sr.Functions();
-                DatabaseSchema.Functions.AddRange(SchemaProcedureConverter.Functions(functions));
-            }
-            catch (DbException ex)
-            {
-                Debug.WriteLine("Cannot read functions - database security may prevent access to DDL\n" + ex.Message);
-                throw; //or suppress if not applicable
-            }
-
             AllStoredProcedures();
             //oracle extra
             DatabaseSchema.Sequences.Clear();
-            DatabaseSchema.Sequences.AddRange(SchemaProcedureConverter.Sequences(_sr.Sequences()));
+            var sequences = _sr.Sequences();
+            DatabaseSchema.Sequences.AddRange(SchemaProcedureConverter.Sequences(sequences));
 
             _fixUp = true;
             UpdateReferences();
@@ -138,7 +151,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseTable> AllTables()
         {
-            DataTable dt = _sr.Tables();
+            DataTable tabs = _sr.Tables();
             //get full datatables for all tables, to minimize database calls
             DataTable cols = _sr.Columns(null); //might want to cache this for views
             DataTable pks = _sr.PrimaryKeys(null);
@@ -149,33 +162,40 @@ namespace DatabaseSchemaReader
             DataTable cks = _sr.CheckConstraints(null);
             DataTable indexes = _sr.Indexes(null);
             DataTable indexColumns = _sr.IndexColumns(null);
-            //MySql and Postgresql only allow indexcolumns per table
-            bool noIndexColumns = (indexColumns.Rows.Count == 0 && indexes.Rows.Count > 0);
             DataTable triggers = _sr.Triggers(null);
-            List<DatabaseTable> tables = SchemaConverter.Tables(dt);
+            List<DatabaseTable> tables = SchemaConverter.Tables(tabs);
             tables.Sort(delegate(DatabaseTable t1, DatabaseTable t2)
             {
                 //doesn't account for mixed schemas
                 return string.Compare(t1.Name, t2.Name, StringComparison.OrdinalIgnoreCase);
             });
+
+            //MySql and Postgresql only allow indexcolumns per table
+            bool noIndexColumns = (indexColumns.Rows.Count == 0 && indexes.Rows.Count > 0);
+            //we may have to do this on a per table basis
+            bool noColumns = (tables.Count > 0 && cols.Rows.Count == 0);
+
             foreach (DatabaseTable table in tables)
             {
-                table.Columns.AddRange(SchemaConverter.Columns(cols, table.Name));
-                List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(pks, ConstraintType.PrimaryKey, table.Name);
+                var tableName = table.Name;
+                var databaseColumns = SchemaConverter.Columns(noColumns ? _sr.Columns(tableName) : cols, tableName);
+                table.Columns.AddRange(databaseColumns);
+                var pkConstraints = SchemaConstraintConverter.Constraints(pks, ConstraintType.PrimaryKey, tableName);
                 PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
-                table.ForeignKeys = SchemaConstraintConverter.Constraints(fks, ConstraintType.ForeignKey, table.Name);
+                table.ForeignKeys = SchemaConstraintConverter.Constraints(fks, ConstraintType.ForeignKey, tableName);
                 SchemaConstraintConverter.AddForeignKeyColumns(fkcols, table);
-                table.UniqueKeys = SchemaConstraintConverter.Constraints(uks, ConstraintType.UniqueKey, table.Name);
-                table.CheckConstraints = SchemaConstraintConverter.Constraints(cks, ConstraintType.Check, table.Name);
-                SchemaConstraintConverter.Indexes(indexes, table.Name, table.Indexes);
+                table.UniqueKeys = SchemaConstraintConverter.Constraints(uks, ConstraintType.UniqueKey, tableName);
+                table.CheckConstraints = SchemaConstraintConverter.Constraints(cks, ConstraintType.Check, tableName);
+                SchemaConstraintConverter.Indexes(indexes, tableName, table.Indexes);
                 if (noIndexColumns)
                 {
-                    indexColumns = _sr.IndexColumns(table.Name);
+                    indexColumns = _sr.IndexColumns(tableName);
                 }
-                SchemaConstraintConverter.Indexes(indexColumns, table.Name, table.Indexes);
+                SchemaConstraintConverter.Indexes(indexColumns, tableName, table.Indexes);
                 SchemaConstraintConverter.AddIdentity(ids, table);
                 table.Triggers.Clear();
-                table.Triggers.AddRange(SchemaConstraintConverter.Triggers(triggers, table.Name));
+                table.Triggers.AddRange(SchemaConstraintConverter.Triggers(triggers, tableName));
+                _sr.PostProcessing(table);
             }
             DatabaseSchema.Tables.Clear();
             DatabaseSchema.Tables.AddRange(tables);
@@ -228,9 +248,9 @@ namespace DatabaseSchemaReader
             //columns must be done first as it is updated by the others
             table.Columns.Clear();
             table.Columns.AddRange(SchemaConverter.Columns(ds.Tables["Columns"]));
-            if (ds.Tables.Contains("Primary_Keys"))
+            if (ds.Tables.Contains("PrimaryKeys"))
             {
-                List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["Primary_Keys"], ConstraintType.PrimaryKey);
+                List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["PrimaryKeys"], ConstraintType.PrimaryKey);
                 PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
             }
             if (ds.Tables.Contains("Foreign_Keys"))
@@ -271,6 +291,17 @@ namespace DatabaseSchemaReader
         /// </remarks>
         public IList<DatabaseStoredProcedure> AllStoredProcedures()
         {
+            try
+            {
+                DataTable functions = _sr.Functions();
+                DatabaseSchema.Functions.AddRange(SchemaProcedureConverter.Functions(functions));
+            }
+            catch (DbException ex)
+            {
+                Debug.WriteLine("Cannot read functions - database security may prevent access to DDL\n" + ex.Message);
+                throw; //or suppress if not applicable
+            }
+
 
             DataTable dt = _sr.StoredProcedures();
             SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
@@ -280,6 +311,15 @@ namespace DatabaseSchemaReader
             //do all the arguments as one call and sort them out. 
             //NB: This is often slow on Oracle
             DataTable args = _sr.StoredProcedureArguments(null);
+
+            if (args.Rows.Count == 0)
+            {
+                foreach (var function in DatabaseSchema.Functions)
+                {
+                    args = _sr.StoredProcedureArguments(function.Name);
+                    SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
+                }
+            }
             //arguments could be for functions too
             SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
 
@@ -298,6 +338,7 @@ namespace DatabaseSchemaReader
         public IList<DataType> DataTypes()
         {
             List<DataType> list = SchemaConverter.DataTypes(_sr.DataTypes());
+            if (list.Count == 0) list = _sr.SchemaDataTypes();
             DatabaseSchema.DataTypes.Clear();
             DatabaseSchema.DataTypes.AddRange(list);
             DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema); //if columns/arguments loaded later, run this method again.
