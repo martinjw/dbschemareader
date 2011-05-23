@@ -388,22 +388,79 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// The Unique Key columns for a specific table  (if tableName is null or empty, all constraints are returned).
+        /// </summary>
+        public DataTable UniqueKeys(string tableName)
+        {
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return UniqueKeys(tableName, connection);
+            }
+        }
+        /// <summary>
+        /// The Unique Key columns for a specific table  (if tableName is null or empty, all constraints are returned).
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable UniqueKeys(string tableName, DbConnection connection)
+        {
+            return GenericCollection("UniqueKeys", connection, tableName);
+        }
+
+        /// <summary>
+        /// The check constraints for a specific table (if tableName is null or empty, all check constraints are returned)
+        /// </summary>
+        public virtual DataTable CheckConstraints(string tableName)
+        {
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return CheckConstraints(tableName, connection);
+            }
+        }
+        /// <summary>
+        /// The check constraints for a specific table (if tableName is null or empty, all check constraints are returned)
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable CheckConstraints(string tableName, DbConnection connection)
+        {
+            return GenericCollection("CheckConstraints", connection, tableName);
+        }
+
+        /// <summary>
         /// Gets the sequences (if supported, eg Oracle)
         /// </summary>
         /// <returns></returns>
         public DataTable Sequences()
         {
-            const string collectionName = "Sequences";
-
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
-                if (!SchemaCollectionExists(conn, collectionName))
-                    return new DataTable(collectionName);
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
-                return conn.GetSchema(collectionName, restrictions);
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return Sequences(connection);
             }
+        }
+
+        /// <summary>
+        /// Gets the sequences (if supported, eg Oracle)
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        private DataTable Sequences(DbConnection connection)
+        {
+            string collectionName = "Sequences";
+            if (!SchemaCollectionExists(connection, collectionName))
+                collectionName = "Generators"; //Firebird calls sequences "Generators"
+            if (!SchemaCollectionExists(connection, collectionName))
+                return new DataTable(collectionName);
+            string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
+            return connection.GetSchema(collectionName, restrictions);
         }
 
         /// <summary>
@@ -507,17 +564,29 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                //different collections here- we could just if(IsOracle)
-                string collectionName = "ProcedureParameters";
-                if (!SchemaCollectionExists(conn, collectionName)) collectionName = "Arguments";
-                if (ProviderType == SqlType.MySql) collectionName = "Procedure Parameters";
-                else if (ProviderType == SqlType.Oracle) collectionName = "Arguments"; //Oracle, assume packages
-                if (!SchemaCollectionExists(conn, collectionName)) return new DataTable(collectionName);
-
-                string[] restrictions = SchemaRestrictions.ForRoutine(conn, collectionName, storedProcedureName);
-                return conn.GetSchema(collectionName, restrictions);
+                return StoredProcedureArguments(storedProcedureName, conn);
             }
         }
+
+        /// <summary>
+        /// Get all the arguments for a stored procedures (or all sprocs)
+        /// </summary>
+        /// <param name="storedProcedureName">Name of the stored procedure.</param>
+        /// <param name="connection">The open connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
+        {
+            //different collections here- we could just if(IsOracle)
+            string collectionName = "ProcedureParameters";
+            if (!SchemaCollectionExists(connection, collectionName)) collectionName = "Arguments";
+            if (ProviderType == SqlType.MySql) collectionName = "Procedure Parameters";
+            else if (ProviderType == SqlType.Oracle) collectionName = "Arguments"; //Oracle, assume packages
+            if (!SchemaCollectionExists(connection, collectionName)) return new DataTable(collectionName);
+
+            string[] restrictions = SchemaRestrictions.ForRoutine(connection, collectionName, storedProcedureName);
+            return connection.GetSchema(collectionName, restrictions);
+        }
+
         /// <summary>
         /// Get all the arguments for a package (or all packs)
         /// Package is only for Oracle - for SqlServer it's all sprocs

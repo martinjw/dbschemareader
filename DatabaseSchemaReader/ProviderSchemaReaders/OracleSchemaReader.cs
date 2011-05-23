@@ -178,20 +178,6 @@ ORDER BY cols.table_name, cols.position";
             return sqlCommand;
         }
 
-        private static string GetPrimaryKeyType()
-        {
-            return "P";
-        }
-
-        private static string GetForeignKeyType()
-        {
-            return "R";
-        }
-        private static string GetUniqueKeyType()
-        {
-            return "U";
-        }
-
         public override DataTable IdentityColumns(string tableName)
         {
             DataTable dt = CreateDataTable("IdentityColumns");
@@ -200,15 +186,15 @@ ORDER BY cols.table_name, cols.position";
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetPrimaryKeyType(), connection);
+            return FindKeys(tableName, "P", connection);
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetForeignKeyType(), connection);
+            return FindKeys(tableName, "R", connection);
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetUniqueKeyType(), connection);
+            return FindKeys(tableName, "U", connection);
         }
         public override DataTable ForeignKeyColumns(string tableName)
         {

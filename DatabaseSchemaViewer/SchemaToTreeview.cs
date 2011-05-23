@@ -92,7 +92,9 @@ namespace DatabaseSchemaViewer
             foreach (var argument in arguments)
             {
                 var sb = new StringBuilder();
-                sb.Append(argument.Name);
+                var name = argument.Name;
+                if (string.IsNullOrEmpty(name)) name = "?";
+                sb.Append(name);
                 sb.Append(" ");
                 sb.Append(argument.DatabaseDataType);
                 if (argument.DataType != null)
@@ -103,7 +105,7 @@ namespace DatabaseSchemaViewer
                         sb.Append(argument.Length);
                         sb.Append(")");
                     }
-                    else if (argument.DataType.IsNumeric)
+                    else if (argument.DataType.IsNumeric && !argument.DataType.IsInt)
                     {
                         sb.Append("(");
                         sb.Append(argument.Precision);

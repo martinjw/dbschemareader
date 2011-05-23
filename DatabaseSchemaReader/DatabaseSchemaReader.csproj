@@ -104,6 +104,7 @@
     <Compile Include="DataSchema\SqlType.cs" />
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
     <Compile Include="SqlGen\IMigrationGenerator.cs" />
     <Compile Include="SqlGen\MigrationGenerator.cs" />

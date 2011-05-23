@@ -137,20 +137,22 @@ WHERE
             //Npgsql doesn't have a functions collection, so this is a simple substitute
             //based on http://www.alberton.info/postgresql_meta_info.html 
             var dt = CreateDataTable(collectionName);
-            const string sqlCommand = @"SELECT pr.proname AS NAME, 
+            const string sqlCommand = @"SELECT 
 ns.nspname AS SCHEMA, 
+pr.proname AS NAME, 
 tp.typname AS RETURNTYPE, 
 lng.lanname AS LANGUAGE,
 pr.prosrc AS BODY
   FROM pg_proc pr
-INNER JOIN pg_type tp ON tp.oid = pr.prorettype
+LEFT OUTER JOIN pg_type tp ON tp.oid = pr.prorettype
 INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
 INNER JOIN pg_language lng ON lng.oid = pr.prolang
  WHERE pr.proisagg = FALSE
-   AND tp.typname <> 'trigger'
-   AND ns.nspname NOT LIKE 'pg_%'
-   AND ns.nspname != 'information_schema'
- AND (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)";
+  AND tp.typname <> 'trigger'
+  AND ns.nspname NOT LIKE 'pg_%'
+  AND ns.nspname != 'information_schema'
+  AND (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)
+ ORDER BY pr.proname";
             using (DbDataAdapter da = Factory.CreateDataAdapter())
             {
                 da.SelectCommand = connection.CreateCommand();
@@ -162,6 +164,12 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
                 da.Fill(dt);
                 return dt;
             }
+        }
+
+        protected override  DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
+        {
+            var argReader = new PostgreSqlArgumentReader(Factory, Owner);
+            return argReader.StoredProcedureArguments(storedProcedureName, connection);
         }
 
         public override void PostProcessing(DatabaseTable databaseTable)

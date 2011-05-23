@@ -102,43 +102,6 @@ namespace DatabaseSchemaReader
             return new List<DataType>();
         }
 
-        #region Constraints
-
-        /// <summary>
-        /// The Unique Key columns for a specific table  (if tableName is null or empty, all constraints are returned).
-        /// </summary>
-        public DataTable UniqueKeys(string tableName)
-        {
-            using (DbConnection connection = Factory.CreateConnection())
-            {
-                connection.ConnectionString = ConnectionString;
-                connection.Open();
-                return UniqueKeys(tableName, connection);
-            }
-        }
-        protected virtual DataTable UniqueKeys(string tableName, DbConnection connection)
-        {
-            return GenericCollection("UniqueKeys", connection, tableName);
-        }
-
-        /// <summary>
-        /// The check constraints for a specific table (if tableName is null or empty, all check constraints are returned)
-        /// </summary>
-        public virtual DataTable CheckConstraints(string tableName)
-        {
-            using (DbConnection connection = Factory.CreateConnection())
-            {
-                connection.ConnectionString = ConnectionString;
-                connection.Open();
-                return CheckConstraints(tableName, connection);
-            }
-        }
-        protected virtual DataTable CheckConstraints(string tableName, DbConnection connection)
-        {
-            return GenericCollection("CheckConstraints", connection, tableName);
-        }
-        #endregion
-
         #region protected helpers
 
         protected virtual DataTable CommandForTable(string tableName, DbConnection conn, string collectionName, string sqlCommand)

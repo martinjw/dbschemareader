@@ -90,6 +90,14 @@ namespace DatabaseSchemaReader.DataSchema
         public string Language { get; set; }
 
         /// <summary>
+        /// Gets or sets the return type (otherwise check arguments[0]).
+        /// </summary>
+        /// <value>
+        /// The return type.
+        /// </value>
+        public string ReturnType { get; set; }
+
+        /// <summary>
         /// Gets the arguments.
         /// </summary>
         public List<DatabaseArgument> Arguments { get { return _arguments; } }

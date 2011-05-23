@@ -26,6 +26,9 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(minValueKey)) minValueKey = "MINVALUE";
             if (!dt.Columns.Contains(maxValueKey)) maxValueKey = "MAXVALUE";
             if (!dt.Columns.Contains(incrementKey)) incrementKey = "INCREMENTBY";
+            //Firebird generators
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "GENERATOR_SCHEMA";
+            if (!dt.Columns.Contains(key)) key = "GENERATOR_NAME";
             //Devart.Data.PostgreSql
             if (!dt.Columns.Contains(minValueKey)) minValueKey = null;
             if (!dt.Columns.Contains(maxValueKey)) maxValueKey = null;
@@ -56,14 +59,20 @@ namespace DatabaseSchemaReader.Conversion
             string ownerKey = "OWNER";
             string sqlKey = "SQL";
             string langKey = "LANGUAGE";
+            string returnKey = "RETURNTYPE";
             //devart
             if (!dt.Columns.Contains(key)) key = "NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
             if (!dt.Columns.Contains(sqlKey)) sqlKey = "BODY";
+            //firebird
+            if (!dt.Columns.Contains(key)) key = "FUNCTION_NAME";
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "FUNCTION_SCHEMA";
+            if (!dt.Columns.Contains(returnKey)) returnKey = "RETURN_ARGUMENT";
             //other
             if (!dt.Columns.Contains(ownerKey)) ownerKey = null;
             if (!dt.Columns.Contains(sqlKey)) sqlKey = null;
             if (!dt.Columns.Contains(langKey)) langKey = null;
+            if (!dt.Columns.Contains(returnKey)) returnKey = null;
 
             foreach (DataRow row in dt.Rows)
             {
@@ -73,6 +82,7 @@ namespace DatabaseSchemaReader.Conversion
                     fun.SchemaOwner = row[ownerKey].ToString();
                 if (sqlKey != null) fun.Sql = row[sqlKey].ToString();
                 if (langKey != null) fun.Language = row[langKey].ToString();
+                if (returnKey != null) fun.ReturnType = row[returnKey].ToString();
                 list.Add(fun);
             }
             return list;
@@ -90,7 +100,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
             string packageKey = "PACKAGE_NAME";
             if (!dt.Columns.Contains(packageKey)) packageKey = null; //sql
-            //jet
+            //jet (and firebird)
             if (!dt.Columns.Contains(key)) key = "PROCEDURE_NAME";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
             string sql = "PROCEDURE_DEFINITION";
@@ -150,7 +160,7 @@ namespace DatabaseSchemaReader.Conversion
             string packageKey = "PACKAGE_NAME";
             if (!arguments.Columns.Contains(packageKey)) packageKey = null; //sql
 
-            //oledb
+            //oledb and firebird
             if (!arguments.Columns.Contains(sprocKey)) sprocKey = "PROCEDURE_NAME";
             if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
 
@@ -299,9 +309,19 @@ namespace DatabaseSchemaReader.Conversion
             if (!arguments.Columns.Contains(scaleKey)) scaleKey = "SCALE";
             if (!arguments.Columns.Contains(inoutKey)) inoutKey = "DIRECTION";
 
-            //oledb
+            //oledb and firebird
             if (!arguments.Columns.Contains(sprocName)) sprocName = "PROCEDURE_NAME";
             if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
+            //firebird
+            if (!arguments.Columns.Contains(datatypeKey)) datatypeKey = "PARAMETER_DATA_TYPE";
+            if (!arguments.Columns.Contains(inoutKey)) inoutKey = "PARAMETER_DIRECTION";
+            if (!arguments.Columns.Contains(lengthKey)) lengthKey = "CHARACTER_MAX_LENGTH";
+            if (!arguments.Columns.Contains(precisionKey)) precisionKey = "NUMERIC_PRECISION";
+            if (!arguments.Columns.Contains(scaleKey)) scaleKey = "NUMERIC_SCALE";
+
+            if (!arguments.Columns.Contains(precisionKey)) precisionKey = null;
+            if (!arguments.Columns.Contains(lengthKey)) lengthKey = null;
+            if (!arguments.Columns.Contains(scaleKey)) scaleKey = null;
             if (!arguments.Columns.Contains(inoutKey)) inoutKey = null;
 
             foreach (DataRowView row in dataView)
@@ -319,9 +339,12 @@ namespace DatabaseSchemaReader.Conversion
                 AddInOut(row, inoutKey, argument);
 
                 //Oracle: these can be decimals, but we'll assume ints
-                argument.Length = GetNullableInt(row[lengthKey]);
-                argument.Precision = GetNullableInt(row[precisionKey]);
-                argument.Scale = GetNullableInt(row[scaleKey]);
+                if (lengthKey != null)
+                    argument.Length = GetNullableInt(row[lengthKey]);
+                if (precisionKey != null)
+                    argument.Precision = GetNullableInt(row[precisionKey]);
+                if (scaleKey != null)
+                    argument.Scale = GetNullableInt(row[scaleKey]);
             }
             return list;
         }
@@ -336,7 +359,7 @@ namespace DatabaseSchemaReader.Conversion
             if (inoutKey == null) return;
             string inout = row[inoutKey].ToString();
             if (inout.Contains("IN")) argument.In = true;
-            if (inout.Contains("OUT")) argument.Out = true;
+            else if (inout.Contains("OUT")) argument.Out = true;
         }
 
         private static DatabaseArgument AddArgumentToList(List<DatabaseArgument> list, string argName)

@@ -129,6 +129,10 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 UpdateArgumentDataTypes(databaseSchema, sproc);
             }
+            foreach (DatabaseFunction function in databaseSchema.Functions)
+            {
+                UpdateArgumentDataTypes(databaseSchema, function);
+            }
             foreach (DatabasePackage package in databaseSchema.Packages)
             {
                 foreach (DatabaseStoredProcedure sproc in package.StoredProcedures)

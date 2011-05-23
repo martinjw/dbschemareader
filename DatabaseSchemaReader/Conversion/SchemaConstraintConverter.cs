@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.Conversion
             string ordinalKey = "ORDINAL_POSITION";
             string refersToKey = "UNIQUE_CONSTRAINT_NAME";
             string refersToTableKey = "FK_TABLE";
-            const string expression = "EXPRESSION";
+            string expressionKey = "EXPRESSION";
             string deleteRuleKey = "DELETE_RULE";
             string updateRuleKey = "UPDATE_RULE";
             //oracle
@@ -42,8 +42,11 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
 
             //firebird
-            if (!dt.Columns.Contains(key)) key = "PK_NAME";
+            if (!dt.Columns.Contains(key)) key = "PK_NAME"; //for pk
+            if (!dt.Columns.Contains(key)) key = "UK_NAME"; //for uk
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "REFERENCED_TABLE_NAME";
+            //a firebird typo!
+            if (dt.Columns.Contains("CHECK_CLAUSULE")) expressionKey = "CHECK_CLAUSULE";
             //sqlite
             if (!dt.Columns.Contains(columnKey)) columnKey = "FKEY_FROM_COLUMN";
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "FKEY_FROM_ORDINAL_POSITION";
@@ -55,6 +58,7 @@ namespace DatabaseSchemaReader.Conversion
             //not present if separate foreign key columns
             if (!dt.Columns.Contains(columnKey)) columnKey = null;
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
+            if (!dt.Columns.Contains(expressionKey)) expressionKey = null;
 
 
             //sort it (unless it's a check constraint)
@@ -72,18 +76,16 @@ namespace DatabaseSchemaReader.Conversion
                     c.TableName = row[tableKey].ToString();
                     c.ConstraintType = constraintType;
                     list.Add(c);
-                    if (constraintType == ConstraintType.Check)
+                    if (constraintType == ConstraintType.Check && expressionKey != null)
                     {
-                        c.Expression = row[expression].ToString();
+                        c.Expression = row[expressionKey].ToString();
+                        continue;
                     }
-                    else
-                    {
-                        c.RefersToConstraint = AddRefersToConstraint(row, refersToKey);
-                        if (!string.IsNullOrEmpty(refersToTableKey))
-                            c.RefersToTable = row[refersToTableKey].ToString();
-                        c.DeleteRule = AddDeleteUpdateRule(row, deleteRuleKey);
-                        c.UpdateRule = AddDeleteUpdateRule(row, updateRuleKey);
-                    }
+                    c.RefersToConstraint = AddRefersToConstraint(row, refersToKey);
+                    if (!string.IsNullOrEmpty(refersToTableKey))
+                        c.RefersToTable = row[refersToTableKey].ToString();
+                    c.DeleteRule = AddDeleteUpdateRule(row, deleteRuleKey);
+                    c.UpdateRule = AddDeleteUpdateRule(row, updateRuleKey);
                 }
                 AddConstraintColumns(row, columnKey, constraintType, c);
             }
@@ -327,27 +329,61 @@ namespace DatabaseSchemaReader.Conversion
             foreach (DataRowView row in dt.DefaultView)
             {
                 string name = row[key].ToString();
-                DatabaseTrigger c = list.Find(delegate(DatabaseTrigger f) { return f.Name == name; });
-                if (c == null)
+                DatabaseTrigger trigger = list.Find(delegate(DatabaseTrigger f) { return f.Name == name; });
+                if (trigger == null)
                 {
-                    c = new DatabaseTrigger();
-                    c.Name = name;
+                    trigger = new DatabaseTrigger();
+                    trigger.Name = name;
                     if (ownerKey != null)
-                        c.SchemaOwner = row[ownerKey].ToString();
-                    list.Add(c);
+                        trigger.SchemaOwner = row[ownerKey].ToString();
+                    list.Add(trigger);
                 }
                 if (!string.IsNullOrEmpty(tableKey))
-                    c.TableName = row[tableKey].ToString();
+                    trigger.TableName = row[tableKey].ToString();
                 if (!string.IsNullOrEmpty(bodyKey))
-                    c.TriggerBody = row[bodyKey].ToString();
+                    trigger.TriggerBody = row[bodyKey].ToString();
                 if (!string.IsNullOrEmpty(eventKey))
-                    c.TriggerEvent = row[eventKey].ToString();
+                    trigger.TriggerEvent = row[eventKey].ToString();
                 if (triggerTypeKey != null)
                 {
-                    c.TriggerType = row[triggerTypeKey].ToString();
+                    trigger.TriggerType = row[triggerTypeKey].ToString();
+                    FirebirdTriggerTypeCode(trigger);
                 }
             }
             return list;
+        }
+
+        private static void FirebirdTriggerTypeCode(DatabaseTrigger trigger)
+        {
+            if (trigger.TriggerType.Length != 1) return;
+            //firebird gives a very helpful number
+            switch (trigger.TriggerType)
+            {
+                case "1":
+                    trigger.TriggerType = "BEFORE";
+                    trigger.TriggerEvent = "INSERT";
+                    break;
+                case "2":
+                    trigger.TriggerType = "AFTER";
+                    trigger.TriggerEvent = "INSERT";
+                    break;
+                case "3":
+                    trigger.TriggerType = "BEFORE";
+                    trigger.TriggerEvent = "UPDATE";
+                    break;
+                case "4":
+                    trigger.TriggerType = "AFTER";
+                    trigger.TriggerEvent = "UPDATE";
+                    break;
+                case "5":
+                    trigger.TriggerType = "BEFORE";
+                    trigger.TriggerEvent = "DELETE";
+                    break;
+                case "6":
+                    trigger.TriggerType = "AFTER";
+                    trigger.TriggerEvent = "DELETE";
+                    break;
+            }
         }
 
         /// <summary>
