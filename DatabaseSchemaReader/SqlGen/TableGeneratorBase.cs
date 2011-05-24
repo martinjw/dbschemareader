@@ -66,7 +66,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         public string WriteColumn(DatabaseColumn column)
         {
-            return "  " + EscapeName(column.Name) + " " + WriteDataType(column);
+            return "  " + EscapeName(column.Name) + " " + WriteDataType(column).TrimEnd();
         }
 
     }

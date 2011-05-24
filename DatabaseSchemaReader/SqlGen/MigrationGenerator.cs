@@ -11,14 +11,18 @@ namespace DatabaseSchemaReader.SqlGen
     {
         private readonly ISqlFormatProvider _sqlFormatProvider;
         private readonly DdlGeneratorFactory _ddlFactory;
-        private readonly bool _noSchema; //database has no schema, so don't use it
 
         public MigrationGenerator(SqlType sqlType)
         {
             _sqlFormatProvider = SqlFormatFactory.Provider(sqlType);
             _ddlFactory = new DdlGeneratorFactory(sqlType);
-            _noSchema = (sqlType == SqlType.SqlServerCe || sqlType == SqlType.SQLite);
+            IncludeSchema = (sqlType != SqlType.SqlServerCe && sqlType != SqlType.SQLite);
         }
+
+        /// <summary>
+        /// Include the schema when writing table. Must not be set for SQLite as there is no schema.
+        /// </summary>
+        public bool IncludeSchema { get; set; }
 
         protected virtual ITableGenerator CreateTableGenerator(DatabaseTable databaseTable)
         {
@@ -368,7 +372,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         protected string SchemaPrefix(string schema)
         {
-            if (!_noSchema && !string.IsNullOrEmpty(schema))
+            if (IncludeSchema && !string.IsNullOrEmpty(schema))
             {
                 return Escape(schema) + ".";
             }

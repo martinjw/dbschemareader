@@ -233,37 +233,40 @@ namespace DatabaseSchemaReader
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
 
-            DataSet ds = _sr.Table(tableName);
-            if (ds == null) return null;
-            if (ds.Tables.Count == 0) return null;
-
-            DatabaseTable table = DatabaseSchema.Tables.Find(delegate(DatabaseTable x) { return x.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase); });
-            if (table == null)
+            DatabaseTable table;
+            using (DataSet ds = _sr.Table(tableName))
             {
-                table = new DatabaseTable();
-                DatabaseSchema.Tables.Add(table);
-            }
-            table.Name = tableName;
-            table.SchemaOwner = _sr.Owner;
-            //columns must be done first as it is updated by the others
-            table.Columns.Clear();
-            table.Columns.AddRange(SchemaConverter.Columns(ds.Tables["Columns"]));
-            if (ds.Tables.Contains("PrimaryKeys"))
-            {
-                List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["PrimaryKeys"], ConstraintType.PrimaryKey);
-                PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
-            }
-            if (ds.Tables.Contains("Foreign_Keys"))
-                table.ForeignKeys = SchemaConstraintConverter.Constraints(ds.Tables["Foreign_Keys"], ConstraintType.ForeignKey);
-            if (ds.Tables.Contains("ForeignKeyColumns"))
-                SchemaConstraintConverter.AddForeignKeyColumns(ds.Tables["ForeignKeyColumns"], table);
+                if (ds == null) return null;
+                if (ds.Tables.Count == 0) return null;
 
-            if (ds.Tables.Contains("Unique_Keys"))
-                table.UniqueKeys = SchemaConstraintConverter.Constraints(ds.Tables["Unique_Keys"], ConstraintType.UniqueKey);
-            if (ds.Tables.Contains("IndexColumns"))
-                table.Indexes = SchemaConstraintConverter.Indexes(ds.Tables["IndexColumns"]);
-            if (ds.Tables.Contains("IdentityColumns"))
-                SchemaConstraintConverter.AddIdentity(ds.Tables["IdentityColumns"], table);
+                table = DatabaseSchema.Tables.Find(delegate(DatabaseTable x) { return x.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase); });
+                if (table == null)
+                {
+                    table = new DatabaseTable();
+                    DatabaseSchema.Tables.Add(table);
+                }
+                table.Name = tableName;
+                table.SchemaOwner = _sr.Owner;
+                //columns must be done first as it is updated by the others
+                table.Columns.Clear();
+                table.Columns.AddRange(SchemaConverter.Columns(ds.Tables["Columns"]));
+                if (ds.Tables.Contains("PrimaryKeys"))
+                {
+                    List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["PrimaryKeys"], ConstraintType.PrimaryKey);
+                    PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
+                }
+                if (ds.Tables.Contains("Foreign_Keys"))
+                    table.ForeignKeys = SchemaConstraintConverter.Constraints(ds.Tables["Foreign_Keys"], ConstraintType.ForeignKey);
+                if (ds.Tables.Contains("ForeignKeyColumns"))
+                    SchemaConstraintConverter.AddForeignKeyColumns(ds.Tables["ForeignKeyColumns"], table);
+
+                if (ds.Tables.Contains("Unique_Keys"))
+                    table.UniqueKeys = SchemaConstraintConverter.Constraints(ds.Tables["Unique_Keys"], ConstraintType.UniqueKey);
+                if (ds.Tables.Contains("IndexColumns"))
+                    table.Indexes = SchemaConstraintConverter.Indexes(ds.Tables["IndexColumns"]);
+                if (ds.Tables.Contains("IdentityColumns"))
+                    SchemaConstraintConverter.AddIdentity(ds.Tables["IdentityColumns"], table);
+            }
 
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
@@ -294,6 +297,7 @@ namespace DatabaseSchemaReader
             try
             {
                 DataTable functions = _sr.Functions();
+                DatabaseSchema.Functions.Clear();
                 DatabaseSchema.Functions.AddRange(SchemaProcedureConverter.Functions(functions));
             }
             catch (DbException ex)

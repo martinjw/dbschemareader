@@ -123,6 +123,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         private static string NumberConversion(int? precision, int? scale)
         {
+            if (!precision.HasValue) return "INT";
             if (precision < 38 && scale == 0) return "INT";
             if (precision == 1 && scale == 0) return "BIT";
             if (precision == 18 && scale == 0) return "DECIMAL";

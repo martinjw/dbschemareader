@@ -47,8 +47,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             //oracle to sql server translation
             dataType = SqlServerToOracleConversion(dataType, providerType, length);
 
-            if (dataType == "NUMERIC" ||
-                dataType == "DECIMAL")
+            if (dataType == "NUMERIC" || dataType == "DECIMAL")
             {
                 var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
                 dataType = dataType + " (" + precision + writeScale + ")";
@@ -89,24 +88,166 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         private static string SqlServerToOracleConversion(string dataType, int providerType, int? length)
         {
             //oracle to sql server translation
-            if (dataType == "VARBINARY") dataType = "BLOB";
-            if (dataType == "IMAGE") dataType = "BLOB";
-            if (dataType == "NVARCHAR" && length > 2000) dataType = "CLOB";
-            if (dataType == "NTEXT") dataType = "CLOB";
-            if (dataType == "TEXT") dataType = "CLOB";
+            if (dataType == "VARBINARY") return "BLOB";
+            if (dataType == "IMAGE") return "BLOB";
+            if (dataType == "NVARCHAR" && length > 2000) return "CLOB";
+            if (dataType == "NTEXT" || dataType == "TEXT") return "CLOB";
             //you probably want Unicode.
-            if (dataType == "VARCHAR") dataType = "NVARCHAR2";
-            if (dataType == "NVARCHAR") dataType = "NVARCHAR2";
+            if (dataType == "VARCHAR" || dataType == "NVARCHAR") return "NVARCHAR2";
+
             //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
-            if (dataType == "DATETIME") dataType = "DATE";
+            if (dataType == "DATETIME") return "DATE";
             //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
             if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != 0x12 && providerType != 0x13 && providerType != 20)
             {
-                dataType = "NUMBER";
+                return "NUMBER";
             }
-            if (dataType == "INT") dataType = "NUMBER";
+            if (dataType == "XML") return "XMLTYPE";
 
             return dataType;
+        }
+
+        public static string WriteDataType(DatabaseColumn column)
+        {
+            var sql = string.Empty;
+            var defaultValue = string.Empty;
+            var dataType = column.DbDataType.ToUpperInvariant();
+            var precision = column.Precision;
+            var scale = column.Scale;
+            var length = column.Length;
+
+            if (dataType == "BOOLEAN")
+            {
+                dataType = "NUMBER";
+                precision = 1;
+                scale = 0;
+            }
+            //sql server to oracle translation
+            dataType = SqlServerToOracleConversion(dataType, GetProviderType(column), length);
+
+            if (dataType == "UNIQUEIDENTIFIER")
+            {
+                dataType = "RAW";
+                length = 16;
+            }
+            if (dataType == "NUMERIC") dataType = "NUMBER";
+            if (dataType == "INT")
+            {
+                dataType = "NUMBER";
+                precision = 9;
+                scale = 0;
+            }
+            if (dataType == "SMALLINT")
+            {
+                dataType = "NUMBER";
+                precision = 5;
+                scale = 0;
+            }
+            if (dataType == "BIT")
+            {
+                dataType = "NUMBER";
+                precision = 1;
+                scale = 0;
+            }
+            if (dataType == "DECIMAL")
+            {
+                dataType = "NUMBER";
+                precision = 18;
+                scale = 0;
+            }
+            if (dataType == "MONEY")
+            {
+                dataType = "NUMBER";
+                precision = 15;
+                scale = 4;
+            }
+
+            //write out Oracle datatype definition
+            if (dataType == "NVARCHAR2")
+            {
+                //don't specify "CHAR" for NVARCHAR2
+                sql = dataType + " (" + length + ")";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
+            if (dataType == "VARCHAR2")
+            {
+                //assume it's CHAR rather than bytes
+                sql = dataType + " (" + length + " CHAR)";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
+            if (dataType == "CHAR" || dataType == "NCHAR")
+            {
+                sql = dataType + " (" + length + ")";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
+            if (dataType == "NUMBER")
+            {
+                if (!precision.HasValue)
+                    sql = "NUMBER";
+                else
+                {
+                    var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
+                    sql = "NUMBER (" + precision + writeScale + ")";
+                }
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = " DEFAULT " + column.DefaultValue;
+            }
+            if (dataType == "REAL")
+            {
+                sql = "REAL";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = " DEFAULT " + column.DefaultValue;
+            }
+            if (dataType == "RAW")
+            {
+                sql = "RAW(" + length + ")";
+            }
+
+
+            if (dataType == "DATE")
+            {
+                sql = "DATE";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = " DEFAULT DATE '" + column.DefaultValue + "'";
+            }
+
+            if (dataType == "TIMESTAMP")
+            {
+                sql = "TIMESTAMP" + (precision.HasValue ? " (" + precision + ")" : " (6)");
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = " DEFAULT TIMESTAMP '" + column.DefaultValue + "'";
+            }
+
+            if (dataType == "CLOB")
+            {
+                sql = "CLOB ";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
+
+            if (dataType == "BLOB")
+            {
+                sql = "BLOB ";
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
+
+            if (string.IsNullOrEmpty(sql))
+            {
+                sql = column.DbDataType;
+                if (!string.IsNullOrEmpty(column.DefaultValue))
+                    defaultValue = AddQuotedDefault(column);
+            }
+
+            return sql + defaultValue + (!column.Nullable ? " NOT NULL" : string.Empty);
+        }
+
+        private static string AddQuotedDefault(DatabaseColumn column)
+        {
+            return " DEFAULT '" + column.DefaultValue + "'";
         }
     }
 }

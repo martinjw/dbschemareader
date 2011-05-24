@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using DatabaseSchemaReader.DataSchema;
 
@@ -11,6 +12,9 @@ namespace DatabaseSchemaReader.Conversion
             DatabaseStoredProcedure matchProcedure;
             DatabaseFunction matchFunction;
             //oracle sources come in lines; assume in order, so we can just concatenate
+            //if they already have source, we don't want to overwrite, so we use a cache
+            var functionCache = new Dictionary<string, DatabaseFunction>();
+
             foreach (DataRow row in dt.Rows)
             {
                 string owner = row["OWNER"].ToString();
@@ -39,9 +43,9 @@ namespace DatabaseSchemaReader.Conversion
                         break;
 
                     case "FUNCTION": //oracle function
-                        matchFunction = FindFunction(schema, name);
-                        if (matchFunction == null) continue;
-                        matchFunction.Sql += text;
+                        var function = FindFunction(name, schema, functionCache);
+                        if (function == null) continue;
+                        function.Sql += text;
                         break;
 
                     case "P": //sql server procedure
@@ -50,7 +54,8 @@ namespace DatabaseSchemaReader.Conversion
                         matchProcedure.Sql = text;
                         break;
 
-                    case "FN": //sql server function
+                    case "TF": //sql server table-valued function
+                    case "FN": //sql server scalar function
                         matchFunction = FindFunction(schema, name);
                         if (matchFunction == null) continue;
                         matchFunction.Sql = text;
@@ -63,6 +68,24 @@ namespace DatabaseSchemaReader.Conversion
                         break;
                 }
             }
+        }
+
+        private static DatabaseFunction FindFunction(string name, DatabaseSchema schema, Dictionary<string, DatabaseFunction> functionCache)
+        {
+            DatabaseFunction function;
+            if (functionCache.ContainsKey(name))
+            {
+                function = functionCache[name];
+            }
+            else
+            {
+                function = FindFunction(schema, name);
+                if (function == null) return null;
+                //we already have sql from the functions collection. Don't add to it.
+                if (!string.IsNullOrEmpty(function.Sql)) return null;
+                functionCache.Add(name, function);
+            }
+            return function;
         }
 
         private static DatabaseView FindView(DatabaseSchema schema, string name)

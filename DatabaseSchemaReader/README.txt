@@ -10,7 +10,9 @@ Unfortunately the information is returned in datatables, and the schema collecti
 
 This is an adapter which loads those collections into simple collections of plain old CLR objects, which are the same for all providers. It doesn't try to hide the underlying differences: Oracle will have packages and none of the others will. But the many small differences between tables, columns and stored procedure parameters disappear.
 
-There is a very simple Winforms UI project (DatabaseSchemaViewer.exe) See the tests show how to use the class library.
+Because almost all ADO providers support the GetSchema standard, it can get basic schema metadata for almost all databases. Where the provider schema doesn't provide enough information, there are additional calls for specific databases (often information on primary key and foreign key columns is limited so we call the database metadata directly). We look for additional information in SqlServer, Oracle, SqlServer Ce, MySQL and Postgresql.
+
+There is are two very simple Winforms UI projects showing example uses. See the tests show how to use the class library.
 
 It is not optimized or particularly well designed code. It was originally written in 2005, just after .Net 2.0 came out. It has been updated to .net 3.5 (although you can see the .net 2 vintage of much of it), and the project files are VS 2008 and VS 2010.
 
@@ -18,7 +20,7 @@ Over the years I've used it for code generation of data access code, and for con
 
 ===Use===
 
-To use it simply specify the connection string and ADO provider (eg System.Data,SqlClient or System.Data,OracleClient)
+To use it simply specify the connection string and ADO provider (eg System.Data,SqlClient or System.Data.OracleClient)
 
 const string providername = "System.Data.SqlClient";
 const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
@@ -72,7 +74,7 @@ The stored procedure gains a collection of DatabaseResultSets, each of which con
 
 ===SQL Generation===
 
-There are also rudimentary tools to generate SQL (note this is VERY LIMITED):
+There are also rudimentary tools to generate SQL (this is LIMITED and designed for simple databases only):
 
 var sqlWriter = new SqlWriter(table, DatabaseSchemaReader.DataSchema.SqlType.SqlServer);
 var sql = sqlWriter.SelectPageSql(); //paging sql
@@ -140,5 +142,5 @@ There are two simple UIs.
  - code generation, table DDL and stored procedure generation.
  - comparing the schema to another database.
 
-* CopyToSQLite. It reads all the schema and creates a new SQLite database file with the same tables and data. If Sql Server CE 4.0 is detected, it can do the same for that database. These databases do not have the full range of data types as other dtabases, so creating tables may fail (e.g. SqlServer CE 4 does not have VARCHAR(MAX)). In addition, copying data may violate foreign key constraints (especially for identity primary keys) and will fail.
+* CopyToSQLite. It reads all the schema and creates a new SQLite database file with the same tables and data. If Sql Server CE 4.0 is detected, it can do the same for that database. These databases do not have the full range of data types as other databases, so creating tables may fail (e.g. SqlServer CE 4 does not have VARCHAR(MAX)). In addition, copying data may violate foreign key constraints (especially for identity primary keys) and will fail.
 

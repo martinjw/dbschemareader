@@ -70,6 +70,8 @@ namespace DatabaseSchemaReader.CodeGen
 
             }
 
+            //we could write functions (at least scalar functions- not table value functions)
+            //you have to check the ReturnType (and remove it from the arguments collections).
             WriteStoredProcedures(directory.FullName, @namespace, pw);
             WritePackages(directory.FullName, @namespace, pw);
             WriteUnitTest(directory.FullName, @namespace);

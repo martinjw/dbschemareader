@@ -45,33 +45,35 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
    AND (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)
    AND (pr.proname = :sprocName OR :sprocName IS NULL) 
   ORDER BY pr.proname";
-            var dt = CreateDataTable("Data");
-            using (var da = _factory.CreateDataAdapter())
+            using (var dt = CreateDataTable("Data"))
             {
-                using (var cmd = connection.CreateCommand())
+                using (var da = _factory.CreateDataAdapter())
                 {
-                    cmd.CommandText = sqlCommand;
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = sqlCommand;
 
-                    var schemaParameter = AddDbParameter(cmd, "schemaOwner", _owner);
-                    schemaParameter.DbType = DbType.String;
-                    cmd.Parameters.Add(schemaParameter);
+                        var schemaParameter = AddDbParameter(cmd, "schemaOwner", _owner);
+                        schemaParameter.DbType = DbType.String;
+                        cmd.Parameters.Add(schemaParameter);
 
-                    var nameParameter = AddDbParameter(cmd, "sprocName", storedProcedureName);
-                    nameParameter.DbType = DbType.String;
-                    cmd.Parameters.Add(nameParameter);
+                        var nameParameter = AddDbParameter(cmd, "sprocName", storedProcedureName);
+                        nameParameter.DbType = DbType.String;
+                        cmd.Parameters.Add(nameParameter);
 
-                    da.SelectCommand = cmd;
-                    da.Fill(dt);
+                        da.SelectCommand = cmd;
+                        da.Fill(dt);
+                    }
                 }
+                //turn this into a result
+                DataTable result = CreateArgumentsTable();
+                var requiredDataTypes = new Dictionary<long, string>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    ParseProcedureRows(row, connection, requiredDataTypes, result);
+                }
+                return result;
             }
-            //turn this into a result
-            DataTable result = CreateArgumentsTable();
-            var requiredDataTypes = new Dictionary<long, string>();
-            foreach (DataRow row in dt.Rows)
-            {
-                ParseProcedureRows(row, connection, requiredDataTypes, result);
-            }
-            return result;
         }
 
         private static void ParseProcedureRows(DataRow row, DbConnection connection, IDictionary<long, string> requiredDataTypes, DataTable result)

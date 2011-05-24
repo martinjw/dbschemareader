@@ -79,10 +79,16 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             else if (dataType == "DATETIME") dataType = "TIMESTAMP";
             else if (dataType == "DATETIME2") dataType = "TIMESTAMP";
 
+            //bytes
+            else if (dataType == "IMAGE") dataType = "BYTEA";
+            else if (dataType == "VARBINARY" && column.Length != -1) dataType = "BYTEA";
+
             //blobs become object ids
             else if (dataType == "BLOB") dataType = "OID";
             else if (dataType == "VARBINARY") dataType = "OID";
 
+            //there is a native BIT(n) type in Postgresql, but in conversion we probably mean boolean.
+            else if (dataType == "BIT" && !column.Length.HasValue) dataType = "BOOLEAN";
 
             //other types
             else if (dataType == "XMLTYPE") dataType = "XML";

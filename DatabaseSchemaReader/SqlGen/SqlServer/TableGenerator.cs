@@ -40,8 +40,12 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
-            return new SqlServerMigrationGenerator();
+            var migrations = new SqlServerMigrationGenerator();
+            //ensure we're not writing schema prefixes
+            if (!IncludeSchema) migrations.IncludeSchema = false;
+            return migrations;
         }
+
         private void AddIndexes(StringBuilder sb)
         {
             if (!Table.Indexes.Any()) return;
@@ -66,7 +70,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
-                var defaultConstraint = " CONSTRAINT [DF_" + TableName + "_" + column.Name + "] DEFAULT ";
+                const string defaultConstraint = "DEFAULT ";
                 var dataType = column.DbDataType.ToUpperInvariant();
                 if (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR")
                 {

@@ -107,6 +107,10 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 expression = expression.Substring(1, expression.Length - 2);
             }
+            //ignore "IS NOT NULL" constraints as they are generally handled on the add/alter column level
+            if (expression.EndsWith(" IS NOT NULL")) 
+                return null;
+
             //translate if required
             if (TranslateCheckConstraint != null) expression = TranslateCheckConstraint(expression);
 

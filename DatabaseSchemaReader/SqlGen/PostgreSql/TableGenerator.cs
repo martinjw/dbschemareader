@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
@@ -36,7 +37,23 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         }
         private ConstraintWriter CreateConstraintWriter()
         {
-            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema };
+            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema, TranslateCheckConstraint = TranslateCheckExpression };
+        }
+        private static string TranslateCheckExpression(string expression)
+        {
+            //translate SqlServer-isms into PostgreSql
+            var getDate = expression.IndexOf("getdate()", StringComparison.OrdinalIgnoreCase);
+            if (getDate != -1)
+            {
+                expression = expression.Remove(getDate, 9).Insert(getDate, "current_timestamp");
+            }
+            return expression
+                //column escaping
+                .Replace("[", "\"")
+                .Replace("]", "\"")
+                //MySql column escaping
+                .Replace("`", "\"")
+                .Replace("`", "\"");
         }
         //protected virtual IMigrationGenerator CreateMigrationGenerator()
         //{
@@ -66,15 +83,25 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
-                var defaultConstraint = " CONSTRAINT [DF_" + TableName + "_" + column.Name + "] DEFAULT ";
+                const string defaultConstraint = "DEFAULT ";
                 var dataType = column.DbDataType.ToUpperInvariant();
                 if (dataType == "VARCHAR" || dataType == "TEXT" || dataType == "CHAR")
                 {
                     defaultValue = defaultConstraint + "'" + column.DefaultValue + "'";
                 }
+                else if (column.DataType != null && column.DataType.GetNetType() == typeof(bool))
+                {
+                    var d = column.DefaultValue.Trim(new[] { '(', ')' });
+                    defaultValue = defaultConstraint + (d == "1" ? "TRUE" : "FALSE");
+                }
                 else //numeric default
                 {
-                    defaultValue = defaultConstraint + column.DefaultValue;
+                    //remove any parenthesis
+                    var d = column.DefaultValue.Trim(new[] { '(', ')' });
+                    //special case casting. What about other single integers?
+                    if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
+                        d = "((0::text)::money)"; //cast from int to money. Weird.
+                    defaultValue = defaultConstraint + d;
                 }
                 defaultValue = " " + defaultValue;
             }
