@@ -42,8 +42,8 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
 
             //firebird
-            if (!dt.Columns.Contains(key)) key = "PK_NAME"; //for pk
-            if (!dt.Columns.Contains(key)) key = "UK_NAME"; //for uk
+            if (constraintType == ConstraintType.PrimaryKey && !dt.Columns.Contains(key)) key = "PK_NAME";
+            if (constraintType == ConstraintType.ForeignKey && !dt.Columns.Contains(key)) key = "UK_NAME";
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "REFERENCED_TABLE_NAME";
             //a firebird typo!
             if (dt.Columns.Contains("CHECK_CLAUSULE")) expressionKey = "CHECK_CLAUSULE";
@@ -51,6 +51,17 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(columnKey)) columnKey = "FKEY_FROM_COLUMN";
             if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "FKEY_FROM_ORDINAL_POSITION";
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "FKEY_TO_TABLE";
+
+            //db2
+            if (constraintType == ConstraintType.PrimaryKey && !dt.Columns.Contains(key)) key = "PK_NAME";
+            if (constraintType == ConstraintType.ForeignKey && !dt.Columns.Contains(key)) key = "FK_NAME";
+            if (!dt.Columns.Contains(tableKey)) tableKey = "FKTABLE_NAME";
+            if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "PKTABLE_NAME";
+            if (!dt.Columns.Contains(refersToKey)) refersToKey = "PK_NAME";
+            if (!dt.Columns.Contains(columnKey)) columnKey = "FKCOLUMN_NAME";
+            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "KEY_SEQ";
+            if (!dt.Columns.Contains(expressionKey)) expressionKey = "CHECK_CLAUSE";
+
             if (!dt.Columns.Contains(refersToKey)) refersToKey = null;
             if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = null;
             if (!dt.Columns.Contains(deleteRuleKey)) deleteRuleKey = null;
@@ -125,6 +136,11 @@ namespace DatabaseSchemaReader.Conversion
             if (string.IsNullOrEmpty(deleteUpdateRuleKey)) return null;
 
             string rule = row[deleteUpdateRuleKey].ToString();
+            //translate DB2 numbers
+            if (rule == "0") rule = "CASCADE";
+            else if (rule == "1") rule = "RESTRICT";
+            else if (rule == "2") rule = "SET NULL";
+            else if (rule == "3") rule = "NO ACTION";
             if (!string.IsNullOrEmpty(rule) && !rule.Equals("NO ACTION", StringComparison.OrdinalIgnoreCase))
                 return rule;
             return null;
@@ -243,6 +259,7 @@ namespace DatabaseSchemaReader.Conversion
             foreach (DataRowView row in dt.DefaultView)
             {
                 string name = row[key].ToString();
+                if(string.IsNullOrEmpty(name)) continue; //all indexes should have a name
                 string schema = row[schemaKey].ToString();
                 DatabaseIndex c = list.Find(delegate(DatabaseIndex f) { return f.Name == name && f.SchemaOwner == schema; });
                 if (c == null)

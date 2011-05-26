@@ -42,11 +42,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         private static string TranslateCheckExpression(string expression)
         {
             //translate SqlServer-isms into PostgreSql
-            var getDate = expression.IndexOf("getdate()", StringComparison.OrdinalIgnoreCase);
-            if (getDate != -1)
-            {
-                expression = expression.Remove(getDate, 9).Insert(getDate, "current_timestamp");
-            }
+            expression = SqlTranslator.EnsureCurrentTimestamp(expression);
+
             return expression
                 //column escaping
                 .Replace("[", "\"")
@@ -55,21 +52,21 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 .Replace("`", "\"")
                 .Replace("`", "\"");
         }
-        //protected virtual IMigrationGenerator CreateMigrationGenerator()
-        //{
-        //    return new SqlServerMigrationGenerator();
-        //}
+        protected virtual IMigrationGenerator CreateMigrationGenerator()
+        {
+            return new PostgreSqlMigrationGenerator { IncludeSchema = IncludeSchema };
+        }
         private void AddIndexes(StringBuilder sb)
         {
             if (!Table.Indexes.Any()) return;
 
-            //var migration = CreateMigrationGenerator();
-            //foreach (var index in Table.Indexes)
-            //{
-            //    if(index.IsUnqiueKeyIndex(Table)) continue;
+            var migration = CreateMigrationGenerator();
+            foreach (var index in Table.Indexes)
+            {
+                if (index.IsUniqueKeyIndex(Table)) continue;
 
-            //    sb.AppendLine(migration.AddIndex(Table, index));
-            //}
+                sb.AppendLine(migration.AddIndex(Table, index));
+            }
         }
 
         protected override ISqlFormatProvider SqlFormatProvider()
@@ -83,27 +80,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
-                const string defaultConstraint = "DEFAULT ";
-                var dataType = column.DbDataType.ToUpperInvariant();
-                if (dataType == "VARCHAR" || dataType == "TEXT" || dataType == "CHAR")
-                {
-                    defaultValue = defaultConstraint + "'" + column.DefaultValue + "'";
-                }
-                else if (column.DataType != null && column.DataType.GetNetType() == typeof(bool))
-                {
-                    var d = column.DefaultValue.Trim(new[] { '(', ')' });
-                    defaultValue = defaultConstraint + (d == "1" ? "TRUE" : "FALSE");
-                }
-                else //numeric default
-                {
-                    //remove any parenthesis
-                    var d = column.DefaultValue.Trim(new[] { '(', ')' });
-                    //special case casting. What about other single integers?
-                    if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
-                        d = "((0::text)::money)"; //cast from int to money. Weird.
-                    defaultValue = defaultConstraint + d;
-                }
-                defaultValue = " " + defaultValue;
+                defaultValue = WriteDefaultValue(column);
             }
 
             var sql = DataTypeWriter.DataType(column);
@@ -116,6 +93,50 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             else
                 sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + defaultValue;
             return sql;
+        }
+
+        private static string WriteDefaultValue(DatabaseColumn column)
+        {
+            const string defaultConstraint = " DEFAULT ";
+            var defaultValue = FixDefaultValue(column.DefaultValue);
+            if (IsStringColumn(column))
+            {
+                defaultValue = defaultConstraint + "'" + defaultValue + "'";
+            }
+            else if (column.DataType != null && column.DataType.GetNetType() == typeof(bool))
+            {
+                var d = defaultValue.Trim(new[] { '(', ')' });
+                defaultValue = defaultConstraint + (d == "1" ? "TRUE" : "FALSE");
+            }
+            else //numeric default
+            {
+                //remove any parenthesis
+                var d = defaultValue.Trim(new[] { '(', ')' });
+                //special case casting. What about other single integers?
+                if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
+                    d = "((0::text)::money)"; //cast from int to money. Weird.
+                defaultValue = defaultConstraint + d;
+            }
+            return defaultValue;
+        }
+
+        private static bool IsStringColumn(DatabaseColumn column)
+        {
+            var dataType = column.DbDataType.ToUpperInvariant();
+            var isString = (dataType == "VARCHAR" || dataType == "TEXT" || dataType == "CHAR");
+            var dt = column.DataType;
+            if (dt != null && dt.IsString) isString = true;
+            return isString;
+        }
+
+        private static string FixDefaultValue(string defaultValue)
+        {
+            //Guid defaults. 
+            if (SqlTranslator.IsGuidGenerator(defaultValue))
+            {
+                return "uuid_generate_v1()"; //use uuid-osp contrib
+            }
+            return SqlTranslator.Fix(defaultValue);
         }
 
         protected override string NonNativeAutoIncrementWriter()

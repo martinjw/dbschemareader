@@ -31,11 +31,14 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             //Oracle doesn't allow SYSDATE in check constraints
             if (check.Expression.IndexOf("getDate()", StringComparison.OrdinalIgnoreCase) != -1)
                 return true;
+            if (check.Expression.IndexOf("current_timestamp", StringComparison.OrdinalIgnoreCase) != -1)
+                return true;
             return false;
         }
 
         private static string TranslateCheckExpression(string expression)
         {
+            expression = SqlTranslator.Fix(expression);
             //translate SqlServer-isms into Oracle
             return expression
                 //column escaping

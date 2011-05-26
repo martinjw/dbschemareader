@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqLite
@@ -30,27 +28,14 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                 if (column.IsIdentity) type += " AUTOINCREMENT";
             }
             if (!column.Nullable) type += " NOT NULL";
-            if (!string.IsNullOrEmpty(column.DefaultValue))
+            //if there's a default value, and it's not a guid generator
+            if (!string.IsNullOrEmpty(column.DefaultValue) && !SqlTranslator.IsGuidGenerator(column.DefaultValue))
             {
-                var value = RemoveParenthesis(column.DefaultValue);
-                if (value.IndexOf("GETDATE()", StringComparison.OrdinalIgnoreCase) != -1)
-                {
-                    value = "CURRENT_TIMESTAMP";
-                }
+                var value = SqlTranslator.Fix(column.DefaultValue);
                 type += " DEFAULT " + value;
             }
 
             return type;
-        }
-
-        private static string RemoveParenthesis(string value)
-        {
-            if (value.StartsWith("((", StringComparison.OrdinalIgnoreCase) &&
-                value.EndsWith("))", StringComparison.OrdinalIgnoreCase))
-            {
-                value = value.Substring(2, value.Length - 4);
-            }
-            return value;
         }
 
         protected override void AddTableConstraints(IList<string> columnList)
@@ -66,7 +51,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             }
             foreach (var checkConstraint in Table.CheckConstraints)
             {
-                var expression = CleanCheckExpression(checkConstraint.Expression);
+                var expression = SqlTranslator.Fix(checkConstraint.Expression);
                 columnList.Add("CHECK " + expression);
             }
 
@@ -96,18 +81,6 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                     formatter.Escape(foreignKey.RefersToTable),
                     refColumnList));
             }
-        }
-
-        private static string CleanCheckExpression(string expression)
-        {
-            if (expression.IndexOf("GETDATE()", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                //special case
-                expression = Regex.Replace(expression, @"GETDATE\(\)", "CURRENT_TIMESTAMP", RegexOptions.IgnoreCase);
-            }
-            //remove any braces around numbers
-            expression = Regex.Replace(expression, @"\((\d+)\)", "$1");
-            return expression;
         }
 
         protected override string NonNativeAutoIncrementWriter()

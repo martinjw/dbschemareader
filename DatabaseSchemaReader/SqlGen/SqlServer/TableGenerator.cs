@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
@@ -53,7 +54,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var migration = CreateMigrationGenerator();
             foreach (var index in Table.Indexes)
             {
-                if(index.IsUnqiueKeyIndex(Table)) continue;
+                if (index.IsUniqueKeyIndex(Table)) continue;
 
                 sb.AppendLine(migration.AddIndex(Table, index));
             }
@@ -70,15 +71,15 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
+                var value = FixDefaultValue(column.DefaultValue);
                 const string defaultConstraint = "DEFAULT ";
-                var dataType = column.DbDataType.ToUpperInvariant();
-                if (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR")
+                if (IsStringColumn(column))
                 {
-                    defaultValue = defaultConstraint + "'" + column.DefaultValue + "'";
+                    defaultValue = defaultConstraint + "'" + value + "'";
                 }
                 else //numeric default
                 {
-                    defaultValue = defaultConstraint + column.DefaultValue;
+                    defaultValue = defaultConstraint + value;
                 }
             }
 
@@ -95,6 +96,24 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             else
                 sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + " " + defaultValue;
             return sql;
+        }
+
+        private static string FixDefaultValue(string defaultValue)
+        {
+            if (SqlTranslator.IsGuidGenerator(defaultValue) && !"newsequentialid()".Equals(defaultValue, StringComparison.OrdinalIgnoreCase))
+            {
+                return "newid()";
+            }
+            return SqlTranslator.Fix(defaultValue);
+        }
+
+        private static bool IsStringColumn(DatabaseColumn column)
+        {
+            var dataType = column.DbDataType.ToUpperInvariant();
+            var isString = (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR");
+            var dt = column.DataType;
+            if (dt != null && dt.IsString) isString = true;
+            return isString;
         }
 
         protected override string NonNativeAutoIncrementWriter()

@@ -43,6 +43,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(typeKey)) typeKey = "tabletype";
             //Devart.Data.MySQL
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
+            var isDb2 = dt.Columns.Contains("REMARKS");
 
             foreach (DataRow row in dt.Rows)
             {
@@ -51,7 +52,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (!type.Equals("TABLE", StringComparison.OrdinalIgnoreCase) &&
                     !type.Equals("BASE TABLE", StringComparison.OrdinalIgnoreCase) &&
                    !type.Equals("User", StringComparison.OrdinalIgnoreCase) &&
-                   //MySQL types are something different
+                    //MySQL types are something different
                    !type.Equals("InnoDB", StringComparison.OrdinalIgnoreCase) &&
                    !type.Equals("MyISAM", StringComparison.OrdinalIgnoreCase)) continue;
                 DatabaseTable t = new DatabaseTable();
@@ -59,6 +60,8 @@ namespace DatabaseSchemaReader.Conversion
                 //exclude Oracle bin tables
                 if (t.Name.StartsWith("BIN$", StringComparison.OrdinalIgnoreCase)) continue;
                 t.SchemaOwner = row[ownerKey].ToString();
+                //Db2 system tables creeping in
+                if (isDb2 && t.SchemaOwner.Equals("SYSTOOLS", StringComparison.OrdinalIgnoreCase)) continue;
                 list.Add(t);
             }
             return list;
@@ -93,6 +96,7 @@ namespace DatabaseSchemaReader.Conversion
             string key = "TABLE_NAME"; //yep, it's Table_Name in SqlServer.
             string ownerKey = "TABLE_SCHEMA";
             string definition = "TEXT";
+            string typeKey = "TABLE_TYPE";
             //mysql
             if (!dt.Columns.Contains(definition)) definition = "VIEW_DEFINITION";
             //firebird
@@ -109,11 +113,20 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.MySQL
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
 
+            if (!dt.Columns.Contains(typeKey)) typeKey = null;
+
             foreach (DataRow row in dt.Rows)
             {
+                if (typeKey != null)
+                {
+                    var type = row[typeKey].ToString();
+                    if (type != "VIEW") continue;
+                }
                 DatabaseView t = new DatabaseView();
                 t.Name = row[key].ToString();
                 t.SchemaOwner = row[ownerKey].ToString();
+                //ignore db2 system tables
+                if (typeKey != null && t.SchemaOwner.StartsWith("SYS", StringComparison.OrdinalIgnoreCase)) continue;
                 if (hasSql) t.Sql = row[definition].ToString();
                 list.Add(t);
             }
@@ -167,6 +180,11 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "typename";
             if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "isunique";
             if (!dt.Columns.Contains(defaultKey)) defaultKey = "defaultvalue";
+            //db2
+            if (dt.Columns.Contains("data_type_name")) datatypeKey = "data_type_name";
+            if (!dt.Columns.Contains(precisionKey)) precisionKey = "column_size";
+            if (!dt.Columns.Contains(scaleKey)) scaleKey = "decimal_digits";
+            if (!dt.Columns.Contains(defaultKey)) defaultKey = "column_def";
 
             if (!dt.Columns.Contains(defaultKey)) defaultKey = null; //not in Oracle catalog
             if (!dt.Columns.Contains(autoIncrementKey)) autoIncrementKey = null;
@@ -243,15 +261,30 @@ namespace DatabaseSchemaReader.Conversion
             List<DataType> list = new List<DataType>();
             if (dataTable == null || dataTable.Rows.Count == 0) return list;
 
+            var typename = "TypeName";
+            var datatype = "DataType";
+            var providerdbtype = "ProviderDbType";
+            var literalprefix = "LiteralPrefix";
+            var literalsuffix = "LiteralSuffix";
+            var createformat = "CreateFormat";
+            //DB2
+            if (!dataTable.Columns.Contains(typename)) typename = "provider_type_name";
+            if (!dataTable.Columns.Contains(datatype)) datatype = "framework_type";
+            if (!dataTable.Columns.Contains(providerdbtype)) providerdbtype = "provider_type";
+            if (!dataTable.Columns.Contains(literalprefix)) literalprefix = "literal_prefix";
+            if (!dataTable.Columns.Contains(literalsuffix)) literalsuffix = "literal_suffix";
+            if (!dataTable.Columns.Contains(createformat)) createformat = null;
+
             foreach (DataRow row in dataTable.Rows)
             {
-                string typeName = row["TypeName"].ToString();
-                string netDataType = row["DataType"].ToString();
+                string typeName = row[typename].ToString();
+                string netDataType = row[datatype].ToString();
                 DataType d = new DataType(typeName, netDataType);
-                d.ProviderDbType = Convert.ToInt32(row["ProviderDbType"], CultureInfo.InvariantCulture);
-                d.LiteralPrefix = row["LiteralPrefix"].ToString();
-                d.LiteralSuffix = row["LiteralSuffix"].ToString();
-                d.CreateFormat = row["CreateFormat"].ToString();
+                d.ProviderDbType = Convert.ToInt32(row[providerdbtype], CultureInfo.InvariantCulture);
+                d.LiteralPrefix = row[literalprefix].ToString();
+                d.LiteralSuffix = row[literalsuffix].ToString();
+                if (createformat != null)
+                    d.CreateFormat = row[createformat].ToString();
                 list.Add(d);
             }
             return list;

@@ -94,6 +94,7 @@ namespace DatabaseSchemaReader.Conversion
             string key = "ROUTINE_NAME";
             string ownerKey = "ROUTINE_SCHEMA";
             string routineTypeKey = "ROUTINE_TYPE";
+            if (!dt.Columns.Contains(routineTypeKey)) routineTypeKey = "PROCEDURE_TYPE_NAME";
             if (!dt.Columns.Contains(routineTypeKey)) routineTypeKey = null;
             //oracle
             if (!dt.Columns.Contains(key)) key = "OBJECT_NAME";
@@ -112,18 +113,18 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
             if (packageKey == null && dt.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
+            var isDb2 = dt.Columns.Contains("PROCEDURE_MODULE");
 
             foreach (DataRow row in dt.Rows)
             {
                 string name = row[key].ToString();
                 string schemaOwner = row[ownerKey].ToString();
-                bool isFunction = false;
-                if (!string.IsNullOrEmpty(routineTypeKey))
+                if (isDb2)
                 {
-                    var type = row[routineTypeKey].ToString();
-                    if (string.Equals(type, "FUNCTION", StringComparison.OrdinalIgnoreCase))
-                        isFunction = true;
+                    //ignore db2 system sprocs
+                    if (IsDb2SystemSchema(schemaOwner)) continue;
                 }
+                bool isFunction = IsFunction(routineTypeKey, row);
                 string package = null;
                 if (packageKey != null)
                 {
@@ -142,6 +143,29 @@ namespace DatabaseSchemaReader.Conversion
                 }
                 if (sql != null) sproc.Sql = row[sql].ToString();
             }
+        }
+
+        private static bool IsDb2SystemSchema(string schemaOwner)
+        {
+            if (schemaOwner.Equals("SYSPROC", StringComparison.OrdinalIgnoreCase)) return true;
+            if (schemaOwner.Equals("SYSFUN", StringComparison.OrdinalIgnoreCase)) return true;
+            if (schemaOwner.Equals("SQLJ", StringComparison.OrdinalIgnoreCase)) return true;
+            if (schemaOwner.StartsWith("SYSIBM", StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+
+        private static bool IsFunction(string routineTypeKey, DataRow row)
+        {
+            bool isFunction = false;
+            if (!string.IsNullOrEmpty(routineTypeKey))
+            {
+                var type = row[routineTypeKey].ToString();
+                if (string.Equals(type, "FUNCTION", StringComparison.OrdinalIgnoreCase))
+                    isFunction = true;
+                else if (string.Equals(type, "SQL_PT_FUNCTION", StringComparison.OrdinalIgnoreCase))
+                    isFunction = true;
+            }
+            return isFunction;
         }
 
         public static void UpdateArguments(DatabaseSchema databaseSchema, DataTable arguments)
@@ -172,6 +196,7 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.PostgreSql
             if (!arguments.Columns.Contains(sprocKey)) sprocKey = "ROUTINE";
 
+            var isDb2 = arguments.Columns.Contains("PROCEDURE_MODULE");
 
             //project the sprocs (which won't have packages) into a distinct view
             DataTable sprocTable;
@@ -191,6 +216,12 @@ namespace DatabaseSchemaReader.Conversion
                 //a procedure without a name?
                 if (string.IsNullOrEmpty(name)) continue;
                 string owner = row[ownerKey].ToString();
+                if (isDb2)
+                {
+                    //ignore db2 system sprocs
+                    if (IsDb2SystemSchema(owner)) continue;
+                }
+
                 string package = null; //for non-Oracle, package is always null
                 if (packageKey != null)
                 {
@@ -309,7 +340,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!arguments.Columns.Contains(scaleKey)) scaleKey = "SCALE";
             if (!arguments.Columns.Contains(inoutKey)) inoutKey = "DIRECTION";
 
-            //oledb and firebird
+            //oledb and firebird and db2
             if (!arguments.Columns.Contains(sprocName)) sprocName = "PROCEDURE_NAME";
             if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
             //firebird
@@ -318,7 +349,16 @@ namespace DatabaseSchemaReader.Conversion
             if (!arguments.Columns.Contains(lengthKey)) lengthKey = "CHARACTER_MAX_LENGTH";
             if (!arguments.Columns.Contains(precisionKey)) precisionKey = "NUMERIC_PRECISION";
             if (!arguments.Columns.Contains(scaleKey)) scaleKey = "NUMERIC_SCALE";
+            //db2
+            if (!arguments.Columns.Contains(name)) name = "COLUMN_NAME";
+            if (arguments.Columns.Contains("PROVIDER_TYPE_NAME")) datatypeKey = "PROVIDER_TYPE_NAME";
+            string db2ColumnTypeKey = null;
+            if (arguments.Columns.Contains("COLUMN_TYPE_NAME")) db2ColumnTypeKey = "COLUMN_TYPE_NAME";
+            if (!arguments.Columns.Contains(lengthKey)) lengthKey = "COLUMN_SIZE";
+            if (!arguments.Columns.Contains(precisionKey)) precisionKey = "COLUMN_SIZE";
+            if (!arguments.Columns.Contains(scaleKey)) scaleKey = "DECIMAL_DIGITS";
 
+            //not provided
             if (!arguments.Columns.Contains(precisionKey)) precisionKey = null;
             if (!arguments.Columns.Contains(lengthKey)) lengthKey = null;
             if (!arguments.Columns.Contains(scaleKey)) scaleKey = null;
@@ -337,6 +377,7 @@ namespace DatabaseSchemaReader.Conversion
 
                 argument.DatabaseDataType = row[datatypeKey].ToString();
                 AddInOut(row, inoutKey, argument);
+                if (db2ColumnTypeKey != null) ApplyColumnType((string)row[db2ColumnTypeKey], argument);
 
                 //Oracle: these can be decimals, but we'll assume ints
                 if (lengthKey != null)
@@ -347,6 +388,29 @@ namespace DatabaseSchemaReader.Conversion
                     argument.Scale = GetNullableInt(row[scaleKey]);
             }
             return list;
+        }
+
+        private static void ApplyColumnType(string columnType, DatabaseArgument argument)
+        {
+            switch (columnType)
+            {
+                case "SQL_PARAM_INPUT":
+                    argument.In = true;
+                    return;
+                case "SQL_PARAM_INPUT_OUTPUT":
+                    argument.In = true;
+                    argument.Out = true;
+                    return;
+                case "SQL_PARAM_OUTPUT":
+                    argument.Out = true;
+                    return;
+                case "SQL_RETURN_VALUE":
+                    argument.Ordinal = -1;
+                    return;
+                case "SQL_RESULT_COL":
+                    //db2 returns result columns?
+                    break;
+            }
         }
 
         private static void AddPackage(DataRowView row, string packageKey, DatabaseArgument argument)

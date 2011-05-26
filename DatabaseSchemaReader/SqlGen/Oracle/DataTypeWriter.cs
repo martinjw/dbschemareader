@@ -110,7 +110,6 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         public static string WriteDataType(DatabaseColumn column)
         {
             var sql = string.Empty;
-            var defaultValue = string.Empty;
             var dataType = column.DbDataType.ToUpperInvariant();
             var precision = column.Precision;
             var scale = column.Scale;
@@ -162,26 +161,28 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 scale = 4;
             }
 
+            string defaultValue = FixDefaultValue(column);
+
             //write out Oracle datatype definition
             if (dataType == "NVARCHAR2")
             {
                 //don't specify "CHAR" for NVARCHAR2
                 sql = dataType + " (" + length + ")";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
             if (dataType == "VARCHAR2")
             {
                 //assume it's CHAR rather than bytes
                 sql = dataType + " (" + length + " CHAR)";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
             if (dataType == "CHAR" || dataType == "NCHAR")
             {
                 sql = dataType + " (" + length + ")";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
             if (dataType == "NUMBER")
             {
@@ -192,14 +193,14 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
                     sql = "NUMBER (" + precision + writeScale + ")";
                 }
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = " DEFAULT " + column.DefaultValue;
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + defaultValue;
             }
             if (dataType == "REAL")
             {
                 sql = "REAL";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = " DEFAULT " + column.DefaultValue;
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + defaultValue;
             }
             if (dataType == "RAW")
             {
@@ -210,44 +211,54 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             if (dataType == "DATE")
             {
                 sql = "DATE";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = " DEFAULT DATE '" + column.DefaultValue + "'";
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT DATE '" + defaultValue + "'";
             }
 
             if (dataType == "TIMESTAMP")
             {
                 sql = "TIMESTAMP" + (precision.HasValue ? " (" + precision + ")" : " (6)");
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = " DEFAULT TIMESTAMP '" + column.DefaultValue + "'";
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT TIMESTAMP '" + defaultValue + "'";
             }
 
             if (dataType == "CLOB")
             {
                 sql = "CLOB ";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
 
             if (dataType == "BLOB")
             {
                 sql = "BLOB ";
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
 
             if (string.IsNullOrEmpty(sql))
             {
                 sql = column.DbDataType;
-                if (!string.IsNullOrEmpty(column.DefaultValue))
-                    defaultValue = AddQuotedDefault(column);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
 
-            return sql + defaultValue + (!column.Nullable ? " NOT NULL" : string.Empty);
+            return sql + (!column.Nullable ? " NOT NULL" : string.Empty);
         }
 
-        private static string AddQuotedDefault(DatabaseColumn column)
+        private static string FixDefaultValue(DatabaseColumn column)
         {
-            return " DEFAULT '" + column.DefaultValue + "'";
+            //Guid defaults. 
+            if (SqlTranslator.IsGuidGenerator(column.DefaultValue))
+            {
+                return "SYS_GUID()";
+            }
+            return SqlTranslator.Fix(column.DefaultValue);
+        }
+
+        private static string AddQuotedDefault(string defaultValue)
+        {
+            return "'" + defaultValue + "'";
         }
     }
 }

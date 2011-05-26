@@ -122,6 +122,7 @@
     <Compile Include="SqlGen\SqlServer\SqlServerMigrationGenerator.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerCeSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
+    <Compile Include="SqlGen\SqlTranslator.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />

@@ -67,7 +67,6 @@ namespace DatabaseSchemaReader
         /// Gets or sets the owner (for Oracle) /schema (for SqlServer) / database (MySql). Always set it with Oracle; if you use other than dbo in SqlServer you should also set it. 
         /// If it is null or empty, all owners are returned.
         /// </summary>
-        /// 
         public string Owner { get; set; }
 
         /// <summary>
@@ -175,11 +174,13 @@ namespace DatabaseSchemaReader
         /// <returns>Datatable with columns OWNER, TABLE_NAME, TYPE</returns>
         public DataTable Views()
         {
-            const string collectionName = "Views";
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
+                string collectionName = "Views";
+                if (!SchemaCollectionExists(conn, collectionName))
+                    collectionName = "Tables";
                 if (!SchemaCollectionExists(conn, collectionName))
                     return new DataTable(collectionName); //doesn't exist in SqlServerCe
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);

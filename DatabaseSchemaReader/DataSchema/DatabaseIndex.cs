@@ -94,9 +94,9 @@ namespace DatabaseSchemaReader.DataSchema
         /// </summary>
         /// <param name="parentTable">The parent table.</param>
         /// <returns>
-        ///   <c>true</c> if is same as unqiue key; otherwise, <c>false</c>.
+        ///   <c>true</c> if is same as unique key; otherwise, <c>false</c>.
         /// </returns>
-        public bool IsUnqiueKeyIndex(DatabaseTable parentTable)
+        public bool IsUniqueKeyIndex(DatabaseTable parentTable)
         {
             var columnNames = Columns.Select(c => c.Name);
             //if this the same as the primary key?

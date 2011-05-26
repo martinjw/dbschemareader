@@ -26,18 +26,19 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             var type = column.MySqlDataType();
             type += (!column.Nullable ? " NOT NULL" : string.Empty);
 
-            if (!string.IsNullOrEmpty(column.DefaultValue))
+            var defaultValue = column.DefaultValue;
+            if (!string.IsNullOrEmpty(defaultValue))
             {
-                //No names for constraints
+                defaultValue = FixDefaultValue(defaultValue);
                 const string defaultConstraint = " DEFAULT ";
-                var dataType = column.DbDataType.ToUpperInvariant();
-                if (dataType == "NVARCHAR" || dataType == "VARCHAR" || dataType == "CHAR")
+
+                if (IsStringColumn(column))
                 {
-                    type += defaultConstraint + "'" + column.DefaultValue + "'";
+                    type += defaultConstraint + "'" + defaultValue + "'";
                 }
                 else //numeric default
                 {
-                    type += defaultConstraint + column.DefaultValue;
+                    type += defaultConstraint + defaultValue;
                 }
             }
 
@@ -47,6 +48,25 @@ namespace DatabaseSchemaReader.SqlGen.MySql
                 type += " PRIMARY KEY";
 
             return type;
+        }
+
+        private static string FixDefaultValue(string defaultValue)
+        {
+            //Guid defaults. 
+            if (SqlTranslator.IsGuidGenerator(defaultValue))
+            {
+                return "UUID()";
+            }
+            return SqlTranslator.Fix(defaultValue);
+        }
+
+        private static bool IsStringColumn(DatabaseColumn column)
+        {
+            var dataType = column.DbDataType.ToUpperInvariant();
+            var isString = (dataType == "NVARCHAR" || dataType == "VARCHAR" || dataType == "CHAR");
+            var dt = column.DataType;
+            if (dt != null && dt.IsString) isString = true;
+            return isString;
         }
 
         protected override string NonNativeAutoIncrementWriter()
@@ -87,7 +107,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             var migration = CreateMigrationGenerator();
             foreach (var index in Table.Indexes)
             {
-                if (index.IsUnqiueKeyIndex(Table)) continue;
+                if (index.IsUniqueKeyIndex(Table)) continue;
 
                 if (index.Columns.Count == 0)
                 {
@@ -110,6 +130,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 
         private static string TranslateCheckExpression(string expression)
         {
+            expression = SqlTranslator.Fix(expression);
             //translate SqlServer-isms into MySql
             return expression
                 //column escaping

@@ -21,7 +21,7 @@ namespace DatabaseSchemaReader.Compare
             var secondIndexes = compareTable.Indexes;
             foreach (var index in firstIndexes)
             {
-                if(index.IsUnqiueKeyIndex(databaseTable)) continue;
+                if(index.IsUniqueKeyIndex(databaseTable)) continue;
 
                 var indexName = index.Name;
                 var match = secondIndexes.FirstOrDefault(c => c.Name == indexName);
@@ -40,7 +40,7 @@ namespace DatabaseSchemaReader.Compare
 
             foreach (var index in secondIndexes)
             {
-                if (index.IsUnqiueKeyIndex(compareTable)) continue;
+                if (index.IsUniqueKeyIndex(compareTable)) continue;
 
                 var indexName = index.Name;
                 var firstConstraint = firstIndexes.FirstOrDefault(c => c.Name == indexName);
