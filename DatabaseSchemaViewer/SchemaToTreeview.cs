@@ -256,6 +256,10 @@ namespace DatabaseSchemaViewer
                     sb.Append(")");
                 }
             }
+            if (!column.Nullable)
+            {
+                sb.Append(" NOT NULL");
+            }
             if (column.IsPrimaryKey)
             {
                 sb.Append(" PK");

@@ -98,7 +98,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
-            return new MySqlMigrationGenerator();
+            return new MySqlMigrationGenerator { IncludeSchema = IncludeSchema };
         }
         private void AddIndexes(StringBuilder sb)
         {
