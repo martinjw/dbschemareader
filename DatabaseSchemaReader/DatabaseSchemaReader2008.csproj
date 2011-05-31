@@ -108,6 +108,13 @@
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerCeSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
+    <Compile Include="SqlGen\DataTypeConverter.cs" />
+    <Compile Include="SqlGen\DB2\ConstraintWriter.cs" />
+    <Compile Include="SqlGen\DB2\DataTypeWriter.cs" />
+    <Compile Include="SqlGen\DB2\DB2MigrationGenerator.cs" />
+    <Compile Include="SqlGen\DB2\SqlFormatProvider.cs" />
+    <Compile Include="SqlGen\DB2\TableGenerator.cs" />
+    <Compile Include="SqlGen\DB2\TablesGenerator.cs" />
     <Compile Include="SqlGen\IMigrationGenerator.cs" />
     <Compile Include="SqlGen\MigrationGenerator.cs" />
     <Compile Include="SqlGen\MySql\MySqlMigrationGenerator.cs" />

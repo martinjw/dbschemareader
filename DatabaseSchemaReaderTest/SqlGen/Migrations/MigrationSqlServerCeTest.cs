@@ -101,7 +101,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
             //we need to strip out the "GO" parts from these scripts AND by ; 
             foreach (var batch in ScriptTools.SplitScript(sql))
             {
-                foreach (var statement in ScriptTools.SplitBySemiColon(batch))
+                foreach (var statement in ScriptTools.SplitBySemicolon(batch))
                 {
                     Console.WriteLine("Executing " + statement);
                     cmd.CommandText = statement;

@@ -115,20 +115,10 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 return "DATETIME";
                 //Oracle numbers- use precise SqlServer versiom
             if (dataType == "NUMBER")
-                return NumberConversion(precision, scale);
+                return DataTypeConverter.OracleNumberConversion(precision, scale);
                 //not an exact match
             if (dataType == "XMLTYPE") return "XML";
             return dataType;
-        }
-
-        private static string NumberConversion(int? precision, int? scale)
-        {
-            if (!precision.HasValue) return "INT";
-            if (precision < 38 && scale == 0) return "INT";
-            if (precision == 1 && scale == 0) return "BIT";
-            if (precision == 18 && scale == 0) return "DECIMAL";
-            if (precision == 15 && scale == 4) return "MONEY";
-            return "NUMERIC";
         }
 
         /// <summary>

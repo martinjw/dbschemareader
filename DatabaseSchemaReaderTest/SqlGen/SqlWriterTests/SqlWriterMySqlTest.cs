@@ -15,19 +15,17 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
 {
     [TestClass]
-    public class SqlWriterPostgreSqlTest
+    public class SqlWriterMySqlTest
     {
-        //private const string ProviderName = "Npgsql";
-        private const string ProviderName = "Devart.Data.PostgreSql";
-        private const string ConnectionString = @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
-
-        private DatabaseTable _table;
+        private const string ProviderName = "MySql.Data.MySqlClient";
+        private const string ConnectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
+        private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 
-        public SqlWriterPostgreSqlTest()
+        public SqlWriterMySqlTest()
         {
             try
             {
@@ -35,29 +33,28 @@ namespace DatabaseSchemaReaderTest.SqlGen
             }
             catch (ArgumentException)
             {
-                //not installed. ProviderChecker will assert.inconclusive.
+                //MySQL is not installed. ProviderChecker will assert.inconclusive.
             }
         }
 
-        private DatabaseTable LoadTable()
+        private DatabaseTable LoadCategoriesFromNorthwind()
         {
-            if (_table != null) return _table;
+            if (_categoriesTable != null) return _categoriesTable;
 
             ProviderChecker.Check(ProviderName, ConnectionString);
 
             var dbReader = new DatabaseReader(ConnectionString, ProviderName);
-            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _table = dbReader.Table("city"); //this hits database for columns and constraints
-            return _table;
+            _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
+            return _categoriesTable;
         }
 
         [TestMethod]
         public void TestGeneratedSqlForCount()
         {
-            var table = LoadTable();
+            var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
 
             runner.RunCountSql();
         }
@@ -66,9 +63,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForSelectAll()
         {
-            var table = LoadTable();
+            var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
 
             runner.RunSelectAllSql();
         }
@@ -76,9 +73,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForPaging()
         {
-            var table = LoadTable();
+            var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
 
             runner.RunPagingSql();
         }
@@ -86,9 +83,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
-            var table = LoadTable();
+            var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
 
             runner.RunPagingStartToEndSql();
         }
@@ -97,12 +94,12 @@ namespace DatabaseSchemaReaderTest.SqlGen
         public void TestGeneratedSqlForInsert()
         {
             //arrange
-            var table = LoadTable();
-            var writer = new SqlWriter(table, SqlType.PostgreSql);
-
+            var table = LoadCategoriesFromNorthwind();
+            var writer = new SqlWriter(table, SqlType.MySql);
+            //MySQL can only use output parameters with sprocs.
             var sql = writer.InsertSqlWithoutOutputParameter();
             Console.WriteLine(sql);
-            //int identity;
+            int identity;
 
             //run generated sql
             using (var con = _factory.CreateConnection())
@@ -117,17 +114,17 @@ namespace DatabaseSchemaReaderTest.SqlGen
                         cmd.Transaction = transaction;
                         foreach (var column in table.Columns)
                         {
-                            if (column.IsIdentity) continue;
+                            if(column.IsIdentity) continue;
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
 
-                            object value = DummyDataCreator.CreateData(column);
-                            if (column.Name == "id") value = 9999; //hardcoded for city
-                            par.Value = value ?? DBNull.Value;
+                                object value = DummyDataCreator.CreateData(column);
+                                par.Value = value ?? DBNull.Value;
                             cmd.Parameters.Add(par);
                         }
-                        cmd.ExecuteNonQuery();
-                        //identity = Convert.ToInt32(cmd.ExecuteScalar());
+                        identity = Convert.ToInt32(cmd.ExecuteScalar());
+                        //if using a sproc
+                        //identity = (int)cmd.Parameters[identityParameterName].Value;
                     }
 
                     //explicit rollback. If we errored, implicit rollback.
@@ -136,7 +133,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             }
 
             //assert
-            //Assert.AreNotEqual(0, identity);
+            Assert.AreNotEqual(0, identity);
         }
     }
 }

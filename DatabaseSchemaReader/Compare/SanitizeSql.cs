@@ -26,7 +26,7 @@ namespace DatabaseSchemaReader.Compare
                     {
                         line = string.Empty;
                     }
-                    if (line != string.Empty) sb.AppendLine(line);
+                    if (!string.IsNullOrEmpty(line)) sb.AppendLine(line);
                 }
             }
             return sb.ToString().Trim();

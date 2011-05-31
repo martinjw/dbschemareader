@@ -16,5 +16,10 @@
         {
             return ";";
         }
+
+        public int MaximumNameLength
+        {
+            get { return 64; }
+        }
     }
 }

@@ -35,6 +35,7 @@ namespace DatabaseSchemaReader
             //    return base.Table(tableName);
             //more information from sqlserver, oracle and mysql
             var ds = new DataSet();
+            ds.Locale = CultureInfo.InvariantCulture;
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
@@ -119,12 +120,7 @@ namespace DatabaseSchemaReader
                 return dt;
             }
         }
-        protected DataTable CreateDataTable(string tableName)
-        {
-            DataTable dt = new DataTable(tableName);
-            dt.Locale = CultureInfo.InvariantCulture;
-            return dt;
-        }
+
         protected DbParameter AddDbParameter(string parameterName, object value)
         {
             DbParameter parameter = Factory.CreateParameter();

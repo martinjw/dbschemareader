@@ -47,7 +47,7 @@ namespace DatabaseSchemaReader.SqlGen
             return tableGenerator.Write().Trim();
         }
 
-        public string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
+        public virtual string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
             return string.Format(CultureInfo.InvariantCulture,
@@ -188,18 +188,18 @@ namespace DatabaseSchemaReader.SqlGen
         }
 
 
-        public virtual string DropFunction(DatabaseFunction function)
+        public virtual string DropFunction(DatabaseFunction databaseFunction)
         {
-            return "DROP FUNCTION " + SchemaPrefix(function.SchemaOwner) + Escape(function.Name) + ";";
+            return "DROP FUNCTION " + SchemaPrefix(databaseFunction.SchemaOwner) + Escape(databaseFunction.Name) + ";";
         }
 
-        public virtual string AddFunction(DatabaseFunction function)
+        public virtual string AddFunction(DatabaseFunction databaseFunction)
         {
-            var sql = function.Sql;
+            var sql = databaseFunction.Sql;
             if (string.IsNullOrEmpty(sql))
             {
                 //without the sql, we can't do anything
-                return "-- add function " + function.Name;
+                return "-- add function " + databaseFunction.Name;
             }
             if (sql.TrimStart().StartsWith("FUNCTION ", StringComparison.OrdinalIgnoreCase))
             {
@@ -210,12 +210,12 @@ namespace DatabaseSchemaReader.SqlGen
             return sql + _sqlFormatProvider.RunStatements();
         }
 
-        public virtual string DropPackage(DatabasePackage package)
+        public virtual string DropPackage(DatabasePackage databasePackage)
         {
             return null; //only applies to Oracle, so see it's override
         }
 
-        public virtual string AddPackage(DatabasePackage package)
+        public virtual string AddPackage(DatabasePackage databasePackage)
         {
             return null; //only applies to Oracle, so see it's override
         }

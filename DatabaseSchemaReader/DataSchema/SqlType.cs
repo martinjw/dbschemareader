@@ -21,14 +21,21 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// SQLite
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Lite")]
         SQLite,
         ///<summary>
         /// Microsoft SQL Server CE 4
         ///</summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ce")]
         SqlServerCe,
         /// <summary>
         /// PostgreSql
         /// </summary>
-        PostgreSql
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Postgre")]
+        PostgreSql,
+        /// <summary>
+        /// IBM DB2
+        /// </summary>
+        Db2
     }
 }

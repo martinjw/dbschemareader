@@ -107,7 +107,7 @@ namespace DatabaseSchemaReader
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
                 if (!SchemaCollectionExists(conn, collection))
-                    return new DataTable(collection);
+                    return CreateDataTable(collection);
                 return conn.GetSchema(collection);
             }
         }
@@ -135,6 +135,7 @@ namespace DatabaseSchemaReader
         public virtual DataSet Table(string tableName)
         {
             var ds = new DataSet();
+            ds.Locale = CultureInfo.InvariantCulture;
             using (DbConnection connection = Factory.CreateConnection())
             {
                 connection.ConnectionString = ConnectionString;
@@ -182,7 +183,7 @@ namespace DatabaseSchemaReader
                 if (!SchemaCollectionExists(conn, collectionName))
                     collectionName = "Tables";
                 if (!SchemaCollectionExists(conn, collectionName))
-                    return new DataTable(collectionName); //doesn't exist in SqlServerCe
+                    return CreateDataTable(collectionName); //doesn't exist in SqlServerCe
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }
@@ -233,7 +234,7 @@ namespace DatabaseSchemaReader
             const string collectionName = "Indexes";
             if (!SchemaCollectionExists(conn, collectionName))
             {
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
             }
 
             return RunGetSchema(conn, collectionName, tableName);
@@ -250,13 +251,13 @@ namespace DatabaseSchemaReader
             {
                 //Postgresql throws this nasty error with a restriction. We'll carry on.
                 Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
             }
             catch (SqlNullValueException exception)
             {
                 //MySQL can't run this without a table (it does a SHOW INDEX FROM table so you get the above error)
                 Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
             }
         }
 
@@ -283,7 +284,7 @@ namespace DatabaseSchemaReader
             {
                 collectionName = "Indexes";
                 if (!SchemaCollectionExists(conn, collectionName))
-                    return new DataTable(collectionName);
+                    return CreateDataTable(collectionName);
             }
 
             return RunGetSchema(conn, collectionName, tableName);
@@ -314,7 +315,7 @@ namespace DatabaseSchemaReader
         {
             const string collectionName = "PrimaryKeys";
             if (!SchemaCollectionExists(connection, collectionName))
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             return connection.GetSchema(collectionName, restrictions);
@@ -346,10 +347,10 @@ namespace DatabaseSchemaReader
             {
                 collectionName = "ForeignKeys";
                 if (!SchemaCollectionExists(connection, collectionName))
-                    return new DataTable(collectionName);
+                    return CreateDataTable(collectionName);
             }
             if (!SchemaCollectionExists(connection, collectionName))
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             return connection.GetSchema(collectionName, restrictions);
@@ -379,7 +380,7 @@ namespace DatabaseSchemaReader
         {
             const string collectionName = "ForeignKeyColumns";
             if (!SchemaCollectionExists(connection, collectionName))
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             var dt = connection.GetSchema(collectionName, restrictions);
@@ -459,7 +460,7 @@ namespace DatabaseSchemaReader
             if (!SchemaCollectionExists(connection, collectionName))
                 collectionName = "Generators"; //Firebird calls sequences "Generators"
             if (!SchemaCollectionExists(connection, collectionName))
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
             return connection.GetSchema(collectionName, restrictions);
         }
@@ -503,9 +504,7 @@ namespace DatabaseSchemaReader
             {
                 return connection.GetSchema(collectionName, SchemaRestrictions.ForTable(connection, collectionName, tableName));
             }
-            DataTable dt = new DataTable(collectionName);
-            dt.Locale = CultureInfo.InvariantCulture;
-            return dt;
+            return CreateDataTable(collectionName);
         }
 
         #region Sprocs
@@ -534,7 +533,7 @@ namespace DatabaseSchemaReader
         {
             const string collectionName = "Functions";
             if (!SchemaCollectionExists(connection, collectionName))
-                return new DataTable(collectionName);
+                return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
             return connection.GetSchema(collectionName, restrictions);
         }
@@ -550,7 +549,7 @@ namespace DatabaseSchemaReader
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
                 const string collectionName = "Procedures";
-                if (!SchemaCollectionExists(conn, collectionName)) return new DataTable(collectionName);
+                if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }
@@ -582,7 +581,7 @@ namespace DatabaseSchemaReader
             if (!SchemaCollectionExists(connection, collectionName)) collectionName = "Arguments";
             if (ProviderType == SqlType.MySql) collectionName = "Procedure Parameters";
             else if (ProviderType == SqlType.Oracle) collectionName = "Arguments"; //Oracle, assume packages
-            if (!SchemaCollectionExists(connection, collectionName)) return new DataTable(collectionName);
+            if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForRoutine(connection, collectionName, storedProcedureName);
             return connection.GetSchema(collectionName, restrictions);
@@ -602,7 +601,7 @@ namespace DatabaseSchemaReader
                 string collectionName = "ProcedureParameters";
                 if (ProviderType == SqlType.Oracle)
                     collectionName = "Arguments"; //Oracle, we assume you mean packages
-                if (!SchemaCollectionExists(conn, collectionName)) return new DataTable();
+                if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
 
                 string[] restrictions = SchemaRestrictions.ForSpecific(conn, collectionName, packageName, "PACKAGENAME");
                 return conn.GetSchema(collectionName, restrictions);
@@ -618,7 +617,7 @@ namespace DatabaseSchemaReader
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
                 const string collectionName = "Packages";
-                if (!SchemaCollectionExists(conn, collectionName)) return new DataTable();
+                if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }
@@ -634,6 +633,18 @@ namespace DatabaseSchemaReader
                     _restrictions = new SchemaRestrictions(Owner);
                 return _restrictions;
             }
+        }
+
+        /// <summary>
+        /// Creates a data table with the designated name
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        protected static DataTable CreateDataTable(string tableName)
+        {
+            DataTable dt = new DataTable(tableName);
+            dt.Locale = CultureInfo.InvariantCulture;
+            return dt;
         }
 
         #region MetadataCollections
@@ -687,7 +698,7 @@ namespace DatabaseSchemaReader
                 catch (NotSupportedException)
                 {
                     //Npgsql doesn't have the collection and throws this exception
-                    return new DataTable("DataTypes");
+                    return CreateDataTable("DataTypes");
                 }
             }
         }

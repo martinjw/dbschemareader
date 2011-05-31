@@ -18,5 +18,11 @@
 /
 ";
         }
+
+
+        public int MaximumNameLength
+        {
+            get { return 30; }
+        }
     }
 }

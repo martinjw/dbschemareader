@@ -16,47 +16,41 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
 {
     [TestClass]
-    public class SqlWriterMySqlTest
+    public class SqlWriterOracleTest
     {
-        private const string ProviderName = "MySql.Data.MySqlClient";
-        private const string ConnectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
-        private DatabaseTable _categoriesTable;
+        private const string ProviderName = "System.Data.OracleClient";
+        private const string ConnectionString = @"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
+        private DatabaseTable _regionsTable;
         private readonly DbProviderFactory _factory;
 
-        public SqlWriterMySqlTest()
+        public SqlWriterOracleTest()
         {
-            try
-            {
-                _factory = DbProviderFactories.GetFactory(ProviderName);
-            }
-            catch (ArgumentException)
-            {
-                //MySQL is not installed. ProviderChecker will assert.inconclusive.
-            }
+            _factory = DbProviderFactories.GetFactory(ProviderName);
         }
 
-        private DatabaseTable LoadCategoriesFromNorthwind()
+        private DatabaseTable LoadRegionsFromHr()
         {
-            if (_categoriesTable != null) return _categoriesTable;
+            if (_regionsTable != null) return _regionsTable;
 
             ProviderChecker.Check(ProviderName, ConnectionString);
 
             var dbReader = new DatabaseReader(ConnectionString, ProviderName);
+            dbReader.Owner = "HR";
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
-            return _categoriesTable;
+            _regionsTable = dbReader.Table("REGIONS"); //this hits database for columns and constraints
+            return _regionsTable;
         }
 
         [TestMethod]
         public void TestGeneratedSqlForCount()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadRegionsFromHr();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
-
+            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
+            
             runner.RunCountSql();
         }
 
@@ -64,9 +58,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForSelectAll()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadRegionsFromHr();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
 
             runner.RunSelectAllSql();
         }
@@ -74,9 +68,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForPaging()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadRegionsFromHr();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
 
             runner.RunPagingSql();
         }
@@ -84,9 +78,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadRegionsFromHr();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
 
             runner.RunPagingStartToEndSql();
         }
@@ -95,12 +89,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         public void TestGeneratedSqlForInsert()
         {
             //arrange
-            var table = LoadCategoriesFromNorthwind();
-            var writer = new SqlWriter(table, SqlType.MySql);
-            //MySQL can only use output parameters with sprocs.
-            var sql = writer.InsertSqlWithoutOutputParameter();
-            Console.WriteLine(sql);
-            int identity;
+            var table = LoadRegionsFromHr();
+            var writer = new SqlWriter(table, SqlType.Oracle);
+            var sql = writer.InsertSql();
 
             //run generated sql
             using (var con = _factory.CreateConnection())
@@ -115,17 +106,22 @@ namespace DatabaseSchemaReaderTest.SqlGen
                         cmd.Transaction = transaction;
                         foreach (var column in table.Columns)
                         {
-                            if(column.IsIdentity) continue;
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
-
+                            if (column.IsIdentity)
+                            {
+                                //we could be using sequences here
+                                par.Direction = ParameterDirection.Output;
+                                par.DbType = DbType.Int32;
+                            }
+                            else
+                            {
                                 object value = DummyDataCreator.CreateData(column);
                                 par.Value = value ?? DBNull.Value;
+                            }
                             cmd.Parameters.Add(par);
                         }
-                        identity = Convert.ToInt32(cmd.ExecuteScalar());
-                        //if using a sproc
-                        //identity = (int)cmd.Parameters[identityParameterName].Value;
+                        cmd.ExecuteNonQuery();
                     }
 
                     //explicit rollback. If we errored, implicit rollback.
@@ -134,7 +130,6 @@ namespace DatabaseSchemaReaderTest.SqlGen
             }
 
             //assert
-            Assert.AreNotEqual(0, identity);
         }
     }
 }

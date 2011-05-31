@@ -23,7 +23,7 @@ namespace DatabaseSchemaReader.DataSchema
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool? _isDateTime;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string _netDataTypeCsName;
+        private string _netDataTypeCSharpName;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly string _netDataType;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -53,46 +53,46 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the name of the C# net data type.
         /// </summary>
-        public string NetDataTypeCsName
+        public string NetDataTypeCSharpName
         {
             get
             {
-                if (!string.IsNullOrEmpty(_netDataTypeCsName))
-                    return _netDataTypeCsName;
+                if (!string.IsNullOrEmpty(_netDataTypeCSharpName))
+                    return _netDataTypeCSharpName;
                 //can we use NetDataType
                 if (string.IsNullOrEmpty(NetDataType))
                     return null;
                 if (IsString)
-                    _netDataTypeCsName = "string";
+                    _netDataTypeCSharpName = "string";
                 else if (IsInt)
-                    _netDataTypeCsName = "int";
+                    _netDataTypeCSharpName = "int";
                 else if (IsFloat)
-                    _netDataTypeCsName = "float";
+                    _netDataTypeCSharpName = "float";
                 else if (IsDateTime)
-                    _netDataTypeCsName = "DateTime";
+                    _netDataTypeCSharpName = "DateTime";
                 else
                 {
                     //check others
                     Type t = GetNetType();
                     if (t == typeof(bool))
-                        _netDataTypeCsName = "bool";
+                        _netDataTypeCSharpName = "bool";
                     else if (t == typeof(short))
-                        _netDataTypeCsName = "short";
+                        _netDataTypeCSharpName = "short";
                     else if (t == typeof(long))
-                        _netDataTypeCsName = "long";
+                        _netDataTypeCSharpName = "long";
                     else if (t == typeof(decimal))
-                        _netDataTypeCsName = "decimal";
+                        _netDataTypeCSharpName = "decimal";
                     else if (t == typeof(double))
-                        _netDataTypeCsName = "double";
+                        _netDataTypeCSharpName = "double";
                     else
-                        _netDataTypeCsName = NetDataType;
+                        _netDataTypeCSharpName = NetDataType;
                 }
 
-                return _netDataTypeCsName;
+                return _netDataTypeCSharpName;
             }
             set
             {
-                _netDataTypeCsName = value;
+                _netDataTypeCSharpName = value;
             }
         }
 
@@ -103,7 +103,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public string NetCodeName(DatabaseColumn column)
         {
-            if (!IsNumeric || IsInt) return NetDataTypeCsName;
+            if (!IsNumeric || IsInt) return NetDataTypeCSharpName;
             var precision = column.Precision.GetValueOrDefault();
             var scale = column.Scale.GetValueOrDefault();
             return NetNameForIntegers(scale, precision);
@@ -116,7 +116,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public string NetCodeName(DatabaseArgument argument)
         {
-            if (!IsNumeric || IsInt) return NetDataTypeCsName;
+            if (!IsNumeric || IsInt) return NetDataTypeCSharpName;
             var precision = argument.Precision.GetValueOrDefault();
             var scale = argument.Scale.GetValueOrDefault();
             return NetNameForIntegers(scale, precision);
@@ -124,7 +124,7 @@ namespace DatabaseSchemaReader.DataSchema
 
         private string NetNameForIntegers(int scale, int precision)
         {
-            if (scale != 0 || precision >= 19) return NetDataTypeCsName;
+            if (scale != 0 || precision >= 19) return NetDataTypeCSharpName;
 
             //could be a short, int or long...
             //VARCHAR2(10) is common for Oracle integers, but it can overflow an int
@@ -141,7 +141,7 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 return "short";
             }
-            return NetDataTypeCsName;
+            return NetDataTypeCSharpName;
         }
 
         /// <summary>
@@ -166,7 +166,14 @@ namespace DatabaseSchemaReader.DataSchema
                     return _isString.Value;
                 if (string.IsNullOrEmpty(NetDataType))
                     return false;
-                _isString = (Type.GetType(NetDataType) == typeof(string));
+                if (NetDataType.Equals("string", StringComparison.OrdinalIgnoreCase))
+                {
+                    _isString = true;
+                }
+                else
+                {
+                    _isString = (Type.GetType(NetDataType) == typeof(string));
+                }
                 return _isString.Value;
             }
         }
@@ -174,6 +181,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Returns if this is a large System.String (text, ntext, clob)
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Clob")]
         public bool IsStringClob
         {
             get
@@ -270,6 +278,7 @@ namespace DatabaseSchemaReader.DataSchema
         ///<summary>
         ///The provider-specific type value that should be used when specifying a parameter’s type. For example, SqlDbType.Money or OracleType.Blob.
         ///</summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Db")]
         public int ProviderDbType { get; set; }
 
         ///<summary>

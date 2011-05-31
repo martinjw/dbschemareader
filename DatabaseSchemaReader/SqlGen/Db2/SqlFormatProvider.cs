@@ -1,10 +1,10 @@
-﻿namespace DatabaseSchemaReader.SqlGen.SqLite
+﻿namespace DatabaseSchemaReader.SqlGen.Db2
 {
     class SqlFormatProvider : ISqlFormatProvider
     {
         public string Escape(string name)
         {
-            return "[" + name + "]";
+            return "\"" + name + "\"";
         }
 
         public string LineEnding()
@@ -14,12 +14,12 @@
 
         public string RunStatements()
         {
-            return string.Empty;
+            return ";";
         }
 
         public int MaximumNameLength
         {
-            get { return 256; } //there is no hard limit in SQLite
+            get { return 30; } //just 18 on OS/390 and AS/400 
         }
     }
 }

@@ -34,6 +34,8 @@ namespace DatabaseSchemaReader.Conversion
             if (providerName.Equals("Npgsql", StringComparison.OrdinalIgnoreCase) || 
                 providerName.Equals("Devart.Data.PostgreSql", StringComparison.OrdinalIgnoreCase))
                 return SqlType.PostgreSql;
+            if (providerName.Equals("IBM.Data.DB2", StringComparison.OrdinalIgnoreCase))
+                return SqlType.Db2;
 
             //could be something we don't have a direct syntax for
             return null;

@@ -140,28 +140,28 @@ namespace DatabaseSchemaReader.SqlGen
         /// <summary>
         /// Drops the function.
         /// </summary>
-        /// <param name="function">The function.</param>
+        /// <param name="databaseFunction">The function.</param>
         /// <returns></returns>
-        string DropFunction(DatabaseFunction function);
+        string DropFunction(DatabaseFunction databaseFunction);
         /// <summary>
         /// Adds the function.
         /// </summary>
-        /// <param name="function">The function.</param>
+        /// <param name="databaseFunction">The function.</param>
         /// <returns></returns>
-        string AddFunction(DatabaseFunction function);
+        string AddFunction(DatabaseFunction databaseFunction);
 
         /// <summary>
         /// Drops the package.
         /// </summary>
-        /// <param name="package">The package.</param>
+        /// <param name="databasePackage">The package.</param>
         /// <returns></returns>
-        string DropPackage(DatabasePackage package);
+        string DropPackage(DatabasePackage databasePackage);
 
         /// <summary>
         /// Adds the package.
         /// </summary>
-        /// <param name="package">The package.</param>
+        /// <param name="databasePackage">The package.</param>
         /// <returns></returns>
-        string AddPackage(DatabasePackage package);
+        string AddPackage(DatabasePackage databasePackage);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 
 namespace DatabaseSchemaReader
 {
@@ -134,6 +135,7 @@ namespace DatabaseSchemaReader
                 //recreate it- the first is always 
                 var collections = connection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
                 _restrictions = new DataTable("Restrictions");
+                _restrictions.Locale = CultureInfo.InvariantCulture;
                 _restrictions.Columns.Add("CollectionName", typeof(string));
                 _restrictions.Columns.Add("RestrictionNumber", typeof(int));
                 _restrictions.Columns.Add("RestrictionName", typeof(string));

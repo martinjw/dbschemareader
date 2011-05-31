@@ -59,7 +59,7 @@ namespace CopyToSQLite
                     //break dll into separate statements and execute them.
                     foreach (var batch in statements)
                     {
-                        foreach (var statement in ScriptTools.SplitBySemiColon(batch))
+                        foreach (var statement in ScriptTools.SplitBySemicolon(batch))
                         {
                             //ignore the drop table bit, which has no useful commands
                             if (statement.StartsWith("-- DROP TABLE", StringComparison.OrdinalIgnoreCase)) continue;

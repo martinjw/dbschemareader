@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Data;
 using System.Data.Common;
+using System.IO;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
@@ -16,30 +16,47 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
 {
     [TestClass]
-    public class SqlWriterSqlServerTest
+    public class SqlWriterSQLiteTest
     {
-        private const string ProviderName = "System.Data.SqlClient";
-        private const string ConnectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+        private const string ProviderName = "System.Data.SQLite";
+        private const string DatabaseFile = @"C:\Data\northwind.db";
+        private const string ConnectionString = "Data Source=" + DatabaseFile;
         private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 
-        public SqlWriterSqlServerTest()
+        public SqlWriterSQLiteTest()
         {
-            _factory = DbProviderFactories.GetFactory(ProviderName);
+            try
+            {
+                _factory = DbProviderFactories.GetFactory(ProviderName);
+            }
+            catch (ArgumentException)
+            {
+                //SQLite is not installed. ProviderChecker will assert.inconclusive.
+            }
+            catch (System.Configuration.ConfigurationException)
+            {
+                //SQLite is not installed. ProviderChecker will assert.inconclusive.
+            }
         }
 
         private DatabaseTable LoadCategoriesFromNorthwind()
         {
             if (_categoriesTable != null) return _categoriesTable;
 
+            if (!File.Exists(DatabaseFile))
+                Assert.Inconclusive("SQLite database file not found: " + DatabaseFile);
+
             ProviderChecker.Check(ProviderName, ConnectionString);
 
             var dbReader = new DatabaseReader(ConnectionString, ProviderName);
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
             _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
+            if (_categoriesTable == null)
+                Assert.Inconclusive("Could not load Categories table from SQLite file");
             return _categoriesTable;
         }
 
@@ -48,7 +65,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
 
             runner.RunCountSql();
         }
@@ -59,7 +76,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
 
             runner.RunSelectAllSql();
         }
@@ -69,7 +86,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
 
             runner.RunPagingSql();
         }
@@ -79,7 +96,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
 
             runner.RunPagingStartToEndSql();
         }
@@ -89,7 +106,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             //arrange
             var table = LoadCategoriesFromNorthwind();
-            var writer = new SqlWriter(table, SqlType.SqlServer);
+            var writer = new SqlWriter(table, SqlType.SQLite);
             var sql = writer.InsertSql();
             int identity;
 
@@ -104,27 +121,17 @@ namespace DatabaseSchemaReaderTest.SqlGen
                     {
                         cmd.CommandText = sql;
                         cmd.Transaction = transaction;
-                        string identityParameterName = "Id";
                         foreach (var column in table.Columns)
                         {
+                            if (column.IsIdentity) continue;
+
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
-                            if (column.IsIdentity)
-                            {
-                                //get the name of the identity parameter
-                                identityParameterName = par.ParameterName;
-                                par.Direction = ParameterDirection.Output;
-                                par.DbType = DbType.Int32;
-                            }
-                            else
-                            {
-                                object value = DummyDataCreator.CreateData(column);
-                                par.Value = value ?? DBNull.Value;
-                            }
+                            object value = DummyDataCreator.CreateData(column);
+                            par.Value = value ?? DBNull.Value;
                             cmd.Parameters.Add(par);
                         }
-                        cmd.ExecuteNonQuery();
-                        identity = (int)cmd.Parameters[identityParameterName].Value;
+                        identity = Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
                     //explicit rollback. If we errored, implicit rollback.

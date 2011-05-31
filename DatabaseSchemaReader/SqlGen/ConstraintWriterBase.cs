@@ -25,11 +25,6 @@ namespace DatabaseSchemaReader.SqlGen
 
         public bool IncludeSchema { get; set; }
 
-        protected virtual int MaximumNameLength
-        {
-            get { return 128; }
-        }
-
         public Func<DatabaseConstraint, bool> CheckConstraintExcluder { get; set; }
         public Func<string, string> TranslateCheckConstraint { get; set; }
 
@@ -108,7 +103,7 @@ namespace DatabaseSchemaReader.SqlGen
                 expression = expression.Substring(1, expression.Length - 2);
             }
             //ignore "IS NOT NULL" constraints as they are generally handled on the add/alter column level
-            if (expression.EndsWith(" IS NOT NULL")) 
+            if (expression.EndsWith(" IS NOT NULL", StringComparison.OrdinalIgnoreCase)) 
                 return null;
 
             //translate if required
@@ -198,9 +193,10 @@ namespace DatabaseSchemaReader.SqlGen
         {
             if (string.IsNullOrEmpty(name)) return "CON";
             //when translating we may exceed limits
-            if (name.Length > MaximumNameLength)
+            var maximumNameLength = SqlFormatProvider().MaximumNameLength;
+            if (name.Length > maximumNameLength)
             {
-                name = name.Substring(0, MaximumNameLength);
+                name = name.Substring(0, maximumNameLength);
             }
             return name;
         }

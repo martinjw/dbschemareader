@@ -87,7 +87,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         private static string SqlServerToOracleConversion(string dataType, int providerType, int? length)
         {
-            //oracle to sql server translation
+            //sql server to oracle  translation
             if (dataType == "VARBINARY") return "BLOB";
             if (dataType == "IMAGE") return "BLOB";
             if (dataType == "NVARCHAR" && length > 2000) return "CLOB";

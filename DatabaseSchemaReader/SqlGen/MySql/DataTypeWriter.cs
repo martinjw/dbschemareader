@@ -21,6 +21,8 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             var length = column.Length;
 
             //oracle to MySql translation
+            if (dataType == "NUMBER")
+                dataType = DataTypeConverter.OracleNumberConversion(precision, scale);
 
             if (dataType == "VARCHAR2" || dataType == "NVARCHAR")
             {

@@ -32,7 +32,7 @@ namespace DatabaseSchemaReader.Utilities
         /// </summary>
         /// <param name="script">The script.</param>
         /// <returns></returns>
-        public static string[] SplitBySemiColon(string script)
+        public static string[] SplitBySemicolon(string script)
         {
             if (String.IsNullOrEmpty(script)) return new string[] { };
 

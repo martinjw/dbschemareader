@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
@@ -16,41 +15,50 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen
+namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
 {
     [TestClass]
-    public class SqlWriterOracleTest
+    public class SqlWriterDb2Test
     {
-        private const string ProviderName = "System.Data.OracleClient";
-        private const string ConnectionString = @"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
-        private DatabaseTable _regionsTable;
+        const string ProviderName = "IBM.Data.DB2";
+        const string ConnectionString = @"Server=localhost:50000;UID=db2admin;pwd=db2;Database=Sample";
+
+        //db2 "grant dbadm on database to user db2admin"
+
+        private DatabaseTable _table;
         private readonly DbProviderFactory _factory;
 
-        public SqlWriterOracleTest()
+        public SqlWriterDb2Test()
         {
-            _factory = DbProviderFactories.GetFactory(ProviderName);
+            try
+            {
+                _factory = DbProviderFactories.GetFactory(ProviderName);
+            }
+            catch (ArgumentException)
+            {
+                //not installed. ProviderChecker will assert.inconclusive.
+            }
         }
 
-        private DatabaseTable LoadRegionsFromHr()
+        private DatabaseTable LoadTable()
         {
-            if (_regionsTable != null) return _regionsTable;
+            if (_table != null) return _table;
 
             ProviderChecker.Check(ProviderName, ConnectionString);
 
             var dbReader = new DatabaseReader(ConnectionString, ProviderName);
-            dbReader.Owner = "HR";
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _regionsTable = dbReader.Table("REGIONS"); //this hits database for columns and constraints
-            return _regionsTable;
+            _table = dbReader.Table("STAFF"); //this hits database for columns and constraints
+            return _table;
         }
 
         [TestMethod]
         public void TestGeneratedSqlForCount()
         {
-            var table = LoadRegionsFromHr();
+            var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
-            
+            var runner = new SqlWriterCommonTest(SqlType.Db2, table, _factory, ConnectionString);
+
             runner.RunCountSql();
         }
 
@@ -58,9 +66,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForSelectAll()
         {
-            var table = LoadRegionsFromHr();
+            var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.Db2, table, _factory, ConnectionString);
 
             runner.RunSelectAllSql();
         }
@@ -68,9 +76,9 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForPaging()
         {
-            var table = LoadRegionsFromHr();
+            var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.Db2, table, _factory, ConnectionString);
 
             runner.RunPagingSql();
         }
@@ -78,20 +86,23 @@ namespace DatabaseSchemaReaderTest.SqlGen
         [TestMethod]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
-            var table = LoadRegionsFromHr();
+            var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.Oracle, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.Db2, table, _factory, ConnectionString);
 
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void TestGeneratedSqlForInsert()
         {
             //arrange
-            var table = LoadRegionsFromHr();
-            var writer = new SqlWriter(table, SqlType.Oracle);
-            var sql = writer.InsertSql();
+            var table = LoadTable();
+            var writer = new SqlWriter(table, SqlType.Db2);
+
+            var sql = writer.InsertSqlWithoutOutputParameter();
+            Console.WriteLine(sql);
+            //int identity;
 
             //run generated sql
             using (var con = _factory.CreateConnection())
@@ -106,22 +117,17 @@ namespace DatabaseSchemaReaderTest.SqlGen
                         cmd.Transaction = transaction;
                         foreach (var column in table.Columns)
                         {
+                            if (column.IsIdentity) continue;
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
-                            if (column.IsIdentity)
-                            {
-                                //we could be using sequences here
-                                par.Direction = ParameterDirection.Output;
-                                par.DbType = DbType.Int32;
-                            }
-                            else
-                            {
-                                object value = DummyDataCreator.CreateData(column);
-                                par.Value = value ?? DBNull.Value;
-                            }
+
+                            object value = DummyDataCreator.CreateData(column);
+                            if (column.Name == "id") value = 9999; //hardcoded for city
+                            par.Value = value ?? DBNull.Value;
                             cmd.Parameters.Add(par);
                         }
                         cmd.ExecuteNonQuery();
+                        //identity = Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
                     //explicit rollback. If we errored, implicit rollback.
@@ -130,6 +136,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             }
 
             //assert
+            //Assert.AreNotEqual(0, identity);
         }
     }
 }

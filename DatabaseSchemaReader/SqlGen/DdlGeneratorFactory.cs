@@ -5,6 +5,7 @@ namespace DatabaseSchemaReader.SqlGen
     /// <summary>
     /// Generate Ddl
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ddl")]
     public class DdlGeneratorFactory
     {
         private readonly SqlType _sqlType;
@@ -39,6 +40,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqlServerCe.TableGenerator(table);
                 case SqlType.PostgreSql:
                     return new PostgreSql.TableGenerator(table);
+                case SqlType.Db2:
+                    return new Db2.TableGenerator(table);
             }
             return null;
         }
@@ -64,6 +67,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqlServerCe.TablesGenerator(schema);
                 case SqlType.PostgreSql:
                     return new PostgreSql.TablesGenerator(schema);
+                case SqlType.Db2:
+                    return new Db2.TablesGenerator(schema);
             }
             return null;
         }
@@ -88,6 +93,8 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.SqlServerCe:
                     return null; //no stored procedures in SqlServerCE
                 case SqlType.PostgreSql:
+                    return null; //for now
+                case SqlType.Db2:
                     return null; //for now
             }
             return null;
@@ -114,6 +121,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqlServer.ConstraintWriter(databaseTable);
                 case SqlType.PostgreSql:
                     return new PostgreSql.ConstraintWriter(databaseTable);
+                case SqlType.Db2:
+                    return new Db2.ConstraintWriter(databaseTable);
             }
             return null;
         }
@@ -138,6 +147,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqlServerCe.SqlServerCeMigrationGenerator();
                 case SqlType.PostgreSql:
                     return new PostgreSql.PostgreSqlMigrationGenerator();
+                case SqlType.Db2:
+                    return new Db2.Db2MigrationGenerator();
             }
             return null;
         }

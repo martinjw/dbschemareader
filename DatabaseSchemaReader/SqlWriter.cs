@@ -52,6 +52,11 @@ namespace DatabaseSchemaReader
                     _nameEscapeStart = "\"";
                     _nameEscapeEnd = "\"";
                     break;
+                case SqlType.Db2:
+                    _parameterPrefix = '@';
+                    _nameEscapeStart = "\"";
+                    _nameEscapeEnd = "\"";
+                    break;
                 case SqlType.SQLite:
                     _parameterPrefix = '@'; //can also be $
                     _nameEscapeStart = "\""; //double quote (supports single quote and square brackets for compat)
@@ -101,14 +106,22 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
-        /// Gets the escaped name of the table.
+        /// Gets the escaped name of the table, including schema if present
         /// </summary>
         /// <value>
         /// The name of the escaped table.
         /// </value>
         public string EscapedTableName
         {
-            get { return EscapedName(_table.Name); }
+            get
+            {
+                var name = EscapedName(_table.Name);
+                if (!string.IsNullOrEmpty(_table.SchemaOwner) && _table.SchemaOwner != "dbo")
+                {
+                    name = EscapedName(_table.SchemaOwner) + "." + name;
+                }
+                return name;
+            }
         }
 
         private string EscapedName(string name)

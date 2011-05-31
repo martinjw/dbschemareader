@@ -1,6 +1,6 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.SqlGen.Oracle
+namespace DatabaseSchemaReader.SqlGen.Db2
 {
     class ConstraintWriter : ConstraintWriterBase
     {

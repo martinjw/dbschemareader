@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.PostgreSql
@@ -37,74 +36,59 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         private static string OtherDatabaseTypesToPostgreSql(string dataType, DatabaseColumn column)
         {
-            int providerType = -1;
-            if (column.DataType != null)
-                providerType = column.DataType.ProviderDbType;
-
             //string types
             //character(n) (aka char(n)) character varying(n) aka varchar(n) and text
-
-            if (dataType == "VARCHAR2") dataType = "VARCHAR";
-            else if (dataType == "NVARCHAR2") dataType = "VARCHAR";
-            else if (dataType == "NVARCHAR")
+            if (DataTypeConverter.IsFixedLengthString(dataType))
             {
-                if (column.Length == -1) dataType = "TEXT";
-                else dataType = "VARCHAR";
+                return "CHAR";
             }
-            else if (dataType == "NCHAR") dataType = "CHAR";
-            else if (dataType == "NTEXT") dataType = "TEXT";
-            else if (dataType == "CLOB") dataType = "TEXT";
-            else if (dataType == "NCLOB") dataType = "TEXT";
-            else if (dataType == "BPCHAR") dataType = "CHAR"; //blank padded char is an internal postgresql name for CHAR
+            if (DataTypeConverter.IsLongString(dataType))
+            {
+                return "TEXT";
+            }
+            if (DataTypeConverter.IsVariableString(dataType))
+            {
+                if (column.Length == -1) return "TEXT";
+                return "VARCHAR";
+            }
 
-            //numeric types
-            else if (dataType == "INT") dataType = "INTEGER";
-            else if (dataType == "INT4") dataType = "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
-            //else if (dataType == "SERIAL") dataType = "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
-            //else if (dataType == "BIGSERIAL") dataType = "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
-            else if (dataType == "INT8") dataType = "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
-            else if (dataType == "INT2") dataType = "SMALLINT"; //this is a PostgreSql alias, we'll use standard SQL
-            else if (dataType == "NUMBER")
-                dataType = NumberConversion(column.Precision, column.Scale);
+                //numeric types
+            if (dataType == "INT") return "INTEGER";
+            if (dataType == "INT4") return "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
+                //else if (dataType == "SERIAL") return "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
+                //else if (dataType == "BIGSERIAL") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
+            if (dataType == "INT8") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
+            if (dataType == "INT2") return "SMALLINT"; //this is a PostgreSql alias, we'll use standard SQL
+            if (dataType == "NUMBER")
+                return DataTypeConverter.OracleNumberConversion(column.Precision, column.Scale);
 
-            //float and real
-            else if (dataType == "FLOAT4") dataType = "REAL"; //this is a PostgreSql alias, we'll use standard SQL
-            else if (dataType == "FLOAT") dataType = "DOUBLE PRECISION";
+                //float and real
+            if (dataType == "FLOAT4") return "REAL"; //this is a PostgreSql alias, we'll use standard SQL
+            if (dataType == "FLOAT") return "DOUBLE PRECISION";
 
-            //date times
-            //SqlServer Timestamp is a binary
-            else if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType == (int)SqlDbType.Timestamp)
-                dataType = "BYTEA"; //this is just a byte array- functionally you should redesign the table and perhaps use the system extension columns
+                //date times
+                //SqlServer Timestamp is a binary
+            if (DataTypeConverter.IsSqlServerTimestamp(dataType, column))
+                return "BYTEA"; //this is just a byte array- functionally you should redesign the table and perhaps use the system extension columns
 
-            else if (dataType == "DATETIME") dataType = "TIMESTAMP";
-            else if (dataType == "DATETIME2") dataType = "TIMESTAMP";
+            if (DataTypeConverter.IsDateTime(dataType))
+                return "TIMESTAMP";
 
-            //bytes
-            else if (dataType == "IMAGE") dataType = "BYTEA";
-            else if (dataType == "VARBINARY" && column.Length != -1) dataType = "BYTEA";
+                //bytes
+            if (DataTypeConverter.IsBlob(dataType, column))
+                return "OID";//blobs become object ids
+            if (DataTypeConverter.IsBinary(dataType))
+            {
+                return "BYTEA";
+            }
 
-            //blobs become object ids
-            else if (dataType == "BLOB") dataType = "OID";
-            else if (dataType == "VARBINARY") dataType = "OID";
+                //there is a native BIT(n) type in Postgresql, but in conversion we probably mean boolean.
+            if (dataType == "BIT" && !column.Length.HasValue) return "BOOLEAN";
 
-            //there is a native BIT(n) type in Postgresql, but in conversion we probably mean boolean.
-            else if (dataType == "BIT" && !column.Length.HasValue) dataType = "BOOLEAN";
-
-            //other types
-            else if (dataType == "XMLTYPE") dataType = "XML";
-            else if (dataType == "UNIQUEIDENTIFIER") dataType = "UUID";
+                //other types
+            if (dataType == "XMLTYPE") return "XML";
+            if (dataType == "UNIQUEIDENTIFIER") return "UUID";
             return dataType;
-        }
-
-
-        private static string NumberConversion(int? precision, int? scale)
-        {
-            //same as Oracle to SqlServer
-            if (precision < 38 && scale == 0) return "INTEGER";
-            if (precision == 1 && scale == 0) return "BIT";
-            if (precision == 18 && scale == 0) return "DECIMAL";
-            if (precision == 15 && scale == 4) return "MONEY";
-            return "NUMERIC";
         }
     }
 }

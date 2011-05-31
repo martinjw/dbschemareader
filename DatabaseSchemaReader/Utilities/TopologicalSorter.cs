@@ -21,7 +21,6 @@ namespace DatabaseSchemaReader.Utilities
         {
             _vertices = new int[size];
             _matrix = new int[size, size];
-            _numVerts = 0;
             for (int i = 0; i < size; i++)
                 for (int j = 0; j < size; j++)
                     _matrix[i, j] = 0;

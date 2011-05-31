@@ -28,6 +28,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The type of the db data.
         /// </value>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Db")]
         public string DbDataType { get; set; }
 
         /// <summary>

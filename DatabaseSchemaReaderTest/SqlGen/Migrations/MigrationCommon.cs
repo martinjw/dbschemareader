@@ -82,7 +82,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
                 DbDataType = "VARCHAR",
                 Length = 20,
                 DataType = new DataType("VARCHAR", "string"),
-                Nullable = true
+                Nullable = false //DB2 doesn't allow unique constraints on nullable columns. Others are fine with it.
             };
         }
 
@@ -179,7 +179,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
 
         private static void Execute(DbCommand cmd, string statements)
         {
-            foreach (var statement in ScriptTools.SplitBySemiColon(statements))
+            foreach (var statement in ScriptTools.SplitBySemicolon(statements))
             {
                 Console.WriteLine("Executing " + statement);
                 cmd.CommandText = statement;

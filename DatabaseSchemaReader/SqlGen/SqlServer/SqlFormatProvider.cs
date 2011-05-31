@@ -1,4 +1,6 @@
-﻿namespace DatabaseSchemaReader.SqlGen.SqlServer
+﻿using System;
+
+namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     class SqlFormatProvider : ISqlFormatProvider
     {
@@ -18,6 +20,11 @@
             return @"
 GO
 "; ;
+        }
+
+        public int MaximumNameLength
+        {
+            get { return 128; }
         }
     }
 }

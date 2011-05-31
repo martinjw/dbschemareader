@@ -16,6 +16,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new SqLite.SqlFormatProvider();
                 case SqlType.PostgreSql:
                     return new PostgreSql.SqlFormatProvider();
+                case SqlType.Db2:
+                    return new Db2.SqlFormatProvider();
                 default:
                     return new SqlServer.SqlFormatProvider();
             }

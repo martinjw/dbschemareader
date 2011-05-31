@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
@@ -14,16 +15,16 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         {
             return "DROP TABLE " + TableName(databaseTable) + " CASCADE CONSTRAINTS;";
         }
-        public override string DropPackage(DatabasePackage package)
+        public override string DropPackage(DatabasePackage databasePackage)
         {
-            return "DROP PACKAGE " + SchemaPrefix(package.SchemaOwner) + Escape(package.Name) + ";";
+            return "DROP PACKAGE " + SchemaPrefix(databasePackage.SchemaOwner) + Escape(databasePackage.Name) + ";";
         }
 
-        public override string AddPackage(DatabasePackage package)
+        public override string AddPackage(DatabasePackage databasePackage)
         {
-            if (string.IsNullOrEmpty(package.Definition) || string.IsNullOrEmpty(package.Body))
+            if (string.IsNullOrEmpty(databasePackage.Definition) || string.IsNullOrEmpty(databasePackage.Body))
             {
-                return "-- add package " + package.Name + " (no sql available)";
+                return "-- add package " + databasePackage.Name + " (no sql available)";
             }
             //the body and defintion starts "PACKAGE name AS", so just add CREATE OR REPLACE
             return string.Format(CultureInfo.InvariantCulture,
@@ -35,8 +36,8 @@ CREATE OR REPLACE
 {1}
 /
 ",
-                package.Definition,
-                package.Body);
+                databasePackage.Definition,
+                databasePackage.Body);
         }
         public override string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
         {
@@ -48,7 +49,7 @@ CREATE OR REPLACE
             //(sql_statement); /
             var beforeOrAfter = trigger.TriggerType;
             var forEachRow = string.Empty;
-            if (beforeOrAfter.EndsWith(" EACH ROW"))
+            if (beforeOrAfter.EndsWith(" EACH ROW", StringComparison.OrdinalIgnoreCase))
             {
                 //it's not table level
                 forEachRow = "FOR EACH ROW";

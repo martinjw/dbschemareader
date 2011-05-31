@@ -108,7 +108,7 @@ namespace DatabaseSchemaReader.CodeGen
                 if (!argument.Out) continue;
                 //gets rid of REF CURSORS
                 if (argument.DataType == null) continue;
-                var dataType = argument.DataType.NetDataTypeCsName;
+                var dataType = argument.DataType.NetDataTypeCSharpName;
                 if (!argument.DataType.IsString) dataType += "?";
                 _cb.AppendAutomaticProperty(dataType, argument.NetName);
            }

@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.MySql
@@ -30,11 +29,11 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             return "-- add procedure " + procedure.Name;
         }
 
-        public override string AddFunction(DatabaseFunction function)
+        public override string AddFunction(DatabaseFunction databaseFunction)
         {
             //the function.Sql contains the BEGIN to END statements, not the CREATE FUNCTION and arguments.
             //for now, just comment
-            return "-- add function " + function.Name;
+            return "-- add function " + databaseFunction.Name;
         }
 
         public override string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion
@@ -28,6 +29,7 @@ namespace DatabaseSchemaReader.Conversion
         public static DataTable ToDataTable(List<DatabaseColumn> list)
         {
             var table = new DataTable("Columns");
+            table.Locale = CultureInfo.InvariantCulture;
             table.Columns.Add("Name", typeof(String));
             table.Columns.Add("TableName", typeof(String));
             table.Columns.Add("DataType", typeof(String));
