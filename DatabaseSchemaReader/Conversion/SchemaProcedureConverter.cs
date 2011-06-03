@@ -41,7 +41,7 @@ namespace DatabaseSchemaReader.Conversion
                 seq.Name = row[key].ToString();
                 seq.SchemaOwner = row[ownerKey].ToString();
                 if (!string.IsNullOrEmpty(minValueKey))
-                    seq.MininumValue = GetNullableDecimal(row[minValueKey]);
+                    seq.MinimumValue = GetNullableDecimal(row[minValueKey]);
                 if (!string.IsNullOrEmpty(maxValueKey))
                     seq.MaximumValue = GetNullableDecimal(row[maxValueKey]);
                 if (!string.IsNullOrEmpty(incrementKey))

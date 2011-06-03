@@ -37,6 +37,14 @@ namespace DatabaseSchemaReader.SqlGen
         string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn);
 
         /// <summary>
+        /// Drops the default value of a column
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <returns></returns>
+        string DropDefault(DatabaseTable databaseTable, DatabaseColumn databaseColumn);
+
+        /// <summary>
         /// Drops the table.
         /// </summary>
         /// <param name="databaseTable">The database table.</param>

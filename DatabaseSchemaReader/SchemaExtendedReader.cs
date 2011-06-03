@@ -63,15 +63,15 @@ namespace DatabaseSchemaReader
 
         public virtual DataTable IdentityColumns(string tableName)
         {
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
 
-                return IdentityColumns(tableName, conn);
+                return IdentityColumns(tableName, connection);
             }
         }
-        protected virtual DataTable IdentityColumns(string tableName, DbConnection conn)
+        protected virtual DataTable IdentityColumns(string tableName, DbConnection connection)
         {
             //override this if provider has identity
             DataTable dt = CreateDataTable("IdentityColumns");

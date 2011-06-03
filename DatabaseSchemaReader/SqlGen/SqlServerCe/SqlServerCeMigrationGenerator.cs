@@ -43,31 +43,5 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
                 Escape(index.Name));
         }
 
-        public override string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
-        {
-            var tableGenerator = CreateTableGenerator(databaseTable);
-            var addColumn = tableGenerator.WriteColumn(databaseColumn).Trim();
-            if (string.IsNullOrEmpty(databaseColumn.DefaultValue) && !databaseColumn.Nullable)
-            {
-                var dt = databaseColumn.DataType;
-                if (dt == null || dt.IsString)
-                {
-                    addColumn += " DEFAULT '1'";
-                }
-                else if (dt.IsNumeric)
-                {
-                    addColumn += " DEFAULT 0";
-                }
-                else if (dt.IsDateTime)
-                {
-                    addColumn += " DEFAULT CURRENT_TIMESTAMP";
-                }
-            }
-            return string.Format(CultureInfo.InvariantCulture,
-                "ALTER TABLE {0} ADD {1}",
-                TableName(databaseTable),
-                addColumn) + LineEnding();
-        }
-
     }
 }

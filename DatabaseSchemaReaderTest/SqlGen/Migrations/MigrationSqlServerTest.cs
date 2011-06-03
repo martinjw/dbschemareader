@@ -38,6 +38,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
 
             var table = MigrationCommon.CreateTestTable(tableName);
             var newColumn = MigrationCommon.CreateNewColumn();
+            //this creates a nullable column with no default. Normally we automatically create a default.
+            //ensure it is nullable, as we don't want to create a default which we can't delete
+            newColumn.Nullable = true; 
             var unqiueConstraint = MigrationCommon.CreateUniqueConstraint(newColumn);
             var fk = MigrationCommon.CreateForeignKey(table);
             var index = MigrationCommon.CreateUniqueIndex(newColumn, tableName);

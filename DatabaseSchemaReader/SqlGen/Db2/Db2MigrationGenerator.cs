@@ -43,6 +43,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
             if (string.IsNullOrEmpty(trigger.TriggerBody))
                 return "-- add trigger " + trigger.Name;
 
+            //db2 returns the entire "Create trigger" statement, so this is very easy
             return trigger.TriggerBody + ";";
         }
     }

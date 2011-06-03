@@ -454,7 +454,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <returns></returns>
-        private DataTable Sequences(DbConnection connection)
+        protected  virtual DataTable Sequences(DbConnection connection)
         {
             string collectionName = "Sequences";
             if (!SchemaCollectionExists(connection, collectionName))

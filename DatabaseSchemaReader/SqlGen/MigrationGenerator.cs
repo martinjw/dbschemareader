@@ -50,10 +50,27 @@ namespace DatabaseSchemaReader.SqlGen
         public virtual string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
+            var addColumn = tableGenerator.WriteColumn(databaseColumn).Trim();
+            if (string.IsNullOrEmpty(databaseColumn.DefaultValue) && !databaseColumn.Nullable)
+            {
+                var dt = databaseColumn.DataType;
+                if (dt == null || dt.IsString)
+                {
+                    addColumn += " DEFAULT ''"; //empty string
+                }
+                else if (dt.IsNumeric)
+                {
+                    addColumn += " DEFAULT 0";
+                }
+                else if (dt.IsDateTime)
+                {
+                    addColumn += " DEFAULT CURRENT_TIMESTAMP";
+                }
+            }
             return string.Format(CultureInfo.InvariantCulture,
                 "ALTER TABLE {0} ADD {1}",
                 TableName(databaseTable),
-                tableGenerator.WriteColumn(databaseColumn).Trim()) + LineEnding();
+                addColumn) + LineEnding();
         }
 
         protected virtual string AlterColumnFormat
@@ -263,7 +280,7 @@ namespace DatabaseSchemaReader.SqlGen
         public string AddSequence(DatabaseSequence sequence)
         {
             //amazingly SQLServer Denali has the same syntax as Oracle. http://msdn.microsoft.com/en-us/library/ff878091%28v=SQL.110%29.aspx
-            return "CREATE SEQUENCE " + SchemaPrefix(sequence.SchemaOwner) + Escape(sequence.Name) + " INCREMENT BY " + sequence.IncrementBy + " MINVALUE " + sequence.MininumValue + " MAXVALUE " + sequence.MaximumValue + ";";
+            return "CREATE SEQUENCE " + SchemaPrefix(sequence.SchemaOwner) + Escape(sequence.Name) + " INCREMENT BY " + sequence.IncrementBy + " MINVALUE " + sequence.MinimumValue + " MAXVALUE " + sequence.MaximumValue + ";";
         }
 
         public string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
@@ -328,6 +345,14 @@ namespace DatabaseSchemaReader.SqlGen
             }
             sb.AppendLine("ALTER TABLE " + TableName(databaseTable) + " DROP COLUMN " + Escape(databaseColumn.Name) + LineEnding());
             return sb.ToString();
+        }
+
+        public virtual string DropDefault(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
+        {
+            return string.Format(CultureInfo.InvariantCulture,
+                                 "ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT;",
+                                 TableName(databaseTable),
+                                 Escape(databaseColumn.Name));
         }
 
         public virtual string DropTable(DatabaseTable databaseTable)

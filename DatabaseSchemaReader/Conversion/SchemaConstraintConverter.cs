@@ -290,8 +290,19 @@ namespace DatabaseSchemaReader.Conversion
                     int ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
                     column.Ordinal = ordinal;
                 }
+                if(ContainsColumn(c.Columns, colName)) continue;
                 c.Columns.Add(column);
             }
+        }
+
+        private static bool ContainsColumn(ICollection<DatabaseColumn> columns, string columnName)
+        {
+            if (columns.Count == 0) return false;
+            foreach (var column in columns)
+            {
+                if (column.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
         }
 
         private static bool FindBoolean(DataRowView row, string key, string trueText)

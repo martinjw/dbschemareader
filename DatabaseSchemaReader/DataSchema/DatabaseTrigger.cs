@@ -49,7 +49,7 @@ namespace DatabaseSchemaReader.DataSchema
         public string TriggerBody { get; set; }
 
         /// <summary>
-        /// Gets or sets the trigger event.
+        /// Gets or sets the trigger event (INSERT, UPDATE, DELETE or a combination of these)
         /// </summary>
         /// <value>
         /// The trigger event.

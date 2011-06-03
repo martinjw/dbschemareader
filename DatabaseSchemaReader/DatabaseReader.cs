@@ -49,6 +49,9 @@ namespace DatabaseSchemaReader
                     case SqlType.PostgreSql:
                         _sr = new PostgreSqlSchemaReader(connectionString, providerName);
                         break;
+                    case SqlType.Db2:
+                        _sr = new Db2SchemaReader(connectionString, providerName);
+                        break;
                 }
             }
             _db = new DatabaseSchema(connectionString, providerName);

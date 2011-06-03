@@ -102,6 +102,7 @@
     <Compile Include="DataSchema\DatabaseView.cs" />
     <Compile Include="DataSchema\DataType.cs" />
     <Compile Include="DataSchema\SqlType.cs" />
+    <Compile Include="ProviderSchemaReaders\Db2SchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />

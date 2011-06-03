@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The mininum value.
         /// </value>
-        public decimal? MininumValue { get; set; }
+        public decimal? MinimumValue { get; set; }
         /// <summary>
         /// Gets or sets the maximum value.
         /// </summary>
