@@ -95,7 +95,7 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.PostgreSql:
                     return null; //for now
                 case SqlType.Db2:
-                    return null; //for now
+                    return new Db2.ProcedureGenerator(table);
             }
             return null;
         }

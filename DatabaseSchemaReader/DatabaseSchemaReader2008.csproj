@@ -113,6 +113,8 @@
     <Compile Include="SqlGen\DB2\ConstraintWriter.cs" />
     <Compile Include="SqlGen\DB2\DataTypeWriter.cs" />
     <Compile Include="SqlGen\DB2\DB2MigrationGenerator.cs" />
+    <Compile Include="SqlGen\DB2\ProcedureGenerator.cs" />
+    <Compile Include="SqlGen\DB2\ProcedureWriter.cs" />
     <Compile Include="SqlGen\DB2\SqlFormatProvider.cs" />
     <Compile Include="SqlGen\DB2\TableGenerator.cs" />
     <Compile Include="SqlGen\DB2\TablesGenerator.cs" />

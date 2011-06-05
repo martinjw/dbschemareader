@@ -535,7 +535,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         public string CountSql(string outputParameter)
         {
             string what = outputParameter + " = COUNT(*)";
-            if (_sqlType == SqlType.Oracle)
+            if (_sqlType == SqlType.Oracle || _sqlType == SqlType.Db2)
                 what = "COUNT(*) INTO " + outputParameter;
             return "SELECT " + what + " FROM " + EscapedTableName;
         }
@@ -611,10 +611,17 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
                     var pk = EscapedName(PrimaryKeys[0]);
                     sb.AppendLine(" RETURNING " + pk + " INTO " + identityParameter + "");
                 }
-                else if (_sqlType == SqlType.SqlServer && useOutputParameter)
+                else if (_sqlType == SqlType.SqlServer)
                 {
                     sb.AppendLine(";");
-                    sb.Append("SET " + identityParameter + " = SCOPE_IDENTITY();");
+                    if (useOutputParameter)
+                    {
+                        sb.Append("SET " + identityParameter + " = SCOPE_IDENTITY();");
+                    }
+                    else
+                    {
+                        sb.Append("SELECT  SCOPE_IDENTITY();");
+                    }
                 }
                 else if (_sqlType == SqlType.MySql)
                 {
@@ -642,6 +649,23 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
                     sb.AppendLine(";");
                     sb.Append("SELECT last_insert_rowid();");
                 }
+                else if (_sqlType == SqlType.Db2)
+                {
+                    sb.AppendLine(";");
+                    var identity = FindIdentityColumn();
+                    if (useOutputParameter)
+                    {
+                        //may need to cast this to from decimal(13,0)
+                        if (identity.DbDataType.ToUpperInvariant() == "INTEGER")
+                            sb.AppendLine("VALUES INTEGER(IDENTITY_VAL_LOCAL()) INTO " + identityParameter + ";");
+                        else
+                            sb.AppendLine("VALUES IDENTITY_VAL_LOCAL() INTO " + identityParameter + ";");
+                    }
+                    else
+                    {
+                        sb.AppendLine("SELECT IDENTITY_VAL_LOCAL() FROM SYSIBM.SYSDUMMY1;");
+                    }
+                }
             }
 
             return sb.ToString();
@@ -653,13 +677,18 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         /// <returns></returns>
         private string FindIdentityParameter()
         {
-            DatabaseColumn identityColumn = _table.Columns.Find(delegate(DatabaseColumn col)
-            {
-                return col.IsIdentity;
-            });
+            DatabaseColumn identityColumn = FindIdentityColumn();
             if (identityColumn == null) return null;
             string identityParameter = ParameterName(identityColumn.Name);
             return identityParameter;
+        }
+
+        private DatabaseColumn FindIdentityColumn()
+        {
+            return _table.Columns.Find(delegate(DatabaseColumn col)
+                    {
+                        return col.IsIdentity;
+                    });
         }
 
         /// <summary>

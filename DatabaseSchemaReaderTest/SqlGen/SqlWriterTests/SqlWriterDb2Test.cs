@@ -97,12 +97,16 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         public void TestGeneratedSqlForInsert()
         {
             //arrange
-            var table = LoadTable();
+            ProviderChecker.Check(ProviderName, ConnectionString);
+            var dbReader = new DatabaseReader(ConnectionString, ProviderName);
+            dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
+            var table = dbReader.Table("TABWITHIDENTITY"); //this hits database for columns and constraints
+
             var writer = new SqlWriter(table, SqlType.Db2);
 
             var sql = writer.InsertSqlWithoutOutputParameter();
             Console.WriteLine(sql);
-            //int identity;
+            int identity;
 
             //run generated sql
             using (var con = _factory.CreateConnection())
@@ -122,12 +126,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
                             par.ParameterName = writer.ParameterName(column.Name);
 
                             object value = DummyDataCreator.CreateData(column);
-                            if (column.Name == "id") value = 9999; //hardcoded for city
                             par.Value = value ?? DBNull.Value;
                             cmd.Parameters.Add(par);
                         }
-                        cmd.ExecuteNonQuery();
-                        //identity = Convert.ToInt32(cmd.ExecuteScalar());
+                        identity = Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
                     //explicit rollback. If we errored, implicit rollback.
@@ -136,7 +138,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             }
 
             //assert
-            //Assert.AreNotEqual(0, identity);
+            Assert.AreNotEqual(0, identity);
         }
     }
 }
