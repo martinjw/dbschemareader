@@ -50,6 +50,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.chkReadSprocs = new System.Windows.Forms.CheckBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.radData = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.panelTables.SuspendLayout();
@@ -79,8 +80,8 @@
             // 
             // txtFilePath
             // 
-            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFilePath.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenFilePath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.errorProvider1.SetError(this.txtFilePath, "Invalid path");
             this.txtFilePath.Location = new System.Drawing.Point(83, 32);
@@ -145,8 +146,8 @@
             // 
             // txtNamespace
             // 
-            this.txtNamespace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtNamespace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNamespace.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenNamespace", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtNamespace.Location = new System.Drawing.Point(83, 97);
             this.txtNamespace.Name = "txtNamespace";
@@ -167,8 +168,8 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(83, 205);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(354, 23);
@@ -192,7 +193,7 @@
             // radDdl
             // 
             this.radDdl.AutoSize = true;
-            this.radDdl.Location = new System.Drawing.Point(206, 59);
+            this.radDdl.Location = new System.Drawing.Point(172, 59);
             this.radDdl.Name = "radDdl";
             this.radDdl.Size = new System.Drawing.Size(77, 17);
             this.radDdl.TabIndex = 5;
@@ -203,7 +204,7 @@
             // radSprocs
             // 
             this.radSprocs.AutoSize = true;
-            this.radSprocs.Location = new System.Drawing.Point(334, 59);
+            this.radSprocs.Location = new System.Drawing.Point(289, 59);
             this.radSprocs.Name = "radSprocs";
             this.radSprocs.Size = new System.Drawing.Size(103, 17);
             this.radSprocs.TabIndex = 6;
@@ -213,8 +214,8 @@
             // 
             // panelTables
             // 
-            this.panelTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTables.Controls.Add(this.cmbTables);
             this.panelTables.Controls.Add(this.label2);
             this.panelTables.Location = new System.Drawing.Point(13, 150);
@@ -257,11 +258,23 @@
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker1RunWorkerCompleted);
             // 
+            // radData
+            // 
+            this.radData.AutoSize = true;
+            this.radData.Location = new System.Drawing.Point(438, 59);
+            this.radData.Name = "radData";
+            this.radData.Size = new System.Drawing.Size(48, 17);
+            this.radData.TabIndex = 17;
+            this.radData.Text = "Data";
+            this.radData.UseVisualStyleBackColor = true;
+            this.radData.CheckedChanged += new System.EventHandler(this.RadioCheckedChanged);
+            // 
             // CodeGenForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(498, 266);
+            this.Controls.Add(this.radData);
             this.Controls.Add(this.chkReadSprocs);
             this.Controls.Add(this.panelTables);
             this.Controls.Add(this.radSprocs);
@@ -280,8 +293,8 @@
             this.Controls.Add(this.label1);
             this.Name = "CodeGenForm";
             this.Text = "Code Generation";
-            this.Load += new System.EventHandler(this.CodeGenFormLoad);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CodeGenFormFormClosing);
+            this.Load += new System.EventHandler(this.CodeGenFormLoad);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -315,5 +328,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkReadSprocs;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.RadioButton radData;
     }
 }

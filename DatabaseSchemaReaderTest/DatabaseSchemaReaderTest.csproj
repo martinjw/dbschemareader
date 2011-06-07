@@ -77,6 +77,9 @@
     <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
     <Compile Include="Procedures\RunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlGen\InsertWriterTests\ConverterTest.cs" />
+    <Compile Include="SqlGen\InsertWriterTests\DateConverterTest.cs" />
+    <Compile Include="SqlGen\InsertWriterTests\InsertWriterTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationDb2Test.cs" />
     <Compile Include="SqlGen\Migrations\MigrationPostgreSqlTest.cs" />
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterDb2Test.cs" />

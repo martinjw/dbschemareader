@@ -66,7 +66,30 @@ namespace DatabaseSchemaViewer
                 var table = (DatabaseTable)cmbTables.SelectedItem;
                 RunSprocs(directory, dialect, table);
             }
+            else if (radData.Checked)
+            {
+                var table = (DatabaseTable)cmbTables.SelectedItem;
+                RunData(directory, dialect, table);
+            }
             StopWaiting();
+        }
+
+        private void RunData(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
+        {
+            var runner = new TaskRunner(_databaseSchema);
+            if (runner.RunData(directory, dialect, table))
+            {
+                toolStripStatusLabel1.Text = runner.Message;
+            }
+            else
+            {
+                MessageBox.Show(
+                    runner.Message,
+                    @"Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+            }
         }
 
         private void RunSprocs(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
@@ -220,7 +243,7 @@ namespace DatabaseSchemaViewer
             {
                 cmbDialect.Visible = true;
                 labDialect.Visible = true;
-                panelTables.Visible = radSprocs.Checked;
+                panelTables.Visible = (radSprocs.Checked || radData.Checked);
                 chkReadSprocs.Visible = false;
 
                 txtNamespace.Visible = false;

@@ -124,6 +124,16 @@ namespace DatabaseSchemaReader
             }
         }
 
+        /// <summary>
+        /// Gets the escaped name of a column (or other simple schema object)
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        public string EscapedColumnName(string name)
+        {
+            return EscapedName(name);
+        }
+
         private string EscapedName(string name)
         {
             return _nameEscapeStart + name + _nameEscapeEnd;
@@ -335,7 +345,7 @@ namespace DatabaseSchemaReader
                 sb.AppendLine("  ORDER BY  " + orderBy + ")");
                 sb.Append(" AS countedTable");
                 sb.AppendLine(" WHERE");
-                sb.AppendLine("   rowNumber >= (" + ParameterName("pageSize") + " * (" + ParameterName("currentPage") + " - 1))");
+                sb.AppendLine("   rowNumber > (" + ParameterName("pageSize") + " * (" + ParameterName("currentPage") + " - 1))");
                 sb.AppendLine("   AND rowNumber <= (" + ParameterName("pageSize") + " * " + ParameterName("currentPage") + ")");
             }
             else if (_sqlType == SqlType.PostgreSql)
@@ -375,14 +385,14 @@ namespace DatabaseSchemaReader
             }
             else
             {
-                //SQLServer 2005+, Oracle 8+
+                //SQLServer 2005+, Oracle 8+, Db2
                 sb.AppendLine("  (SELECT ROW_NUMBER() OVER(ORDER BY " + orderBy + ") AS rowNumber,");
                 sb.AppendLine(columns);
                 sb.Append("  FROM " + EscapedTableName + ")");
                 //SqlServer needs a subquery alias, Oracle doesn't accept it
                 if (_sqlType != SqlType.Oracle) sb.Append(" AS countedTable");
                 sb.AppendLine(" WHERE");
-                sb.AppendLine("   rowNumber >= (" + ParameterName("pageSize") + " * (" + ParameterName("currentPage") + " - 1))");
+                sb.AppendLine("   rowNumber > (" + ParameterName("pageSize") + " * (" + ParameterName("currentPage") + " - 1))");
                 sb.AppendLine("   AND rowNumber <= (" + ParameterName("pageSize") + " * " + ParameterName("currentPage") + ")");
             }
 

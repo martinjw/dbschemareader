@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using DatabaseSchemaReader.Data;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 
@@ -76,5 +77,41 @@ namespace DatabaseSchemaViewer
 
         public string Message { get; private set; }
 
+        public bool RunData(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
+        {
+            if (table == null)
+            {
+                Message = "No table";
+                return false;
+            }
+            var path = Path.Combine(directory.FullName, table.Name + "_data.sql");
+            try
+            {
+
+                var rdr = new Reader(table, table.DatabaseSchema.ConnectionString, table.DatabaseSchema.Provider);
+                var dt = rdr.Read();
+
+                var insertWriter = new InsertWriter(table, dt);
+                if (dialect == SqlType.SqlServer || dialect == SqlType.SqlServerCe)
+                {
+                    insertWriter.IncludeIdentity = true;
+                }
+
+                //act
+                string txt = insertWriter.Write(dialect);
+
+
+                File.WriteAllText(path, txt);
+                Message = @"Wrote " + path;
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Message =
+                    @"An error occurred while creating the script.\n" + exception.Message;
+            }
+            return false;
+       
+        }
     }
 }

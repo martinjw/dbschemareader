@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         {
             var dataType = column.DbDataType.ToUpperInvariant();
 
-            dataType = OtherDatabaseTypesToDB2(dataType, column);
+            dataType = OtherDatabaseTypesToDb2(dataType, column);
 
             if ((dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) || dataType == "TIME") &&
                 column.DateTimePrecision > 0)
@@ -44,7 +44,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
             return column.DataType.IsString;
         }
 
-        private static string OtherDatabaseTypesToDB2(string dataType, DatabaseColumn column)
+        private static string OtherDatabaseTypesToDb2(string dataType, DatabaseColumn column)
         {
             //string types
             if (DataTypeConverter.IsFixedLengthString(dataType))
@@ -69,6 +69,8 @@ namespace DatabaseSchemaReader.SqlGen.Db2
             if (dataType == "INT") return "INTEGER";
             if (dataType == "NUM") return "NUMERIC"; //DB2 alias
             if (dataType == "DEC") return "DECIMAL"; //DB2 alias
+            if (dataType == "MONEY") return "DECIMAL(19,4)";
+            if (dataType == "BIT") return "SMALLINT"; //could be CHAR(1) but nicer with an integer
             if (dataType == "NUMBER")
                 return DataTypeConverter.OracleNumberConversion(column.Precision, column.Scale);
 
