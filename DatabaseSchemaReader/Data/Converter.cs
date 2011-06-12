@@ -42,12 +42,15 @@ namespace DatabaseSchemaReader.Data
                 var dbType = _dateTypes[columnName];
                 return new DateConverter(_sqlType).Convert((DateTime)data, dbType);
             }
-
+            if (type == typeof(decimal))
+            {
+                //must have the invariant decimal point (. not ,), remove trailing zeroes
+                return ((decimal)data).ToString("G29", CultureInfo.InvariantCulture);
+            }
             //all the numeric types
             if (type == typeof(int) || type == typeof(short) || type == typeof(long) ||
                 type == typeof(uint) || type == typeof(ushort) || type == typeof(ulong) ||
-                type == typeof(sbyte) || type == typeof(byte) ||
-                type == typeof(decimal) || type == typeof(float) || type == typeof(double))
+                type == typeof(sbyte) || type == typeof(byte) || type == typeof(float) || type == typeof(double))
             {
                 //must have the invariant decimal point (. not ,)
                 return System.Convert.ToString(data, CultureInfo.InvariantCulture);
@@ -78,7 +81,8 @@ namespace DatabaseSchemaReader.Data
             if (_sqlType == SqlType.Db2)
             {
                 sb.Append("x'");
-            } else
+            }
+            else
             {
                 sb.Append("0x");
             }

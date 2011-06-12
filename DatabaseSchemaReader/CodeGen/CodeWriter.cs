@@ -79,6 +79,10 @@ namespace DatabaseSchemaReader.CodeGen
             File.WriteAllText(
                 Path.Combine(directory.FullName, (@namespace ?? "Project") + ".csproj"),
                 pw.Write());
+            pw.UpgradeTo2010();
+            File.WriteAllText(
+                Path.Combine(directory.FullName, (@namespace ?? "Project") + ".2010.csproj"),
+                pw.Write());
         }
 
         private void WriteStoredProcedures(string directoryFullName, string @namespace, ProjectWriter pw)

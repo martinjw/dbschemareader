@@ -18,6 +18,7 @@ namespace DatabaseSchemaReader.Data
         private readonly DatabaseTable _databaseTable;
         private readonly string _connectionString;
         private readonly string _providerName;
+        private int _pageSize = 200;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Reader"/> class.
@@ -38,6 +39,21 @@ namespace DatabaseSchemaReader.Data
             _databaseTable = databaseTable;
         }
 
+        /// <summary>
+        /// Gets or sets the maximum number of records returned.
+        /// </summary>
+        /// <value>The size of the page.</value>
+        public int PageSize
+        {
+            get { return _pageSize; }
+            set
+            {
+                if (value <= 0) throw new InvalidOperationException("Must be a positive number");
+                if (value > 10000) throw new InvalidOperationException("Value is too large - consider another method");
+                _pageSize = value;
+            }
+        }
+
         private SqlType FindSqlType()
         {
             var sqlType = ProviderToSqlType.Convert(_providerName);
@@ -45,15 +61,15 @@ namespace DatabaseSchemaReader.Data
         }
 
         /// <summary>
-        /// Reads ALL the data from the table into a DataTable. Small tables only.
+        /// Reads first 200 rows of data from the table into a DataTable.
         /// </summary>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "We're generating the select SQL")]
         public DataTable Read()
         {
-
-            var originSql = new SqlWriter(_databaseTable, FindSqlType());
-            var selectAll = originSql.SelectAllSql();
+            var sqlType = FindSqlType();
+            var originSql = new SqlWriter(_databaseTable, sqlType);
+            var selectAll = originSql.SelectPageSql();
 
             var dt = new DataTable(_databaseTable.Name) { Locale = CultureInfo.InvariantCulture };
 
@@ -64,6 +80,18 @@ namespace DatabaseSchemaReader.Data
                 using (var cmd = con.CreateCommand())
                 {
                     cmd.CommandText = selectAll;
+                    var p = cmd.CreateParameter();
+                    var parameterName = "currentPage";
+                    if (sqlType == SqlType.SqlServerCe) parameterName = "offset";
+                    p.ParameterName = parameterName;
+                    p.Value = 1;
+                    if (sqlType == SqlType.SqlServerCe) p.Value = 0;
+                    cmd.Parameters.Add(p);
+                    var ps = cmd.CreateParameter();
+                    ps.ParameterName = "pageSize";
+                    ps.Value = _pageSize;
+                    cmd.Parameters.Add(ps);
+
                     using (var da = dbFactory.CreateDataAdapter())
                     {
                         da.SelectCommand = cmd;

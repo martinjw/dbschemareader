@@ -20,6 +20,7 @@ namespace DatabaseSchemaReader.Data
         private string _template;
         private readonly IDictionary<string, Type> _columnTypes = new Dictionary<string, Type>();
         private readonly IDictionary<string, string> _dateTypes = new Dictionary<string, string>();
+        private readonly IList<string> _nullColumns = new List<string>();
         private SqlType _sqlType;
         private Converter _converter;
 
@@ -58,6 +59,15 @@ namespace DatabaseSchemaReader.Data
                     //get the original database type (datetime2, date, time, timestamp etc)
                     _dateTypes.Add(key, databaseColumn.DbDataType.ToUpperInvariant());
                 }
+                if (columnType == typeof(object))
+                {
+                    _nullColumns.Add(key);
+                }
+                if (!IncludeBlobs && DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn))
+                {
+                    _nullColumns.Add(key);
+                }
+
             }
         }
 
@@ -148,14 +158,13 @@ namespace DatabaseSchemaReader.Data
             {
                 if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
 
-                var columnType = _columnTypes[databaseColumn.Name];
-                if (columnType == typeof(object))
+                if (_nullColumns.Contains(databaseColumn.Name))
                 {
                     values.Add("NULL");
                     continue;
                 }
-                if (!IncludeBlobs && DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn))
-                    continue;
+
+                var columnType = _columnTypes[databaseColumn.Name];
 
                 object data = row[databaseColumn.Name];
                 values.Add(_converter.Convert(databaseColumn.Name, columnType, data));

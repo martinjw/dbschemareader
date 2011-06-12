@@ -57,6 +57,14 @@ namespace DatabaseSchemaReader.CodeGen
             _hasOracle = true;
         }
 
+        public void UpgradeTo2010()
+        {
+            var projectElement = _document.Root;
+            projectElement.SetAttributeValue("ToolsVersion", "4.0");
+            var target = projectElement.Descendants(_xmlns + "TargetFrameworkVersion").First();
+            target.SetValue("v4.0");
+        }
+
         public string Write()
         {
             return _document.ToString();
