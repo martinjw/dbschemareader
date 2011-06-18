@@ -225,10 +225,12 @@
             // 
             // cmbTables
             // 
+            this.cmbTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbTables.FormattingEnabled = true;
             this.cmbTables.Location = new System.Drawing.Point(71, 9);
             this.cmbTables.Name = "cmbTables";
-            this.cmbTables.Size = new System.Drawing.Size(121, 21);
+            this.cmbTables.Size = new System.Drawing.Size(353, 21);
             this.cmbTables.TabIndex = 14;
             // 
             // label2

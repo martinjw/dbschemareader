@@ -85,15 +85,19 @@ namespace DatabaseSchemaReader.SqlGen
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
             var columnDefinition = tableGenerator.WriteColumn(databaseColumn).Trim();
-            var originalDefinition = tableGenerator.WriteColumn(originalColumn).Trim();
-            //we don't specify "NULL" for nullables in tableGenerator, but if it's changed we should
-            if (originalColumn.Nullable && !databaseColumn.Nullable)
+            string originalDefinition = null;
+            if (originalColumn != null)
             {
-                originalDefinition += " NULL";
-            }
-            if (!originalColumn.Nullable && databaseColumn.Nullable)
-            {
-                columnDefinition += " NULL";
+                originalDefinition = tableGenerator.WriteColumn(originalColumn).Trim();
+                //we don't specify "NULL" for nullables in tableGenerator, but if it's changed we should
+                if (originalColumn.Nullable && !databaseColumn.Nullable)
+                {
+                    originalDefinition += " NULL";
+                }
+                if (!originalColumn.Nullable && databaseColumn.Nullable)
+                {
+                    columnDefinition += " NULL";
+                }
             }
 
             //add a nice comment
@@ -132,8 +136,11 @@ namespace DatabaseSchemaReader.SqlGen
             //we always use the named form.
             var constraintName = constraint.Name;
 
-            if (string.IsNullOrEmpty(constraintName)) throw new InvalidOperationException("Constraint must have a name");
-            if (constraint.Columns.Count == 0) throw new InvalidOperationException("Constraint has no columns");
+            if (string.IsNullOrEmpty(constraintName)) 
+                throw new InvalidOperationException("Constraint must have a name");
+            //primary, unique and foreign key constraints must have columns
+            if (constraint.Columns.Count == 0 && constraint.ConstraintType != ConstraintType.Check) 
+                throw new InvalidOperationException("Constraint has no columns");
 
             //use the standard constraint writer for the database
             var constraintWriter = _ddlFactory.ConstraintWriter(databaseTable);

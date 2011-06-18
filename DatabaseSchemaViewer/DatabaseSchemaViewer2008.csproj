@@ -111,6 +111,7 @@
     <Compile Include="ScriptForm.Designer.cs">
       <DependentUpon>ScriptForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SqlTasks.cs" />
     <Compile Include="TaskRunner.cs" />
   </ItemGroup>
   <ItemGroup>

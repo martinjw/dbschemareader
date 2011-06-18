@@ -40,7 +40,7 @@
             this.SchemaOwner = new System.Windows.Forms.TextBox();
             this.ReadSchema = new System.Windows.Forms.Button();
             this.ConnectionString = new System.Windows.Forms.TextBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.connectionContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.DataProviders = new System.Windows.Forms.ComboBox();
@@ -48,6 +48,7 @@
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.treeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.statusStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -115,7 +116,7 @@
             this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(73, 22);
+            this.toolStripButton1.Size = new System.Drawing.Size(78, 22);
             this.toolStripButton1.Text = "Code gen";
             this.toolStripButton1.ToolTipText = "Code Generation";
             this.toolStripButton1.Click += new System.EventHandler(this.CodeGenClick);
@@ -126,7 +127,7 @@
             this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
             this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(70, 22);
+            this.toolStripButton2.Size = new System.Drawing.Size(76, 22);
             this.toolStripButton2.Text = "Compare";
             this.toolStripButton2.ToolTipText = "Compare to another database";
             this.toolStripButton2.Click += new System.EventHandler(this.CompareClick);
@@ -164,7 +165,7 @@
             // 
             this.ConnectionString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ConnectionString.ContextMenuStrip = this.contextMenuStrip1;
+            this.ConnectionString.ContextMenuStrip = this.connectionContext;
             this.ConnectionString.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "ConnectionString", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.ConnectionString.Location = new System.Drawing.Point(3, 74);
             this.ConnectionString.Name = "ConnectionString";
@@ -172,10 +173,10 @@
             this.ConnectionString.TabIndex = 3;
             this.ConnectionString.Text = global::DatabaseSchemaViewer.Properties.Settings.Default.ConnectionString;
             // 
-            // contextMenuStrip1
+            // connectionContext
             // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.connectionContext.Name = "contextMenuStrip1";
+            this.connectionContext.Size = new System.Drawing.Size(61, 4);
             // 
             // label2
             // 
@@ -223,6 +224,7 @@
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(625, 223);
             this.treeView1.TabIndex = 0;
+            this.treeView1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TreeMouseUp);
             // 
             // errorProvider1
             // 
@@ -232,6 +234,11 @@
             // 
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker1RunWorkerCompleted);
+            // 
+            // treeContext
+            // 
+            this.treeContext.Name = "treeContext";
+            this.treeContext.Size = new System.Drawing.Size(61, 4);
             // 
             // Form1
             // 
@@ -277,7 +284,8 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ContextMenuStrip connectionContext;
+        private System.Windows.Forms.ContextMenuStrip treeContext;
     }
 }
 

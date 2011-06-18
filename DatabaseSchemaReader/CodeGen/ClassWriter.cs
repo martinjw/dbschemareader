@@ -4,12 +4,20 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
-    class ClassWriter
+    /// <summary>
+    /// Turns a specified <see cref="DatabaseTable"/> into a C# class
+    /// </summary>
+    public class ClassWriter
     {
         private readonly DatabaseTable _table;
         private readonly string _ns;
         private readonly ClassBuilder _cb;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClassWriter"/> class.
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="ns">The ns.</param>
         public ClassWriter(DatabaseTable table, string ns)
         {
             _ns = ns;
@@ -17,9 +25,19 @@ namespace DatabaseSchemaReader.CodeGen
             _cb = new ClassBuilder();
         }
 
+        /// <summary>
+        /// Writes the C# code of the table
+        /// </summary>
+        /// <returns></returns>
         public string Write()
         {
             var className = _table.NetName;
+            if (string.IsNullOrEmpty(className) && _table.DatabaseSchema != null)
+            {
+                PrepareSchemaNames.Prepare(_table.DatabaseSchema);
+                className = _table.NetName;
+            }
+
 
             WriteNamespaces();
 

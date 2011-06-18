@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Data.Common;
+using System.Drawing;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
+using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaViewer
@@ -37,40 +39,40 @@ namespace DatabaseSchemaViewer
             if (!_installedProviders.Contains(selectedValue)) selectedValue = "System.Data.SqlClient";
             DataProviders.SelectedItem = selectedValue;
             //add sample connection strings
-            contextMenuStrip1.Items.Clear();
+            connectionContext.Items.Clear();
             if (_installedProviders.Contains("IBM.Data.DB2"))
             {
-                contextMenuStrip1.Items.Add("DB2 (Sample)").Click += (s, ev) => FillConnectionString(@"Server=localhost:50000;UID=db2admin;pwd=db2;Database=Sample");
+                connectionContext.Items.Add("DB2 (Sample)").Click += (s, ev) => FillConnectionString(@"Server=localhost:50000;UID=db2admin;pwd=db2;Database=Sample");
             }
             if (_installedProviders.Contains("FirebirdSql.Data.FirebirdClient"))
             {
-                contextMenuStrip1.Items.Add("Firebird (Employee)").Click += (s, ev) => FillConnectionString(@"User=SYSDBA;Password=masterkey;Database=C:\Program Files\Firebird\Firebird_2_1\examples\empbuild\EMPLOYEE.FDB;Server=localhost; Connection lifetime=15;Pooling=true");
+                connectionContext.Items.Add("Firebird (Employee)").Click += (s, ev) => FillConnectionString(@"User=SYSDBA;Password=masterkey;Database=C:\Program Files\Firebird\Firebird_2_1\examples\empbuild\EMPLOYEE.FDB;Server=localhost; Connection lifetime=15;Pooling=true");
             }
             if (_installedProviders.Contains("MySql.Data.MySqlClient") || _installedProviders.Contains("Devart.Data.MySql"))
             {
-                contextMenuStrip1.Items.Add("MySQL (Northwind)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;");
-                contextMenuStrip1.Items.Add("MySQL (Sakila)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Sakila;Allow User Variables=True;", @"Sakila");
+                connectionContext.Items.Add("MySQL (Northwind)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;");
+                connectionContext.Items.Add("MySQL (Sakila)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Sakila;Allow User Variables=True;", @"Sakila");
             }
-            contextMenuStrip1.Items.Add("Oracle XE - TNS (HR)").Click += (s, ev) => FillConnectionString(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;", @"HR");
-            contextMenuStrip1.Items.Add("Oracle XE (HR)").Click += (s, ev) => FillConnectionString(
+            connectionContext.Items.Add("Oracle XE - TNS (HR)").Click += (s, ev) => FillConnectionString(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;", @"HR");
+            connectionContext.Items.Add("Oracle XE (HR)").Click += (s, ev) => FillConnectionString(
                 @"Data Source=XE;User Id=HR;Password=HR;", @"HR");
             if (_installedProviders.Contains("Npgsql") || _installedProviders.Contains("Devart.Data.Devart.Data.PostgreSql"))
             {
-                contextMenuStrip1.Items.Add("Postgresql (world)").Click += (s, ev) => FillConnectionString(@"Server=127.0.0.1;User id=postgres;password=sql;database=world;");
+                connectionContext.Items.Add("Postgresql (world)").Click += (s, ev) => FillConnectionString(@"Server=127.0.0.1;User id=postgres;password=sql;database=world;");
             }
             if (_installedProviders.Contains("System.Data.SQLite") || _installedProviders.Contains("Devart.Data.SQLite"))
             {
-                contextMenuStrip1.Items.Add("SQLite (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=C:\Data\northwind.db;");
-                contextMenuStrip1.Items.Add("SQLite (Chinook)").Click += (s, ev) => FillConnectionString(@"Data Source=C:\Data\Chinook_Sqlite.sqlite;");
+                connectionContext.Items.Add("SQLite (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=C:\Data\northwind.db;");
+                connectionContext.Items.Add("SQLite (Chinook)").Click += (s, ev) => FillConnectionString(@"Data Source=C:\Data\Chinook_Sqlite.sqlite;");
             }
-            contextMenuStrip1.Items.Add("Sql Server Express (AdventureWorks)").Click += (s, ev) => FillConnectionString(
+            connectionContext.Items.Add("Sql Server Express (AdventureWorks)").Click += (s, ev) => FillConnectionString(
                 @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks");
-            contextMenuStrip1.Items.Add("Sql Server Express (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind");
+            connectionContext.Items.Add("Sql Server Express (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind");
             if (_installedProviders.Contains("System.Data.SqlServerCe.4.0"))
             {
-                contextMenuStrip1.Items.Add("SqlServerCe (Chinook)").Click += (s, ev) => FillConnectionString(@"Data Source=""C:\Data\Chinook_SqlServerCompact.sdf"";");
+                connectionContext.Items.Add("SqlServerCe (Chinook)").Click += (s, ev) => FillConnectionString(@"Data Source=""C:\Data\Chinook_SqlServerCompact.sdf"";");
                 //don't use the C:\Program Files\Microsoft SQL Server Compact Edition\v4.0\Samples version as you need admin rights
-                contextMenuStrip1.Items.Add("SqlServerCe (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=""C:\Data\northwind.sdf"";");
+                connectionContext.Items.Add("SqlServerCe (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=""C:\Data\northwind.sdf"";");
             }
         }
 
@@ -201,6 +203,7 @@ namespace DatabaseSchemaViewer
             }
         }
 
+        private TreeNode _lastSelectedNode;
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.Cancel)
@@ -212,5 +215,182 @@ namespace DatabaseSchemaViewer
 
             Properties.Settings.Default.Save();
         }
+
+        private void TreeMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right) return;
+            var p = new Point(e.X, e.Y);
+
+            var node = treeView1.GetNodeAt(p);
+            if (node == null) return;
+
+            var tag = node.Tag;
+
+            if (tag == null) return;
+
+            _lastSelectedNode = node;
+            treeView1.SelectedNode = node;
+
+            var menu = treeContext;
+            menu.Items.Clear();
+
+            var sqlType = FindSqlType();
+
+            var schema = node.Tag as DatabaseSchema;
+            var view = node.Tag as DatabaseView;
+            var table = node.Tag as DatabaseTable;
+            var column = node.Tag as DatabaseColumn;
+            var pack = node.Tag as DatabasePackage;
+            var sproc = node.Tag as DatabaseStoredProcedure;
+            var fun = node.Tag as DatabaseFunction;
+            var constraint = node.Tag as DatabaseConstraint;
+            var trigger = node.Tag as DatabaseTrigger;
+            var index = node.Tag as DatabaseIndex;
+            if (schema != null)
+            {
+                var create = new ToolStripMenuItem("CREATE TABLEs to clipboard");
+                create.Click += (s, ea) => new SqlTasks(sqlType).BuildAllTableDdl(schema);
+                menu.Items.Add(create);
+            }
+            else if (view != null)
+            {
+                //views are based on tables, so do them first
+                BuildViewMenu(menu, view, sqlType);
+            }
+            else if (table != null)
+            {
+                BuildTableMenu(menu, table, sqlType);
+            }
+            else if (pack != null)
+            {
+                var create = new ToolStripMenuItem("CREATE PACKAGE " + pack.Name + " to clipboard");
+                create.Click += (s, ea) => new SqlTasks(sqlType).BuildPackage(pack);
+                menu.Items.Add(create);
+            }
+            else if (fun != null)
+            {
+                var create = new ToolStripMenuItem("CREATE FUNCTION " + fun.Name + " to clipboard");
+                create.Click += (s, ea) => new SqlTasks(sqlType).BuildFunction(fun);
+                menu.Items.Add(create);
+            }
+            else if (sproc != null)
+            {
+                var create = new ToolStripMenuItem("CREATE STORED PROC " + sproc.Name + " to clipboard");
+                create.Click += (s, ea) => new SqlTasks(sqlType).BuildProcedure(sproc);
+                menu.Items.Add(create);
+            }
+            else if (column != null)
+            {
+                var add = new ToolStripMenuItem("ADD COLUMN " + column.Name + " to clipboard");
+                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddColumn(column);
+                menu.Items.Add(add);
+                var alter = new ToolStripMenuItem("ALTER COLUMN " + column.Name + " to clipboard");
+                alter.Click += (s, ea) => new SqlTasks(sqlType).BuildAlterColumn(column);
+                menu.Items.Add(alter);
+            }
+            else if (constraint != null)
+            {
+                var parentTable = node.Parent.Parent.Tag as DatabaseTable;
+                var add = new ToolStripMenuItem("ADD CONSTRAINT " + constraint.Name + " to clipboard");
+                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddConstraint(parentTable, constraint);
+                menu.Items.Add(add);
+                var drop = new ToolStripMenuItem("DROP CONSTRAINT " + constraint.Name + " to clipboard");
+                drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropConstraint(parentTable, constraint);
+                menu.Items.Add(drop);
+            }
+            else if (trigger != null)
+            {
+                var parentTable = node.Parent.Parent.Tag as DatabaseTable;
+                var add = new ToolStripMenuItem("ADD TRIGGER " + trigger.Name + " to clipboard");
+                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddTrigger(parentTable, trigger);
+                menu.Items.Add(add);
+                var drop = new ToolStripMenuItem("DROP TRIGGER " + trigger.Name + " to clipboard");
+                drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropTrigger(trigger);
+                menu.Items.Add(drop);
+            }
+            else if (index != null)
+            {
+                var parentTable = node.Parent.Parent.Tag as DatabaseTable;
+                var add = new ToolStripMenuItem("ADD INDEX " + index.Name + " to clipboard");
+                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddIndex(parentTable, index);
+                menu.Items.Add(add);
+                var drop = new ToolStripMenuItem("DROP INDEX " + index.Name + " to clipboard");
+                drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropIndex(parentTable, index);
+                menu.Items.Add(drop);
+            }
+
+
+            menu.Show(treeView1, p);
+
+            treeView1.SelectedNode = _lastSelectedNode;
+            _lastSelectedNode = null;
+
+        }
+
+        private void BuildViewMenu(ToolStrip menu, DatabaseView view, SqlType sqlType)
+        {
+            if (!string.IsNullOrEmpty(view.Sql))
+            {
+                var create = new ToolStripMenuItem("CREATE VIEW " + view.Name + " to clipboard");
+                create.Click += (s, ea) => new SqlTasks(sqlType).BuildView(view);
+                menu.Items.Add(create);
+
+                var bar = new ToolStripSeparator();
+                menu.Items.Add(bar);
+            }
+
+            var select = new ToolStripMenuItem("SELECT VIEW to clipboard");
+            select.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelect(view);
+            menu.Items.Add(select);
+
+            var selectPaged = new ToolStripMenuItem("SELECT VIEW PAGED to clipboard");
+            selectPaged.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelectPaged(view);
+            menu.Items.Add(selectPaged);
+        }
+
+        private void BuildTableMenu(ToolStrip menu, DatabaseTable table, SqlType sqlType)
+        {
+            if (menu == null) throw new ArgumentNullException("menu");
+            var create = new ToolStripMenuItem("CREATE TABLE " + table.Name + " to clipboard");
+            create.Click += (s, ea) => new SqlTasks(sqlType).BuildTableDdl(table);
+            menu.Items.Add(create);
+
+            var drop = new ToolStripMenuItem("DROP TABLE " + table.Name + " to clipboard");
+            drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropTable(table);
+            menu.Items.Add(drop);
+
+            var bar = new ToolStripSeparator();
+            menu.Items.Add(bar);
+
+            var select = new ToolStripMenuItem("SELECT TABLE to clipboard");
+            select.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelect(table);
+            menu.Items.Add(select);
+
+            var selectPaged = new ToolStripMenuItem("SELECT TABLE PAGED to clipboard");
+            selectPaged.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelectPaged(table);
+            menu.Items.Add(selectPaged);
+
+            var insert = new ToolStripMenuItem("INSERT TABLE to clipboard");
+            insert.Click += (s, ea) => new SqlTasks(sqlType).BuildTableInsert(table);
+            menu.Items.Add(insert);
+
+            var update = new ToolStripMenuItem("UPDATE TABLE to clipboard");
+            update.Click += (s, ea) => new SqlTasks(sqlType).BuildTableUpdate(table);
+            menu.Items.Add(update);
+
+            var bar2 = new ToolStripSeparator();
+            menu.Items.Add(bar2);
+
+            var code = new ToolStripMenuItem("C# class to clipboard");
+            code.Click += (s, ea) => new SqlTasks(sqlType).BuildClass(table);
+            menu.Items.Add(code);
+        }
+
+        private SqlType FindSqlType()
+        {
+            var sqlType = ProviderToSqlType.Convert(_databaseSchema.Provider);
+            return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
+        }
+
     }
 }

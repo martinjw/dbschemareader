@@ -9,6 +9,7 @@ namespace DatabaseSchemaViewer
 {
     static class SchemaToTreeview
     {
+        private const string RightClickToScript = "Right click to script";
 
         public static void PopulateTreeView(DatabaseSchema schema, TreeView treeView1)
         {
@@ -51,7 +52,7 @@ namespace DatabaseSchemaViewer
                 var name = storedProcedure.Name;
                 if (!string.IsNullOrEmpty(storedProcedure.SchemaOwner)) name = storedProcedure.SchemaOwner + "." + name;
                 var node = new TreeNode(name);
-                node.ToolTipText = storedProcedure.Sql;
+                if (!string.IsNullOrEmpty(storedProcedure.Sql)) node.Tag = storedProcedure;
                 root.Nodes.Add(node);
                 FillArguments(node, storedProcedure.Arguments);
             }
@@ -67,7 +68,7 @@ namespace DatabaseSchemaViewer
                 var name = function.Name;
                 if (!string.IsNullOrEmpty(function.SchemaOwner)) name = function.SchemaOwner + "." + name;
                 var node = new TreeNode(name);
-                node.ToolTipText = function.Sql;
+                if (!string.IsNullOrEmpty(function.Sql)) node.Tag = function;
                 root.Nodes.Add(node);
                 FillArguments(node, function.Arguments);
             }
@@ -81,7 +82,7 @@ namespace DatabaseSchemaViewer
             foreach (var package in schema.Packages)
             {
                 var node = new TreeNode(package.Name);
-                node.ToolTipText = package.Definition;
+                if (!string.IsNullOrEmpty(package.Definition)) node.Tag = package;
                 root.Nodes.Add(node);
                 FillSprocs(node, package.StoredProcedures);
             }
@@ -134,7 +135,7 @@ namespace DatabaseSchemaViewer
                 var name = view.Name;
                 if (!string.IsNullOrEmpty(view.SchemaOwner)) name = view.SchemaOwner + "." + name;
                 var viewNode = new TreeNode(name);
-                viewNode.ToolTipText = view.Sql;
+                viewNode.Tag = view;
                 viewRoot.Nodes.Add(viewNode);
                 foreach (var column in view.Columns)
                 {
@@ -146,6 +147,8 @@ namespace DatabaseSchemaViewer
         private static void FillTables(TreeNode treeRoot, DatabaseSchema schema)
         {
             var tableRoot = new TreeNode("Tables");
+            tableRoot.Tag = schema;
+            tableRoot.ToolTipText = RightClickToScript;
             treeRoot.Nodes.Add(tableRoot);
 
             foreach (var table in schema.Tables.OrderBy(x => x.SchemaOwner).ThenBy(x => x.Name))
@@ -153,6 +156,8 @@ namespace DatabaseSchemaViewer
                 var name = table.Name;
                 if (!string.IsNullOrEmpty(table.SchemaOwner)) name = table.SchemaOwner + "." + name;
                 var tableNode = new TreeNode(name);
+                tableNode.Tag = table;
+                tableNode.ToolTipText = RightClickToScript;
                 tableRoot.Nodes.Add(tableNode);
                 foreach (var column in table.Columns)
                 {
@@ -173,6 +178,7 @@ namespace DatabaseSchemaViewer
             foreach (var index in table.Indexes)
             {
                 var node = new TreeNode(index.Name);
+                node.Tag = index;
                 indexRoot.Nodes.Add(node);
                 foreach (var column in index.Columns)
                 {
@@ -207,6 +213,8 @@ namespace DatabaseSchemaViewer
         private static void AddConstraint(TreeNode constraintRoot, DatabaseConstraint constraint)
         {
             var node = new TreeNode(constraint.Name);
+            node.Tag = constraint;
+            node.ToolTipText = RightClickToScript;
             constraintRoot.Nodes.Add(node);
             if (constraint.ConstraintType == ConstraintType.Check)
             {
@@ -227,7 +235,8 @@ namespace DatabaseSchemaViewer
             foreach (var trigger in table.Triggers)
             {
                 var triggerNode = new TreeNode(trigger.Name);
-                triggerNode.ToolTipText = trigger.TriggerBody;
+                if (!string.IsNullOrEmpty(trigger.TriggerBody))
+                    triggerNode.Tag = trigger;
                 triggerRoot.Nodes.Add(triggerNode);
             }
         }
@@ -240,14 +249,14 @@ namespace DatabaseSchemaViewer
             sb.Append(column.DbDataType);
             if (column.DataType != null)
             {
-                if (column.DataType.IsString)
+                if (column.DataType.IsString && !column.DataType.IsStringClob)
                 {
                     sb.Append("(");
                     var length = column.Length.GetValueOrDefault();
-                    sb.Append(length != -1? length.ToString(CultureInfo.InvariantCulture) : "MAX");
+                    sb.Append(length != -1 ? length.ToString(CultureInfo.InvariantCulture) : "MAX");
                     sb.Append(")");
                 }
-                else if (column.DataType.IsNumeric)
+                else if (column.DataType.IsNumeric && !column.DataType.IsInt)
                 {
                     sb.Append("(");
                     sb.Append(column.Precision);
@@ -273,6 +282,11 @@ namespace DatabaseSchemaViewer
                 sb.Append(" FK to " + column.ForeignKeyTableName);
             }
             var colNode = new TreeNode(sb.ToString());
+            if (!(column.Table is DatabaseView))
+            {
+                colNode.Tag = column;
+                colNode.ToolTipText = RightClickToScript;
+            }
             tableNode.Nodes.Add(colNode);
         }
     }
