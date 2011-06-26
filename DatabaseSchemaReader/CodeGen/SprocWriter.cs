@@ -45,14 +45,53 @@ namespace DatabaseSchemaReader.CodeGen
 
         public string Write()
         {
-            var className = _logic.ClassName;
+            WriteTop();
 
+            WriteClass();
+
+            WriteEnd();
+
+            return _cb.ToString();
+        }
+
+        internal string WriteWithResultClass()
+        {
+            WriteTop();
+
+            WriteClass();
+
+            if (HasResultClass)
+            {
+                var rs = new SprocResultWriter(_storedProcedure, _namespace, _cb);
+                rs.WriteClasses();
+            }
+
+            WriteEnd();
+
+            return _cb.ToString();
+        }
+
+        private void WriteTop()
+        {
             WriteNamespaces();
 
             if (!string.IsNullOrEmpty(_namespace))
             {
                 _cb.BeginNest("namespace " + _namespace);
             }
+        }
+
+        private void WriteEnd()
+        {
+            if (!string.IsNullOrEmpty(_namespace))
+            {
+                _cb.EndNest();
+            }
+        }
+
+        private void WriteClass()
+        {
+            var className = _logic.ClassName;
 
             using (_cb.BeginNest("public class " + className, "Class representing " + _storedProcedure.FullName + " stored procedure"))
             {
@@ -62,13 +101,6 @@ namespace DatabaseSchemaReader.CodeGen
 
                 WriteExecute();
             }
-
-            if (!string.IsNullOrEmpty(_namespace))
-            {
-                _cb.EndNest();
-            }
-
-            return _cb.ToString();
         }
 
         private void WriteNamespaces()

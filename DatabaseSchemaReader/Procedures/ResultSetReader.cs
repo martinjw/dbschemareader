@@ -37,7 +37,7 @@ namespace DatabaseSchemaReader.Procedures
         }
 
         /// <summary>
-        /// Executes this instance.
+        /// Calls each procedure to find the result type.
         /// </summary>
         public void Execute()
         {
@@ -54,7 +54,11 @@ namespace DatabaseSchemaReader.Procedures
             }
         }
 
-        private void ExecuteProcedure(DatabaseStoredProcedure procedure)
+        /// <summary>
+        /// Calls the specified procedure to find the result type.
+        /// </summary>
+        /// <param name="procedure">The procedure.</param>
+        public void ExecuteProcedure(DatabaseStoredProcedure procedure)
         {
             var executionName = procedure.Name;
             if (!string.IsNullOrEmpty(procedure.Package))

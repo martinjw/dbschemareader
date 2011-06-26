@@ -272,7 +272,7 @@ namespace DatabaseSchemaViewer
             catch (Exception exception)
             {
                 Debug.WriteLine(exception.Message);
-            } 
+            }
         }
 
         public void BuildClass(DatabaseTable databaseTable)
@@ -286,7 +286,33 @@ namespace DatabaseSchemaViewer
             catch (Exception exception)
             {
                 Debug.WriteLine(exception.Message);
-            } 
+            }
+        }
+
+        public void BuildProcedureCode(DatabaseSchema databaseSchema, DatabaseStoredProcedure databaseStoredProcedure)
+        {
+            try
+            {
+                //grab the data
+                if (databaseStoredProcedure.ResultSets.Count == 0)
+                {
+                    //Delete sprocs won't have resultsets, so will get called multiple times
+                    var sprocRunner = new DatabaseSchemaReader.Procedures.ResultSetReader(databaseSchema);
+                    sprocRunner.ExecuteProcedure(databaseStoredProcedure);
+                }
+
+                //write it
+                var sprocWriter = new ProcedureWriter(databaseStoredProcedure, "Domain");
+                var txt = sprocWriter.Write();
+
+                Clipboard.SetText(txt, TextDataFormat.UnicodeText);
+            }
+            catch (Exception exception)
+            {
+                Clipboard.SetText("//sorry, not available - " + exception.Message,
+                    TextDataFormat.UnicodeText);
+                Debug.WriteLine(exception.Message);
+            }
         }
     }
 }

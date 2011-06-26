@@ -57,6 +57,7 @@
     <Compile Include="CodeGen\Nester.cs" />
     <Compile Include="CodeGen\OverrideWriter.cs" />
     <Compile Include="CodeGen\PrepareSchemaNames.cs" />
+    <Compile Include="CodeGen\ProcedureWriter.cs" />
     <Compile Include="CodeGen\ProjectWriter.cs" />
     <Compile Include="CodeGen\SprocLogic.cs" />
     <Compile Include="CodeGen\SprocResultType.cs" />

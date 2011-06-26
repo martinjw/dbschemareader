@@ -22,7 +22,14 @@ namespace DatabaseSchemaReader.CodeGen
             _resultClassName = _logic.ResultClassName;
             _cb = new ClassBuilder();
         }
-
+        internal SprocResultWriter(DatabaseStoredProcedure storedProcedure, string ns, ClassBuilder classBuilder)
+        {
+            _namespace = ns;
+            _storedProcedure = storedProcedure;
+            _logic = new SprocLogic(_storedProcedure);
+            _resultClassName = _logic.ResultClassName;
+            _cb = classBuilder;
+        }
         public string ClassName { get { return _resultClassName; } }
 
         public string Write()
@@ -34,6 +41,21 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.BeginNest("namespace " + _namespace);
             }
 
+            WriteClasses();
+
+            if (!string.IsNullOrEmpty(_namespace))
+            {
+                _cb.EndNest();
+            }
+
+            return _cb.ToString();
+        }
+
+        /// <summary>
+        /// Writes the classes. This is exposed to SprocWriter so it doesn't include usings/namespaces
+        /// </summary>
+        internal void WriteClasses()
+        {
             using (_cb.BeginNest("public class " + _resultClassName, "Class representing result of " + _storedProcedure.FullName + " stored procedure"))
             {
                 if (_logic.ResultType == SprocResultType.Enumerable)
@@ -52,13 +74,6 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 WriteMultiResultSetClasses();
             }
-
-            if (!string.IsNullOrEmpty(_namespace))
-            {
-                _cb.EndNest();
-            }
-
-            return _cb.ToString();
         }
 
         private void WriteMultiResultSetClasses()
@@ -122,13 +137,44 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     column.NetName = NameFixer.ToPascalCase(column.Name);
                 }
-                var dataType = column.DbDataType;
+                var dataType = TranslateDataTypeToCSharp(column.DbDataType);
+
                 if (!string.Equals(dataType, "String", StringComparison.OrdinalIgnoreCase) &&
                     !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
                 {
                     dataType += "?"; //nullable
                 }
                 _cb.AppendAutomaticProperty(dataType, column.NetName);
+            }
+        }
+
+        private static string TranslateDataTypeToCSharp(string dataType)
+        {
+            //these are generally of the form "System.String"
+            switch (dataType.ToUpperInvariant())
+            {
+                case "STRING":
+                    return "string";
+                case "INT32":
+                    return "int";
+                case "INT64":
+                    return "long";
+                case "INT16":
+                    return "short";
+                case "DECIMAL":
+                    return "decimal";
+                case "BYTE":
+                    return "byte";
+                case "BYTE[]":
+                    return "byte[]";
+                case "CHAR":
+                    return "char";
+                case "BOOLEAN":
+                    return "bool";
+                case "SINGLE":
+                    return "float";
+                default:
+                    return dataType;
             }
         }
 
