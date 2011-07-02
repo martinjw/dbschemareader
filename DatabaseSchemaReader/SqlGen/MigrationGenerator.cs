@@ -136,10 +136,10 @@ namespace DatabaseSchemaReader.SqlGen
             //we always use the named form.
             var constraintName = constraint.Name;
 
-            if (string.IsNullOrEmpty(constraintName)) 
+            if (string.IsNullOrEmpty(constraintName))
                 throw new InvalidOperationException("Constraint must have a name");
             //primary, unique and foreign key constraints must have columns
-            if (constraint.Columns.Count == 0 && constraint.ConstraintType != ConstraintType.Check) 
+            if (constraint.Columns.Count == 0 && constraint.ConstraintType != ConstraintType.Check)
                 throw new InvalidOperationException("Constraint has no columns");
 
             //use the standard constraint writer for the database
@@ -374,7 +374,7 @@ namespace DatabaseSchemaReader.SqlGen
                 foreach (var foreignKey in foreignKeyChild.ForeignKeys.Where(fk => fk.RefersToTable == databaseTable.Name))
                 {
                     //table may have been dropped before, so check it exists
-                    sb.AppendLine(IfTableExists(foreignKeyChild));
+                    sb.AppendLine(IfConstraintExists(foreignKeyChild, foreignKey.Name));
                     sb.AppendLine(" ALTER TABLE " + TableName(foreignKeyChild) + " DROP CONSTRAINT " + Escape(foreignKey.Name) + ";");
                 }
             }
@@ -383,14 +383,20 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        private static string IfTableExists(DatabaseTable databaseTable)
+        private static string IfConstraintExists(DatabaseTable databaseTable, string foreignKeyName)
         {
             if (string.IsNullOrEmpty(databaseTable.SchemaOwner))
             {
-                return "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + databaseTable.Name + "'))";
+                return string.Format(CultureInfo.InvariantCulture,
+                    "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_NAME = '{0}' AND CONSTRAINT_NAME = '{1}'))",
+                    databaseTable.Name,
+                    foreignKeyName);
             }
-            return "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" +
-                   databaseTable.SchemaOwner + "' AND TABLE_NAME = '" + databaseTable.Name + "'))";
+            return string.Format(CultureInfo.InvariantCulture,
+                "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{0}' AND TABLE_NAME = '{1}' AND CONSTRAINT_NAME = '{2}'))",
+                databaseTable.SchemaOwner,
+                databaseTable.Name,
+                foreignKeyName);
         }
 
         /// <summary>

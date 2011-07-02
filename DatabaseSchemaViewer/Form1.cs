@@ -275,12 +275,15 @@ namespace DatabaseSchemaViewer
             }
             else if (sproc != null)
             {
-                var create = new ToolStripMenuItem("CREATE STORED PROC " + sproc.Name + " to clipboard");
-                create.Click += (s, ea) => new SqlTasks(sqlType).BuildProcedure(sproc);
-                menu.Items.Add(create);
+                if (!string.IsNullOrEmpty(sproc.Sql))
+                {
+                    var create = new ToolStripMenuItem("CREATE STORED PROC " + sproc.Name + " to clipboard");
+                    create.Click += (s, ea) => new SqlTasks(sqlType).BuildProcedure(sproc);
+                    menu.Items.Add(create);
 
-                var bar = new ToolStripSeparator();
-                menu.Items.Add(bar);
+                    var bar = new ToolStripSeparator();
+                    menu.Items.Add(bar);
+                }
 
                 var code = new ToolStripMenuItem("C# class to clipboard");
                 code.Click += (s, ea) => new SqlTasks(sqlType).BuildProcedureCode(_databaseSchema, sproc);

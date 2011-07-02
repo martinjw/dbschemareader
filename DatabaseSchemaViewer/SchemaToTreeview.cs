@@ -52,7 +52,7 @@ namespace DatabaseSchemaViewer
                 var name = storedProcedure.Name;
                 if (!string.IsNullOrEmpty(storedProcedure.SchemaOwner)) name = storedProcedure.SchemaOwner + "." + name;
                 var node = new TreeNode(name);
-                if (!string.IsNullOrEmpty(storedProcedure.Sql)) node.Tag = storedProcedure;
+                node.Tag = storedProcedure;
                 root.Nodes.Add(node);
                 FillArguments(node, storedProcedure.Arguments);
             }
