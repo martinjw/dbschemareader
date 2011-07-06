@@ -58,7 +58,7 @@ namespace DatabaseSchemaReader.Compare
                 //in Oracle could be a CREATE OR REPLACE
                 _sb.AppendLine("-- ALTER STORED PROCEDURE " + procedure.Name);
                 _sb.AppendLine(_writer.DropProcedure(procedure));
-                _sb.AppendLine(_writer.AddProcedure(procedure));
+                _sb.AppendLine(_writer.AddProcedure(match));
             }
         }
     }

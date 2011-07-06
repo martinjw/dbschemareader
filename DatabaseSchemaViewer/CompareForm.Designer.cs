@@ -35,13 +35,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.ConnectionString = new System.Windows.Forms.TextBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Database = new System.Windows.Forms.GroupBox();
             this.labOriginDatabase = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.chkInverse = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.Database.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -84,11 +85,12 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.chkInverse);
             this.groupBox1.Controls.Add(this.ConnectionString);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Location = new System.Drawing.Point(12, 60);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(658, 84);
+            this.groupBox1.Size = new System.Drawing.Size(658, 94);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Compare To Database";
@@ -105,6 +107,11 @@
             this.ConnectionString.TabIndex = 3;
             this.ConnectionString.Text = global::DatabaseSchemaViewer.Properties.Settings.Default.CompareConnectionString;
             this.ConnectionString.Validating += new System.ComponentModel.CancelEventHandler(this.ConnectionStringValidating);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // Database
             // 
@@ -150,10 +157,15 @@
             // 
             this.errorProvider1.ContainerControl = this;
             // 
-            // contextMenuStrip1
+            // chkInverse
             // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.chkInverse.AutoSize = true;
+            this.chkInverse.Location = new System.Drawing.Point(23, 71);
+            this.chkInverse.Name = "chkInverse";
+            this.chkInverse.Size = new System.Drawing.Size(198, 17);
+            this.chkInverse.TabIndex = 4;
+            this.chkInverse.Text = "Inverse comparison (Second to First)";
+            this.chkInverse.UseVisualStyleBackColor = true;
             // 
             // CompareForm
             // 
@@ -196,5 +208,6 @@
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.CheckBox chkInverse;
     }
 }

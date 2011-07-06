@@ -58,7 +58,7 @@ namespace DatabaseSchemaReader.Compare
                 //in Oracle could be a CREATE OR REPLACE
                 _sb.AppendLine("-- ALTER FUNCTION " + function.Name);
                 _sb.AppendLine(_writer.DropFunction(function));
-                _sb.AppendLine(_writer.AddFunction(function));
+                _sb.AppendLine(_writer.AddFunction(match));
             }
         }
     }

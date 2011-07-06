@@ -86,7 +86,8 @@ namespace DatabaseSchemaReaderTest.Compare
 
             var baseViews = new List<DatabaseView> { CreateView() };
             var view = CreateView();
-            view.Sql += " ORDER BY NAME";
+            const string orderByName = " ORDER BY NAME";
+            view.Sql += orderByName;
             var compareViews = new List<DatabaseView> { view };
 
             //act
@@ -96,8 +97,32 @@ namespace DatabaseSchemaReaderTest.Compare
             //assert
             Assert.IsTrue(result.Contains("DROP VIEW"));
             Assert.IsTrue(result.Contains("CREATE VIEW"));
+            Assert.IsTrue(result.Contains(orderByName));
         }
 
+        [TestMethod]
+        public void WhenViewChangedInverse()
+        {
+            //arrange
+            var sb = new StringBuilder();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareViews(sb, writer);
+
+            var view = CreateView();
+            const string orderByName = " ORDER BY NAME";
+            view.Sql += orderByName;
+            var baseViews = new List<DatabaseView> { view };
+            var compareViews = new List<DatabaseView> { CreateView() };
+
+            //act
+            target.Execute(baseViews, compareViews);
+            var result = sb.ToString();
+
+            //assert
+            Assert.IsTrue(result.Contains("DROP VIEW"));
+            Assert.IsTrue(result.Contains("CREATE VIEW"));
+            Assert.IsFalse(result.Contains(orderByName));
+        }
         private static DatabaseView CreateView()
         {
             return new DatabaseView { Name = "MyView", Sql = "CREATE VIEW MyView AS SELECT * FROM TABLE" };

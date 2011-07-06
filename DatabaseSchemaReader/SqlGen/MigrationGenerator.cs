@@ -184,7 +184,8 @@ namespace DatabaseSchemaReader.SqlGen
 
         public string DropView(DatabaseView view)
         {
-            return "DROP VIEW " + SchemaPrefix(view.SchemaOwner) + Escape(view.Name) + ";";
+            return "DROP VIEW " + SchemaPrefix(view.SchemaOwner) + Escape(view.Name) + ";"
+                + _sqlFormatProvider.RunStatements();
         }
 
         public virtual string AddProcedure(DatabaseStoredProcedure procedure)
@@ -210,13 +211,15 @@ namespace DatabaseSchemaReader.SqlGen
             return string.Format(CultureInfo.InvariantCulture,
                 "DROP PROCEDURE {0}{1};",
                 SchemaPrefix(procedure.SchemaOwner),
-                Escape(procedure.Name));
+                Escape(procedure.Name))
+                + _sqlFormatProvider.RunStatements();
         }
 
 
         public virtual string DropFunction(DatabaseFunction databaseFunction)
         {
-            return "DROP FUNCTION " + SchemaPrefix(databaseFunction.SchemaOwner) + Escape(databaseFunction.Name) + ";";
+            return "DROP FUNCTION " + SchemaPrefix(databaseFunction.SchemaOwner) + Escape(databaseFunction.Name) + ";"
+                + _sqlFormatProvider.RunStatements();
         }
 
         public virtual string AddFunction(DatabaseFunction databaseFunction)

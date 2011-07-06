@@ -63,7 +63,7 @@ namespace DatabaseSchemaReader.Compare
                 //different package
                 _sb.AppendLine("-- ALTER PACKAGE " + package.Name);
                 //we rely on CREATE OR REPLACE here (no drop!)
-                _sb.AppendLine(_writer.AddPackage(package));
+                _sb.AppendLine(_writer.AddPackage(match));
             }
         }
     }

@@ -59,7 +59,7 @@ namespace DatabaseSchemaReader.Compare
                 //in Oracle could be a CREATE OR REPLACE
                 _sb.AppendLine("-- ALTER VIEW " + view.Name);
                 _sb.AppendLine(_writer.DropView(view));
-                _sb.AppendLine(_writer.AddView(view));
+                _sb.AppendLine(_writer.AddView(match));
             }
         }
     }

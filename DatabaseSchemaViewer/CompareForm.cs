@@ -11,6 +11,7 @@ namespace DatabaseSchemaViewer
     {
         private DatabaseSchema _compareSchema;
         private readonly DatabaseSchema _databaseSchema;
+        private bool _inverseComparison;
 
         public CompareForm(DatabaseSchema databaseSchema)
         {
@@ -58,6 +59,7 @@ namespace DatabaseSchemaViewer
         {
             StartWaiting();
             var connectionString = ConnectionString.Text.Trim();
+            _inverseComparison = chkInverse.Checked;
             var providerName = _databaseSchema.Provider;
             var rdr = new DatabaseReader(connectionString, providerName);
             var owner = _databaseSchema.Owner;
@@ -96,7 +98,14 @@ namespace DatabaseSchemaViewer
         private void RunCompare()
         {
             var runner = new CompareRunner();
-            if (runner.RunCompare(_databaseSchema, _compareSchema))
+            var first = _databaseSchema;
+            var second = _compareSchema;
+            if (_inverseComparison)
+            {
+                first = _compareSchema;
+                second = _databaseSchema;
+            }
+            if (runner.RunCompare(first, second))
             {
                 toolStripStatusLabel1.Text = runner.Message;
             }
