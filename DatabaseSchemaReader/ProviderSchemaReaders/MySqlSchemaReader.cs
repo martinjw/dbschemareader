@@ -10,6 +10,18 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
         }
 
+        /*
+         * MySQL limitations - parameter arguments
+         * 
+         * MySql v5 has a problem with parameter arguments (which it parses from the string in SHOW CREATE).
+         * Devart.Data.MySql doesn't return any parameter arguments (!)
+         * MySql v6 seems okay (it uses INFORMATION_SCHEMA.PARAMETERS)
+         * 
+         * It's possible to grab out the parameter arguments and return type in select param_list, returns from mysql.proc
+         * But there's just blobs of text with comments included - it needs to be parsed properly
+         * 
+         */
+
         protected DataTable FindKeys(string tableName, string constraintType, DbConnection conn)
         {
             DataTable dt = CreateDataTable(constraintType);

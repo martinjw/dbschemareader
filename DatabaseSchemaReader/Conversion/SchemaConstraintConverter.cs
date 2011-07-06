@@ -249,6 +249,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(columnKey)) columnKey = null;
             if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
             if (!dt.Columns.Contains(primaryKey)) primaryKey = null;
+            if (!dt.Columns.Contains(schemaKey)) schemaKey = null;
 
             if (!string.IsNullOrEmpty(ordinalKey))
                 dt.DefaultView.Sort = ordinalKey;
@@ -259,8 +260,8 @@ namespace DatabaseSchemaReader.Conversion
             foreach (DataRowView row in dt.DefaultView)
             {
                 string name = row[key].ToString();
-                if(string.IsNullOrEmpty(name)) continue; //all indexes should have a name
-                string schema = row[schemaKey].ToString();
+                if (string.IsNullOrEmpty(name)) continue; //all indexes should have a name
+                string schema = !string.IsNullOrEmpty(schemaKey) ? row[schemaKey].ToString() : string.Empty;
                 DatabaseIndex c = list.Find(delegate(DatabaseIndex f) { return f.Name == name && f.SchemaOwner == schema; });
                 if (c == null)
                 {
@@ -290,7 +291,7 @@ namespace DatabaseSchemaReader.Conversion
                     int ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
                     column.Ordinal = ordinal;
                 }
-                if(ContainsColumn(c.Columns, colName)) continue;
+                if (ContainsColumn(c.Columns, colName)) continue;
                 c.Columns.Add(column);
             }
         }

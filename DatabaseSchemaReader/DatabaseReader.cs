@@ -321,6 +321,13 @@ namespace DatabaseSchemaReader
 
             if (args.Rows.Count == 0)
             {
+                //MySql v6 won't do all stored procedures. So we have to do them individually.
+                foreach (var sproc in DatabaseSchema.StoredProcedures)
+                {
+                    args = _sr.StoredProcedureArguments(sproc.Name);
+                    SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
+                }
+
                 foreach (var function in DatabaseSchema.Functions)
                 {
                     args = _sr.StoredProcedureArguments(function.Name);
@@ -329,6 +336,11 @@ namespace DatabaseSchemaReader
             }
             //arguments could be for functions too
             SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
+            foreach (var function in DatabaseSchema.Functions)
+            {
+                //return types are assigned as arguments (in most platforms). Move them to return type.
+                function.CheckArgumentsForReturnType();
+            }
 
             //procedure, function and view source sql
             DataTable srcs = _sr.ProcedureSource(null);
