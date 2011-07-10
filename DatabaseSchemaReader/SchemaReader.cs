@@ -259,6 +259,12 @@ namespace DatabaseSchemaReader
                 Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
                 return CreateDataTable(collectionName);
             }
+            catch (ArgumentException exception)
+            {
+                //Intersystems requires table name
+                Console.WriteLine("Provider returned error for " + collectionName + ": " + exception.Message);
+                return CreateDataTable(collectionName);
+            }
         }
 
 
@@ -318,7 +324,15 @@ namespace DatabaseSchemaReader
                 return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
-            return connection.GetSchema(collectionName, restrictions);
+            try
+            {
+                return connection.GetSchema(collectionName, restrictions);
+            }
+            catch (ArgumentException)
+            {
+                //may not be allowed without tablename
+                return CreateDataTable(collectionName);
+            }
         }
 
         /// <summary>
@@ -353,7 +367,15 @@ namespace DatabaseSchemaReader
                 return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
-            return connection.GetSchema(collectionName, restrictions);
+            try
+            {
+                return connection.GetSchema(collectionName, restrictions);
+            }
+            catch (ArgumentException)
+            {
+                //may not be allowed without tablename
+                return CreateDataTable(collectionName);
+            }
         }
 
         /// <summary>
@@ -454,7 +476,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <returns></returns>
-        protected  virtual DataTable Sequences(DbConnection connection)
+        protected virtual DataTable Sequences(DbConnection connection)
         {
             string collectionName = "Sequences";
             if (!SchemaCollectionExists(connection, collectionName))

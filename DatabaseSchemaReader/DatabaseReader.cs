@@ -177,18 +177,24 @@ namespace DatabaseSchemaReader
             bool noIndexColumns = (indexColumns.Rows.Count == 0 && indexes.Rows.Count > 0);
             //we may have to do this on a per table basis
             bool noColumns = (tables.Count > 0 && cols.Rows.Count == 0);
+            bool noPks = (tables.Count > 0 && pks.Rows.Count == 0);
+            bool noFks = (tables.Count > 0 && fks.Rows.Count == 0);
+            bool noIndexes = (tables.Count > 0 && indexes.Rows.Count == 0);
 
             foreach (DatabaseTable table in tables)
             {
                 var tableName = table.Name;
                 var databaseColumns = SchemaConverter.Columns(noColumns ? _sr.Columns(tableName) : cols, tableName);
                 table.Columns.AddRange(databaseColumns);
+                if (noPks) pks = _sr.PrimaryKeys(tableName);
                 var pkConstraints = SchemaConstraintConverter.Constraints(pks, ConstraintType.PrimaryKey, tableName);
                 PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
+                if (noFks) fks = _sr.ForeignKeys(tableName);
                 table.ForeignKeys = SchemaConstraintConverter.Constraints(fks, ConstraintType.ForeignKey, tableName);
                 SchemaConstraintConverter.AddForeignKeyColumns(fkcols, table);
                 table.UniqueKeys = SchemaConstraintConverter.Constraints(uks, ConstraintType.UniqueKey, tableName);
                 table.CheckConstraints = SchemaConstraintConverter.Constraints(cks, ConstraintType.Check, tableName);
+                if (noIndexes) indexes = _sr.Indexes(tableName);
                 SchemaConstraintConverter.Indexes(indexes, tableName, table.Indexes);
                 if (noIndexColumns)
                 {

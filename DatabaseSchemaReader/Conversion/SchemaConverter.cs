@@ -44,6 +44,8 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.MySQL
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
             var isDb2 = dt.Columns.Contains("REMARKS");
+            //Intersystems Cache
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "TABLE_SCHEM";
 
             foreach (DataRow row in dt.Rows)
             {
@@ -185,11 +187,14 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(precisionKey)) precisionKey = "column_size";
             if (!dt.Columns.Contains(scaleKey)) scaleKey = "decimal_digits";
             if (!dt.Columns.Contains(defaultKey)) defaultKey = "column_def";
+            //Intersystems Cache
+            if (dt.Columns.Contains("TYPE_NAME")) datatypeKey = "TYPE_NAME";
 
             if (!dt.Columns.Contains(defaultKey)) defaultKey = null; //not in Oracle catalog
             if (!dt.Columns.Contains(autoIncrementKey)) autoIncrementKey = null;
             if (!dt.Columns.Contains(primaryKeyKey)) primaryKeyKey = null;
             if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
+            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
 
             CreateDefaultView(dt, ordinalKey, tableKey, tableName);
 
@@ -198,7 +203,8 @@ namespace DatabaseSchemaReader.Conversion
                 DatabaseColumn column = new DatabaseColumn();
                 column.Name = row[key].ToString();
                 column.TableName = row[tableKey].ToString();
-                column.Ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
+                if (!string.IsNullOrEmpty(ordinalKey))
+                    column.Ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
                 column.DbDataType = row[datatypeKey].ToString();
 
                 AddNullability(row, nullableKey, column);
@@ -239,6 +245,8 @@ namespace DatabaseSchemaReader.Conversion
                 return true;
             if (nullable.StartsWith("N", StringComparison.OrdinalIgnoreCase) || nullable.StartsWith("F", StringComparison.OrdinalIgnoreCase)) //N or NO
                 return false;
+            if (nullable == "0") return false;
+            if (nullable == "1") return true;
             //sqlite has a boolean type
             return ((bool)row[key]);
         }
@@ -250,7 +258,8 @@ namespace DatabaseSchemaReader.Conversion
 
         private static void CreateDefaultView(DataTable dt, string ordinalKey, string tableKey, string tableName)
         {
-            dt.DefaultView.Sort = ordinalKey;
+            if (!string.IsNullOrEmpty(ordinalKey))
+                dt.DefaultView.Sort = ordinalKey;
             //this could be more than one table, so filter the view
             if (!string.IsNullOrEmpty(tableName))
                 dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
@@ -280,7 +289,8 @@ namespace DatabaseSchemaReader.Conversion
                 string typeName = row[typename].ToString();
                 string netDataType = row[datatype].ToString();
                 DataType d = new DataType(typeName, netDataType);
-                d.ProviderDbType = Convert.ToInt32(row[providerdbtype], CultureInfo.InvariantCulture);
+                var pdt = GetNullableInt(row[providerdbtype]);
+                d.ProviderDbType = pdt.HasValue ? pdt.Value : -1;
                 d.LiteralPrefix = row[literalprefix].ToString();
                 d.LiteralSuffix = row[literalsuffix].ToString();
                 if (createformat != null)

@@ -113,6 +113,8 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
             if (packageKey == null && dt.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
+            //Intersystems Cache
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEM";
             var isDb2 = dt.Columns.Contains("PROCEDURE_MODULE");
 
             foreach (DataRow row in dt.Rows)
@@ -196,6 +198,10 @@ namespace DatabaseSchemaReader.Conversion
             //Devart.Data.PostgreSql
             if (!arguments.Columns.Contains(sprocKey)) sprocKey = "ROUTINE";
 
+            //Intersystems.Cache
+            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_OWNER";
+            if (!arguments.Columns.Contains(ordinalKey)) ordinalKey = null;
+
             var isDb2 = arguments.Columns.Contains("PROCEDURE_MODULE");
 
             //project the sprocs (which won't have packages) into a distinct view
@@ -234,7 +240,8 @@ namespace DatabaseSchemaReader.Conversion
                     //match sproc name and schema
                     dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND [{2}] = '{3}'",
                                                  sprocKey, name, ownerKey, owner);
-                    dv.Sort = ordinalKey;
+                    if (!string.IsNullOrEmpty(ordinalKey))
+                        dv.Sort = ordinalKey;
                     List<DatabaseArgument> args = StoredProcedureArguments(dv);
 
                     DatabaseStoredProcedure sproc = FindStoredProcedureOrFunction(databaseSchema, name, owner, package);
@@ -358,6 +365,11 @@ namespace DatabaseSchemaReader.Conversion
             if (!arguments.Columns.Contains(precisionKey)) precisionKey = "COLUMN_SIZE";
             if (!arguments.Columns.Contains(scaleKey)) scaleKey = "DECIMAL_DIGITS";
 
+            //Intersystems.Cache
+            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_OWNER";
+            if (!arguments.Columns.Contains(ordinalKey)) ordinalKey = null;
+            if (arguments.Columns.Contains("TYPE_NAME")) datatypeKey = "TYPE_NAME";
+
             //not provided
             if (!arguments.Columns.Contains(precisionKey)) precisionKey = null;
             if (!arguments.Columns.Contains(lengthKey)) lengthKey = null;
@@ -373,7 +385,8 @@ namespace DatabaseSchemaReader.Conversion
                 argument.ProcedureName = row[sprocName].ToString();
                 argument.SchemaOwner = row[ownerKey].ToString();
                 AddPackage(row, packageKey, argument);
-                argument.Ordinal = Convert.ToDecimal(row[ordinalKey], CultureInfo.CurrentCulture);
+                if (!string.IsNullOrEmpty(ordinalKey))
+                    argument.Ordinal = Convert.ToDecimal(row[ordinalKey], CultureInfo.CurrentCulture);
 
                 argument.DatabaseDataType = row[datatypeKey].ToString();
                 AddInOut(row, inoutKey, argument);
