@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.MySql
 {
@@ -23,8 +24,13 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             //oracle to MySql translation
             if (dataType == "NUMBER")
                 dataType = DataTypeConverter.OracleNumberConversion(precision, scale);
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && 
+                DataTypeConverter.IsSqlServerTimestamp(dataType, column))
+            {
+                dataType = "TINYBLOB"; //there's no equivalent really
+            }
 
-            if (dataType == "VARCHAR2" || dataType == "NVARCHAR")
+            if (dataType == "VARCHAR2" || dataType == "NVARCHAR" || dataType == "NVARCHAR2")
             {
                 dataType = "VARCHAR";
                 if (length == -1) //MAX
@@ -40,6 +46,10 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             {
                 dataType = "TEXT";
             }
+            else if (dataType == "NCHAR")
+            {
+                dataType = "CHAR";
+            }
             else if (dataType == "DATETIME2" ||
                 dataType == "TIME")
             {
@@ -48,6 +58,8 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             else if (dataType == "MONEY")
             {
                 dataType = "DECIMAL";
+                precision = 19;
+                scale = 4;
             }
             else if (dataType == "BIT")
             {
@@ -67,7 +79,11 @@ namespace DatabaseSchemaReader.SqlGen.MySql
                 dataType = "VARCHAR";
                 length = 64;
             }
-            //write out SqlServer datatype definition
+            else if (dataType == "XML" || dataType == "XMLTYPE")
+            {
+                dataType = "TEXT";
+            }
+            //write out MySql datatype definition
             if (dataType == "VARCHAR" ||
                 dataType == "CHAR" ||
                 dataType == "BINARY" ||

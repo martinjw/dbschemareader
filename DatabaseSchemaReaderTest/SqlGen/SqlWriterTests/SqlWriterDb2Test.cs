@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data.Common;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
@@ -33,6 +34,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             try
             {
                 _factory = DbProviderFactories.GetFactory(ProviderName);
+            }
+            catch (ConfigurationErrorsException)
+            {
+                //not installed. ProviderChecker will assert.inconclusive.
             }
             catch (ArgumentException)
             {

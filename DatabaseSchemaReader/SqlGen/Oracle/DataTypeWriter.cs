@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
@@ -90,15 +91,21 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             //sql server to oracle  translation
             if (dataType == "VARBINARY") return "BLOB";
             if (dataType == "IMAGE") return "BLOB";
-            if (dataType == "NVARCHAR" && length > 2000) return "CLOB";
-            if (dataType == "NTEXT" || dataType == "TEXT") return "CLOB";
+            if (dataType == "NVARCHAR" && length > 2000) return "NCLOB";
+            if (dataType == "NTEXT") return "NCLOB";
+            if (dataType == "TEXT") return "CLOB";
             //you probably want Unicode.
             if (dataType == "VARCHAR" || dataType == "NVARCHAR") return "NVARCHAR2";
 
+            if (dataType == "DECIMAL") dataType = "NUMBER";
+
             //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
             if (dataType == "DATETIME") return "DATE";
+            if (dataType == "DATETIME2") return "TIMESTAMP";
+            //NB: DATE in SQLServer is yyMMdd. DATE in Oracle is yyMMddHHss.
+
             //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
-            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != 0x12 && providerType != 0x13 && providerType != 20)
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType == (int)SqlDbType.Timestamp)
             {
                 return "NUMBER";
             }
@@ -166,10 +173,17 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             //write out Oracle datatype definition
             if (dataType == "NVARCHAR2")
             {
-                //don't specify "CHAR" for NVARCHAR2
-                sql = dataType + " (" + length + ")";
-                if (!string.IsNullOrEmpty(defaultValue))
-                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
+                if (length == -1)
+                {
+                    dataType = "CLOB";
+                }
+                else
+                {
+                    //don't specify "CHAR" for NVARCHAR2
+                    sql = dataType + " (" + length + ")";
+                    if (!string.IsNullOrEmpty(defaultValue))
+                        sql += " DEFAULT " + AddQuotedDefault(defaultValue);
+                }
             }
             if (dataType == "VARCHAR2")
             {
@@ -206,7 +220,10 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             {
                 sql = "RAW(" + length + ")";
             }
-
+            if (dataType == "XMLTYPE")
+            {
+                sql = dataType;
+            }
 
             if (dataType == "DATE")
             {
@@ -222,16 +239,16 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     sql += " DEFAULT TIMESTAMP '" + defaultValue + "'";
             }
 
-            if (dataType == "CLOB")
+            if (dataType == "CLOB" || dataType == "NCLOB")
             {
-                sql = "CLOB ";
+                sql = dataType;
                 if (!string.IsNullOrEmpty(defaultValue))
                     sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
 
             if (dataType == "BLOB")
             {
-                sql = "BLOB ";
+                sql = dataType;
                 if (!string.IsNullOrEmpty(defaultValue))
                     sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
@@ -243,7 +260,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     sql += " DEFAULT " + AddQuotedDefault(defaultValue);
             }
 
-            return sql + (!column.Nullable ? " NOT NULL" : string.Empty);
+            return sql.TrimEnd() + (!column.Nullable ? " NOT NULL" : string.Empty);
         }
 
         private static string FixDefaultValue(DatabaseColumn column)

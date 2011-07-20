@@ -97,7 +97,5 @@ namespace DatabaseSchemaReader.SqlGen.Db2
             if (dataType == "UNIQUEIDENTIFIER") return "CHAR(16) FOR BIT DATA";
             return dataType;
         }
-
-
     }
 }

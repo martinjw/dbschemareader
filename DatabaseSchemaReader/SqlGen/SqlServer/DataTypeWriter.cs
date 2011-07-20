@@ -48,8 +48,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
             dataType = ConvertOtherPlatformTypes(dataType, providerType, length, precision, scale);
 
-            if (dataType == "DATETIME2" ||
-                dataType == "TIME")
+            if ((dataType == "DATETIME2" || dataType == "TIME") && column.DateTimePrecision.HasValue)
             {
                 dataType = dataType + "(" + column.DateTimePrecision + ")";
             }
@@ -85,7 +84,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         private static string PostgreSqlToSqlServerConversion(string dataType)
         {
             //PostgreSql specific types and the SqlServer equivalent
-            if (dataType == "VARCHAR") return "NVARCHAR";
+            //if (dataType == "VARCHAR") return "NVARCHAR";
             if (dataType == "CHARACTER VARYING") return "NVARCHAR";
             if (dataType == "CHARACTER") return "NCHAR";
             if (dataType == "BPCHAR") return "NCHAR";
@@ -105,7 +104,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         private static string OracleToSqlServerConversion(string dataType, int providerType, int? precision, int? scale)
         {
-            if (dataType == "VARCHAR2") return "NVARCHAR";
+            if (dataType == "VARCHAR2") return "VARCHAR";
             if (dataType == "NVARCHAR2") return "NVARCHAR";
                 //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
             if (dataType == "DATE" && providerType != (int)SqlDbType.Date)
