@@ -27,6 +27,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
          */
 
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestDateTime()
@@ -35,7 +36,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "DATETIME";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATE", result);
@@ -48,7 +49,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "DATETIME2";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TIMESTAMP (6)", result);
@@ -62,7 +63,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Precision = 5;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TIMESTAMP (5)", result);
@@ -79,7 +80,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DataType.ProviderDbType = (int)SqlDbType.Timestamp;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (18)", result);
@@ -92,7 +93,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "DATE";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATE", result);

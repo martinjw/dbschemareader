@@ -11,7 +11,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         {
             SqlWriter = new SqlWriter(table, SqlType.MySql);
             SqlWriter.InStoredProcedure = true;
-            SqlWriter.FormatParameter = x => { return "p_" + x; };
+            SqlWriter.FormatParameter = x => "p_" + x;
         }
         protected override IProcedureWriter CreateProcedureWriter(string procName)
         {
@@ -19,7 +19,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         }
         protected override string ColumnDataType(DatabaseColumn column)
         {
-            return column.MySqlDataType();
+            return new DataTypeWriter().WriteDataType(column);
         }
 
         protected override string ColumnDataType(string dataType)

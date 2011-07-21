@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using DatabaseSchemaReader.Conversion.KeyMaps;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion
@@ -29,44 +30,35 @@ namespace DatabaseSchemaReader.Conversion
         public static List<DatabaseTable> Tables(DataTable dt)
         {
             List<DatabaseTable> list = new List<DatabaseTable>();
-            //sql server
-            string key = "TABLE_NAME";
-            string ownerKey = "TABLE_SCHEMA";
-            string typeKey = "TABLE_TYPE";
-            //oracle
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
-            if (!dt.Columns.Contains(typeKey)) typeKey = "TYPE";
-            //Devart.Data.Oracle - TABLE_NAME is NAME
-            if (!dt.Columns.Contains(key)) key = "NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            //Devart.Data.PostgreSql
-            if (!dt.Columns.Contains(typeKey)) typeKey = "tabletype";
-            //Devart.Data.MySQL
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
-            var isDb2 = dt.Columns.Contains("REMARKS");
-            //Intersystems Cache
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "TABLE_SCHEM";
+
+            TableKeyMap keyMap = new TableKeyMap(dt);
 
             foreach (DataRow row in dt.Rows)
             {
-                string type = row[typeKey].ToString();
+                string type = row[keyMap.TypeKey].ToString();
                 //Sql server has base tables and views. Oracle has system and user
-                if (!type.Equals("TABLE", StringComparison.OrdinalIgnoreCase) &&
-                    !type.Equals("BASE TABLE", StringComparison.OrdinalIgnoreCase) &&
-                   !type.Equals("User", StringComparison.OrdinalIgnoreCase) &&
-                    //MySQL types are something different
-                   !type.Equals("InnoDB", StringComparison.OrdinalIgnoreCase) &&
-                   !type.Equals("MyISAM", StringComparison.OrdinalIgnoreCase)) continue;
+                if (IsNotTable(type)) continue;
                 DatabaseTable t = new DatabaseTable();
-                t.Name = row[key].ToString();
+                t.Name = row[keyMap.TableName].ToString();
                 //exclude Oracle bin tables
                 if (t.Name.StartsWith("BIN$", StringComparison.OrdinalIgnoreCase)) continue;
-                t.SchemaOwner = row[ownerKey].ToString();
+                t.SchemaOwner = row[keyMap.OwnerKey].ToString();
                 //Db2 system tables creeping in
-                if (isDb2 && t.SchemaOwner.Equals("SYSTOOLS", StringComparison.OrdinalIgnoreCase)) continue;
+                if (keyMap.IsDb2 && t.SchemaOwner.Equals("SYSTOOLS", StringComparison.OrdinalIgnoreCase)) continue;
                 list.Add(t);
             }
             return list;
+        }
+
+        private static bool IsNotTable(string type)
+        {
+            //may be a VIEW or a system table
+            return !type.Equals("TABLE", StringComparison.OrdinalIgnoreCase) &&
+                   !type.Equals("BASE TABLE", StringComparison.OrdinalIgnoreCase) &&
+                   !type.Equals("User", StringComparison.OrdinalIgnoreCase) &&
+                   //MySQL types are something different
+                   !type.Equals("InnoDB", StringComparison.OrdinalIgnoreCase) &&
+                   !type.Equals("MyISAM", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -95,41 +87,22 @@ namespace DatabaseSchemaReader.Conversion
         public static List<DatabaseView> Views(DataTable dt)
         {
             List<DatabaseView> list = new List<DatabaseView>();
-            string key = "TABLE_NAME"; //yep, it's Table_Name in SqlServer.
-            string ownerKey = "TABLE_SCHEMA";
-            string definition = "TEXT";
-            string typeKey = "TABLE_TYPE";
-            //mysql
-            if (!dt.Columns.Contains(definition)) definition = "VIEW_DEFINITION";
-            //firebird
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "VIEW_SCHEMA"; //always null
-            if (!dt.Columns.Contains(definition)) definition = "DEFINITION";
-            //oracle
-            if (!dt.Columns.Contains(key)) key = "VIEW_NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
-            //Oracle does not expose ViewColumns, only the raw sql.
-            bool hasSql = dt.Columns.Contains(definition);
-            //Devart.Data.Oracle
-            if (!dt.Columns.Contains(key)) key = "NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            //Devart.Data.MySQL
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
 
-            if (!dt.Columns.Contains(typeKey)) typeKey = null;
+            ViewKeyMap viewKeyMap = new ViewKeyMap(dt);
 
             foreach (DataRow row in dt.Rows)
             {
-                if (typeKey != null)
+                if (viewKeyMap.TypeKey != null)
                 {
-                    var type = row[typeKey].ToString();
+                    var type = row[viewKeyMap.TypeKey].ToString();
                     if (type != "VIEW") continue;
                 }
                 DatabaseView t = new DatabaseView();
-                t.Name = row[key].ToString();
-                t.SchemaOwner = row[ownerKey].ToString();
+                t.Name = row[viewKeyMap.Key].ToString();
+                t.SchemaOwner = row[viewKeyMap.OwnerKey].ToString();
                 //ignore db2 system tables
-                if (typeKey != null && t.SchemaOwner.StartsWith("SYS", StringComparison.OrdinalIgnoreCase)) continue;
-                if (hasSql) t.Sql = row[definition].ToString();
+                if (viewKeyMap.TypeKey != null && t.SchemaOwner.StartsWith("SYS", StringComparison.OrdinalIgnoreCase)) continue;
+                if (viewKeyMap.HasSql) t.Sql = row[viewKeyMap.Definition].ToString();
                 list.Add(t);
             }
             return list;
@@ -149,86 +122,43 @@ namespace DatabaseSchemaReader.Conversion
         public static List<DatabaseColumn> Columns(DataTable dt, string tableName)
         {
             List<DatabaseColumn> list = new List<DatabaseColumn>();
-            //sql server
-            string key = "column_name";
-            string tableKey = "table_name";
-            string ordinalKey = "ordinal_position";
-            string datatypeKey = "data_type";
-            string nullableKey = "is_nullable";
-            string lengthKey = "character_maximum_length";
-            string precisionKey = "numeric_precision";
-            string scaleKey = "numeric_scale";
-            string dateTimePrecision = "datetime_precision";
-            string defaultKey = "column_default";
-            //oracle
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "id";
-            if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "datatype";
-            if (!dt.Columns.Contains(nullableKey)) nullableKey = "nullable";
-            if (!dt.Columns.Contains(lengthKey)) lengthKey = "length";
-            if (!dt.Columns.Contains(precisionKey)) precisionKey = "precision";
-            if (!dt.Columns.Contains(scaleKey)) scaleKey = "scale";
-            if (!dt.Columns.Contains(dateTimePrecision)) dateTimePrecision = null;
-            //sqlite
-            string autoIncrementKey = "AUTOINCREMENT";
-            string primaryKeyKey = "PRIMARY_KEY";
-            string uniqueKey = "UNIQUE";
-            //firebird
-            if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "column_data_type";
-            if (!dt.Columns.Contains(lengthKey)) lengthKey = "COLUMN_SIZE";
-            //devart.Data.PostgreSql
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "position";
-            if (!dt.Columns.Contains(tableKey)) tableKey = "table";
-            if (!dt.Columns.Contains(key)) key = "name";
-            if (!dt.Columns.Contains(datatypeKey)) datatypeKey = "typename";
-            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "isunique";
-            if (!dt.Columns.Contains(defaultKey)) defaultKey = "defaultvalue";
-            //db2
-            if (dt.Columns.Contains("data_type_name")) datatypeKey = "data_type_name";
-            if (!dt.Columns.Contains(precisionKey)) precisionKey = "column_size";
-            if (!dt.Columns.Contains(scaleKey)) scaleKey = "decimal_digits";
-            if (!dt.Columns.Contains(defaultKey)) defaultKey = "column_def";
-            //Intersystems Cache
-            if (dt.Columns.Contains("TYPE_NAME")) datatypeKey = "TYPE_NAME";
 
-            if (!dt.Columns.Contains(defaultKey)) defaultKey = null; //not in Oracle catalog
-            if (!dt.Columns.Contains(autoIncrementKey)) autoIncrementKey = null;
-            if (!dt.Columns.Contains(primaryKeyKey)) primaryKeyKey = null;
-            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
+            ColumnsKeyMap columnsKeyMap = new ColumnsKeyMap(dt);
 
-            CreateDefaultView(dt, ordinalKey, tableKey, tableName);
+            CreateDefaultView(dt, columnsKeyMap.OrdinalKey, columnsKeyMap.TableKey, tableName);
 
             foreach (DataRowView row in dt.DefaultView)
             {
                 DatabaseColumn column = new DatabaseColumn();
-                column.Name = row[key].ToString();
-                column.TableName = row[tableKey].ToString();
-                if (!string.IsNullOrEmpty(ordinalKey))
-                    column.Ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
-                column.DbDataType = row[datatypeKey].ToString();
+                column.Name = row[columnsKeyMap.Key].ToString();
+                column.TableName = row[columnsKeyMap.TableKey].ToString();
+                if (!string.IsNullOrEmpty(columnsKeyMap.OrdinalKey))
+                    column.Ordinal = Convert.ToInt32(row[columnsKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
+                column.DbDataType = row[columnsKeyMap.DatatypeKey].ToString();
 
-                AddNullability(row, nullableKey, column);
+                AddNullability(row, columnsKeyMap.NullableKey, column);
                 //the length unless it's an OleDb blob or clob
-                column.Length = GetNullableInt(row[lengthKey]);
-                column.Precision = GetNullableInt(row[precisionKey]);
-                column.Scale = GetNullableInt(row[scaleKey]);
-                if (dateTimePrecision != null)
+                column.Length = GetNullableInt(row[columnsKeyMap.LengthKey]);
+                column.Precision = GetNullableInt(row[columnsKeyMap.PrecisionKey]);
+                column.Scale = GetNullableInt(row[columnsKeyMap.ScaleKey]);
+                if (columnsKeyMap.DateTimePrecision != null)
                 {
-                    column.DateTimePrecision = GetNullableInt(row[dateTimePrecision]);
+                    column.DateTimePrecision = GetNullableInt(row[columnsKeyMap.DateTimePrecision]);
                 }
 
-                AddColumnDefault(row, defaultKey, column);
-                if (!string.IsNullOrEmpty(primaryKeyKey) && (bool)row[primaryKeyKey])
+                AddColumnDefault(row, columnsKeyMap.DefaultKey, column);
+                if (!string.IsNullOrEmpty(columnsKeyMap.PrimaryKeyKey) && (bool)row[columnsKeyMap.PrimaryKeyKey])
                     column.IsPrimaryKey = true;
-                if (!string.IsNullOrEmpty(autoIncrementKey) && (bool)row[autoIncrementKey])
+                if (!string.IsNullOrEmpty(columnsKeyMap.AutoIncrementKey) && (bool)row[columnsKeyMap.AutoIncrementKey])
                     column.IsIdentity = true;
-                if (!string.IsNullOrEmpty(uniqueKey) && CastToBoolean(row, uniqueKey))
+                if (!string.IsNullOrEmpty(columnsKeyMap.UniqueKey) && CastToBoolean(row, columnsKeyMap.UniqueKey))
                     column.IsUniqueKey = true;
 
                 list.Add(column);
-            }
+            } 
             return list;
         }
+
 
         private static void AddColumnDefault(DataRowView row, string defaultKey, DatabaseColumn column)
         {

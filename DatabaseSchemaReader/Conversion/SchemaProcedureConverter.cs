@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using DatabaseSchemaReader.Conversion.KeyMaps;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion
@@ -12,125 +13,63 @@ namespace DatabaseSchemaReader.Conversion
         public static List<DatabaseSequence> Sequences(DataTable dt)
         {
             List<DatabaseSequence> list = new List<DatabaseSequence>();
-            //oracle
-            string key = "SEQUENCE_NAME";
-            string ownerKey = "SEQUENCE_OWNER";
-            string minValueKey = "MIN_VALUE";
-            string maxValueKey = "MAX_VALUE";
-            string incrementKey = "INCREMENT_BY";
-            //DDTek.Oracle is different
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SEQUENCE_SCHEMA";
-            //Devart.Data.Oracle
-            if (!dt.Columns.Contains(key)) key = "NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            if (!dt.Columns.Contains(minValueKey)) minValueKey = "MINVALUE";
-            if (!dt.Columns.Contains(maxValueKey)) maxValueKey = "MAXVALUE";
-            if (!dt.Columns.Contains(incrementKey)) incrementKey = "INCREMENTBY";
-            //Firebird generators
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "GENERATOR_SCHEMA";
-            if (!dt.Columns.Contains(key)) key = "GENERATOR_NAME";
-            //Devart.Data.PostgreSql
-            if (!dt.Columns.Contains(minValueKey)) minValueKey = null;
-            if (!dt.Columns.Contains(maxValueKey)) maxValueKey = null;
-            if (!dt.Columns.Contains(incrementKey)) incrementKey = null;
 
+            var sequenceKeyMap = new SequenceKeyMap(dt);
 
             foreach (DataRow row in dt.Rows)
             {
                 DatabaseSequence seq = new DatabaseSequence();
-                seq.Name = row[key].ToString();
-                seq.SchemaOwner = row[ownerKey].ToString();
-                if (!string.IsNullOrEmpty(minValueKey))
-                    seq.MinimumValue = GetNullableDecimal(row[minValueKey]);
-                if (!string.IsNullOrEmpty(maxValueKey))
-                    seq.MaximumValue = GetNullableDecimal(row[maxValueKey]);
-                if (!string.IsNullOrEmpty(incrementKey))
-                    seq.IncrementBy = GetNullableInt(row[incrementKey]) ?? 1;
+                seq.Name = row[sequenceKeyMap.Key].ToString();
+                seq.SchemaOwner = row[sequenceKeyMap.OwnerKey].ToString();
+                if (!string.IsNullOrEmpty(sequenceKeyMap.MinValueKey))
+                    seq.MinimumValue = GetNullableDecimal(row[sequenceKeyMap.MinValueKey]);
+                if (!string.IsNullOrEmpty(sequenceKeyMap.MaxValueKey))
+                    seq.MaximumValue = GetNullableDecimal(row[sequenceKeyMap.MaxValueKey]);
+                if (!string.IsNullOrEmpty(sequenceKeyMap.IncrementKey))
+                    seq.IncrementBy = GetNullableInt(row[sequenceKeyMap.IncrementKey]) ?? 1;
                 list.Add(seq);
-            }
+            } 
             return list;
         }
 
         public static List<DatabaseFunction> Functions(DataTable dt)
         {
             List<DatabaseFunction> list = new List<DatabaseFunction>();
-            //oracle
-            string key = "OBJECT_NAME";
-            string ownerKey = "OWNER";
-            string sqlKey = "SQL";
-            string langKey = "LANGUAGE";
-            string returnKey = "RETURNTYPE";
-            //devart
-            if (!dt.Columns.Contains(key)) key = "NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            if (!dt.Columns.Contains(sqlKey)) sqlKey = "BODY";
-            //firebird
-            if (!dt.Columns.Contains(key)) key = "FUNCTION_NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "FUNCTION_SCHEMA";
-            if (!dt.Columns.Contains(returnKey)) returnKey = "RETURN_ARGUMENT";
-            //other
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = null;
-            if (!dt.Columns.Contains(sqlKey)) sqlKey = null;
-            if (!dt.Columns.Contains(langKey)) langKey = null;
-            if (!dt.Columns.Contains(returnKey)) returnKey = null;
 
+
+            var functionKeyMap = new FunctionKeyMap(dt);
             foreach (DataRow row in dt.Rows)
             {
                 DatabaseFunction fun = new DatabaseFunction();
-                fun.Name = row[key].ToString();
-                if (!string.IsNullOrEmpty(ownerKey))
-                    fun.SchemaOwner = row[ownerKey].ToString();
-                if (sqlKey != null) fun.Sql = row[sqlKey].ToString();
-                if (langKey != null) fun.Language = row[langKey].ToString();
-                if (returnKey != null) fun.ReturnType = row[returnKey].ToString();
+                fun.Name = row[functionKeyMap.Key].ToString();
+                if (!string.IsNullOrEmpty(functionKeyMap.OwnerKey))
+                    fun.SchemaOwner = row[functionKeyMap.OwnerKey].ToString();
+                if (functionKeyMap.SqlKey != null) fun.Sql = row[functionKeyMap.SqlKey].ToString();
+                if (functionKeyMap.LangKey != null) fun.Language = row[functionKeyMap.LangKey].ToString();
+                if (functionKeyMap.ReturnKey != null) fun.ReturnType = row[functionKeyMap.ReturnKey].ToString();
                 list.Add(fun);
-            }
+            } 
             return list;
         }
 
         public static void StoredProcedures(DatabaseSchema schema, DataTable dt)
         {
-            //sql server
-            string key = "ROUTINE_NAME";
-            string ownerKey = "ROUTINE_SCHEMA";
-            string routineTypeKey = "ROUTINE_TYPE";
-            if (!dt.Columns.Contains(routineTypeKey)) routineTypeKey = "PROCEDURE_TYPE_NAME";
-            if (!dt.Columns.Contains(routineTypeKey)) routineTypeKey = null;
-            //oracle
-            if (!dt.Columns.Contains(key)) key = "OBJECT_NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
-            string packageKey = "PACKAGE_NAME";
-            if (!dt.Columns.Contains(packageKey)) packageKey = null; //sql
-            //jet (and firebird)
-            if (!dt.Columns.Contains(key)) key = "PROCEDURE_NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
-            string sql = "PROCEDURE_DEFINITION";
-            if (!dt.Columns.Contains(sql)) sql = "ROUTINE_DEFINITION"; //MySql
-            if (!dt.Columns.Contains(sql)) sql = "SOURCE"; //firebird
-            if (!dt.Columns.Contains(sql)) sql = null;
-            //Devart.Data.Oracle
-            if (!dt.Columns.Contains(key)) key = "NAME";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            if (packageKey == null && dt.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "DATABASE";
-            //Intersystems Cache
-            if (!dt.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEM";
-            var isDb2 = dt.Columns.Contains("PROCEDURE_MODULE");
+            var storedProcedureKeyMap = new StoredProcedureKeyMap(dt);
 
             foreach (DataRow row in dt.Rows)
             {
-                string name = row[key].ToString();
-                string schemaOwner = row[ownerKey].ToString();
-                if (isDb2)
+                string name = row[storedProcedureKeyMap.Key].ToString();
+                string schemaOwner = row[storedProcedureKeyMap.OwnerKey].ToString();
+                if (storedProcedureKeyMap.IsDb2)
                 {
                     //ignore db2 system sprocs
                     if (IsDb2SystemSchema(schemaOwner)) continue;
                 }
-                bool isFunction = IsFunction(routineTypeKey, row);
+                bool isFunction = IsFunction(storedProcedureKeyMap.RoutineTypeKey, row);
                 string package = null;
-                if (packageKey != null)
+                if (storedProcedureKeyMap.PackageKey != null)
                 {
-                    package = row[packageKey].ToString();
+                    package = row[storedProcedureKeyMap.PackageKey].ToString();
                     if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
                 }
 
@@ -143,7 +82,7 @@ namespace DatabaseSchemaReader.Conversion
                     sproc.SchemaOwner = schemaOwner;
                     sproc.Package = package;
                 }
-                if (sql != null) sproc.Sql = row[sql].ToString();
+                if (storedProcedureKeyMap.Sql != null) sproc.Sql = row[storedProcedureKeyMap.Sql].ToString();
             }
         }
 
@@ -174,64 +113,38 @@ namespace DatabaseSchemaReader.Conversion
         {
             if (arguments.Columns.Count == 0) return; //empty datatable
 
-            //sql server
-            string sprocKey = "SPECIFIC_NAME";
-            string ordinalKey = "ORDINAL_POSITION";
-            string ownerKey = "SPECIFIC_SCHEMA";
+            var argumentsKeyMap = new ArgumentsKeyMap(arguments);
 
-            //oracle
-            if (!arguments.Columns.Contains(sprocKey)) sprocKey = "OBJECT_NAME";
-            if (!arguments.Columns.Contains(ordinalKey)) ordinalKey = "POSITION";
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "OWNER";
-            string packageKey = "PACKAGE_NAME";
-            if (!arguments.Columns.Contains(packageKey)) packageKey = null; //sql
-
-            //oledb and firebird
-            if (!arguments.Columns.Contains(sprocKey)) sprocKey = "PROCEDURE_NAME";
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
-
-            //Devart.Data.Oracle
-            if (!arguments.Columns.Contains(sprocKey)) sprocKey = "PROCEDURE";
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            if (packageKey == null && arguments.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
-
-            //Devart.Data.PostgreSql
-            if (!arguments.Columns.Contains(sprocKey)) sprocKey = "ROUTINE";
-
-            //Intersystems.Cache
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_OWNER";
-            if (!arguments.Columns.Contains(ordinalKey)) ordinalKey = null;
-
-            var isDb2 = arguments.Columns.Contains("PROCEDURE_MODULE");
+            bool hasPackage = !string.IsNullOrEmpty(argumentsKeyMap.PackageKey);
 
             //project the sprocs (which won't have packages) into a distinct view
             DataTable sprocTable;
             using (DataView sprocNames = new DataView(arguments))
             {
-                sprocNames.Sort = sprocKey;
-                if (packageKey == null)
-                    sprocTable = sprocNames.ToTable(true, sprocKey, ownerKey); //distinct
+                sprocNames.Sort = argumentsKeyMap.SprocName;
+                if (!hasPackage)
+                    sprocTable = sprocNames.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey); //distinct
                 else
-                    sprocTable = sprocNames.ToTable(true, sprocKey, ownerKey, packageKey);
+                    sprocTable = sprocNames.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey, argumentsKeyMap.PackageKey);
             }
 
             //go thru all sprocs with arguments- if not in sproc list, add it
             foreach (DataRow row in sprocTable.Rows)
             {
-                string name = row[sprocKey].ToString();
+                string name = row[argumentsKeyMap.SprocName].ToString();
                 //a procedure without a name?
                 if (string.IsNullOrEmpty(name)) continue;
-                string owner = row[ownerKey].ToString();
-                if (isDb2)
+                string owner = row[argumentsKeyMap.OwnerKey].ToString();
+                if (argumentsKeyMap.IsDb2)
                 {
                     //ignore db2 system sprocs
                     if (IsDb2SystemSchema(owner)) continue;
                 }
 
                 string package = null; //for non-Oracle, package is always null
-                if (packageKey != null)
+                if (hasPackage)
                 {
-                    package = row[packageKey].ToString();
+                    package = row[argumentsKeyMap.PackageKey].ToString();
                     if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
                 }
 
@@ -239,9 +152,9 @@ namespace DatabaseSchemaReader.Conversion
                 {
                     //match sproc name and schema
                     dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND [{2}] = '{3}'",
-                                                 sprocKey, name, ownerKey, owner);
-                    if (!string.IsNullOrEmpty(ordinalKey))
-                        dv.Sort = ordinalKey;
+                                                 argumentsKeyMap.SprocName, name, argumentsKeyMap.OwnerKey, owner);
+                    if (!string.IsNullOrEmpty(argumentsKeyMap.OrdinalKey))
+                        dv.Sort = argumentsKeyMap.OrdinalKey;
                     List<DatabaseArgument> args = StoredProcedureArguments(dv);
 
                     DatabaseStoredProcedure sproc = FindStoredProcedureOrFunction(databaseSchema, name, owner, package);
@@ -313,93 +226,34 @@ namespace DatabaseSchemaReader.Conversion
         {
             DataTable arguments = dataView.Table;
             List<DatabaseArgument> list = new List<DatabaseArgument>();
-            //oracle
-            string ownerKey = "SPECIFIC_SCHEMA";
-            string sprocName = "SPECIFIC_NAME";
-            string name = "PARAMETER_NAME";
-            string inoutKey = "PARAMETER_MODE";
-            string datatypeKey = "DATA_TYPE";
-            string packageKey = "PACKAGE_NAME";
-            string ordinalKey = "ORDINAL_POSITION";
-            string lengthKey = "CHARACTER_MAXIMUM_LENGTH";
-            string precisionKey = "NUMERIC_PRECISION";
-            string scaleKey = "NUMERIC_SCALE";
 
-            //sql server
-            if (!arguments.Columns.Contains(sprocName)) sprocName = "OBJECT_NAME";
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "OWNER";
-            if (!arguments.Columns.Contains(name)) name = "ARGUMENT_NAME";
-            if (!arguments.Columns.Contains(inoutKey)) inoutKey = "IN_OUT";
-            if (!arguments.Columns.Contains(packageKey)) packageKey = null;
-            if (!arguments.Columns.Contains(ordinalKey)) ordinalKey = "POSITION";
-            if (!arguments.Columns.Contains(lengthKey)) lengthKey = "DATA_LENGTH";
-            if (!arguments.Columns.Contains(precisionKey)) precisionKey = "DATA_PRECISION";
-            if (!arguments.Columns.Contains(scaleKey)) scaleKey = "DATA_SCALE";
 
-            //Devart.Data.Oracle
-            if (!arguments.Columns.Contains(name)) name = "NAME";
-            if (!arguments.Columns.Contains(sprocName)) sprocName = "PROCEDURE";
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
-            if (packageKey == null && arguments.Columns.Contains("PACKAGE")) packageKey = "PACKAGE";
-            if (!arguments.Columns.Contains(datatypeKey)) datatypeKey = "DATATYPE";
-            if (!arguments.Columns.Contains(precisionKey)) precisionKey = "PRECISION";
-            if (!arguments.Columns.Contains(lengthKey)) lengthKey = "LENGTH";
-            if (!arguments.Columns.Contains(scaleKey)) scaleKey = "SCALE";
-            if (!arguments.Columns.Contains(inoutKey)) inoutKey = "DIRECTION";
-
-            //oledb and firebird and db2
-            if (!arguments.Columns.Contains(sprocName)) sprocName = "PROCEDURE_NAME";
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_SCHEMA";
-            //firebird
-            if (!arguments.Columns.Contains(datatypeKey)) datatypeKey = "PARAMETER_DATA_TYPE";
-            if (!arguments.Columns.Contains(inoutKey)) inoutKey = "PARAMETER_DIRECTION";
-            if (!arguments.Columns.Contains(lengthKey)) lengthKey = "CHARACTER_MAX_LENGTH";
-            if (!arguments.Columns.Contains(precisionKey)) precisionKey = "NUMERIC_PRECISION";
-            if (!arguments.Columns.Contains(scaleKey)) scaleKey = "NUMERIC_SCALE";
-            //db2
-            if (!arguments.Columns.Contains(name)) name = "COLUMN_NAME";
-            if (arguments.Columns.Contains("PROVIDER_TYPE_NAME")) datatypeKey = "PROVIDER_TYPE_NAME";
-            string db2ColumnTypeKey = null;
-            if (arguments.Columns.Contains("COLUMN_TYPE_NAME")) db2ColumnTypeKey = "COLUMN_TYPE_NAME";
-            if (!arguments.Columns.Contains(lengthKey)) lengthKey = "COLUMN_SIZE";
-            if (!arguments.Columns.Contains(precisionKey)) precisionKey = "COLUMN_SIZE";
-            if (!arguments.Columns.Contains(scaleKey)) scaleKey = "DECIMAL_DIGITS";
-
-            //Intersystems.Cache
-            if (!arguments.Columns.Contains(ownerKey)) ownerKey = "PROCEDURE_OWNER";
-            if (!arguments.Columns.Contains(ordinalKey)) ordinalKey = null;
-            if (arguments.Columns.Contains("TYPE_NAME")) datatypeKey = "TYPE_NAME";
-
-            //not provided
-            if (!arguments.Columns.Contains(precisionKey)) precisionKey = null;
-            if (!arguments.Columns.Contains(lengthKey)) lengthKey = null;
-            if (!arguments.Columns.Contains(scaleKey)) scaleKey = null;
-            if (!arguments.Columns.Contains(inoutKey)) inoutKey = null;
+            var argumentsKeyMap = new ArgumentsKeyMap(arguments);
 
             foreach (DataRowView row in dataView)
             {
-                var argName = row[name].ToString();
+                var argName = row[argumentsKeyMap.ParameterName].ToString();
                 //check if it's already there
                 var argument = AddArgumentToList(list, argName);
 
-                argument.ProcedureName = row[sprocName].ToString();
-                argument.SchemaOwner = row[ownerKey].ToString();
-                AddPackage(row, packageKey, argument);
-                if (!string.IsNullOrEmpty(ordinalKey))
-                    argument.Ordinal = Convert.ToDecimal(row[ordinalKey], CultureInfo.CurrentCulture);
+                argument.ProcedureName = row[argumentsKeyMap.SprocName].ToString();
+                argument.SchemaOwner = row[argumentsKeyMap.OwnerKey].ToString();
+                AddPackage(row, argumentsKeyMap.PackageKey, argument);
+                if (!string.IsNullOrEmpty(argumentsKeyMap.OrdinalKey))
+                    argument.Ordinal = Convert.ToDecimal(row[argumentsKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
 
-                argument.DatabaseDataType = row[datatypeKey].ToString();
-                AddInOut(row, inoutKey, argument);
-                if (db2ColumnTypeKey != null) ApplyColumnType((string)row[db2ColumnTypeKey], argument);
+                argument.DatabaseDataType = row[argumentsKeyMap.DatatypeKey].ToString();
+                AddInOut(row, argumentsKeyMap.InoutKey, argument);
+                if (argumentsKeyMap.Db2ColumnTypeKey != null) ApplyColumnType((string)row[argumentsKeyMap.Db2ColumnTypeKey], argument);
 
                 //Oracle: these can be decimals, but we'll assume ints
-                if (lengthKey != null)
-                    argument.Length = GetNullableInt(row[lengthKey]);
-                if (precisionKey != null)
-                    argument.Precision = GetNullableInt(row[precisionKey]);
-                if (scaleKey != null)
-                    argument.Scale = GetNullableInt(row[scaleKey]);
-            }
+                if (argumentsKeyMap.LengthKey != null)
+                    argument.Length = GetNullableInt(row[argumentsKeyMap.LengthKey]);
+                if (argumentsKeyMap.PrecisionKey != null)
+                    argument.Precision = GetNullableInt(row[argumentsKeyMap.PrecisionKey]);
+                if (argumentsKeyMap.ScaleKey != null)
+                    argument.Scale = GetNullableInt(row[argumentsKeyMap.ScaleKey]);
+            } 
             return list;
         }
 

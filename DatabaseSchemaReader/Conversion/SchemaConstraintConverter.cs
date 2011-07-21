@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using DatabaseSchemaReader.Conversion.KeyMaps;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion
@@ -22,84 +23,38 @@ namespace DatabaseSchemaReader.Conversion
         {
             List<DatabaseConstraint> list = new List<DatabaseConstraint>();
             if (dt.Rows.Count == 0) return list; //nothing to do
-            //all same, my custom sql
-            string key = "CONSTRAINT_NAME";
-            string tableKey = "TABLE_NAME";
-            string columnKey = "COLUMN_NAME";
-            string ordinalKey = "ORDINAL_POSITION";
-            string refersToKey = "UNIQUE_CONSTRAINT_NAME";
-            string refersToTableKey = "FK_TABLE";
-            string expressionKey = "EXPRESSION";
-            string deleteRuleKey = "DELETE_RULE";
-            string updateRuleKey = "UPDATE_RULE";
-            //oracle
-            if (!dt.Columns.Contains(key)) key = "FOREIGN_KEY_CONSTRAINT_NAME";
-            if (!dt.Columns.Contains(tableKey)) tableKey = "FOREIGN_KEY_TABLE_NAME";
-            if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "PRIMARY_KEY_TABLE_NAME";
-            if (!dt.Columns.Contains(refersToKey)) refersToKey = "PRIMARY_KEY_CONSTRAINT_NAME";
-            //devart.data.postgresql
-            if (!dt.Columns.Contains(key)) key = "NAME";
-            if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
 
-            //firebird
-            if (constraintType == ConstraintType.PrimaryKey && !dt.Columns.Contains(key)) key = "PK_NAME";
-            if (constraintType == ConstraintType.ForeignKey && !dt.Columns.Contains(key)) key = "UK_NAME";
-            if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "REFERENCED_TABLE_NAME";
-            //a firebird typo!
-            if (dt.Columns.Contains("CHECK_CLAUSULE")) expressionKey = "CHECK_CLAUSULE";
-            //sqlite
-            if (!dt.Columns.Contains(columnKey)) columnKey = "FKEY_FROM_COLUMN";
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "FKEY_FROM_ORDINAL_POSITION";
-            if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "FKEY_TO_TABLE";
-
-            //db2
-            if (constraintType == ConstraintType.PrimaryKey && !dt.Columns.Contains(key)) key = "PK_NAME";
-            if (constraintType == ConstraintType.ForeignKey && !dt.Columns.Contains(key)) key = "FK_NAME";
-            if (!dt.Columns.Contains(tableKey)) tableKey = "FKTABLE_NAME";
-            if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = "PKTABLE_NAME";
-            if (!dt.Columns.Contains(refersToKey)) refersToKey = "PK_NAME";
-            if (!dt.Columns.Contains(columnKey)) columnKey = "FKCOLUMN_NAME";
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "KEY_SEQ";
-            if (!dt.Columns.Contains(expressionKey)) expressionKey = "CHECK_CLAUSE";
-
-            if (!dt.Columns.Contains(refersToKey)) refersToKey = null;
-            if (!dt.Columns.Contains(refersToTableKey)) refersToTableKey = null;
-            if (!dt.Columns.Contains(deleteRuleKey)) deleteRuleKey = null;
-            if (!dt.Columns.Contains(updateRuleKey)) updateRuleKey = null;
-            //not present if separate foreign key columns
-            if (!dt.Columns.Contains(columnKey)) columnKey = null;
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
-            if (!dt.Columns.Contains(expressionKey)) expressionKey = null;
-
+            ConstraintKeyMap constraintKeyMap = new ConstraintKeyMap(dt, constraintType);
 
             //sort it (unless it's a check constraint)
-            CreateDefaultView(dt, tableKey, ordinalKey, constraintType, tableName);
+            CreateDefaultView(dt, constraintKeyMap.TableKey, constraintKeyMap.OrdinalKey, constraintType, tableName);
 
             foreach (DataRowView row in dt.DefaultView)
             {
-                string name = row[key].ToString();
+                string name = row[constraintKeyMap.Key].ToString();
                 //constraints may be on multiple columns, each as sep row.
                 DatabaseConstraint c = FindConstraint(list, name);
                 if (c == null)
                 {
                     c = new DatabaseConstraint(); //it's a new constraint
                     c.Name = name;
-                    c.TableName = row[tableKey].ToString();
+                    c.TableName = row[constraintKeyMap.TableKey].ToString();
                     c.ConstraintType = constraintType;
                     list.Add(c);
-                    if (constraintType == ConstraintType.Check && expressionKey != null)
+                    if (constraintType == ConstraintType.Check && constraintKeyMap.ExpressionKey != null)
                     {
-                        c.Expression = row[expressionKey].ToString();
+                        c.Expression = row[constraintKeyMap.ExpressionKey].ToString();
                         continue;
                     }
-                    c.RefersToConstraint = AddRefersToConstraint(row, refersToKey);
-                    if (!string.IsNullOrEmpty(refersToTableKey))
-                        c.RefersToTable = row[refersToTableKey].ToString();
-                    c.DeleteRule = AddDeleteUpdateRule(row, deleteRuleKey);
-                    c.UpdateRule = AddDeleteUpdateRule(row, updateRuleKey);
+                    c.RefersToConstraint = AddRefersToConstraint(row, constraintKeyMap.RefersToKey);
+                    if (!string.IsNullOrEmpty(constraintKeyMap.RefersToTableKey))
+                        c.RefersToTable = row[constraintKeyMap.RefersToTableKey].ToString();
+                    c.DeleteRule = AddDeleteUpdateRule(row, constraintKeyMap.DeleteRuleKey);
+                    c.UpdateRule = AddDeleteUpdateRule(row, constraintKeyMap.UpdateRuleKey);
                 }
-                AddConstraintColumns(row, columnKey, constraintType, c);
+                AddConstraintColumns(row, constraintKeyMap.ColumnKey, constraintType, c);
             }
+
             return list;
         }
 
@@ -205,90 +160,46 @@ namespace DatabaseSchemaReader.Conversion
             //Npgsql
             if (dt.Columns.Count == 0) return;
 
-            string uniqueKey = "UNIQUE";
-            string primaryKey = "PRIMARY";
+            var indexKeyMap = new IndexKeyMap(dt);
 
-            //sql server
-            string key = "CONSTRAINT_NAME";
-            string tableKey = "TABLE_NAME";
-            string schemaKey = "TABLE_SCHEMA";
-            string columnKey = "COLUMN_NAME";
-            string ordinalKey = "ORDINAL_POSITION";
-            //oracle
-            string typekey = "INDEX_TYPE";
-            if (!dt.Columns.Contains(schemaKey)) schemaKey = "INDEX_SCHEMA";
-            if (!dt.Columns.Contains(schemaKey)) schemaKey = "OWNER";
-            if (!dt.Columns.Contains(key)) key = "INDEX_NAME";
-            if (!dt.Columns.Contains(schemaKey)) schemaKey = "INDEX_OWNER";
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "COLUMN_POSITION";
-            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "UNIQUENESS";
-            //mysql
-            if (!dt.Columns.Contains(schemaKey)) schemaKey = "INDEX_SCHEMA";
-            //Devart.Data.Oracle
-            if (!dt.Columns.Contains(key)) key = "INDEX"; //IndexColumns
-            if (!dt.Columns.Contains(key)) key = "NAME"; //Indexes
-            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = "ISUNIQUE";
-            if (!dt.Columns.Contains(schemaKey)) schemaKey = "SCHEMA";
-            if (!dt.Columns.Contains(tableKey)) tableKey = "TABLE";
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = "POSITION";
-            if (!dt.Columns.Contains(columnKey)) columnKey = "NAME";
-            //devart.data.postgresql
-            if (!dt.Columns.Contains(key)) key = "indexname";
-            //sqlite
-            if (!dt.Columns.Contains(primaryKey)) primaryKey = "PRIMARY_KEY";
-            //postgresql
-            if (!dt.Columns.Contains(ordinalKey)) ordinalKey = null;
-            //sqlserver 2008 - HEAP CLUSTERED NONCLUSTERED XML SPATIAL
-            //sys_indexes has is_unique but it's not exposed. 
-            if (!dt.Columns.Contains(typekey)) typekey = "type_desc";
-
-            //pre 2008 sql server
-            if (!dt.Columns.Contains(typekey)) typekey = null;
-
-            //indexes and not indexcolumns
-            if (!dt.Columns.Contains(columnKey)) columnKey = null;
-            if (!dt.Columns.Contains(uniqueKey)) uniqueKey = null;
-            if (!dt.Columns.Contains(primaryKey)) primaryKey = null;
-            if (!dt.Columns.Contains(schemaKey)) schemaKey = null;
-
-            if (!string.IsNullOrEmpty(ordinalKey))
-                dt.DefaultView.Sort = ordinalKey;
+            if (!string.IsNullOrEmpty(indexKeyMap.OrdinalKey))
+                dt.DefaultView.Sort = indexKeyMap.OrdinalKey;
             //this could be more than one table, so filter the view
             if (!string.IsNullOrEmpty(tableName))
-                dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
+                dt.DefaultView.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}'", indexKeyMap.TableKey, tableName);
 
             foreach (DataRowView row in dt.DefaultView)
             {
-                string name = row[key].ToString();
+                string name = row[indexKeyMap.Key].ToString();
                 if (string.IsNullOrEmpty(name)) continue; //all indexes should have a name
-                string schema = !string.IsNullOrEmpty(schemaKey) ? row[schemaKey].ToString() : string.Empty;
+                string schema = !string.IsNullOrEmpty(indexKeyMap.SchemaKey) ? row[indexKeyMap.SchemaKey].ToString() : string.Empty;
                 DatabaseIndex c = list.Find(delegate(DatabaseIndex f) { return f.Name == name && f.SchemaOwner == schema; });
                 if (c == null)
                 {
                     c = new DatabaseIndex();
                     c.Name = name;
                     c.SchemaOwner = schema;
-                    c.TableName = row[tableKey].ToString();
-                    if (typekey != null)
-                        c.IndexType = row[typekey].ToString();
-                    if (FindBoolean(row, uniqueKey, "UNIQUE"))
+                    c.TableName = row[indexKeyMap.TableKey].ToString();
+                    if (indexKeyMap.Typekey != null)
+                        c.IndexType = row[indexKeyMap.Typekey].ToString();
+                    if (FindBoolean(row, indexKeyMap.UniqueKey, "UNIQUE"))
                     {
                         c.IsUnique = true;
                         c.IndexType = "UNIQUE";
                     }
-                    if (FindBoolean(row, primaryKey, string.Empty))
+                    if (FindBoolean(row, indexKeyMap.PrimaryKey, string.Empty))
                         c.IndexType = "PRIMARY"; //primary keys should be unique too
                     list.Add(c);
                 }
-                if (string.IsNullOrEmpty(columnKey)) continue;
+                if (string.IsNullOrEmpty(indexKeyMap.ColumnKey)) continue;
 
-                string colName = row[columnKey].ToString();
+                string colName = row[indexKeyMap.ColumnKey].ToString();
                 if (string.IsNullOrEmpty(colName)) continue;
                 DatabaseColumn column = new DatabaseColumn();
                 column.Name = colName;
-                if (!string.IsNullOrEmpty(ordinalKey))
+                if (!string.IsNullOrEmpty(indexKeyMap.OrdinalKey))
                 {
-                    int ordinal = Convert.ToInt32(row[ordinalKey], CultureInfo.CurrentCulture);
+                    int ordinal = Convert.ToInt32(row[indexKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
                     column.Ordinal = ordinal;
                 }
                 if (ContainsColumn(c.Columns, colName)) continue;
@@ -311,7 +222,7 @@ namespace DatabaseSchemaReader.Conversion
             if (key == null) return false;
             var o = row[key];
             if (o == DBNull.Value) return false;
-            if (o.GetType() == typeof(string))
+            if (o is string)
             {
                 return (o.Equals(trueText));
             }

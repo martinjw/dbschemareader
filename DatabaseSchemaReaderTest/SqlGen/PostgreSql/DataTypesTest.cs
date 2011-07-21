@@ -62,133 +62,46 @@ xml	 	XML data
         private readonly DatabaseColumn _column = new DatabaseColumn();
 
         [TestMethod]
-        public void TestStringType1()
-        {
-            //arrange
-            _column.DbDataType = "NVARCHAR";
-            _column.Length = 0;
-            
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("VARCHAR", result);
-        }
-
-        [TestMethod]
-        public void TestStringType2()
-        {
-            //arrange
-            _column.DbDataType = "NVARCHAR2";
-            _column.Length = 0;
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("VARCHAR", result);
-        }
-
-        [TestMethod]
-        public void TestStringWithLength()
-        {
-            //arrange
-            _column.DbDataType = "NVARCHAR2";
-            _column.Length = 5;
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("VARCHAR (5)", result);
-        }
-
-        [TestMethod]
-        public void TestStringWithMaxLength()
-        {
-            //arrange
-            _column.DbDataType = "NVARCHAR";
-            _column.Length = -1;
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("TEXT", result);
-        }
-
-        [TestMethod]
-        public void TestChar()
-        {
-            //arrange
-            _column.DbDataType = "NCHAR";
-            _column.Length = -1;
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("CHAR", result);
-        }
-
-
-        [TestMethod]
-        public void TestCharWithLength()
-        {
-            //arrange
-            _column.DbDataType = "NCHAR";
-            _column.Length = 20;
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("CHAR (20)", result);
-        }
-
-        [TestMethod]
-        public void TestClob()
-        {
-            //arrange
-            _column.DbDataType = "CLOB";
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("TEXT", result);
-        }
-
-        [TestMethod]
-        public void TestNText()
-        {
-            //arrange
-            _column.DbDataType = "NTEXT";
-
-            //act
-            var result = _typeWriter.DataType(_column);
-
-            //assert
-            Assert.AreEqual("TEXT", result);
-        }
-
-
-        [TestMethod]
         public void TestInteger()
         {
             //arrange
             _column.DbDataType = "INT";
 
             //act
-            var result = _typeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("INTEGER", result);
         }
 
+        [TestMethod]
+        public void TestInt2()
+        {
+            //arrange
+            _column.DbDataType = "INT2";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("SMALLINT", result);
+        }
 
         [TestMethod]
-        public void TestNumeric()
+        public void TestSmallInt()
+        {
+            //arrange
+            _column.DbDataType = "SMALLINT";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("SMALLINT", result);
+        }
+
+        [TestMethod]
+        public void TestNumber()
         {
             //arrange
             _column.DbDataType = "NUMBER";
@@ -196,28 +109,26 @@ xml	 	XML data
             _column.Scale = 2;
 
             //act
-            var result = _typeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMERIC (10,2)", result);
         }
 
-
-
         [TestMethod]
-        public void TestDateTime()
+        public void TestNumeric()
         {
             //arrange
-            _column.DbDataType = "DATETIME";
+            _column.DbDataType = "NUMERIC";
+            _column.Precision = 10;
+            _column.Scale = 2;
 
             //act
-            var result = _typeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("TIMESTAMP", result);
+            Assert.AreEqual("NUMERIC (10,2)", result);
         }
-
-
 
     }
 }

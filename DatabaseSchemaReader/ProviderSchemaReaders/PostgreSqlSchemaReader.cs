@@ -180,7 +180,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
 
             foreach (var databaseColumn in databaseTable.Columns)
             {
-                var santizedType = typeWriter.DataType(databaseColumn);
+                var santizedType = typeWriter.WriteDataType(databaseColumn);
                 //all the different native types are reworked
                 if ((santizedType.StartsWith("VARCHAR", StringComparison.OrdinalIgnoreCase)
                     || santizedType.StartsWith("CHAR", StringComparison.OrdinalIgnoreCase)))

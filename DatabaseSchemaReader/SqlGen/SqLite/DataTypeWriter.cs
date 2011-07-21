@@ -3,9 +3,9 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqLite
 {
-    static class DataTypeWriter
+    class DataTypeWriter : IDataTypeWriter
     {
-        public static string SqLiteDataType(DatabaseColumn column)
+        public string WriteDataType(DatabaseColumn column)
         {
             //sqlite is not strongly typed, and the type affinities (http://www.sqlite.org/datatype3.html) are very limited
             // (text, integer, real, blob)

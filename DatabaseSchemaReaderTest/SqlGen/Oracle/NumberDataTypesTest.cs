@@ -25,6 +25,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
          */
 
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestInteger()
@@ -33,7 +34,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "INT";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (9)", result);
@@ -46,7 +47,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "SMALLINT";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (5)", result);
@@ -61,7 +62,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (10,2)", result);
@@ -76,7 +77,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (10,2)", result);
@@ -91,7 +92,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (10,2)", result);
@@ -104,7 +105,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "BIT";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (1)", result);
@@ -117,7 +118,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "MONEY";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMBER (15,4)", result);

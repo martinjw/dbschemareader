@@ -1,5 +1,5 @@
 ﻿using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.SqlGen.SqlServer;
+using DatabaseSchemaReader.SqlGen.PostgreSql;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -11,70 +11,53 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
+namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
 {
     [TestClass]
     public class StringDataTypesTest
     {
         /*
-        --Character--
-        CHAR(n) 
-        NCHAR(n) 
-        VARCHAR(n | max) 
-        NVARCHAR(n | max) 
-        TEXT 
-        NTEXT 
+character varying [ (n) ]	varchar [ (n) ]	variable-length character string
+character [ (n) ]	char [ (n) ]	fixed-length character string
+text	 	variable-length character string
          */
+
         private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
-        private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DatabaseColumn _column = new DatabaseColumn();
 
         [TestMethod]
-        public void TestStringNVarChar()
+        public void TestStringType1()
         {
             //arrange
             _column.DbDataType = "NVARCHAR";
-            _column.Length = 5;
-
+            _column.Length = 0;
+            
             //act
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("NVARCHAR (5)", result);
+            Assert.AreEqual("VARCHAR", result);
         }
 
         [TestMethod]
-        public void TestStringNVarChar2()
+        public void TestStringType2()
         {
             //arrange
             _column.DbDataType = "NVARCHAR2";
-            _column.Length = 5;
+            _column.Length = 0;
 
             //act
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("NVARCHAR (5)", result);
+            Assert.AreEqual("VARCHAR", result);
         }
 
         [TestMethod]
-        public void TestStringVarChar()
+        public void TestStringWithLength()
         {
             //arrange
-            _column.DbDataType = "VARCHAR";
-            _column.Length = 5;
-
-            //act
-            var result = _typeWriter.WriteDataType(_column);
-
-            //assert
-            Assert.AreEqual("VARCHAR (5)", result); //NB we've changed to unicode here
-        }
-
-        [TestMethod]
-        public void TestStringVarChar2()
-        {
-            //arrange
-            _column.DbDataType = "VARCHAR2";
+            _column.DbDataType = "NVARCHAR2";
             _column.Length = 5;
 
             //act
@@ -95,29 +78,29 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("NVARCHAR (MAX)", result);
+            Assert.AreEqual("TEXT", result);
         }
-
-        [TestMethod]
-        public void TestCharUnicode()
-        {
-            //arrange
-            _column.DbDataType = "NCHAR";
-            _column.Length = 5;
-
-            //act
-            var result = _typeWriter.WriteDataType(_column);
-
-            //assert
-            Assert.AreEqual("NCHAR (5)", result);
-        }
-
 
         [TestMethod]
         public void TestChar()
         {
             //arrange
-            _column.DbDataType = "CHAR";
+            _column.DbDataType = "NCHAR";
+            _column.Length = -1;
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("CHAR", result);
+        }
+
+
+        [TestMethod]
+        public void TestCharWithLength()
+        {
+            //arrange
+            _column.DbDataType = "NCHAR";
             _column.Length = 20;
 
             //act
@@ -137,7 +120,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("NVARCHAR (MAX)", result);
+            Assert.AreEqual("TEXT", result);
         }
 
         [TestMethod]
@@ -145,19 +128,6 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
         {
             //arrange
             _column.DbDataType = "NTEXT";
-
-            //act
-            var result = _typeWriter.WriteDataType(_column);
-
-            //assert
-            Assert.AreEqual("NTEXT", result);
-        }
-
-        [TestMethod]
-        public void TestText()
-        {
-            //arrange
-            _column.DbDataType = "TEXT";
 
             //act
             var result = _typeWriter.WriteDataType(_column);

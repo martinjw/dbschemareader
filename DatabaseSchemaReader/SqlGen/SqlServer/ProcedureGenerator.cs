@@ -26,11 +26,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         }
         protected override string ColumnDataType(DatabaseColumn column)
         {
-            return _dataTypeWriter.SqlServerDataType(column);
+            return _dataTypeWriter.WriteDataType(column);
         }
         protected override string ColumnDataType(string dataType)
         {
-            return _dataTypeWriter.SqlServerDataType(dataType);
+            return DataTypeWriter.WriteDataType(dataType);
         }
     }
 }

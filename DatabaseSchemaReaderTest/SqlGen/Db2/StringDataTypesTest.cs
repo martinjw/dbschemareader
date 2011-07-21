@@ -17,6 +17,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
     public class StringDataTypesTest
     {
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestStringNVarChar()
@@ -26,7 +27,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARCHAR (5)", result);
@@ -40,7 +41,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARCHAR (5)", result);
@@ -54,7 +55,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARCHAR (5)", result);
@@ -68,7 +69,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARCHAR (5)", result);
@@ -82,7 +83,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = -1;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DBCLOB", result);
@@ -96,7 +97,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CHAR (5)", result);
@@ -111,7 +112,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = 20;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CHAR (20)", result);
@@ -124,7 +125,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "CLOB";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CLOB", result);
@@ -137,7 +138,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "DBCLOB";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DBCLOB", result);
@@ -150,7 +151,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "NTEXT";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DBCLOB", result);
@@ -163,7 +164,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "TEXT";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DBCLOB", result);

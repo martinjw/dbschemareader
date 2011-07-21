@@ -17,6 +17,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
     public class DataTypesTest
     {
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
 
         [TestMethod]
@@ -26,7 +27,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "GRAPHIC";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("GRAPHIC", result);
@@ -39,7 +40,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "VARGRAPHIC";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARGRAPHIC", result);
@@ -52,7 +53,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "LONG VARGRAPHIC";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("LONG VARGRAPHIC", result);
@@ -65,7 +66,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "BLOB";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BLOB", result);
@@ -79,7 +80,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = -1;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BLOB", result);
@@ -93,7 +94,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Length = -1;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BLOB", result);
@@ -106,7 +107,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "XML";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("XML", result);
@@ -119,7 +120,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "XMLTYPE";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("XML", result);
@@ -132,7 +133,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "UNIQUEIDENTIFIER";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CHAR(16) FOR BIT DATA", result);

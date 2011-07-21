@@ -78,6 +78,15 @@
     <Compile Include="Compare\CompareFunctions.cs" />
     <Compile Include="Compare\SanitizeSql.cs" />
     <Compile Include="Conversion\DatabaseColumnExtensions.cs" />
+    <Compile Include="Conversion\KeyMaps\ArgumentsKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\ColumnsKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\ConstraintKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\FunctionKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\IndexKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\SequenceKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\StoredProcedureKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\TableKeyMap.cs" />
+    <Compile Include="Conversion\KeyMaps\ViewKeyMap.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
     <Compile Include="Conversion\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
@@ -123,6 +132,7 @@
     <Compile Include="SqlGen\DB2\SqlFormatProvider.cs" />
     <Compile Include="SqlGen\DB2\TableGenerator.cs" />
     <Compile Include="SqlGen\DB2\TablesGenerator.cs" />
+    <Compile Include="SqlGen\IDataTypeWriter.cs" />
     <Compile Include="SqlGen\IMigrationGenerator.cs" />
     <Compile Include="SqlGen\MigrationGenerator.cs" />
     <Compile Include="SqlGen\MySql\MySqlMigrationGenerator.cs" />

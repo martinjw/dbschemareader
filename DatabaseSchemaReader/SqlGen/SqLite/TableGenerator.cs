@@ -21,7 +21,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
 
         protected override string WriteDataType(DatabaseColumn column)
         {
-            var type = DataTypeWriter.SqLiteDataType(column);
+            var type = new DataTypeWriter().WriteDataType(column);
             if (column.IsPrimaryKey && (Table.PrimaryKey == null || Table.PrimaryKey.Columns.Count == 1))
             {
                 type += " PRIMARY KEY";

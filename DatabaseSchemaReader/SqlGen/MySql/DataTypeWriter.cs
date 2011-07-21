@@ -3,14 +3,14 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.MySql
 {
-    static class DataTypeWriter
+    class DataTypeWriter : IDataTypeWriter
     {
         /// <summary>
         /// Gets the MySql datatype definition as string
         /// </summary>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public static string MySqlDataType(this DatabaseColumn column)
+        public string WriteDataType(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
             //int providerType = -1;

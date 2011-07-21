@@ -83,7 +83,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 defaultValue = WriteDefaultValue(column);
             }
 
-            var sql = DataTypeWriter.DataType(column);
+            var sql = DataTypeWriter.WriteDataType(column);
             if (sql == "BIT") _hasBit = true;
 
 

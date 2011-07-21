@@ -64,7 +64,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "BLOB";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARBINARY (MAX)", result);
@@ -78,7 +78,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.Length = -1;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARBINARY (MAX)", result);
@@ -92,7 +92,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.Length = -1;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("IMAGE", result);
@@ -105,7 +105,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "XML";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("XML", result);
@@ -118,7 +118,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "XMLTYPE";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("XML", result);
@@ -131,7 +131,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "UNIQUEIDENTIFIER";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("UNIQUEIDENTIFIER", result);

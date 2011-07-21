@@ -103,7 +103,8 @@ namespace DatabaseSchemaViewer
                     if (argument.DataType.IsString)
                     {
                         sb.Append("(");
-                        sb.Append(argument.Length);
+                        var length = argument.Length.GetValueOrDefault();
+                        sb.Append(length != -1 ? length.ToString(CultureInfo.InvariantCulture) : "MAX");
                         sb.Append(")");
                     }
                     else if (argument.DataType.IsNumeric && !argument.DataType.IsInt)

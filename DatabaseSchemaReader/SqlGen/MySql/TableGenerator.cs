@@ -23,7 +23,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 
         protected override string WriteDataType(DatabaseColumn column)
         {
-            var type = column.MySqlDataType();
+            var type = new DataTypeWriter().WriteDataType(column);
             type += (!column.Nullable ? " NOT NULL" : string.Empty);
 
             var defaultValue = column.DefaultValue;

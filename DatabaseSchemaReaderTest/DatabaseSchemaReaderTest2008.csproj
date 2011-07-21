@@ -91,6 +91,8 @@
     <Compile Include="SqlGen\Oracle\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\Oracle\NumberDataTypesTest.cs" />
     <Compile Include="SqlGen\Oracle\StringDataTypesTest.cs" />
+    <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
+    <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\DataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\NumberDataTypesTest.cs" />

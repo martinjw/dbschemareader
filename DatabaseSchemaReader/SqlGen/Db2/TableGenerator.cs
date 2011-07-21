@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
@@ -21,7 +20,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
 
         protected override string WriteDataType(DatabaseColumn column)
         {
-            var type = DataTypeWriter.DataType(column);
+            var type = new DataTypeWriter().WriteDataType(column);
             type += (!column.Nullable ? " NOT NULL" : string.Empty);
 
             var defaultValue = column.DefaultValue;

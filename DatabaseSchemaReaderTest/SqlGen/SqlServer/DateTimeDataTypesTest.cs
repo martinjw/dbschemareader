@@ -36,7 +36,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "DATETIME";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATETIME", result);
@@ -49,7 +49,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "DATETIME2";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATETIME2", result);
@@ -64,7 +64,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             //this isn't a SqlServer Timestamp
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATETIME", result);
@@ -81,7 +81,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DataType.ProviderDbType = (int)SqlDbType.Timestamp;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TIMESTAMP", result);
@@ -96,7 +96,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DataType.ProviderDbType = (int)SqlDbType.Date;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATE", result);
@@ -109,7 +109,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "DATE";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATETIME", result);

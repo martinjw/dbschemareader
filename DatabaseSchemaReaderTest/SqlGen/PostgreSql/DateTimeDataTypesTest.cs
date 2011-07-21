@@ -1,6 +1,5 @@
-﻿using System.Data;
-using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.SqlGen.MySql;
+﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.SqlGen.PostgreSql;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -12,13 +11,22 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
 #endif
 
-namespace DatabaseSchemaReaderTest.SqlGen.MySql
+namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
 {
     [TestClass]
     public class DateTimeDataTypesTest
     {
-        private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        /*
+date	 	calendar date (year, month, day)
+interval [ fields ] [ (p) ]	 	time span
+time [ (p) ] [ without time zone ]	 	time of day (no time zone)
+time [ (p) ] with time zone	timetz	time of day, including time zone
+timestamp [ (p) ] [ without time zone ]	 	date and time (no time zone)
+timestamp [ (p) ] with time zone	timestamptz	date and time, including time zone
+         */
+
         private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
+        private readonly DatabaseColumn _column = new DatabaseColumn();
 
         [TestMethod]
         public void TestDateTime()
@@ -30,7 +38,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("DATETIME", result);
+            Assert.AreEqual("TIMESTAMP", result);
         }
 
         [TestMethod]
@@ -43,38 +51,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("DATETIME", result);
-        }
-
-        [TestMethod]
-        public void TestTimeStamp()
-        {
-            //arrange
-            _column.DbDataType = "TIMESTAMP";
-            _column.Precision = 5;
-
-            //act
-            var result = _typeWriter.WriteDataType(_column);
-
-            //assert
-            Assert.AreEqual("TIMESTAMP", result); //timestamp has no precision
-        }
-
-
-        [TestMethod]
-        public void TestSqlServerTimeStamp()
-        {
-            //arrange
-            _column.DbDataType = "TIMESTAMP";
-            _column.Precision = 18;
-            _column.DataType = new DataType("TIMESTAMP", "byte[]");
-            _column.DataType.ProviderDbType = (int)SqlDbType.Timestamp;
-
-            //act
-            var result = _typeWriter.WriteDataType(_column);
-
-            //assert
-            Assert.AreEqual("TINYBLOB", result);
+            Assert.AreEqual("TIMESTAMP", result);
         }
 
         [TestMethod]
@@ -89,5 +66,19 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             //assert
             Assert.AreEqual("DATE", result);
         }
+
+        [TestMethod]
+        public void TestTime()
+        {
+            //arrange
+            _column.DbDataType = "TIME";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("TIME", result);
+        }
+
     }
 }

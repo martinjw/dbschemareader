@@ -3,9 +3,9 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.PostgreSql
 {
-    class DataTypeWriter
+    class DataTypeWriter : IDataTypeWriter
     {
-        public string DataType(DatabaseColumn column)
+        public string WriteDataType(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
 

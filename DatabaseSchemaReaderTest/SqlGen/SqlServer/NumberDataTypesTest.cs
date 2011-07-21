@@ -43,7 +43,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "INT";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("INT", result);
@@ -56,7 +56,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "SMALLINT";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("SMALLINT", result);
@@ -71,7 +71,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.Scale = 2;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMERIC (10,2)", result);
@@ -86,7 +86,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.Scale = 2;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMERIC (10,2)", result);
@@ -101,7 +101,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.Scale = 2;
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DECIMAL (10,2)", result);
@@ -114,7 +114,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "BIT";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BIT", result);
@@ -127,7 +127,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "MONEY";
 
             //act
-            var result = _typeWriter.SqlServerDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("MONEY", result);

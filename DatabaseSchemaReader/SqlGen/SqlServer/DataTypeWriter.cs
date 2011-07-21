@@ -11,9 +11,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     /// <remarks>
     /// <see cref="DatabaseSchemaReader.SqlGen.SqlServerCe.DataTypeWriter"/> is derived from this for SqlServerCe
     /// </remarks>
-    class DataTypeWriter
+    class DataTypeWriter : IDataTypeWriter
     {
-        public string SqlServerDataType(string dataType)
+        public static string WriteDataType(string dataType)
         {
             //don't know provider
             return OracleToSqlServerConversion(dataType, -1, 0, 0);
@@ -24,7 +24,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// </summary>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public string SqlServerDataType(DatabaseColumn column)
+        public string WriteDataType(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
             int providerType = -1;
@@ -126,7 +126,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// <param name="table">The table.</param>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public bool LooksLikeOracleIdentityColumn(DatabaseTable table, DatabaseColumn column)
+        public static bool LooksLikeOracleIdentityColumn(DatabaseTable table, DatabaseColumn column)
         {
             if (!column.IsPrimaryKey) return false;
             if (table.Triggers.Count == 0) return false;

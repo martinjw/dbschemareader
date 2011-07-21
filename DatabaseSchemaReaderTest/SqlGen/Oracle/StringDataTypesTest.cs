@@ -29,6 +29,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
          */
 
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestStringNVarChar()
@@ -38,7 +39,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = 5; //in Oracle by default this is bytes, rather than char length
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NVARCHAR2 (5)", result);
@@ -52,7 +53,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NVARCHAR2 (5)", result);
@@ -66,7 +67,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NVARCHAR2 (5)", result); //NB we've changed to unicode here
@@ -80,7 +81,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARCHAR2 (5 CHAR)", result); //should have preserved VARCHAR. Assumes CHAR length
@@ -94,7 +95,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = -1;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CLOB", result);
@@ -108,7 +109,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = 5;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NCHAR (5)", result);
@@ -123,7 +124,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.Length = 20;
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CHAR (20)", result);
@@ -136,7 +137,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "CLOB";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CLOB", result);
@@ -149,7 +150,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "NTEXT";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NCLOB", result);
@@ -162,7 +163,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             _column.DbDataType = "TEXT";
 
             //act
-            var result = DataTypeWriter.WriteDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("CLOB", result);

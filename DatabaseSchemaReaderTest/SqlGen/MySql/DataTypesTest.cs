@@ -17,6 +17,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
     public class DataTypesTest
     {
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestBlob()
@@ -25,7 +26,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             _column.DbDataType = "BLOB";
 
             //act
-            var result = DataTypeWriter.MySqlDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BLOB", result);
@@ -39,7 +40,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             _column.Length = -1;
 
             //act
-            var result = DataTypeWriter.MySqlDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BLOB", result);
@@ -53,7 +54,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             _column.Length = -1;
 
             //act
-            var result = DataTypeWriter.MySqlDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("BLOB", result);
@@ -66,7 +67,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             _column.DbDataType = "XML";
 
             //act
-            var result = DataTypeWriter.MySqlDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TEXT", result);
@@ -79,7 +80,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             _column.DbDataType = "XMLTYPE";
 
             //act
-            var result = DataTypeWriter.MySqlDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TEXT", result);
@@ -92,7 +93,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             _column.DbDataType = "UNIQUEIDENTIFIER";
 
             //act
-            var result = DataTypeWriter.MySqlDataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("VARCHAR (64)", result);

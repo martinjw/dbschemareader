@@ -18,6 +18,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
     public class DateTimeDataTypesTest
     {
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestDateTime()
@@ -26,7 +27,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "DATETIME";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TIMESTAMP", result);
@@ -39,7 +40,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "DATETIME2";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TIMESTAMP", result);
@@ -53,7 +54,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Precision = 5;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("TIMESTAMP", result);
@@ -70,7 +71,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DataType.ProviderDbType = (int)SqlDbType.Timestamp;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("GRAPHIC", result);
@@ -83,7 +84,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "DATE";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DATE", result);

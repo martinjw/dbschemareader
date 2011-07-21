@@ -17,6 +17,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
     public class NumberDataTypesTest
     {
         private readonly DatabaseColumn _column = new DatabaseColumn { Nullable = true };
+        private readonly DataTypeWriter _typeWriter = new DataTypeWriter();
 
         [TestMethod]
         public void TestInteger()
@@ -25,7 +26,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "INT";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("INTEGER", result);
@@ -38,7 +39,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "SMALLINT";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("SMALLINT", result);
@@ -53,7 +54,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMERIC (10,2)", result);
@@ -68,7 +69,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("NUMERIC (10,2)", result);
@@ -83,7 +84,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DECIMAL (10,2)", result);
@@ -98,7 +99,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.Scale = 2;
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DECIMAL (10,2)", result);
@@ -111,7 +112,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "BIT";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("SMALLINT", result);
@@ -124,7 +125,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             _column.DbDataType = "MONEY";
 
             //act
-            var result = DataTypeWriter.DataType(_column);
+            var result = _typeWriter.WriteDataType(_column);
 
             //assert
             Assert.AreEqual("DECIMAL(19,4)", result);

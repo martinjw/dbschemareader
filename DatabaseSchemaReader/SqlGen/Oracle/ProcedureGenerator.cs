@@ -44,7 +44,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         protected override string ColumnDataType(DatabaseColumn column)
         {
-            return column.OracleDataTypeForParameter();
+            return DataTypeWriter.OracleDataTypeForParameter(column);
         }
 
         protected override string ColumnDataType(string dataType)

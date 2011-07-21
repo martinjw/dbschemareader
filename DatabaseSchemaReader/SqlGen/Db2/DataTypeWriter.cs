@@ -3,9 +3,9 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Db2
 {
-    static class DataTypeWriter
+    class DataTypeWriter : IDataTypeWriter
     {
-        public static string DataType(DatabaseColumn column)
+        public string WriteDataType(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
 

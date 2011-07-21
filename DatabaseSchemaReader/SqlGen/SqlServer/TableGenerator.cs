@@ -83,7 +83,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 }
             }
 
-            var sql = DataTypeWriter.SqlServerDataType(column);
+            var sql = DataTypeWriter.WriteDataType(column);
             if (sql == "BIT") _hasBit = true;
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))

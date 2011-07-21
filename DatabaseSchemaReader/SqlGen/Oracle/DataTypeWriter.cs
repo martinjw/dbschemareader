@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
     /// <summary>
     /// Returns a datatype string (will convert common Oracle types to SqlServer)
     /// </summary>
-    static class DataTypeWriter
+    class DataTypeWriter : IDataTypeWriter
     {
         public static string OracleDataType(string dataType)
         {
@@ -15,7 +15,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             return SqlServerToOracleConversion(dataType, -1, -1);
         }
 
-        public static string OracleDataTypeForParameter(this DatabaseColumn column)
+        public static string OracleDataTypeForParameter(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
             var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
@@ -35,7 +35,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         /// </summary>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public static string OracleDataType(this DatabaseColumn column)
+        public static string OracleDataType(DatabaseColumn column)
         {
             var dataType = column.DbDataType.ToUpperInvariant();
             int providerType = GetProviderType(column);
@@ -114,7 +114,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             return dataType;
         }
 
-        public static string WriteDataType(DatabaseColumn column)
+        public string WriteDataType(DatabaseColumn column)
         {
             var sql = string.Empty;
             var dataType = column.DbDataType.ToUpperInvariant();

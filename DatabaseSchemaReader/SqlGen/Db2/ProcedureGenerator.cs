@@ -18,7 +18,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         }
         protected override string ColumnDataType(DatabaseColumn column)
         {
-            return DataTypeWriter.DataType(column);
+            return new DataTypeWriter().WriteDataType(column);
         }
 
         protected override string ColumnDataType(string dataType)

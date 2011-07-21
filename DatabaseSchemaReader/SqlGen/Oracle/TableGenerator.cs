@@ -56,7 +56,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         protected override string WriteDataType(DatabaseColumn column)
         {
-            return DataTypeWriter.WriteDataType(column);
+            return new DataTypeWriter().WriteDataType(column);
         }
 
         protected override string NonNativeAutoIncrementWriter()
