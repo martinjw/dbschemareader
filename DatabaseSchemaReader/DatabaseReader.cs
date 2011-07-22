@@ -53,6 +53,10 @@ namespace DatabaseSchemaReader
                         _sr = new Db2SchemaReader(connectionString, providerName);
                         break;
                 }
+                if (providerName.Equals("Ingres.Client", StringComparison.OrdinalIgnoreCase))
+                {
+                    _sr = new IngresSchemaReader(connectionString, providerName);
+                }
             }
             _db = new DatabaseSchema(connectionString, providerName);
         }

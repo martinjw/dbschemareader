@@ -117,6 +117,7 @@
     <Compile Include="Data\InsertWriter.cs" />
     <Compile Include="Data\Reader.cs" />
     <Compile Include="ProviderSchemaReaders\Db2SchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\IngresSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />
