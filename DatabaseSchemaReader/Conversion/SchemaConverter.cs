@@ -54,6 +54,7 @@ namespace DatabaseSchemaReader.Conversion
         {
             //may be a VIEW or a system table
             return !type.Equals("TABLE", StringComparison.OrdinalIgnoreCase) &&
+                   !type.Equals("BASE", StringComparison.OrdinalIgnoreCase) && //sybase
                    !type.Equals("BASE TABLE", StringComparison.OrdinalIgnoreCase) &&
                    !type.Equals("User", StringComparison.OrdinalIgnoreCase) &&
                    //MySQL types are something different

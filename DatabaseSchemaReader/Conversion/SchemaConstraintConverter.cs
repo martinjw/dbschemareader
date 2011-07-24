@@ -31,28 +31,34 @@ namespace DatabaseSchemaReader.Conversion
 
             foreach (DataRowView row in dt.DefaultView)
             {
-                string name = row[constraintKeyMap.Key].ToString();
-                //constraints may be on multiple columns, each as sep row.
-                DatabaseConstraint c = FindConstraint(list, name);
-                if (c == null)
+                string name = null;
+                DatabaseConstraint constraint = null;
+                var nameKey = constraintKeyMap.Key;
+                if (!string.IsNullOrEmpty(nameKey))
                 {
-                    c = new DatabaseConstraint(); //it's a new constraint
-                    c.Name = name;
-                    c.TableName = row[constraintKeyMap.TableKey].ToString();
-                    c.ConstraintType = constraintType;
-                    list.Add(c);
+                    name = row[nameKey].ToString();
+                    constraint = FindConstraint(list, name);
+                }
+                //constraints may be on multiple columns, each as sep row.
+                if (constraint == null)
+                {
+                    constraint = new DatabaseConstraint(); //it's a new constraint
+                    constraint.Name = name;
+                    constraint.TableName = row[constraintKeyMap.TableKey].ToString();
+                    constraint.ConstraintType = constraintType;
+                    list.Add(constraint);
                     if (constraintType == ConstraintType.Check && constraintKeyMap.ExpressionKey != null)
                     {
-                        c.Expression = row[constraintKeyMap.ExpressionKey].ToString();
+                        constraint.Expression = row[constraintKeyMap.ExpressionKey].ToString();
                         continue;
                     }
-                    c.RefersToConstraint = AddRefersToConstraint(row, constraintKeyMap.RefersToKey);
+                    constraint.RefersToConstraint = AddRefersToConstraint(row, constraintKeyMap.RefersToKey);
                     if (!string.IsNullOrEmpty(constraintKeyMap.RefersToTableKey))
-                        c.RefersToTable = row[constraintKeyMap.RefersToTableKey].ToString();
-                    c.DeleteRule = AddDeleteUpdateRule(row, constraintKeyMap.DeleteRuleKey);
-                    c.UpdateRule = AddDeleteUpdateRule(row, constraintKeyMap.UpdateRuleKey);
+                        constraint.RefersToTable = row[constraintKeyMap.RefersToTableKey].ToString();
+                    constraint.DeleteRule = AddDeleteUpdateRule(row, constraintKeyMap.DeleteRuleKey);
+                    constraint.UpdateRule = AddDeleteUpdateRule(row, constraintKeyMap.UpdateRuleKey);
                 }
-                AddConstraintColumns(row, constraintKeyMap.ColumnKey, constraintType, c);
+                AddConstraintColumns(row, constraintKeyMap.ColumnKey, constraintType, constraint);
             }
 
             return list;

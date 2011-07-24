@@ -42,6 +42,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(ColumnKey)) ColumnKey = null;
             if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = null;
             if (!dt.Columns.Contains(ExpressionKey)) ExpressionKey = null;
+            if (!dt.Columns.Contains(Key)) Key = null;
         }
 
         private void CheckSqLite(DataTable dt)

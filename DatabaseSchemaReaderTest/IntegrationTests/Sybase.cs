@@ -14,23 +14,24 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
 {
     /// <summary>
     /// These are INTEGRATION tests using databases.
-    /// The following databases should exist on localhost:
-    ///     Db2 with Sample (user id root, passwod mysql)
     /// </summary>
     [TestClass]
-    public class Db2
+    public class Sybase
     {
         [TestMethod]
-        public void Db2Test()
+        public void SybaseAnyWhereTest()
         {
-            const string providername = "IBM.Data.DB2";
-            const string connectionString = @"Server=localhost:50000;UID=db2admin;pwd=db2;Database=Sample";
+            const string providername = "iAnyWhere.Data.SQLAnyWhere";
+            const string connectionString = "Data Source=SQL Anywhere 12 Demo";
+
             ProviderChecker.Check(providername, connectionString);
+
+            DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
-            var table = schema.FindTableByName("EMPLOYEE");
-            Assert.IsTrue(table.Columns.Count > 0);
+
+            Assert.IsTrue(schema.Tables.Count > 0);
         }
     }
 }

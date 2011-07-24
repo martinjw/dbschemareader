@@ -116,6 +116,7 @@
     <Compile Include="Data\DateConverter.cs" />
     <Compile Include="Data\InsertWriter.cs" />
     <Compile Include="Data\Reader.cs" />
+    <Compile Include="ProviderSchemaReaders\SybaseAsaSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\IngresSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\Db2SchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="ProviderSchemaReaders\SqlServerCeSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
     <Compile Include="SqlGen\SqlTranslator.cs" />
+    <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />

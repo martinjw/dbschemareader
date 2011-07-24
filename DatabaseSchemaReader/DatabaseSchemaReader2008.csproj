@@ -124,6 +124,7 @@
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerCeSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\SybaseAsaSchemaReader.cs" />
     <Compile Include="SqlGen\DataTypeConverter.cs" />
     <Compile Include="SqlGen\DB2\ConstraintWriter.cs" />
     <Compile Include="SqlGen\DB2\DataTypeWriter.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="SqlGen\SqlServerCe\SqlServerCeMigrationGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\SqlServerMigrationGenerator.cs" />
     <Compile Include="SqlGen\SqlTranslator.cs" />
+    <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />

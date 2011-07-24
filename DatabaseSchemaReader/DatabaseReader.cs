@@ -57,6 +57,10 @@ namespace DatabaseSchemaReader
                 {
                     _sr = new IngresSchemaReader(connectionString, providerName);
                 }
+                else if (providerName.Equals("iAnyWhere.Data.SQLAnyWhere", StringComparison.OrdinalIgnoreCase))
+                {
+                    _sr = new SybaseAsaSchemaReader(connectionString, providerName);
+                }
             }
             _db = new DatabaseSchema(connectionString, providerName);
         }
