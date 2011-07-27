@@ -38,12 +38,19 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             CheckDb2(dt);
             //Intersystems Cache
             if (dt.Columns.Contains("TYPE_NAME")) DatatypeKey = "TYPE_NAME";
+            //sybase ultralite
+            if (!dt.Columns.Contains(NullableKey)) NullableKey = "nulls";
+            if (!dt.Columns.Contains(LengthKey)) LengthKey = null;
+            if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = null;
+            if (!dt.Columns.Contains(ScaleKey)) ScaleKey = null;
+
 
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = null; //not in Oracle catalog
             if (!dt.Columns.Contains(AutoIncrementKey)) AutoIncrementKey = null;
             if (!dt.Columns.Contains(PrimaryKeyKey)) PrimaryKeyKey = null;
             if (!dt.Columns.Contains(UniqueKey)) UniqueKey = null;
             if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = null;
+            if (!dt.Columns.Contains(DatatypeKey)) DatatypeKey = null;
 
         }
 

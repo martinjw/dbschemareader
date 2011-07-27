@@ -42,7 +42,8 @@ namespace DatabaseSchemaReader.Conversion
                 t.Name = row[keyMap.TableName].ToString();
                 //exclude Oracle bin tables
                 if (t.Name.StartsWith("BIN$", StringComparison.OrdinalIgnoreCase)) continue;
-                t.SchemaOwner = row[keyMap.OwnerKey].ToString();
+                if (!string.IsNullOrEmpty(keyMap.OwnerKey))
+                    t.SchemaOwner = row[keyMap.OwnerKey].ToString();
                 //Db2 system tables creeping in
                 if (keyMap.IsDb2 && t.SchemaOwner.Equals("SYSTOOLS", StringComparison.OrdinalIgnoreCase)) continue;
                 list.Add(t);
@@ -57,7 +58,7 @@ namespace DatabaseSchemaReader.Conversion
                    !type.Equals("BASE", StringComparison.OrdinalIgnoreCase) && //sybase
                    !type.Equals("BASE TABLE", StringComparison.OrdinalIgnoreCase) &&
                    !type.Equals("User", StringComparison.OrdinalIgnoreCase) &&
-                   //MySQL types are something different
+                //MySQL types are something different
                    !type.Equals("InnoDB", StringComparison.OrdinalIgnoreCase) &&
                    !type.Equals("MyISAM", StringComparison.OrdinalIgnoreCase);
         }
@@ -135,13 +136,17 @@ namespace DatabaseSchemaReader.Conversion
                 column.TableName = row[columnsKeyMap.TableKey].ToString();
                 if (!string.IsNullOrEmpty(columnsKeyMap.OrdinalKey))
                     column.Ordinal = Convert.ToInt32(row[columnsKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
-                column.DbDataType = row[columnsKeyMap.DatatypeKey].ToString();
+                if (!string.IsNullOrEmpty(columnsKeyMap.DatatypeKey))
+                    column.DbDataType = row[columnsKeyMap.DatatypeKey].ToString();
 
                 AddNullability(row, columnsKeyMap.NullableKey, column);
                 //the length unless it's an OleDb blob or clob
-                column.Length = GetNullableInt(row[columnsKeyMap.LengthKey]);
-                column.Precision = GetNullableInt(row[columnsKeyMap.PrecisionKey]);
-                column.Scale = GetNullableInt(row[columnsKeyMap.ScaleKey]);
+                if (!string.IsNullOrEmpty(columnsKeyMap.LengthKey))
+                    column.Length = GetNullableInt(row[columnsKeyMap.LengthKey]);
+                if (!string.IsNullOrEmpty(columnsKeyMap.PrecisionKey))
+                    column.Precision = GetNullableInt(row[columnsKeyMap.PrecisionKey]);
+                if (!string.IsNullOrEmpty(columnsKeyMap.ScaleKey))
+                    column.Scale = GetNullableInt(row[columnsKeyMap.ScaleKey]);
                 if (columnsKeyMap.DateTimePrecision != null)
                 {
                     column.DateTimePrecision = GetNullableInt(row[columnsKeyMap.DateTimePrecision]);
@@ -156,7 +161,7 @@ namespace DatabaseSchemaReader.Conversion
                     column.IsUniqueKey = true;
 
                 list.Add(column);
-            } 
+            }
             return list;
         }
 
