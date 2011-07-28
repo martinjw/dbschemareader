@@ -39,6 +39,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             //Intersystems Cache
             if (dt.Columns.Contains("TYPE_NAME")) DatatypeKey = "TYPE_NAME";
             //sybase ultralite
+            if (!dt.Columns.Contains(DefaultKey)) DefaultKey = "default";
             if (!dt.Columns.Contains(NullableKey)) NullableKey = "nulls";
             if (!dt.Columns.Contains(LengthKey)) LengthKey = null;
             if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = null;

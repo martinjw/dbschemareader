@@ -61,6 +61,10 @@ namespace DatabaseSchemaReader
                 {
                     _sr = new SybaseAsaSchemaReader(connectionString, providerName);
                 }
+                else if (providerName.Equals("iAnyWhere.Data.UltraLite", StringComparison.OrdinalIgnoreCase))
+                {
+                    _sr = new SybaseUltraLiteSchemaReader(connectionString, providerName);
+                }
             }
             _db = new DatabaseSchema(connectionString, providerName);
         }

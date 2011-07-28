@@ -39,7 +39,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             const string providername = "iAnyWhere.Data.UltraLite";
             //default sample location on Windows 7
-            //IN .Net 4 this isn't added to machine.config, so add the DbProvider in app.config
+            //In .Net 4 this isn't added to machine.config, so add the DbProvider in app.config
             const string connectionString = @"DBF=C:\Users\Public\Documents\SQL Anywhere 12\Samples\UltraLite.NET\CustDB\custdb.udb";
 
             ProviderChecker.Check(providername, connectionString);

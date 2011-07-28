@@ -125,6 +125,7 @@
     <Compile Include="ProviderSchemaReaders\SqlServerCeSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseAsaSchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\SybaseUltraLiteSchemaReader.cs" />
     <Compile Include="SqlGen\DataTypeConverter.cs" />
     <Compile Include="SqlGen\DB2\ConstraintWriter.cs" />
     <Compile Include="SqlGen\DB2\DataTypeWriter.cs" />
