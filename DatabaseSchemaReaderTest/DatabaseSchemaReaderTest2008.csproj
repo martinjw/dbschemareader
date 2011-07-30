@@ -85,6 +85,14 @@
     <Compile Include="SqlGen\InsertWriterTests\InsertWriterTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationDb2Test.cs" />
     <Compile Include="SqlGen\Migrations\MigrationPostgreSqlTest.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddForeignKey.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddIndex.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterColumn.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationCreateTable.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropColumn.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropIndex.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationRenameColumn.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationRenameTable.cs" />
     <Compile Include="SqlGen\MySql\DataTypesTest.cs" />
     <Compile Include="SqlGen\MySql\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\MySql\NumberDataTypesTest.cs" />

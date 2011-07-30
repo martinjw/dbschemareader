@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
@@ -114,6 +115,30 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             sb.AppendLine(trigger.TriggerBody + ";;");
             sb.AppendLine("DELIMITER ;");
             return sb.ToString();
+        }
+
+        public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            if (string.IsNullOrEmpty(originalColumnName) || databaseColumn == null)
+                return RenameColumn(databaseTable, databaseColumn, originalColumnName);
+            //MySql has to restate the column definition even if it's unchanged. Yuck, but we have the data.
+            var tableGenerator = CreateTableGenerator(databaseTable);
+            var columnDefinition = tableGenerator.WriteColumn(databaseColumn).Trim();
+            return string.Format(CultureInfo.InvariantCulture,
+                "ALTER TABLE {0} CHANGE {1} {2}",
+                TableName(databaseTable),
+                Escape(originalColumnName),
+                columnDefinition) + LineEnding();
+        }
+
+        public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            if (string.IsNullOrEmpty(originalTableName) || databaseTable == null)
+                return RenameTable(databaseTable, originalTableName);
+            return string.Format(CultureInfo.InvariantCulture,
+                                 "RENAME TABLE {0} TO {1};",
+                                 SchemaPrefix(databaseTable.SchemaOwner) + Escape(originalTableName),
+                                 Escape(databaseTable.Name));
         }
     }
 }

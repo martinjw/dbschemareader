@@ -10,8 +10,6 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         {
         }
 
-
-
         protected override string AlterColumnFormat
         {
             get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
@@ -48,6 +46,16 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             return string.Format(CultureInfo.InvariantCulture,
                 "DROP INDEX IF EXISTS {0} CASCADE;",
                 Escape(index.Name));
+        }
+
+        public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            return RenameColumnTo(databaseTable, databaseColumn, originalColumnName);
+        }
+
+        public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            return RenameTableTo(databaseTable, originalTableName);
         }
     }
 }

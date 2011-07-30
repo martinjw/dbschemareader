@@ -44,6 +44,7 @@ namespace DatabaseSchemaReader.SqlGen
         public string AddTable(DatabaseTable databaseTable)
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
+            tableGenerator.IncludeSchema = IncludeSchema; //cascade our setting
             return tableGenerator.Write().Trim();
         }
 
@@ -130,6 +131,36 @@ namespace DatabaseSchemaReader.SqlGen
                     columnDefinition);
         }
 
+        /// <summary>
+        /// Renames the column.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="originalColumnName">The original column name.</param>
+        /// <returns></returns>
+        public virtual string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            return "--TODO rename column " + TableName(databaseTable) + " from " + originalColumnName + " to " + Escape(databaseColumn.Name);
+        }
+
+        /// <summary>
+        /// Standard "Rename Column x To y" syntax for those that support it.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="originalColumnName">Name of the original column.</param>
+        /// <returns></returns>
+        protected string RenameColumnTo(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            if (string.IsNullOrEmpty(originalColumnName) || databaseColumn == null)
+                return RenameColumn(databaseTable, databaseColumn, originalColumnName);
+            return string.Format(CultureInfo.InvariantCulture,
+                "ALTER TABLE {0} RENAME COLUMN {1} TO {2}",
+                TableName(databaseTable),
+                Escape(originalColumnName),
+                Escape(databaseColumn.Name)) + LineEnding();
+        }
+
 
         public virtual string AddConstraint(DatabaseTable databaseTable, DatabaseConstraint constraint)
         {
@@ -144,6 +175,7 @@ namespace DatabaseSchemaReader.SqlGen
 
             //use the standard constraint writer for the database
             var constraintWriter = _ddlFactory.ConstraintWriter(databaseTable);
+            constraintWriter.IncludeSchema = IncludeSchema; //cascade setting
             return constraintWriter.WriteConstraint(constraint);
         }
 
@@ -365,6 +397,27 @@ namespace DatabaseSchemaReader.SqlGen
                                  "ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT;",
                                  TableName(databaseTable),
                                  Escape(databaseColumn.Name));
+        }
+
+        /// <summary>
+        /// Renames the table (if available)
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="originalTableName">Name of the original table.</param>
+        /// <returns></returns>
+        public virtual string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            return "--TODO rename table " + Escape(originalTableName) + " to " + TableName(databaseTable);
+        }
+
+        protected string RenameTableTo(DatabaseTable databaseTable, string originalTableName)
+        {
+            if (string.IsNullOrEmpty(originalTableName) || databaseTable == null)
+                return RenameTable(databaseTable, originalTableName);
+            return string.Format(CultureInfo.InvariantCulture,
+                                 "ALTER TABLE {0} RENAME TO {1};",
+                                 SchemaPrefix(databaseTable.SchemaOwner) + Escape(originalTableName),
+                                 Escape(databaseTable.Name));
         }
 
         public virtual string DropTable(DatabaseTable databaseTable)

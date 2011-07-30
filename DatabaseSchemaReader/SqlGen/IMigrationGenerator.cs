@@ -8,6 +8,10 @@ namespace DatabaseSchemaReader.SqlGen
     public interface IMigrationGenerator
     {
         /// <summary>
+        /// Include the schema when writing migration sql. Default true (except if detects SQLite, SqlServerCE)
+        /// </summary>
+        bool IncludeSchema { get; set; }
+        /// <summary>
         /// Adds the table. If any primary key, unqiue or check constraints are attached, they are written too (don't write them individually). Foreign keys must be added separately (use <see cref="AddConstraint"/>)
         /// </summary>
         /// <param name="databaseTable">The database table.</param>
@@ -29,6 +33,15 @@ namespace DatabaseSchemaReader.SqlGen
         /// <returns></returns>
         string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn);
         /// <summary>
+        /// Renames the column.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="originalColumnName">The original column name.</param>
+        /// <returns></returns>
+        string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName);
+
+        /// <summary>
         /// Drops the column.
         /// </summary>
         /// <param name="databaseTable">The database table.</param>
@@ -43,6 +56,14 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="databaseColumn">The database column.</param>
         /// <returns></returns>
         string DropDefault(DatabaseTable databaseTable, DatabaseColumn databaseColumn);
+
+        /// <summary>
+        /// Renames the table (if available)
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="originalTableName">Name of the original table.</param>
+        /// <returns></returns>
+        string RenameTable(DatabaseTable databaseTable, string originalTableName);
 
         /// <summary>
         /// Drops the table.

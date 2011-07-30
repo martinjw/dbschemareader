@@ -82,5 +82,10 @@ ON {3}
         {
             return "-- drop default on " + databaseColumn.Name;
         }
+
+        public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            return RenameTableTo(databaseTable, originalTableName);
+        }
     }
 }

@@ -86,5 +86,15 @@ ON {4}
                 SchemaPrefix(index.SchemaOwner),
                 Escape(index.Name));
         }
+
+        public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            return RenameColumnTo(databaseTable, databaseColumn, originalColumnName);
+        }
+
+        public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            return RenameTableTo(databaseTable, originalTableName);
+        }
     }
 }

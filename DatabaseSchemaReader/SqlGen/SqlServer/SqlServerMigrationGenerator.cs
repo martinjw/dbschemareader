@@ -4,7 +4,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     class SqlServerMigrationGenerator : MigrationGenerator
     {
-        public SqlServerMigrationGenerator() : base(SqlType.SqlServer)
+        public SqlServerMigrationGenerator()
+            : base(SqlType.SqlServer)
         {
         }
         protected override string AlterColumnFormat
@@ -30,6 +31,22 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 return "-- add trigger " + trigger.Name;
 
             return trigger.TriggerBody + ";";
+        }
+
+        public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            if (string.IsNullOrEmpty(originalColumnName) || databaseColumn == null)
+                return base.RenameColumn(databaseTable, databaseColumn, originalColumnName);
+            var name = TableName(databaseTable) + "." + Escape(originalColumnName);
+            return "sp_rename '" + name + "', '" + Escape(databaseColumn.Name) + "', 'COLUMN';";
+        }
+
+        public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            if (string.IsNullOrEmpty(originalTableName) || databaseTable == null)
+                return base.RenameTable(databaseTable, originalTableName);
+            var name = SchemaPrefix(databaseTable.SchemaOwner) + Escape(originalTableName);
+            return "sp_rename '" + name + "', '" + Escape(databaseTable.Name) + "';";
         }
     }
 }

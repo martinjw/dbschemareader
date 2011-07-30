@@ -103,7 +103,7 @@ namespace DatabaseSchemaReader.SqlGen
                 expression = expression.Substring(1, expression.Length - 2);
             }
             //ignore "IS NOT NULL" constraints as they are generally handled on the add/alter column level
-            if (expression.EndsWith(" IS NOT NULL", StringComparison.OrdinalIgnoreCase)) 
+            if (expression.EndsWith(" IS NOT NULL", StringComparison.OrdinalIgnoreCase))
                 return null;
 
             //translate if required
@@ -131,6 +131,8 @@ namespace DatabaseSchemaReader.SqlGen
 
         private string WriteForeignKey(DatabaseConstraint foreignKey)
         {
+            var foreignKeyTableName = ForeignKeyTableName(foreignKey);
+
             var fkTablePks = foreignKey.ReferencedColumns(_table.DatabaseSchema);
             //if we can't find other table, we won't list the fk table primary key columns - it *should* be automatic
             //in practice, SQLServer/Oracle are ok but MySQL will error 
@@ -154,9 +156,18 @@ namespace DatabaseSchemaReader.SqlGen
                                  TableName(_table),
                                  EscapeName(foreignKey.Name),
                                  GetColumnList(foreignKey.Columns),
-                                 EscapeName(foreignKey.RefersToTable),
+                                 foreignKeyTableName,
                                  fkColumnList,
                                  deleteUpdateRule) + SqlFormatProvider().LineEnding();
+        }
+
+        private string ForeignKeyTableName(DatabaseConstraint foreignKey)
+        {
+            var foreignKeyTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
+
+            return (foreignKeyTable != null)
+                                          ? TableName(foreignKeyTable)
+                                          : EscapeName(foreignKey.RefersToTable);
         }
 
         public string WriteConstraint(DatabaseConstraint constraint)

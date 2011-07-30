@@ -46,5 +46,21 @@ namespace DatabaseSchemaReader.SqlGen.Db2
             //db2 returns the entire "Create trigger" statement, so this is very easy
             return trigger.TriggerBody + ";";
         }
+
+        public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
+        {
+            return RenameColumnTo(databaseTable, databaseColumn, originalColumnName);
+        }
+
+        public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
+        {
+            if (string.IsNullOrEmpty(originalTableName) || databaseTable == null)
+                return RenameTable(databaseTable, originalTableName);
+            return string.Format(CultureInfo.InvariantCulture,
+                                 @"--IMPORTANT: check views, constraints, triggers don't refer to this table
+RENAME TABLE {0} TO {1};",
+                                 SchemaPrefix(databaseTable.SchemaOwner) + Escape(originalTableName),
+                                 Escape(databaseTable.Name));
+        }
     }
 }
