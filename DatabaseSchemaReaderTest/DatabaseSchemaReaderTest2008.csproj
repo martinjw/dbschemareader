@@ -59,6 +59,7 @@
     <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
+    <Compile Include="DataSchema\ExtensionsTest.cs" />
     <Compile Include="IntegrationTests\Db2.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
     <Compile Include="IntegrationTests\IntersystemsCache.cs" />

@@ -103,6 +103,8 @@
     <Compile Include="DataSchema\DatabasePackage.cs" />
     <Compile Include="DataSchema\DatabaseResultSet.cs" />
     <Compile Include="DataSchema\DatabaseSchema.cs" />
+    <Compile Include="DataSchema\DatabaseSchemaConstraintExtensions.cs" />
+    <Compile Include="DataSchema\DatabaseSchemaExtensions.cs" />
     <Compile Include="DataSchema\DatabaseSchemaFixer.cs" />
     <Compile Include="DataSchema\DatabaseSequence.cs" />
     <Compile Include="DataSchema\DatabaseStoredProcedure.cs" />
