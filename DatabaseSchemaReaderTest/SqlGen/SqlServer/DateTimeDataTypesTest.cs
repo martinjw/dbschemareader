@@ -62,6 +62,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             _column.DbDataType = "TIMESTAMP";
             _column.Precision = 5;
             //this isn't a SqlServer Timestamp
+            _column.DataType = null;
 
             //act
             var result = _typeWriter.WriteDataType(_column);

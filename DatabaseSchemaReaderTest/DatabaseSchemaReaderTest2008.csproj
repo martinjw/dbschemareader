@@ -77,6 +77,11 @@
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="Procedures\RunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingDateTimeTest.cs" />
+    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingDecimalTest.cs" />
+    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingIntegerTest.cs" />
+    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingStringTest.cs" />
+    <Compile Include="SqlGen\DataTypeParserTest.cs" />
     <Compile Include="SqlGen\Db2\DataTypesTest.cs" />
     <Compile Include="SqlGen\Db2\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\Db2\NumberDataTypesTest.cs" />
@@ -86,6 +91,7 @@
     <Compile Include="SqlGen\InsertWriterTests\InsertWriterTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationDb2Test.cs" />
     <Compile Include="SqlGen\Migrations\MigrationPostgreSqlTest.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddColumn.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddForeignKey.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddIndex.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterColumn.cs" />

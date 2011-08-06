@@ -28,10 +28,18 @@ namespace DatabaseSchemaReader.Utilities
                     Console.WriteLine(collectionName);
                     if (collectionName != metaDataCollections)
                     {
-                        var col = connection.GetSchema(collectionName);
-                        foreach (System.Data.DataColumn column in col.Columns)
+                        try
                         {
-                            Console.WriteLine("\t" + column.ColumnName + "\t" + column.DataType.Name);
+                            var col = connection.GetSchema(collectionName);
+                            foreach (System.Data.DataColumn column in col.Columns)
+                            {
+                                Console.WriteLine("\t" + column.ColumnName + "\t" + column.DataType.Name);
+                            }
+                        }
+                        catch (NotImplementedException)
+                        {
+                            
+                                Console.WriteLine("\t" + collectionName + " not implemented");
                         }
                     }
                 }

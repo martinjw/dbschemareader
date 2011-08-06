@@ -52,6 +52,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Db2
             //arrange
             _column.DbDataType = "TIMESTAMP";
             _column.Precision = 5;
+            _column.DataType = null;
 
             //act
             var result = _typeWriter.WriteDataType(_column);

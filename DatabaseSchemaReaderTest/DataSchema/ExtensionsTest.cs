@@ -1,6 +1,16 @@
-﻿using System.Linq;
+﻿using System.Data;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#else
+using NUnit.Framework;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestCleanup = NUnit.Framework.TearDownAttribute;
+using TestContext = System.Object;
+#endif
 
 namespace DatabaseSchemaReaderTest.DataSchema
 {
@@ -53,6 +63,27 @@ namespace DatabaseSchemaReaderTest.DataSchema
             Assert.AreEqual(cats, fk.ReferencedTable(schema));
         }
 
+
+
+        [TestMethod]
+        public void PrimaryKeyTest()
+        {
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("Categories")
+                .AddColumn("CategoryId", "INT").AddPrimaryKey()
+                .AddColumn("CategoryName", "NVARCHAR").AddLength(50);
+
+            //assert
+            var cats = schema.FindTableByName("Categories");
+
+            var id = cats.PrimaryKeyColumn;
+            Assert.IsNotNull(id);
+            Assert.AreEqual("INT", id.DbDataType);
+            Assert.AreEqual(true, id.IsPrimaryKey);
+            Assert.AreEqual(false, id.Nullable);
+        }
+
         [TestMethod]
         public void UniqueKeysTest()
         {
@@ -73,6 +104,71 @@ namespace DatabaseSchemaReaderTest.DataSchema
             var catName = cats.Columns.Find(c => c.Name == "CategoryName");
             Assert.IsTrue(catName.IsUniqueKey);
 
+        }
+
+        [TestMethod]
+        public void ParsingDataTypeTest()
+        {
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("Categories")
+                .AddColumn("CategoryId", "INT").AddPrimaryKey()
+                .AddColumn("CategoryName", "VARCHAR(50)");
+
+            //assert
+            var cats = schema.FindTableByName("Categories");
+            var catName = cats.FindColumn("CategoryName");
+
+            Assert.AreEqual("VARCHAR", catName.DbDataType);
+            Assert.AreEqual(50, catName.Length);
+
+        }
+
+        [TestMethod]
+        public void PropertiesTest()
+        {
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("Categories")
+                .AddColumn("CategoryId", DbType.Int32).AddPrimaryKey()
+                .AddColumn("CategoryName", DbType.String).AddLength(50).AddNullable()
+                .AddColumn("Cost", DbType.Decimal).AddPrecisionScale(15,4).AddNullable();
+
+            //assert
+            var cats = schema.FindTableByName("Categories");
+
+            var catName = cats.FindColumn("CategoryName");
+
+            Assert.AreEqual("NVARCHAR", catName.DbDataType);
+            Assert.AreEqual(50, catName.Length);
+            Assert.AreEqual(true, catName.Nullable);
+
+            var cost = cats.FindColumn("Cost");
+
+            Assert.AreEqual("DECIMAL", cost.DbDataType);
+            Assert.AreEqual(15, cost.Precision);
+            Assert.AreEqual(4, cost.Scale);
+            Assert.AreEqual(true, cost.Nullable);
+        }
+
+        [TestMethod]
+        public void DbTypeTest()
+        {
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("Categories")
+                .AddColumn("CategoryId", DbType.Int32).AddPrimaryKey()
+                .AddColumn("CategoryName", DbType.String).AddLength(50).AddNullable();
+
+            //assert
+            var cats = schema.FindTableByName("Categories");
+
+            var id = cats.PrimaryKeyColumn;
+            Assert.AreEqual("INT", id.DbDataType);
+
+            var catName = cats.FindColumn("CategoryName");
+
+            Assert.AreEqual("NVARCHAR", catName.DbDataType);
         }
     }
 }

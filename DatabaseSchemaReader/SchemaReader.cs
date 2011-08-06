@@ -570,12 +570,23 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                const string collectionName = "Procedures";
-                if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
-                string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
-                return conn.GetSchema(collectionName, restrictions);
+                return StoredProcedures(conn);
             }
         }
+
+        /// <summary>
+        /// Get all the stored procedures (owner required for Oracle- otherwise null).
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable StoredProcedures(DbConnection connection)
+        {
+            const string collectionName = "Procedures";
+            if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(collectionName);
+            string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
+            return connection.GetSchema(collectionName, restrictions);
+        }
+
         /// <summary>
         /// Get all the arguments for a stored procedures (or all sprocs)
         /// NB: in oracle we get arguments for sprocs in packages. This is slow.

@@ -37,6 +37,7 @@ namespace DatabaseSchemaReader.DataSchema
             };
             table.PrimaryKey.Columns.Add(databaseColumn.Name);
             databaseColumn.IsPrimaryKey = true;
+            databaseColumn.Nullable = false; //you can't have a nullable pk
             return databaseColumn;
         }
 

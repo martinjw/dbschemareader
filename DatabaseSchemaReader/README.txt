@@ -6,17 +6,17 @@ From MSDN http://msdn.microsoft.com/en-us/library/kcax58fh.aspx
 
 Each of the .NET Framework managed providers implement the GetSchema method in the Connection class, and the schema information that is returned from the GetSchema method comes in the form of a DataTable. The GetSchema method is an overloaded method that provides optional parameters for specifying the schema collection to return, and restricting the amount of information returned.+
 
-Unfortunately the information is returned in datatables, and the schema collections are different for each provider (SqlServer, Oracle, MySql).
+Unfortunately the information is returned in datatables, and the schema collections are different for each provider (SqlServer, Oracle, MySql, etc).
 
 This is an adapter which loads those collections into simple collections of plain old CLR objects, which are the same for all providers. It doesn't try to hide the underlying differences: Oracle will have packages and none of the others will. But the many small differences between tables, columns and stored procedure parameters disappear.
 
-Because almost all ADO providers support the GetSchema standard, it can get basic schema metadata for almost all databases. Where the provider schema doesn't provide enough information, there are additional calls for specific databases (often information on primary key and foreign key columns is limited so we call the database metadata directly). We look for additional information in SqlServer, Oracle, SqlServer Ce, MySQL and Postgresql.
+Because almost all ADO providers support the GetSchema standard, it can get basic schema metadata for almost all databases. Where the provider schema doesn't provide enough information, there are additional calls for specific databases (often information on primary key and foreign key columns is limited so we call the database metadata directly). We look for additional information in SqlServer, Oracle, SqlServer Ce, MySQL, Postgresql, DB2, Ingres and Sybase ASE/ASA/UltraLite.
 
 There is are two very simple Winforms UI projects showing example uses. See the tests show how to use the class library.
 
 It is not optimized or particularly well designed code. It was originally written in 2005, just after .Net 2.0 came out. It has been updated to .net 3.5 (although you can see the .net 2 vintage of much of it), and the project files are VS 2008 and VS 2010.
 
-Over the years I've used it for code generation of data access code, and for conversions between database platforms. Some of this code is included, but there are better solutions for data access code gen (you could still use this library to get the schema data and then use that within T4 templating, for instance).
+Over the years I've used it for code generation of data access code, and for conversions between database platforms. Some of this code is included, but this is not specialized for data access code gen (you could still use this library to get the schema data and then use that within T4 templating, for instance).
 
 ===Use===
 
@@ -113,7 +113,7 @@ If you use Oracle packages, the generated code is grouped with a folder/namespac
 
 If a stored procedure has ResultSets (if you used ResultSetReader), a typed result class is generated, and the stored procedure class has an Execute method.
 
-It also writes a VS2008 v3.5 csproj file, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
+It also writes VS2008 and VS2010 csproj files, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
 
 ===Comparisons===
 

@@ -54,6 +54,16 @@ namespace DatabaseSchemaReader.SqlGen
                     dataType == "IMAGE" ||
                     dataType == "OID");
         }
+        public static bool HasPrecision(string dataType)
+        {
+            return (dataType == "DEC" ||
+                    dataType == "DECIMAL" ||
+                    dataType == "NUMBER" ||
+                    dataType == "NUMERIC" ||
+                    dataType == "FLOAT" ||
+                    dataType == "DOUBLE" ||
+                    dataType == "DOUBLE PRECISION");
+        }
         public static bool IsDateTime(string dataType)
         {
             return (dataType == "DATETIME" ||
@@ -78,6 +88,58 @@ namespace DatabaseSchemaReader.SqlGen
             if (precision == 18 && scale == 0) return "DECIMAL";
             if (precision == 15 && scale == 4) return "MONEY";
             return "NUMERIC";
+        }
+
+        public static DatabaseColumn ParseDataType(string dataType)
+        {
+            var column = new DatabaseColumn();
+            if (string.IsNullOrEmpty(dataType))
+                return column;
+            var brace = dataType.IndexOf('(');
+            if (brace == -1)
+            {
+                //"INT"
+                column.DbDataType = dataType;
+                return column;
+            }
+            column.DbDataType = dataType.Substring(0, brace).Trim();
+
+            brace = brace + 1;
+            var endBrace = dataType.IndexOf(')', brace);
+            var param = dataType.Substring(brace, endBrace - brace).Trim();
+            if (param.IndexOf("MAX", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                //"VARCHAR(MAX)"
+                column.Length = -1;
+                return column;
+            }
+            var comma = param.IndexOf(',');
+
+            if (comma == -1)
+            {
+                //"VARCHAR(20)"
+                int length;
+                if (int.TryParse(param, out length))
+                {
+                    var hasPrecision = HasPrecision(column.DbDataType.ToUpperInvariant());
+                    if (hasPrecision)
+                        column.Precision = length;
+                    else
+                        column.Length = length;
+                }
+                return column;
+            }
+            //"NUMBER(10,2)"
+            var p1 = param.Substring(0, comma).Trim();
+            var p2 = param.Substring(comma + 1).Trim();
+            int precision, scale;
+            if (int.TryParse(p1, out precision) && int.TryParse(p2, out scale))
+            {
+                column.Precision = precision;
+                column.Scale = scale;
+            }
+
+            return column;
         }
 
     }

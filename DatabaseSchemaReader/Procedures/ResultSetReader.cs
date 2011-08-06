@@ -101,6 +101,13 @@ namespace DatabaseSchemaReader.Procedures
                                     Debug.WriteLine(executionName + Environment.NewLine
                                                     + exception.Message);
                                 }
+                                catch (Exception exception) //for exceptions that don't derive from DbException
+                                {
+                                    //ignore any db exceptions
+                                    Debug.WriteLine(executionName + Environment.NewLine
+                                                    + exception.Message);
+                                }
+
                             }
                             tx.Rollback();
                         }
@@ -132,6 +139,8 @@ namespace DatabaseSchemaReader.Procedures
         {
             foreach (var argument in procedure.Arguments)
             {
+                if (argument.Ordinal == 0 && !argument.In && string.Equals(argument.Name, "RETURN_VALUE", StringComparison.OrdinalIgnoreCase))
+                    continue;
                 var parameter = command.CreateParameter();
                 AddParameter(parameter, argument);
                 command.Parameters.Add(parameter);

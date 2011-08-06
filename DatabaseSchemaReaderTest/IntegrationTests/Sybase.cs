@@ -18,6 +18,24 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class Sybase
     {
+
+        [TestMethod]
+        public void SybaseAseTest()
+        {
+            //using pubs3 with default sa account with Ase Developer Edition 15 on localhost (had to use IP address to get it to connect)
+            const string providername = "Sybase.Data.AseClient";
+            const string connectionString = "Server=192.168.1.100;Port=5000;Uid=sa;Pwd='';Initial Catalog=pubs3";
+
+            ProviderChecker.Check(providername, connectionString);
+
+            DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            var schema = dbReader.ReadAll();
+
+            Assert.IsTrue(schema.Tables.Count > 0);
+        }
+
         [TestMethod]
         public void SybaseAnyWhereTest()
         {
