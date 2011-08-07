@@ -1,5 +1,7 @@
-﻿using DatabaseSchemaReader;
+﻿using System;
+using DatabaseSchemaReader;
 #if !NUNIT
+using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
 using NUnit.Framework;
@@ -14,20 +16,37 @@ namespace DatabaseSchemaReaderTest
 {
     
     /// <summary>
-    /// INTEGRATION TEST
+    /// 
     ///</summary>
-    [TestClass()]
+    [TestClass]
     public class DatabaseReaderTest
     {
 
-        /// <summary>
-        ///A test for DatabaseReader Constructor
-        ///</summary>
-        [TestMethod()]
-        public void DatabaseReaderConstructorTest()
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NoConnectionStringTest()
         {
-            var target = new DatabaseReader();
-            Assert.Inconclusive("TODO: Implement code to verify target");
+            new DatabaseReader(null, SqlType.SqlServer);
+
+            Assert.Fail("Should not have succeeded");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NoProviderTest()
+        {
+            new DatabaseReader("Dummy", null);
+
+            Assert.Fail("Should not have succeeded");
+        }
+
+        [TestMethod]
+        public void SqlTypeTest()
+        {
+            var dr =  new DatabaseReader("Dummy", SqlType.SqlServer);
+            Assert.AreEqual("System.Data.SqlClient", dr.DatabaseSchema.Provider);
+
+            //the other types will fail if they aren't installed
         }
     }
 }

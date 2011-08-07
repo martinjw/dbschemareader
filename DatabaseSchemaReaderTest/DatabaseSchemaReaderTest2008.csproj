@@ -57,7 +57,9 @@
     <Compile Include="Compare\CompareViewsTest.cs" />
     <Compile Include="Compare\CompareProceduresTest.cs" />
     <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
+    <Compile Include="DatabaseReaderTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
+    <Compile Include="DataSchema\DatabaseSchemaTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="DataSchema\ExtensionsTest.cs" />
     <Compile Include="IntegrationTests\Db2.cs" />

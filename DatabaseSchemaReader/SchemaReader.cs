@@ -51,10 +51,10 @@ namespace DatabaseSchemaReader
         public SchemaReader(string connectionString, string providerName)
         {
             if (String.IsNullOrEmpty(connectionString))
-                throw new ArgumentException("connectionString must not be empty");
+                throw new ArgumentNullException("connectionString", "connectionString must not be empty");
 
             if (String.IsNullOrEmpty(providerName))
-                throw new ArgumentException("providerName must not be empty");
+                throw new ArgumentNullException("providerName", "providerName must not be empty");
 
             ConnectionString = connectionString;
             ProviderName = providerName;

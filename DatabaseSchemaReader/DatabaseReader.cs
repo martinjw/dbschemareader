@@ -74,6 +74,42 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class for one of the standard providers.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="sqlType">Type of the SQL.</param>
+        public DatabaseReader(string connectionString, SqlType sqlType)
+        {
+            switch (sqlType)
+            {
+                case SqlType.Oracle:
+                    _sr = new OracleSchemaReader(connectionString, "System.Data.OracleClient");
+                    break;
+                case SqlType.SqlServer:
+                    _sr = new SqlServerSchemaReader(connectionString, "System.Data.SqlClient");
+                    break;
+                case SqlType.SqlServerCe:
+                    _sr = new SqlServerCeSchemaReader(connectionString, "System.Data.SqlServerCe.4.0");
+                    break;
+                case SqlType.MySql:
+                    _sr = new MySqlSchemaReader(connectionString, "MySql.Data.MySqlClient");
+                    break;
+                case SqlType.PostgreSql:
+                    _sr = new PostgreSqlSchemaReader(connectionString, "Npgsql");
+                    break;
+                case SqlType.Db2:
+                    _sr = new Db2SchemaReader(connectionString, "IBM.Data.DB2");
+                    break;
+                case SqlType.SQLite:
+                    _sr = new SchemaExtendedReader(connectionString, "System.Data.SQLite");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("sqlType", "Not a recognized SqlType");
+            }
+            _db = new DatabaseSchema(connectionString, _sr.ProviderName);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class. For Oracle, use this overload.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
