@@ -69,6 +69,10 @@ namespace DatabaseSchemaReader
                 {
                     _sr = new SybaseUltraLiteSchemaReader(connectionString, providerName);
                 }
+                else if (providerName.Equals("System.Data.OleDb", StringComparison.OrdinalIgnoreCase))
+                {
+                    _sr = new OleDbSchemaReader(connectionString, providerName);
+                }
             }
             _db = new DatabaseSchema(connectionString, providerName);
         }
@@ -265,6 +269,8 @@ namespace DatabaseSchemaReader
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
 
+            _sr.PostProcessing(DatabaseSchema);
+
             return tables;
         }
 
@@ -331,6 +337,7 @@ namespace DatabaseSchemaReader
 
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
+            _sr.PostProcessing(DatabaseSchema);
 
             return table;
         }

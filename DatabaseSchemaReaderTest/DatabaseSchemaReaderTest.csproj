@@ -67,6 +67,7 @@
     <Compile Include="DataSchema\DatabaseSchemaTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="DataSchema\ExtensionsTest.cs" />
+    <Compile Include="IntegrationTests\Access.cs" />
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
     <Compile Include="IntegrationTests\IntersystemsCache.cs" />
@@ -117,6 +118,8 @@
     <Compile Include="SqlGen\Oracle\DataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
+    <Compile Include="SqlGen\SqlServer\AccessCheckConstraintTest.cs" />
+    <Compile Include="SqlGen\SqlServer\AccessConversionTest.cs" />
     <Compile Include="SqlGen\SqlServer\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\NumberDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\StringDataTypesTest.cs" />

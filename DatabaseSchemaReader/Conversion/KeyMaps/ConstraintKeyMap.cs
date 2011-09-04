@@ -34,6 +34,14 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             //db2
             CheckDb2(dt, constraintType);
 
+            //oledb
+            if (!dt.Columns.Contains(Key)) Key = "FK_NAME";
+            if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = "ORDINAL";
+            if (!dt.Columns.Contains(TableKey)) TableKey = "FK_TABLE_NAME";
+            if (!dt.Columns.Contains(ColumnKey)) ColumnKey = "FK_COLUMN_NAME";
+            if (!dt.Columns.Contains(RefersToTableKey)) RefersToTableKey = "PK_TABLE_NAME";
+            if (!dt.Columns.Contains(RefersToKey)) RefersToKey = "PK_NAME";
+
             if (!dt.Columns.Contains(RefersToKey)) RefersToKey = null;
             if (!dt.Columns.Contains(RefersToTableKey)) RefersToTableKey = null;
             if (!dt.Columns.Contains(DeleteRuleKey)) DeleteRuleKey = null;

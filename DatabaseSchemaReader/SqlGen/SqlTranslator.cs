@@ -32,6 +32,14 @@ namespace DatabaseSchemaReader.SqlGen
         public static string EnsureCurrentTimestamp(string value)
         {
             if (string.IsNullOrEmpty(value)) return value;
+
+            //access
+            var regex = new Regex(@"\bDate\(\)", RegexOptions.Compiled);
+            if (regex.IsMatch(value))
+            {
+                value = regex.Replace(value, "current_timestamp");
+            }
+
             //SQLServer function
             var getDate = value.IndexOf("getdate()", StringComparison.OrdinalIgnoreCase);
             if (getDate != -1)

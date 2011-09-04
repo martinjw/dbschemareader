@@ -119,6 +119,7 @@
     <Compile Include="Data\DateConverter.cs" />
     <Compile Include="Data\InsertWriter.cs" />
     <Compile Include="Data\Reader.cs" />
+    <Compile Include="ProviderSchemaReaders\OleDbSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseAseSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseUltraLiteSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseAsaSchemaReader.cs" />

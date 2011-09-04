@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.DataSchema
                     //prefix with package name
                     fullName = Package + "." + fullName;
                 }
-                if (!SchemaOwner.Equals("dbo"))
+                if (!string.IsNullOrEmpty(SchemaOwner) && !SchemaOwner.Equals("dbo"))
                 {
                     //prefix with schema name
                     fullName = SchemaOwner + "." + fullName;

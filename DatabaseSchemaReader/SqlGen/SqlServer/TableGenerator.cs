@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -28,12 +29,21 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
             sb.AppendLine(constraintWriter.WriteUniqueKeys());
             //looks like a boolean check, skip it
-            constraintWriter.CheckConstraintExcluder = check => (_hasBit && check.Expression.Contains(" IN (0, 1)"));
+            constraintWriter.TranslateCheckConstraint = TranslateCheckExpression;
             sb.AppendLine(constraintWriter.WriteCheckConstraints());
 
             AddIndexes(sb);
 
             return sb.ToString();
+        }
+        private static string TranslateCheckExpression(string expression)
+        {
+            const string pattern = @"\bDate\(\)";
+            if (Regex.IsMatch(expression, pattern))
+            {
+                expression = Regex.Replace(expression, pattern, "getdate()");
+            }
+            return expression;
         }
         protected virtual ConstraintWriter CreateConstraintWriter()
         {
@@ -68,10 +78,20 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         protected override string WriteDataType(DatabaseColumn column)
         {
 
+            var sql = DataTypeWriter.WriteDataType(column);
+            if (sql == "BIT") _hasBit = true;
+
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
                 var value = FixDefaultValue(column.DefaultValue);
+                if(_hasBit)
+                {
+                    //Access Yes/No boolean
+                    if (value.Equals("No", StringComparison.OrdinalIgnoreCase)) value = "0";
+                    if (value.Equals("Yes", StringComparison.OrdinalIgnoreCase)) value = "1";
+                }
+
                 const string defaultConstraint = "DEFAULT ";
                 if (IsStringColumn(column))
                 {
@@ -82,9 +102,6 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                     defaultValue = defaultConstraint + value;
                 }
             }
-
-            var sql = DataTypeWriter.WriteDataType(column);
-            if (sql == "BIT") _hasBit = true;
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))
             {

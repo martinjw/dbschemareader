@@ -1,4 +1,5 @@
 ﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.SqlGen.SqlServer;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServerCe
 {
@@ -12,10 +13,14 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         {
             DataTypeWriter = new DataTypeWriter();
         }
-        //protected override ConstraintWriter CreateConstraintWriter()
-        //{
-        //    return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema };
-        //}
+        protected override ConstraintWriter CreateConstraintWriter()
+        {
+            var constraintWriter = base.CreateConstraintWriter();
+            //check constraints don't seem to be included so ignore them all
+            constraintWriter.CheckConstraintExcluder = check => true;
+            return constraintWriter;
+        }
+
         protected override IMigrationGenerator CreateMigrationGenerator()
         {
             //this will ensure the add constraints don't have schema naming

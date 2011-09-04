@@ -98,14 +98,22 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public DatabaseTable ReferencedTable(DatabaseSchema schema)
         {
-            if(schema == null) return null;
+            if (schema == null) return null;
 
-            return schema.Tables.FirstOrDefault(table =>
-                //the string RefersToTable is the same
-                table.Name.Equals(RefersToTable, StringComparison.OrdinalIgnoreCase) ||
-                //or the RefersToConstraint is it's primary key
-                (table.PrimaryKey != null && 
-                table.PrimaryKey.Name.Equals(RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
+            //first look up the refers to table name
+            var refTable = schema.Tables
+                .FirstOrDefault(table =>
+                    //the string RefersToTable is the same
+                     table.Name.Equals(RefersToTable, StringComparison.OrdinalIgnoreCase));
+
+            //if not found, look for the constraint name
+            if (refTable == null) refTable = schema.Tables
+                 .FirstOrDefault(table =>
+                     //or the RefersToConstraint is it's primary key
+                     (table.PrimaryKey != null &&
+                     table.PrimaryKey.Name.Equals(RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
+
+            return refTable;
         }
 
         /// <summary>

@@ -109,7 +109,14 @@ namespace DatabaseSchemaReader.SqlGen
             //translate if required
             if (TranslateCheckConstraint != null) expression = TranslateCheckConstraint(expression);
 
-            var name = ConstraintName(checkConstraint.Name);
+            var constraintName = checkConstraint.Name;
+            if (constraintName.Contains("]."))
+            {
+                //access format names [table].[column].ValidationRule
+                constraintName = constraintName.Replace("[", "").Replace("]", "").Replace(".", "_");
+                expression = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].") + 1) + " " + expression;
+            }
+            var name = ConstraintName(constraintName);
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} CHECK ({2})",

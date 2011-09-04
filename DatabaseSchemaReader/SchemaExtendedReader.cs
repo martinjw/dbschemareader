@@ -94,6 +94,10 @@ namespace DatabaseSchemaReader
             //override this if required
         }
 
+        public virtual void PostProcessing(DatabaseSchema schema)
+        {
+            //override this if required
+        }
         /// <summary>
         /// If there are no datatypes, call this to load them directly
         /// </summary>

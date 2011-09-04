@@ -61,9 +61,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 dataType == "BINARY" ||
                 dataType == "VARBINARY")
             {
-                dataType = dataType + " (" +
-                    (length != -1 ? length.ToString() : "MAX")
-                    + ")";
+                dataType = WriteDataTypeWithLength(dataType, length);
             }
 
             if (dataType == "NUMERIC" ||
@@ -76,9 +74,25 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return dataType;
         }
 
+        protected virtual string WriteDataTypeWithLength(string dataType, int? length)
+        {
+            if (length == 0) length = -1; //a zero length varchar doesn't make sense
+            dataType = dataType + " (" +
+                       (length != -1 ? length.ToString() : "MAX")
+                       + ")";
+            return dataType;
+        }
+
         protected virtual string ConvertOtherPlatformTypes(string dataType, int providerType, int? length, int? precision, int? scale)
         {
             dataType = PostgreSqlToSqlServerConversion(dataType);
+            dataType = AccessToSqlServerConversion(dataType);
+            //a text with a defined length = probably a NvarChar
+            if (dataType == "TEXT")
+            {
+                if (length == 0) return "NVARCHAR (MAX)"; //SqlServer TEXT will have length NULL
+                if (length > 0) return "NVARCHAR";
+            }
             return OracleToSqlServerConversion(dataType, providerType, precision, scale);
         }
         private static string PostgreSqlToSqlServerConversion(string dataType)
@@ -99,6 +113,20 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (dataType == "BYTEA") return "VARBINARY";
             if (dataType == "UUID") return "UNIQUEIDENTIFIER";
             if (dataType == "OID") return "VARBINARY";
+            return dataType;
+        }
+
+        private static string AccessToSqlServerConversion(string dataType)
+        {
+            if (dataType == "LONG") return "INT";
+            if (dataType == "SINGLE") return "REAL";
+            if (dataType == "BYTE") return "TINYINT";
+            if (dataType == "SHORT") return "SMALLINT";
+            if (dataType == "BOOLEAN") return "BIT";
+            if (dataType == "CURRENCY") return "MONEY";
+            if (dataType == "MEMO") return "NVARCHAR (MAX)";
+            if (dataType == "BINARY") return "VARBINARY";
+            if (dataType == "GUID") return "UNIQUEIDENTIFIER";
             return dataType;
         }
 

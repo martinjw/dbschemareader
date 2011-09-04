@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -117,65 +119,80 @@ namespace DatabaseSchemaReader.DataSchema
             //check if no datatypes loaded
             if (databaseSchema.DataTypes.Count == 0) return;
 
+            //quickly lookup the datatypes
+            var dataTypes = new Dictionary<string, DataType>();
+            foreach (DataType type in databaseSchema.DataTypes)
+            {
+                //just in case there are duplicate names
+                if(!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
+            }
+
             foreach (DatabaseTable table in databaseSchema.Tables)
             {
-                UpdateColumnDataTypes(databaseSchema, table.Columns);
+                UpdateColumnDataTypes(dataTypes, table.Columns);
             }
             foreach (DatabaseView view in databaseSchema.Views)
             {
-                UpdateColumnDataTypes(databaseSchema, view.Columns);
+                UpdateColumnDataTypes(dataTypes, view.Columns);
             }
             foreach (DatabaseStoredProcedure sproc in databaseSchema.StoredProcedures)
             {
-                UpdateArgumentDataTypes(databaseSchema, sproc);
+                UpdateArgumentDataTypes(dataTypes, sproc);
             }
             foreach (DatabaseFunction function in databaseSchema.Functions)
             {
-                UpdateArgumentDataTypes(databaseSchema, function);
+                UpdateArgumentDataTypes(dataTypes, function);
             }
             foreach (DatabasePackage package in databaseSchema.Packages)
             {
                 foreach (DatabaseStoredProcedure sproc in package.StoredProcedures)
                 {
-                    UpdateArgumentDataTypes(databaseSchema, sproc);
+                    UpdateArgumentDataTypes(dataTypes, sproc);
                 }
                 foreach (DatabaseFunction function in package.Functions)
                 {
-                    UpdateArgumentDataTypes(databaseSchema, function);
+                    UpdateArgumentDataTypes(dataTypes, function);
                 }
             }
         }
 
-        private static void UpdateArgumentDataTypes(DatabaseSchema databaseSchema, DatabaseStoredProcedure sproc)
+        private static void UpdateArgumentDataTypes(IDictionary<string, DataType> dataTypes, DatabaseStoredProcedure sproc)
         {
             foreach (DatabaseArgument arg in sproc.Arguments)
             {
-                arg.DataType = FindDataType(databaseSchema, arg.DatabaseDataType);
+                arg.DataType = FindDataType(dataTypes, arg.DatabaseDataType);
             }
         }
 
-        private static void UpdateColumnDataTypes(DatabaseSchema databaseSchema, IEnumerable<DatabaseColumn> columns)
+        private static void UpdateColumnDataTypes(IDictionary<string, DataType> dataTypes, IEnumerable<DatabaseColumn> columns)
         {
             foreach (DatabaseColumn column in columns)
             {
                 if (column.DataType == null)
                 {
                     string dbDataType = column.DbDataType;
-                    column.DataType = FindDataType(databaseSchema, dbDataType);
+                    column.DataType = FindDataType(dataTypes, dbDataType);
                 }
             }
         }
 
-        private static DataType FindDataType(DatabaseSchema databaseSchema, string dbDataType)
+        private static DataType FindDataType(IDictionary<string, DataType> dataTypes, string dbDataType)
         {
+            //quick lookup in dictionary, otherwise has to loop thru
+
             if (string.IsNullOrEmpty(dbDataType)) return null;
-            var dt = databaseSchema.DataTypes.Find(dataType => dataType.TypeName.Equals(dbDataType, StringComparison.OrdinalIgnoreCase));
-            if (dt == null)
-            {
-                //TIMESTAMP(9) from Oracle == Timestamp
-                dt = databaseSchema.DataTypes.Find(dataType => dbDataType.StartsWith(dataType.TypeName, StringComparison.OrdinalIgnoreCase));
-            }
+            DataType dt;
+            if (dataTypes.TryGetValue(dbDataType, out dt)) return dt;
+
+            //TIMESTAMP(9) from Oracle == Timestamp
+            dt = dataTypes.Values.FirstOrDefault(dataType => dbDataType.StartsWith(dataType.TypeName, StringComparison.OrdinalIgnoreCase));
+
+            int i;
+            if (dt == null && int.TryParse(dbDataType, NumberStyles.Integer, CultureInfo.InvariantCulture, out i))
+                dt = dataTypes.Values.FirstOrDefault(dataType => i.Equals(dataType.ProviderDbType));
+
             return dt;
         }
+
     }
 }

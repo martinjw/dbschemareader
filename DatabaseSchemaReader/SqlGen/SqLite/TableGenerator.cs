@@ -52,6 +52,18 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             foreach (var checkConstraint in Table.CheckConstraints)
             {
                 var expression = SqlTranslator.Fix(checkConstraint.Expression);
+
+                //check if Access and reformat
+                if (checkConstraint.Name.Contains("]."))
+                {
+                    //access format names [table].[column].ValidationRule
+                    //access expression doesn't have column name so take it from constraint name
+                    var columnName = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].") + 1)
+                        .Replace("[" + Table.Name + "].", "");
+                    //must have braces
+                    expression = "(" + columnName + " " + expression + ")";
+                }
+
                 columnList.Add("CHECK " + expression);
             }
 

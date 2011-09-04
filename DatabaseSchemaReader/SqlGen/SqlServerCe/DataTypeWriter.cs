@@ -21,6 +21,7 @@
                 case "CHAR":
                     dataType = "NCHAR";
                     break;
+                case "NVARCHAR (MAX)":
                 case "TEXT":
                     dataType = "NTEXT";
                     break;
@@ -58,5 +59,28 @@
 
             return dataType;
         }
+
+        protected override string WriteDataTypeWithLength(string dataType, int? length)
+        {
+            if (length == 0) length = -1; //a zero length varchar doesn't make sense
+            if (length == -1)
+            {
+                switch (dataType)
+                {
+                    case "VARBINARY":
+                    case "BINARY":
+                        return "IMAGE";
+                    case "NVARCHAR":
+                    case "NCHAR":
+                        return "NTEXT";
+                    case "VARCHAR":
+                    case "CHAR":
+                        return "TEXT";
+                }
+            }
+            dataType = dataType + " (" + length + ")";
+            return dataType;
+        }
+
     }
 }

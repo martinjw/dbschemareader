@@ -221,31 +221,37 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public DataTable Indexes(string tableName)
         {
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
-                return Indexes(tableName, conn);
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return Indexes(tableName, connection);
             }
         }
 
-        private DataTable Indexes(string tableName, DbConnection conn)
+        /// <summary>
+        /// Gets the indexes.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable Indexes(string tableName, DbConnection connection)
         {
             const string collectionName = "Indexes";
-            if (!SchemaCollectionExists(conn, collectionName))
+            if (!SchemaCollectionExists(connection, collectionName))
             {
                 return CreateDataTable(collectionName);
             }
 
-            return RunGetSchema(conn, collectionName, tableName);
+            return RunGetSchema(connection, collectionName, tableName);
         }
 
-        private DataTable RunGetSchema(DbConnection conn, string collectionName, string tableName)
+        private DataTable RunGetSchema(DbConnection connection, string collectionName, string tableName)
         {
-            string[] restrictions = SchemaRestrictions.ForTable(conn, collectionName, tableName);
+            string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             try
             {
-                return conn.GetSchema(collectionName, restrictions);
+                return connection.GetSchema(collectionName, restrictions);
             }
             catch (DbException exception)
             {
@@ -275,25 +281,25 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public DataTable IndexColumns(string tableName)
         {
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
-                return IndexColumns(tableName, conn);
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return IndexColumns(tableName, connection);
             }
         }
 
-        private DataTable IndexColumns(string tableName, DbConnection conn)
+        private DataTable IndexColumns(string tableName, DbConnection connection)
         {
             string collectionName = "IndexColumns";
-            if (!SchemaCollectionExists(conn, collectionName))
+            if (!SchemaCollectionExists(connection, collectionName))
             {
                 collectionName = "Indexes";
-                if (!SchemaCollectionExists(conn, collectionName))
+                if (!SchemaCollectionExists(connection, collectionName))
                     return CreateDataTable(collectionName);
             }
 
-            return RunGetSchema(conn, collectionName, tableName);
+            return RunGetSchema(connection, collectionName, tableName);
         }
 
         /// <summary>
@@ -303,11 +309,11 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         public virtual DataTable PrimaryKeys(string tableName)
         {
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
-                return PrimaryKeys(tableName, conn);
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return PrimaryKeys(tableName, connection);
             }
         }
 
@@ -720,19 +726,29 @@ namespace DatabaseSchemaReader
         /// <returns>DataTable with columns incl. TYPENAME, DataType (.net)</returns>
         public DataTable DataTypes()
         {
-            using (DbConnection conn = Factory.CreateConnection())
+            using (DbConnection connection = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                conn.Open();
-                try
-                {
-                    return conn.GetSchema(DbMetaDataCollectionNames.DataTypes);
-                }
-                catch (NotSupportedException)
-                {
-                    //Npgsql doesn't have the collection and throws this exception
-                    return CreateDataTable("DataTypes");
-                }
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+                return DataTypes(connection);
+            }
+        }
+
+        /// <summary>
+        /// All the Datatypes in the database and the mappings to .Net types
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable DataTypes(DbConnection connection)
+        {
+            try
+            {
+                return connection.GetSchema(DbMetaDataCollectionNames.DataTypes);
+            }
+            catch (NotSupportedException)
+            {
+                //Npgsql doesn't have the collection and throws this exception
+                return CreateDataTable("DataTypes");
             }
         }
 
