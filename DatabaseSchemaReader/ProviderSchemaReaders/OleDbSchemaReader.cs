@@ -15,11 +15,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
         }
 
-        private static DataTable GetOleDbSchemaTable(Guid schema, string tableName, DbConnection connection)
+        private static DataTable GetOleDbSchemaTable(Guid schema, string tableName, DbConnection connection, string collectionName)
         {
             //this is the old .Net 1.1 provider specific way of doing it
             var oleDbConnection = connection as OleDbConnection;
-            if (oleDbConnection == null) return CreateDataTable("Constraints");
+            if (oleDbConnection == null) return CreateDataTable(collectionName);
 
             try
             {
@@ -28,25 +28,25 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             catch (ArgumentException)
             {
                 //may not be implemented
-                return CreateDataTable("CheckConstraints");
+                return CreateDataTable(collectionName);
             }
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Primary_Keys, tableName, connection);
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Primary_Keys, tableName, connection, "PrimaryKeys");
             return schemaTable;
         }
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, tableName, connection);
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, tableName, connection, "ForeignKeys");
             return schemaTable;
         }
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Check_Constraints, null, connection);
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Check_Constraints, null, connection, "CheckConstraints");
 
             //let's try to read the table name from the constraint name
             const string tableColumnKey = "TABLE_NAME";
@@ -67,7 +67,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable Indexes(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Indexes, null, connection);
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Indexes, null, connection, "Indexes");
+            return schemaTable;
+        }
+
+        protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection) 
+        {
+            //for JET and ACE providers this isn't supported, but we'll try anyway
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Procedure_Parameters, storedProcedureName, connection, "StoredProcedureArguments");
             return schemaTable;
         }
 
@@ -107,6 +114,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             {
                 UpdateColumnDataTypes(view.Columns);
             }
+
+            //ignore temporary internal queries
+            databaseSchema.StoredProcedures
+                .RemoveAll(procedure =>
+                          procedure.Name.StartsWith("~sq_", StringComparison.OrdinalIgnoreCase));
+
+
         }
 
         private static void UpdateColumnDataTypes(IEnumerable<DatabaseColumn> columns)

@@ -432,8 +432,12 @@ namespace DatabaseSchemaReader
         private void UpdateReferences()
         {
             //a simple latch so ReadAll will only call this at the end
-            if (_fixUp)
-                DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
+            if (!_fixUp) return;
+
+            DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
+
+            //last, do custom post processing if implemented
+            _sr.PostProcessing(DatabaseSchema);
         }
 
         #region Implementation of IDisposable
