@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using DatabaseSchemaReader;
@@ -88,6 +89,29 @@ namespace DatabaseSchemaReaderTest.DataSchema
             Assert.AreEqual(schema.Tables.Count, clone.Tables.Count);
             Assert.AreEqual(schema.Tables[0].Columns.Count, clone.Tables[0].Columns.Count);
         }
+
+        [TestMethod]
+        public void UseEqualityTest()
+        {
+
+            //NamedSchemaObject = has a name and schemaOwner
+            var schema = new DatabaseSchema(null, null);
+            schema.Owner = "dbo";
+            schema.AddTable("A").AddTable("A");
+            var distinct = schema.Tables.Distinct().Count();
+            Assert.AreEqual(1, distinct);
+
+            //NamedObject = has a name
+            var cols = new List<DatabaseColumn> {new DatabaseColumn {Name = "Id"}, new DatabaseColumn {Name = "Name"}};
+            var cols2 = new List<DatabaseColumn> { new DatabaseColumn { Name = "Id" }, new DatabaseColumn { Name = "Name" } };
+
+            var union = cols.Union(cols2);
+
+            Assert.AreEqual(2, union.Count());
+
+        }
+
+
 
     }
 }

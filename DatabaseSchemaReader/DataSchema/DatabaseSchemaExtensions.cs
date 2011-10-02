@@ -21,6 +21,7 @@ namespace DatabaseSchemaReader.DataSchema
             var table = new DatabaseTable { Name = tableName };
             databaseSchema.Tables.Add(table);
             table.DatabaseSchema = databaseSchema;
+            table.SchemaOwner = databaseSchema.Owner;
             return table;
         }
 

@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// We don't capture if this is a UNIQUE or NONCLUSTERED index.
     /// </remarks>
     [Serializable]
-    public partial class DatabaseIndex
+    public partial class DatabaseIndex : NamedSchemaObject
     {
         #region Fields
         //backing fields
@@ -29,21 +29,6 @@ namespace DatabaseSchemaReader.DataSchema
             _columns = new List<DatabaseColumn>();
         }
 
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the schema owner.
-        /// </summary>
-        /// <value>
-        /// The schema owner.
-        /// </value>
-        public string SchemaOwner { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the table.

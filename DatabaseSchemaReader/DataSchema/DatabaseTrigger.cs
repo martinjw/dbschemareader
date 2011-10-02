@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a trigger in the database.
     /// </summary>
     [Serializable]
-    public partial class DatabaseTrigger
+    public partial class DatabaseTrigger : NamedSchemaObject
     {
         /// <summary>
         /// Gets or sets the database schema.
@@ -15,22 +15,6 @@ namespace DatabaseSchemaReader.DataSchema
         /// The database schema.
         /// </value>
         public DatabaseSchema DatabaseSchema { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the schema owner.
-        /// </summary>
-        /// <value>
-        /// The schema owner.
-        /// </value>
-        public string SchemaOwner { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the table.

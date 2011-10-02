@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A table in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseTable
+    public partial class DatabaseTable : NamedSchemaObject
     {
         #region Fields
         //backing fields and initialize collections
@@ -44,7 +44,6 @@ namespace DatabaseSchemaReader.DataSchema
             _foreignKeys = new List<DatabaseConstraint>();
             _checkConstraints = new List<DatabaseConstraint>();
         }
-
         /// <summary>
         /// Gets or sets the database schema.
         /// </summary>
@@ -54,28 +53,12 @@ namespace DatabaseSchemaReader.DataSchema
         public DatabaseSchema DatabaseSchema { get; set; }
 
         /// <summary>
-        /// Gets or sets the table name (original database format)
-        /// </summary>
-        /// <value>
-        /// The table name.
-        /// </value>
-        public string Name { get; set; }
-
-        /// <summary>
         /// Gets or sets the table name in .Net (C#) compatible format.
         /// </summary>
         /// <value>
         /// The .net name
         /// </value>
         public string NetName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the schema owner.
-        /// </summary>
-        /// <value>
-        /// The schema owner.
-        /// </value>
-        public string SchemaOwner { get; set; }
 
         /// <summary>
         /// Gets the columns.

@@ -95,6 +95,7 @@
     <Compile Include="Conversion\KeyMaps\SequenceKeyMap.cs" />
     <Compile Include="DatabaseReader.cs" />
     <Compile Include="DataSchema\ConstraintType.cs" />
+    <Compile Include="DataSchema\NamedObject.cs" />
     <Compile Include="DataSchema\DatabaseArgument.cs" />
     <Compile Include="DataSchema\DatabaseColumn.cs" />
     <Compile Include="DataSchema\DatabaseConstraint.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="DataSchema\DatabaseUser.cs" />
     <Compile Include="DataSchema\DatabaseView.cs" />
     <Compile Include="DataSchema\DataType.cs" />
+    <Compile Include="DataSchema\NamedSchemaObject.cs" />
     <Compile Include="DataSchema\SqlType.cs" />
     <Compile Include="Data\Converter.cs" />
     <Compile Include="Data\DateConverter.cs" />

@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a package in the database (in Oracle, a collection of stored procedures and functions)
     /// </summary>
     [Serializable]
-    public partial class DatabasePackage
+    public partial class DatabasePackage : NamedSchemaObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabasePackage"/> class.
@@ -18,20 +18,6 @@ namespace DatabaseSchemaReader.DataSchema
             Functions = new List<DatabaseFunction>();
         }
 
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public string Name { get; set; }
-        /// <summary>
-        /// Gets or sets the schema owner.
-        /// </summary>
-        /// <value>
-        /// The schema owner.
-        /// </value>
-        public string SchemaOwner { get; set; }
         /// <summary>
         /// Gets or sets the definition.
         /// </summary>

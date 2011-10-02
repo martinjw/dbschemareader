@@ -6,21 +6,13 @@ namespace DatabaseSchemaReader.DataSchema
     /// A column in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseColumn
+    public partial class DatabaseColumn : NamedObject
     {
         #region Fields
 
         #endregion
 
         #region Basic Properties
-
-        /// <summary>
-        /// Gets or sets the column name (original database format)
-        /// </summary>
-        /// <value>
-        /// The column name.
-        /// </value>
-        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the database data type as a string (as defined by the database platform)

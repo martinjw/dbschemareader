@@ -7,22 +7,8 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a sequence in the database (eg Oracle, SqlServer 2011)
     /// </summary>
     [Serializable]
-    public partial class DatabaseSequence
+    public partial class DatabaseSequence : NamedSchemaObject
     {
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public string Name { get; set; }
-        /// <summary>
-        /// Gets or sets the schema owner.
-        /// </summary>
-        /// <value>
-        /// The schema owner.
-        /// </value>
-        public string SchemaOwner { get; set; }
         /// <summary>
         /// Gets or sets the mininum value.
         /// </summary>

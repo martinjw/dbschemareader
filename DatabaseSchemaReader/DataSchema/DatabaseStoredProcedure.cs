@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a stored procedure in the database.
     /// </summary>
     [Serializable]
-    public partial class DatabaseStoredProcedure
+    public partial class DatabaseStoredProcedure : NamedSchemaObject
     {
         #region Fields
         //backing fields
@@ -26,14 +26,6 @@ namespace DatabaseSchemaReader.DataSchema
             _arguments = new List<DatabaseArgument>();
             _resultSets = new List<DatabaseResultSet>();
         }
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public string Name { get; set; }
 
         /// <summary>
         /// Gets the full name (including schema if applicable, and package if applicable)
@@ -56,14 +48,6 @@ namespace DatabaseSchemaReader.DataSchema
                 return fullName;
             }
         }
-
-        /// <summary>
-        /// Gets or sets the schema owner.
-        /// </summary>
-        /// <value>
-        /// The schema owner.
-        /// </value>
-        public string SchemaOwner { get; set; }
 
         /// <summary>
         /// Gets or sets the package.
