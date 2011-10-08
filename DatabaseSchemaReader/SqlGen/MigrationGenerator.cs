@@ -107,12 +107,16 @@ namespace DatabaseSchemaReader.SqlGen
                 databaseTable.Name,
                 originalDefinition,
                 columnDefinition);
-            if (!SupportsAlterColumn || databaseColumn.IsPrimaryKey || databaseColumn.IsForeignKey)
+            if (!SupportsAlterColumn)
             {
                 //SQLite does not have modify column
+                return comment + Environment.NewLine + "-- TODO: change manually (no ALTER COLUMN)";
+            }
+            if (databaseColumn.IsPrimaryKey || databaseColumn.IsForeignKey)
+            {
                 //you can't change primary keys
                 //you can't change foreign key columns
-                return comment + Environment.NewLine + "-- TODO: change manually";
+                return comment + Environment.NewLine + "-- TODO: change manually (PK or FK)";
             }
 
             //there are practical restrictions on what can be altered

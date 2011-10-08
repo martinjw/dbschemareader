@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -49,6 +51,29 @@ namespace DatabaseSchemaReader.DataSchema
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var table = databaseColumn.Table;
             return table.AddTable(tableName);
+        }
+
+        /// <summary>
+        /// Adds the index.
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="indexName">Name of the index.</param>
+        /// <param name="columns">The columns.</param>
+        /// <returns></returns>
+        public static DatabaseTable AddIndex(this DatabaseTable databaseTable, string indexName, IEnumerable<DatabaseColumn> columns)
+        {
+            if (databaseTable == null) throw new ArgumentNullException("databaseTable", "databaseTable must not be null");
+            if (columns.Count() == 0) throw new ArgumentException("columns is empty", "columns");
+            var index = new DatabaseIndex
+                            {
+                                Name = indexName,
+                                TableName = databaseTable.Name,
+                                SchemaOwner = databaseTable.SchemaOwner,
+                                IndexType = "NONCLUSTERED"
+                            };
+            index.Columns.AddRange(columns);
+            databaseTable.AddIndex(index);
+            return databaseTable;
         }
     }
 }

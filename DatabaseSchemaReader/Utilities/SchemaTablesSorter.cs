@@ -35,6 +35,8 @@ namespace DatabaseSchemaReader.Utilities
                 {
                     //ignore cycles (not relevant here)
                     if (t.RefersToTable == tables[i].Name) continue;
+                    //corrupt model
+                    if (!indexes.ContainsKey(t.RefersToTable)) continue;
 
                     sorter.AddEdge(i, indexes[t.RefersToTable]);
                 }

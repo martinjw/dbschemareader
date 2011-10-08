@@ -45,7 +45,9 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -64,6 +66,7 @@
     <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
     <Compile Include="DatabaseReaderTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
+    <Compile Include="DataSchema\DatabaseConstraintTest.cs" />
     <Compile Include="DataSchema\DatabaseSchemaTest.cs" />
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="DataSchema\ExtensionsTest.cs" />
@@ -140,10 +143,17 @@
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterOracleTest.cs" />
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterMySqlTest.cs" />
     <Compile Include="SqlGen\WritingSprocsTest.cs" />
+    <Compile Include="Utilities\EF\Catalog.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Catalog.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\EF\EntityImporterTest.cs" />
     <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.txt" />
+    <Content Include="Utilities\EF\Catalog.edmx.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
@@ -155,6 +165,10 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <EntityDeploy Include="Utilities\EF\Catalog.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>Catalog.Designer.cs</LastGenOutput>
+    </EntityDeploy>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

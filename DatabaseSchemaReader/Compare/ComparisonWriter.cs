@@ -74,7 +74,7 @@ namespace DatabaseSchemaReader.Compare
         public bool CompareView(string view1, string view2)
         {
             //trim any extra whitespace around the sql
-            var sql1 = view1.Trim();
+            var sql1 = (view1 == null) ? string.Empty : view1.Trim();
             var sql2 = view2.Trim();
             if (_sqlType != SqlType.SqlServerCe && _sqlType != SqlType.SqlServer)
             {

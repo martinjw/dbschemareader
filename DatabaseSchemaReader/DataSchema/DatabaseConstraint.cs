@@ -111,7 +111,8 @@ namespace DatabaseSchemaReader.DataSchema
                  .FirstOrDefault(table =>
                      //or the RefersToConstraint is it's primary key
                      (table.PrimaryKey != null &&
-                     table.PrimaryKey.Name.Equals(RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
+                     //one or the other may not have a name
+                     string.Equals(table.PrimaryKey.Name, RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
 
             return refTable;
         }
@@ -137,7 +138,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// </returns>
         public override string ToString()
         {
-            return Name + " on " + TableName;
+            return (Name ?? ConstraintType.ToString()) + 
+                " on " + TableName;
         }
 
     }

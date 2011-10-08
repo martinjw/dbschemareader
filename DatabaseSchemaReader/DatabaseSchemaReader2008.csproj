@@ -169,6 +169,7 @@
     <Compile Include="SqlGen\SqlTranslator.cs" />
     <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
+    <Compile Include="Utilities\EntityFrameworkImporter.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />
     <Compile Include="Utilities\TopologicalSorter.cs" />

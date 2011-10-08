@@ -33,6 +33,7 @@ namespace DatabaseSchemaReader.DataSchema
             table.PrimaryKey = new DatabaseConstraint
             {
                 ConstraintType = ConstraintType.PrimaryKey,
+                TableName = table.Name,
                 Name = primaryKeyName
             };
             table.PrimaryKey.Columns.Add(databaseColumn.Name);
@@ -75,6 +76,7 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 ConstraintType = ConstraintType.ForeignKey,
                 Name = foreignKeyName,
+                TableName = table.Name,
                 RefersToTable = foreignTableName
             };
             table.ForeignKeys.Add(foreignKey);
@@ -135,10 +137,11 @@ namespace DatabaseSchemaReader.DataSchema
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var table = databaseColumn.Table;
             var uk = new DatabaseConstraint
-                                         {
-                                             ConstraintType = ConstraintType.UniqueKey,
-                                             Name = uniqueKeyName
-                                         };
+             {
+                 ConstraintType = ConstraintType.UniqueKey,
+                 TableName = table.Name,
+                 Name = uniqueKeyName
+             };
             uk.Columns.Add(databaseColumn.Name);
             table.UniqueKeys.Add(uk);
             databaseColumn.IsUniqueKey = true;
