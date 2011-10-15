@@ -86,7 +86,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("TEXT", result);
+            Assert.AreEqual("LONGTEXT", result);
         }
 
         [TestMethod]
@@ -128,7 +128,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("TEXT", result);
+            Assert.AreEqual("LONGTEXT", result);
         }
 
         [TestMethod]
@@ -141,7 +141,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("TEXT", result);
+            Assert.AreEqual("LONGTEXT", result);
         }
 
         [TestMethod]

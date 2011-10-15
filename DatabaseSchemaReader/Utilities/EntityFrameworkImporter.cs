@@ -10,6 +10,7 @@ namespace DatabaseSchemaReader.Utilities
     /// <summary>
     /// Convert an EF storage model into a DSR schema model.
     /// </summary>
+    /// <remarks>You can inherit from this and override <see cref="FixColumn"/></remarks>
     public class EntityFrameworkImporter
     {
         //the EF writes DDL using a t4 template
@@ -214,7 +215,7 @@ namespace DatabaseSchemaReader.Utilities
             table.PrimaryKey = primaryKey;
         }
 
-        private static void ReadProperty(XElement property, DatabaseTable table)
+        private void ReadProperty(XElement property, DatabaseTable table)
         {
             var name = (string)property.Attribute("Name");
             var type = (string)property.Attribute("Type");
@@ -245,13 +246,18 @@ namespace DatabaseSchemaReader.Utilities
             column.Scale = scale;
             column.Nullable = nullable;
 
-            FixTypes(column);
-
             if (storeGeneratedPattern == "Identity") column.IsIdentity = true;
+
+            FixColumn(column);
 
         }
 
-        private static void FixTypes(DatabaseColumn column)
+        /// <summary>
+        /// Correct the column datatype and related properties
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <remarks>Extension point: inherit this class and override this</remarks>
+        protected virtual void FixColumn(DatabaseColumn column)
         {
             //the EF ssdl doesn't specify some precision/scale/length settings for certain types
             //if you're comparing this to an actual schema you'll need these values or you get false positive "ALTER COLUMN"s

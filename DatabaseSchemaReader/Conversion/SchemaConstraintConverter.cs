@@ -120,6 +120,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(key)) key = "foreignkey";
             if (!dt.Columns.Contains(tableKey)) tableKey = "table";
             if (!dt.Columns.Contains(columnKey)) columnKey = "name";
+            if (!dt.Columns.Contains(columnKey)) columnKey = "FKEY_FROM_COLUMN"; //VistaDB
 
             //this could be more than one table, so filter the view
             dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + table.Name + "'";

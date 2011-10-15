@@ -133,6 +133,7 @@
     <Compile Include="ProviderSchemaReaders\SybaseAsaSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseAseSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseUltraLiteSchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\VistaDbSchemaReader.cs" />
     <Compile Include="SqlGen\DataTypeConverter.cs" />
     <Compile Include="SqlGen\DataTypeMapper.cs" />
     <Compile Include="SqlGen\DataTypeMappingFactory.cs" />

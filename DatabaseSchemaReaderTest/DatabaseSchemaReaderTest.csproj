@@ -71,6 +71,7 @@
     <Compile Include="DataSchema\DataTypeTest.cs" />
     <Compile Include="DataSchema\ExtensionsTest.cs" />
     <Compile Include="IntegrationTests\Access.cs" />
+    <Compile Include="IntegrationTests\VistaDb.cs" />
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
     <Compile Include="IntegrationTests\IntersystemsCache.cs" />

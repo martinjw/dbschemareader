@@ -89,7 +89,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
 
         public string OrdinalKey { get; private set; }
 
-        public string TableKey { get; private set; }
+        public string TableKey { get; set; }
 
         public string NullableKey { get; private set; }
 

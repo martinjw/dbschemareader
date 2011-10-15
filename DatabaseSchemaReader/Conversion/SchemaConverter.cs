@@ -118,16 +118,28 @@ namespace DatabaseSchemaReader.Conversion
             return Columns(dt, null);
         }
 
+        public static List<DatabaseColumn> ViewColumns(DataTable dt, string viewName)
+        {
+            ColumnsKeyMap columnsKeyMap = new ColumnsKeyMap(dt);
+
+            if (dt.Columns.Contains("VIEW_NAME")) columnsKeyMap.TableKey = "VIEW_NAME";
+            return Columns(dt, viewName, columnsKeyMap);
+        }
+
         /// <summary>
         /// Converts the "Columns" DataTable into <see cref="DatabaseColumn"/> objects for a specified table
         /// </summary>
         public static List<DatabaseColumn> Columns(DataTable dt, string tableName)
         {
-            List<DatabaseColumn> list = new List<DatabaseColumn>();
-
             ColumnsKeyMap columnsKeyMap = new ColumnsKeyMap(dt);
+            return Columns(dt, tableName, columnsKeyMap);
+        }
 
+        private static List<DatabaseColumn> Columns(DataTable dt, string tableName, ColumnsKeyMap columnsKeyMap)
+        {
             CreateDefaultView(dt, columnsKeyMap.OrdinalKey, columnsKeyMap.TableKey, tableName);
+
+            List<DatabaseColumn> list = new List<DatabaseColumn>();
 
             foreach (DataRowView row in dt.DefaultView)
             {

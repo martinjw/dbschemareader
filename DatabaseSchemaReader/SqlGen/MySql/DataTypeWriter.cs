@@ -32,26 +32,17 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 
             if (dataType == "VARCHAR2" || dataType == "NVARCHAR" || dataType == "NVARCHAR2")
             {
-                dataType = "VARCHAR";
-                if (length == -1) //MAX
-                {
-                    dataType = "TEXT";
-                }
+                dataType = ConvertString(length);
             }
-            else if (dataType == "CLOB")
+            else if (dataType == "CLOB" || dataType == "NTEXT")
             {
-                dataType = "TEXT";
-            }
-            else if (dataType == "NTEXT")
-            {
-                dataType = "TEXT";
+                dataType = "LONGTEXT";
             }
             else if (dataType == "NCHAR")
             {
                 dataType = "CHAR";
             }
-            else if (dataType == "DATETIME2" ||
-                dataType == "TIME")
+            else if (dataType == "DATETIME2" || dataType == "TIME")
             {
                 dataType = "DATETIME";
             }
@@ -66,13 +57,9 @@ namespace DatabaseSchemaReader.SqlGen.MySql
                 dataType = "TINYINT";
             }
 
-            else if (dataType == "IMAGE")
+            else if (dataType == "IMAGE" || dataType == "VARBINARY")
             {
-                dataType = "BLOB";
-            }
-            else if (dataType == "VARBINARY" && length == -1)
-            {
-                dataType = "BLOB";
+                dataType = ConvertBlob(length);
             }
             else if (dataType == "UNIQUEIDENTIFIER")
             {
@@ -100,6 +87,41 @@ namespace DatabaseSchemaReader.SqlGen.MySql
                 dataType = dataType + " (" + precision + writeScale + ")";
             }
 
+            return dataType;
+        }
+
+        private static string ConvertBlob(int? length)
+        {
+            if (length < 65536)
+            {
+                return "BLOB";
+            }
+            if (length >= 65536 && length < 16777216)
+            {
+                return "MEDIUMBLOB";
+            }
+            return "LONGBLOB";
+        }
+
+        private static string ConvertString(int? length)
+        {
+            var dataType = "VARCHAR";
+            if (length == -1) //MAX
+            {
+                dataType = "LONGTEXT";
+            }
+            else if (length > 255 && length < 65536)
+            {
+                dataType = "TEXT";
+            }
+            else if (length >= 65536 && length < 16777216)
+            {
+                dataType = "MEDIUMTEXT";
+            }
+            else if (length >= 16777216)
+            {
+                dataType = "LONGTEXT";
+            }
             return dataType;
         }
     }

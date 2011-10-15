@@ -151,7 +151,7 @@ namespace DatabaseSchemaReader.Conversion
                 using (DataView dv = new DataView(arguments))
                 {
                     //match sproc name and schema
-                    dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND [{2}] = '{3}'",
+                    dv.RowFilter = string.Format(CultureInfo.InvariantCulture, "[{0}] = '{1}' AND ISNULL([{2}],'') = '{3}'",
                                                  argumentsKeyMap.SprocName, name, argumentsKeyMap.OwnerKey, owner);
                     if (!string.IsNullOrEmpty(argumentsKeyMap.OrdinalKey))
                         dv.Sort = argumentsKeyMap.OrdinalKey;

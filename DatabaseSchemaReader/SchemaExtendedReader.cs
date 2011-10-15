@@ -107,6 +107,17 @@ namespace DatabaseSchemaReader
             return new List<DataType>();
         }
 
+        /// <summary>
+        /// Get the columns of a view.
+        /// </summary>
+        /// <param name="viewName">Name of the view.</param>
+        /// <returns></returns>
+        public virtual DataTable ViewColumns(string viewName)
+        {
+            //in most cases this is exposed via the table columns
+            return Columns(viewName);
+        }
+
         #region protected helpers
 
         protected virtual DataTable CommandForTable(string tableName, DbConnection conn, string collectionName, string sqlCommand)

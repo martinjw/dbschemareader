@@ -73,6 +73,10 @@ namespace DatabaseSchemaReader
                 {
                     _sr = new OleDbSchemaReader(connectionString, providerName);
                 }
+                else if (providerName.Equals("System.Data.VistaDB", StringComparison.OrdinalIgnoreCase))
+                {
+                    _sr = new VistaDbSchemaReader(connectionString, providerName);
+                }
             }
             _db = new DatabaseSchema(connectionString, providerName);
         }
@@ -282,10 +286,10 @@ namespace DatabaseSchemaReader
             DataTable dt = _sr.Views();
             List<DatabaseView> views = SchemaConverter.Views(dt);
             //get full datatables for all tables, to minimize database calls
-            DataTable cols = _sr.Columns(null);
+            DataTable cols = _sr.ViewColumns(null);
             foreach (DatabaseView v in views)
             {
-                v.Columns.AddRange(SchemaConverter.Columns(cols, v.Name));
+                v.Columns.AddRange(SchemaConverter.ViewColumns(cols, v.Name));
             }
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
