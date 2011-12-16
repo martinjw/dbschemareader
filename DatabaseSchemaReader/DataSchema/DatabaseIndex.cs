@@ -89,7 +89,8 @@ namespace DatabaseSchemaReader.DataSchema
                 parentTable.PrimaryKey.Columns.SequenceEqual(columnNames))
                 return true;
             return parentTable.UniqueKeys.Any(
-                uniqueKey => uniqueKey.Columns.SequenceEqual(columnNames));
+                uniqueKey => uniqueKey.Name == Name || 
+                    uniqueKey.Columns.SequenceEqual(columnNames));
         }
 
         /// <summary>

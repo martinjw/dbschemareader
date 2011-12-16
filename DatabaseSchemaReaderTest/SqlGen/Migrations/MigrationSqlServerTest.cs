@@ -21,7 +21,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     public class MigrationSqlServerTest
     {
         private const string ProviderName = "System.Data.SqlClient";
-        private const string ConnectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+        const string ConnectionString = ConnectionStrings.Northwind;
         private readonly DbProviderFactory _factory;
 
         public MigrationSqlServerTest()

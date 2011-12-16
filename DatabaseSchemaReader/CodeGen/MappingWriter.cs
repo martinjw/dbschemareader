@@ -54,7 +54,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var foreignKeyTable = foreignKeyChild.Name;
             var childClass = foreignKeyChild.NetName;
-            var foreignKey = foreignKeyChild.ForeignKeys.Find(fk => fk.RefersToTable == _table.Name);
+            var foreignKey = foreignKeyChild.ForeignKeys.FirstOrDefault(fk => fk.RefersToTable == _table.Name);
             if (foreignKey == null) return; //corruption in our database
             //we won't deal with composite keys
             var fkColumn = foreignKey.Columns[0];

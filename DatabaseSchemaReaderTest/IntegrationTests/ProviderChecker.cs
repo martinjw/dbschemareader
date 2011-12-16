@@ -35,6 +35,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             {
                 Assert.Inconclusive("Cannot test for provider " + providerName);
             }
+
             try
             {
                 using (var connection = factory.CreateConnection())

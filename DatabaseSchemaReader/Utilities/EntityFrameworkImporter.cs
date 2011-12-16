@@ -162,7 +162,7 @@ namespace DatabaseSchemaReader.Utilities
                     fk.DeleteRule = "Cascade";
                 }
                 var databaseTable = databaseSchema.FindTableByName(tableName);
-                databaseTable.ForeignKeys.Add(fk);
+                databaseTable.AddConstraint(fk);
                 var cols = fk.Columns.Select(col => databaseTable.FindColumn(col));
 
                 //SSDLToSQL10.tt creates a nonclustered index (IX_name) for the foreign key

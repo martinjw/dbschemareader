@@ -140,7 +140,7 @@ namespace DatabaseSchemaReaderTest.Compare
             DatabaseSchema schema1 = CreateSchema();
             DatabaseSchema schema2 = CreateSchema();
             DatabaseConstraint constraint = GetUniqueConstraint();
-            schema2.Tables[0].UniqueKeys.Add(constraint);
+            schema2.Tables[0].AddConstraint(constraint);
 
             //act
             var comparison = new CompareSchemas(schema1, schema2);
@@ -155,10 +155,10 @@ namespace DatabaseSchemaReaderTest.Compare
             //arrange
             DatabaseSchema schema1 = CreateSchema();
             DatabaseConstraint constraint = GetUniqueConstraint();
-            schema1.Tables[0].UniqueKeys.Add(constraint);
+            schema1.Tables[0].AddConstraint(constraint);
             DatabaseSchema schema2 = CreateSchema();
             DatabaseConstraint constraint2 = GetUniqueConstraint();
-            schema2.Tables[0].UniqueKeys.Add(constraint2);
+            schema2.Tables[0].AddConstraint(constraint2);
 
             //act
             var comparison = new CompareSchemas(schema1, schema2);
@@ -173,12 +173,12 @@ namespace DatabaseSchemaReaderTest.Compare
             //arrange
             DatabaseSchema schema1 = CreateSchema();
             DatabaseConstraint constraint = GetUniqueConstraint();
-            schema1.Tables[0].UniqueKeys.Add(constraint);
+            schema1.Tables[0].AddConstraint(constraint);
 
             DatabaseSchema schema2 = CreateSchema();
             DatabaseConstraint constraint2 = GetUniqueConstraint();
             constraint2.Columns[0] = "Desc";
-            schema2.Tables[0].UniqueKeys.Add(constraint2);
+            schema2.Tables[0].AddConstraint(constraint2);
 
             //act
             var comparison = new CompareSchemas(schema1, schema2);
@@ -194,7 +194,7 @@ namespace DatabaseSchemaReaderTest.Compare
             //arrange
             DatabaseSchema schema1 = CreateSchema();
             DatabaseConstraint constraint = GetUniqueConstraint();
-            schema1.Tables[0].UniqueKeys.Add(constraint);
+            schema1.Tables[0].AddConstraint(constraint);
             DatabaseSchema schema2 = CreateSchema();
 
             //act

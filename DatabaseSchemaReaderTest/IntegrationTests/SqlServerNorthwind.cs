@@ -23,7 +23,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         private static DatabaseReader GetNortwindReader()
         {
             const string providername = "System.Data.SqlClient";
-            const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+            const string connectionString = ConnectionStrings.Northwind;
             ProviderChecker.Check(providername, connectionString);
 
             return new DatabaseReader(connectionString, providername);

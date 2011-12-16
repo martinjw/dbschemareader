@@ -32,7 +32,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
                                 Name = "[Orders].[Quantity].ValidationRule"
                             };
 
-            table.CheckConstraints.Add(check);
+            table.AddConstraint(check);
 
             var writer = new ConstraintWriter(table);
 
@@ -56,7 +56,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
                                 Name = "[Orders].[OrderDate].ValidationRule"
                             };
 
-            table.CheckConstraints.Add(check);
+            table.AddConstraint(check);
 
             var writer = new TableGenerator(table);
 
@@ -80,7 +80,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
                                 Name = "ValidationRule"
                             };
 
-            table.CheckConstraints.Add(check);
+            table.AddConstraint(check);
 
             var writer = new ConstraintWriter(table);
 
@@ -105,7 +105,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
                                 Name = "ValidationRule"
                             };
 
-            table.CheckConstraints.Add(check);
+            table.AddConstraint(check);
 
             var writer = new TableGenerator(table);
 

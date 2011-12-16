@@ -17,17 +17,18 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     public class MigrationOracleTest
     {
         private const string ProviderName = "System.Data.OracleClient";
-        private const string ConnectionString = @"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
 
         [TestMethod]
         public void TestMigration()
         {
             //arrange
-            var tableName = MigrationCommon.FindFreeTableName(ProviderName, ConnectionString);
+            const string connectionString = ConnectionStrings.OracleHr;
+
+            var tableName = MigrationCommon.FindFreeTableName(ProviderName, connectionString);
             var migration = new DdlGeneratorFactory(SqlType.Oracle).MigrationGenerator();
 
             //Oracle DDL isn't transactional. If it fails, you'll find my test tables in your database.
-            MigrationCommon.ExecuteScripts(ProviderName, ConnectionString, tableName, migration);
+            MigrationCommon.ExecuteScripts(ProviderName, connectionString, tableName, migration);
         }
     }
 }

@@ -58,9 +58,14 @@ namespace CopyToSQLite
                 contextMenuStrip1.Items.Add("MySQL (Northwind)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;");
                 contextMenuStrip1.Items.Add("MySQL (Sakila)").Click += (s, ev) => FillConnectionString(@"Server=localhost;Uid=root;Pwd=mysql;Database=Sakila;Allow User Variables=True;", @"Sakila");
             }
-            contextMenuStrip1.Items.Add("Oracle XE - TNS (HR)").Click += (s, ev) => FillConnectionString(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;", @"HR");
+            contextMenuStrip1.Items.Add("Oracle XE - TNS (HR)").Click += (s, ev) => FillConnectionString(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=hr;Password=hr;", @"HR");
             contextMenuStrip1.Items.Add("Oracle XE (HR)").Click += (s, ev) => FillConnectionString(
-                @"Data Source=XE;User Id=HR;Password=HR;", @"HR");
+                @"Data Source=XE;User Id=hr;Password=hr;", @"HR");
+            if (_installedProviders.Contains("Devart.Data.Oracle"))
+            {
+                contextMenuStrip1.Items.Add("Oracle XE - devart direct mode (HR)").Click += (s, ev) => FillConnectionString(
+                    @"Data Source=localhost;SID=XE;direct=true;User Id=hr;Password=hr;", @"HR");
+            }
             if (_installedProviders.Contains("Npgsql") || _installedProviders.Contains("Devart.Data.Devart.Data.PostgreSql"))
             {
                 contextMenuStrip1.Items.Add("Postgresql (world)").Click += (s, ev) => FillConnectionString(@"Server=127.0.0.1;User id=postgres;password=sql;database=world;");

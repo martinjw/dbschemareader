@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 
@@ -17,12 +18,20 @@ namespace DatabaseSchemaReader.DataSchema
         private DatabaseConstraint _primaryKey;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _foreignKeys;
+        //we expose readonly collections because the constraints need logic to add
+        //readonly collections cannot be serialized, but it's just a wrapper of the underlying list
+        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
+        private readonly ReadOnlyCollection<DatabaseConstraint> _readOnlyForeignKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _uniqueKeys;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
+        private readonly ReadOnlyCollection<DatabaseConstraint> _readOnlyUniqueKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseIndex> _indexes;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _checkConstraints;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
+        private readonly ReadOnlyCollection<DatabaseConstraint> _readOnlyCheckConstraints;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseColumn> _columns;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -38,11 +47,15 @@ namespace DatabaseSchemaReader.DataSchema
         {
             _columns = new List<DatabaseColumn>();
             _triggers = new List<DatabaseTrigger>();
-            _foreignKeyChildren = new List<DatabaseTable>();
             _indexes = new List<DatabaseIndex>();
-            _uniqueKeys = new List<DatabaseConstraint>();
+
             _foreignKeys = new List<DatabaseConstraint>();
+            _readOnlyForeignKeys = new ReadOnlyCollection<DatabaseConstraint>(_foreignKeys);
+            _foreignKeyChildren = new List<DatabaseTable>();
+            _uniqueKeys = new List<DatabaseConstraint>();
+            _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);
             _checkConstraints = new List<DatabaseConstraint>();
+            _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
         }
         /// <summary>
         /// Gets or sets the database schema.
@@ -90,15 +103,14 @@ namespace DatabaseSchemaReader.DataSchema
             }
         }
         /// <summary>
-        /// Gets or sets the foreign keys.
+        /// Gets the foreign keys. Add using <see cref="AddConstraint"/>.
         /// </summary>
         /// <value>
         /// The foreign keys.
         /// </value>
-        public List<DatabaseConstraint> ForeignKeys
+        public ReadOnlyCollection<DatabaseConstraint> ForeignKeys
         {
-            get { return _foreignKeys; }
-            set { value.ForEach(AddConstraint); }
+            get { return _readOnlyForeignKeys; }
         }
         /// <summary>
         /// Gets or sets the unique keys.
@@ -106,10 +118,9 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The unique keys.
         /// </value>
-        public List<DatabaseConstraint> UniqueKeys
+        public ReadOnlyCollection<DatabaseConstraint> UniqueKeys
         {
-            get { return _uniqueKeys; }
-            set { value.ForEach(AddConstraint); }
+            get { return _readOnlyUniqueKeys; }
         }
         /// <summary>
         /// Gets or sets the check constraints.
@@ -117,11 +128,23 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The check constraints.
         /// </value>
-        public List<DatabaseConstraint> CheckConstraints
+        public ReadOnlyCollection<DatabaseConstraint> CheckConstraints
         {
-            get { return _checkConstraints; }
-            set { value.ForEach(AddConstraint); }
+            get { return _readOnlyCheckConstraints; }
         }
+
+        /// <summary>
+        /// Adds the constraints of any type (primary key, foreign key, unique key, check)
+        /// </summary>
+        /// <param name="constraints">The constraints.</param>
+        public void AddConstraints(IEnumerable<DatabaseConstraint> constraints)
+        {
+            foreach (var constraint in constraints)
+            {
+                AddConstraint(constraint);
+            }
+        }
+
         /// <summary>
         /// Adds the constraint of any type (primary key, foreign key, unique key, check)
         /// </summary>
@@ -134,13 +157,13 @@ namespace DatabaseSchemaReader.DataSchema
                     PrimaryKey = con;
                     break;
                 case ConstraintType.ForeignKey:
-                    ForeignKeys.Add(con);
+                    _foreignKeys.Add(con);
                     break;
                 case ConstraintType.UniqueKey:
-                    UniqueKeys.Add(con);
+                    _uniqueKeys.Add(con);
                     break;
                 case ConstraintType.Check:
-                    CheckConstraints.Add(con);
+                    _checkConstraints.Add(con);
                     break;
             }
             AddConstraintColumns(con);
@@ -148,6 +171,7 @@ namespace DatabaseSchemaReader.DataSchema
 
         private void AddConstraintColumns(DatabaseConstraint con)
         {
+            if (con == null) return;
             foreach (string name in con.Columns)
             {
                 AddConstraintFindColumn(con, name);
@@ -186,12 +210,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the foreign key children.
         /// </summary>
-        public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren;  } }
+        public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren; } }
 
         /// <summary>
         /// Gets the triggers.
         /// </summary>
-        public List<DatabaseTrigger> Triggers { get { return _triggers;  } }
+        public List<DatabaseTrigger> Triggers { get { return _triggers; } }
 
         /// <summary>
         /// Gets or sets the indexes.

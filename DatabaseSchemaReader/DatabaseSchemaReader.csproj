@@ -77,6 +77,10 @@
     <Compile Include="Compare\CompareTriggers.cs" />
     <Compile Include="Compare\CompareFunctions.cs" />
     <Compile Include="Compare\SanitizeSql.cs" />
+    <Compile Include="Conversion\ColumnConverter.cs" />
+    <Compile Include="Conversion\ForeignKeyColumnConverter.cs" />
+    <Compile Include="Conversion\IndexConverter.cs" />
+    <Compile Include="Conversion\Loaders\ColumnLoader.cs" />
     <Compile Include="Conversion\KeyMaps\FunctionKeyMap.cs" />
     <Compile Include="Conversion\KeyMaps\ArgumentsKeyMap.cs" />
     <Compile Include="Conversion\KeyMaps\ConstraintKeyMap.cs" />
@@ -85,6 +89,8 @@
     <Compile Include="Conversion\KeyMaps\ColumnsKeyMap.cs" />
     <Compile Include="Conversion\DatabaseColumnExtensions.cs" />
     <Compile Include="Conversion\KeyMaps\TableKeyMap.cs" />
+    <Compile Include="Conversion\Loaders\IndexLoader.cs" />
+    <Compile Include="Conversion\Loaders\SchemaConstraintLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
     <Compile Include="Conversion\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
@@ -93,6 +99,9 @@
     <Compile Include="Conversion\SchemaSourceConverter.cs" />
     <Compile Include="Conversion\KeyMaps\StoredProcedureKeyMap.cs" />
     <Compile Include="Conversion\KeyMaps\SequenceKeyMap.cs" />
+    <Compile Include="Conversion\TriggerConverter.cs" />
+    <Compile Include="Conversion\ViewColumnConverter.cs" />
+    <Compile Include="Conversion\Loaders\ViewColumnLoader.cs" />
     <Compile Include="DatabaseReader.cs" />
     <Compile Include="DataSchema\ConstraintType.cs" />
     <Compile Include="DataSchema\NamedObject.cs" />

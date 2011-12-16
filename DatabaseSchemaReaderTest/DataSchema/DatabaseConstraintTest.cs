@@ -70,7 +70,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
                              RefersToConstraint = "CategoryPK"
                          };
             fk.Columns.Add("CategoryId");
-            products.ForeignKeys.Add(fk);
+            products.AddConstraint(fk);
 
             //act
             var referencedTable = fk.ReferencedTable(schema);

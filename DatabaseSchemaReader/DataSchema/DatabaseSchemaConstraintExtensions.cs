@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
@@ -79,7 +80,7 @@ namespace DatabaseSchemaReader.DataSchema
                 TableName = table.Name,
                 RefersToTable = foreignTableName
             };
-            table.ForeignKeys.Add(foreignKey);
+            table.AddConstraint(foreignKey);
             databaseColumn.IsForeignKey = true;
 
             //add the inverse relationship
@@ -87,6 +88,19 @@ namespace DatabaseSchemaReader.DataSchema
             if (fkTable != null) fkTable.ForeignKeyChildren.Add(table);
 
             return databaseColumn;
+        }
+
+        /// <summary>
+        /// Finds the constraint by name (case insensitive)
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        public static DatabaseConstraint FindByName(this ReadOnlyCollection<DatabaseConstraint> collection, string name)
+        {
+            if (collection == null) return null;
+            if (string.IsNullOrEmpty(name)) return null;
+            return collection.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -143,7 +157,7 @@ namespace DatabaseSchemaReader.DataSchema
                  Name = uniqueKeyName
              };
             uk.Columns.Add(databaseColumn.Name);
-            table.UniqueKeys.Add(uk);
+            table.AddConstraint(uk);
             databaseColumn.IsUniqueKey = true;
             return databaseColumn;
         }

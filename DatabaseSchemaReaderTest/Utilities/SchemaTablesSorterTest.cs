@@ -26,11 +26,14 @@ namespace DatabaseSchemaReaderTest.Utilities
 
             var orders = new DatabaseTable();
             orders.Name = "orders";
-            var productsFk = new DatabaseConstraint();
-            productsFk.RefersToTable = "products";
-            orders.ForeignKeys.Add(productsFk);
+            var productsFk = new DatabaseConstraint
+                                 {
+                                     ConstraintType = ConstraintType.ForeignKey,
+                                     RefersToTable = "products"
+                                 };
+            orders.AddConstraint(productsFk);
             schema.Tables.Add(orders);
-           
+
             var categories = new DatabaseTable();
             categories.Name = "categories";
             schema.Tables.Add(categories);
@@ -38,9 +41,10 @@ namespace DatabaseSchemaReaderTest.Utilities
             var products = new DatabaseTable();
             products.Name = "products";
             var categoriesFk = new DatabaseConstraint();
+            categoriesFk.ConstraintType = ConstraintType.ForeignKey;
             categoriesFk.RefersToTable = "categories";
-            products.ForeignKeys.Add(categoriesFk);
-            schema.Tables.Add(products); 
+            products.AddConstraint(categoriesFk);
+            schema.Tables.Add(products);
 
             //act
             var sortedTables = SchemaTablesSorter.TopologicalSort(schema);
@@ -61,15 +65,17 @@ namespace DatabaseSchemaReaderTest.Utilities
             var orders = new DatabaseTable();
             orders.Name = "countries";
             var productsFk = new DatabaseConstraint();
+            productsFk.ConstraintType = ConstraintType.ForeignKey;
             productsFk.RefersToTable = "capitalcities";
-            orders.ForeignKeys.Add(productsFk);
+            orders.AddConstraint(productsFk);
             schema.Tables.Add(orders);
 
             var products = new DatabaseTable();
             products.Name = "capitalcities";
             var categoriesFk = new DatabaseConstraint();
+            categoriesFk.ConstraintType = ConstraintType.ForeignKey;
             categoriesFk.RefersToTable = "countries";
-            products.ForeignKeys.Add(categoriesFk);
+            products.AddConstraint(categoriesFk);
             schema.Tables.Add(products);
 
             //a country has one capital city

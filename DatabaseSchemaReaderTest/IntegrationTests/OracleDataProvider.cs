@@ -24,7 +24,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void OracleOdp()
         {
             const string providername = "Oracle.DataAccess.Client";
-            const string connectionString = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
+            const string connectionString = ConnectionStrings.OracleHr;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);

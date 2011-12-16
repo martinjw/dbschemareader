@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using DatabaseSchemaReader.Conversion;
+using DatabaseSchemaReader.Conversion.Loaders;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders;
 
@@ -216,54 +217,47 @@ namespace DatabaseSchemaReader
         {
             DataTable tabs = _sr.Tables();
             //get full datatables for all tables, to minimize database calls
-            DataTable cols = _sr.Columns(null); //might want to cache this for views
-            DataTable pks = _sr.PrimaryKeys(null);
-            DataTable fks = _sr.ForeignKeys(null);
-            DataTable fkcols = _sr.ForeignKeyColumns(null);
-            DataTable uks = _sr.UniqueKeys(null);
+
+            //we either use the converters directly (DataTable to our db model)
+            //or loaders, which wrap the schema loader calls and converters 
+            //loaders hide the switch between calling for all tables, or a specific table
+            var columnLoader = new ColumnLoader(_sr);
+            var constraintLoader = new SchemaConstraintLoader(_sr);
+            var indexLoader = new IndexLoader(_sr);
+
             DataTable ids = _sr.IdentityColumns(null);
-            DataTable cks = _sr.CheckConstraints(null);
-            DataTable indexes = _sr.Indexes(null);
-            DataTable indexColumns = _sr.IndexColumns(null);
+
             DataTable triggers = _sr.Triggers(null);
-            List<DatabaseTable> tables = SchemaConverter.Tables(tabs);
+            var triggerConverter = new TriggerConverter(triggers);
+
+            var tables = SchemaConverter.Tables(tabs);
             tables.Sort(delegate(DatabaseTable t1, DatabaseTable t2)
             {
                 //doesn't account for mixed schemas
                 return string.Compare(t1.Name, t2.Name, StringComparison.OrdinalIgnoreCase);
             });
 
-            //MySql and Postgresql only allow indexcolumns per table
-            bool noIndexColumns = (indexColumns.Rows.Count == 0 && indexes.Rows.Count > 0);
-            //we may have to do this on a per table basis
-            bool noColumns = (tables.Count > 0 && cols.Rows.Count == 0);
-            bool noPks = (tables.Count > 0 && pks.Rows.Count == 0);
-            bool noFks = (tables.Count > 0 && fks.Rows.Count == 0);
-            bool noIndexes = (tables.Count > 0 && indexes.Rows.Count == 0);
 
             foreach (DatabaseTable table in tables)
             {
                 var tableName = table.Name;
-                var databaseColumns = SchemaConverter.Columns(noColumns ? _sr.Columns(tableName) : cols, tableName);
+                var databaseColumns = columnLoader.Load(tableName);
                 table.Columns.AddRange(databaseColumns);
-                if (noPks) pks = _sr.PrimaryKeys(tableName);
-                var pkConstraints = SchemaConstraintConverter.Constraints(pks, ConstraintType.PrimaryKey, tableName);
+
+                var pkConstraints = constraintLoader.Load(tableName, ConstraintType.PrimaryKey);
                 PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
-                if (noFks) fks = _sr.ForeignKeys(tableName);
-                table.ForeignKeys = SchemaConstraintConverter.Constraints(fks, ConstraintType.ForeignKey, tableName);
-                SchemaConstraintConverter.AddForeignKeyColumns(fkcols, table);
-                table.UniqueKeys = SchemaConstraintConverter.Constraints(uks, ConstraintType.UniqueKey, tableName);
-                table.CheckConstraints = SchemaConstraintConverter.Constraints(cks, ConstraintType.Check, tableName);
-                if (noIndexes) indexes = _sr.Indexes(tableName);
-                SchemaConstraintConverter.Indexes(indexes, tableName, table.Indexes);
-                if (noIndexColumns)
-                {
-                    indexColumns = _sr.IndexColumns(tableName);
-                }
-                SchemaConstraintConverter.Indexes(indexColumns, tableName, table.Indexes);
+
+                var fks = constraintLoader.Load(tableName, ConstraintType.ForeignKey);
+                table.AddConstraints(fks);
+
+                table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.UniqueKey));
+                table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.Check));
+
+                indexLoader.AddIndexes(table);
+
                 SchemaConstraintConverter.AddIdentity(ids, table);
                 table.Triggers.Clear();
-                table.Triggers.AddRange(SchemaConstraintConverter.Triggers(triggers, tableName));
+                table.Triggers.AddRange(triggerConverter.Triggers(tableName));
                 _sr.PostProcessing(table);
             }
             DatabaseSchema.Tables.Clear();
@@ -286,10 +280,10 @@ namespace DatabaseSchemaReader
             DataTable dt = _sr.Views();
             List<DatabaseView> views = SchemaConverter.Views(dt);
             //get full datatables for all tables, to minimize database calls
-            DataTable cols = _sr.ViewColumns(null);
+            var columnLoader = new ViewColumnLoader(_sr);
             foreach (DatabaseView v in views)
             {
-                v.Columns.AddRange(SchemaConverter.ViewColumns(cols, v.Name));
+                v.Columns.AddRange(columnLoader.Load(v.Name));
             }
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
@@ -310,7 +304,7 @@ namespace DatabaseSchemaReader
                 if (ds == null) return null;
                 if (ds.Tables.Count == 0) return null;
 
-                table = DatabaseSchema.Tables.Find(delegate(DatabaseTable x) { return x.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase); });
+                table = DatabaseSchema.FindTableByName(tableName);
                 if (table == null)
                 {
                     table = new DatabaseTable();
@@ -320,21 +314,34 @@ namespace DatabaseSchemaReader
                 table.SchemaOwner = _sr.Owner;
                 //columns must be done first as it is updated by the others
                 table.Columns.Clear();
-                table.Columns.AddRange(SchemaConverter.Columns(ds.Tables["Columns"]));
+                var columnConverter = new ColumnConverter(ds.Tables["Columns"]);
+                table.Columns.AddRange(columnConverter.Columns());
                 if (ds.Tables.Contains("PrimaryKeys"))
                 {
-                    List<DatabaseConstraint> pkConstraints = SchemaConstraintConverter.Constraints(ds.Tables["PrimaryKeys"], ConstraintType.PrimaryKey);
+                    var converter = new SchemaConstraintConverter(ds.Tables["PrimaryKeys"], ConstraintType.PrimaryKey);
+                    var pkConstraints = converter.Constraints();
                     PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
                 }
                 if (ds.Tables.Contains("Foreign_Keys"))
-                    table.ForeignKeys = SchemaConstraintConverter.Constraints(ds.Tables["Foreign_Keys"], ConstraintType.ForeignKey);
+                {
+                    var converter = new SchemaConstraintConverter(ds.Tables["Foreign_Keys"], ConstraintType.ForeignKey);
+                    table.AddConstraints(converter.Constraints());
+                }
                 if (ds.Tables.Contains("ForeignKeyColumns"))
-                    SchemaConstraintConverter.AddForeignKeyColumns(ds.Tables["ForeignKeyColumns"], table);
+                {
+                    var fkConverter = new ForeignKeyColumnConverter(ds.Tables["ForeignKeyColumns"]);
+                    fkConverter.AddForeignKeyColumns(table.ForeignKeys);
+                }
 
                 if (ds.Tables.Contains("Unique_Keys"))
-                    table.UniqueKeys = SchemaConstraintConverter.Constraints(ds.Tables["Unique_Keys"], ConstraintType.UniqueKey);
-                if (ds.Tables.Contains("IndexColumns"))
-                    table.Indexes = SchemaConstraintConverter.Indexes(ds.Tables["IndexColumns"]);
+                {
+                    var converter = new SchemaConstraintConverter(ds.Tables["Unique_Keys"], ConstraintType.UniqueKey);
+                    table.AddConstraints(converter.Constraints());
+                }
+
+                var indexConverter = new IndexConverter(ds.Tables["IndexColumns"], null);
+                table.Indexes.AddRange(indexConverter.Indexes(tableName));
+
                 if (ds.Tables.Contains("IdentityColumns"))
                     SchemaConstraintConverter.AddIdentity(ds.Tables["IdentityColumns"], table);
             }

@@ -109,7 +109,7 @@ namespace DatabaseSchemaReader.Conversion
             }
             return list;
         }
-
+        /*
         /// <summary>
         /// Converts the "Columns" DataTable into <see cref="DatabaseColumn"/> objects
         /// </summary>
@@ -212,7 +212,7 @@ namespace DatabaseSchemaReader.Conversion
             if (!string.IsNullOrEmpty(tableName))
                 dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
         }
-
+        */
         public static List<DataType> DataTypes(DataTable dataTable)
         {
             List<DataType> list = new List<DataType>();

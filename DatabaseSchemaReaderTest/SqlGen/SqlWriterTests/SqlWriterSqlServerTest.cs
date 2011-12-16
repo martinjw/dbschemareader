@@ -22,7 +22,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     public class SqlWriterSqlServerTest
     {
         private const string ProviderName = "System.Data.SqlClient";
-        private const string ConnectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+        const string ConnectionString = ConnectionStrings.Northwind;
         private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 

@@ -156,7 +156,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
 
 
         const string Providername = "System.Data.SqlClient";
-        const string ConnectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+        const string ConnectionString = ConnectionStrings.Northwind;
 
         private static DatabaseReader GetNortwindReader()
         {

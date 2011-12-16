@@ -25,7 +25,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void DevartOracle()
         {
             const string providername = "Devart.Data.Oracle";
-            const string connectionString = "Server=localhost;Sid=XE;Port=1521;Direct=true;User Id=HR;Password=HR;";
+            const string connectionString = "Server=localhost;Sid=XE;Port=1521;Direct=true;User Id=hr;Password=hr;";
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);

@@ -22,7 +22,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     public class SqlWriterOracleTest
     {
         private const string ProviderName = "System.Data.OracleClient";
-        private const string ConnectionString = @"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)));User Id=HR;Password=HR;";
+        const string ConnectionString = ConnectionStrings.OracleHr;
         private DatabaseTable _regionsTable;
         private readonly DbProviderFactory _factory;
 

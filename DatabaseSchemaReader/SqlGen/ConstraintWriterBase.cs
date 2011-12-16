@@ -97,6 +97,8 @@ namespace DatabaseSchemaReader.SqlGen
         {
             if (CheckConstraintExcluder != null && CheckConstraintExcluder(checkConstraint)) return null;
             var expression = checkConstraint.Expression;
+            //cannot compare empty expression
+            if (string.IsNullOrEmpty(expression)) return null;
             //remove wrapping
             if (expression.StartsWith("(", StringComparison.OrdinalIgnoreCase) && expression.EndsWith(")", StringComparison.OrdinalIgnoreCase))
             {
