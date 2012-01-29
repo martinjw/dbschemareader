@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -45,8 +46,10 @@ namespace DatabaseSchemaReader.CodeGen
 
             var pw = new ProjectWriter(@namespace);
 
-            var mapping = new DirectoryInfo(Path.Combine(directory.FullName, "mapping"));
+            var mapping = new DirectoryInfo(Path.Combine(directory.FullName, "Mapping"));
             if (!mapping.Exists) mapping.Create();
+            var fluentMapping = new DirectoryInfo(Path.Combine(directory.FullName, "FluentMapping"));
+            if (!fluentMapping.Exists) fluentMapping.Create();
 
             foreach (var table in _schema.Tables)
             {
@@ -59,6 +62,8 @@ namespace DatabaseSchemaReader.CodeGen
                 var path = Path.Combine(directory.FullName, fileName);
                 File.WriteAllText(path, txt);
                 pw.AddClass(fileName);
+
+                WriteFluentMapping(table, @namespace, fluentMapping.FullName);
 
                 var mw = new MappingWriter(table, @namespace);
                 txt = mw.Write();
@@ -83,6 +88,15 @@ namespace DatabaseSchemaReader.CodeGen
             File.WriteAllText(
                 Path.Combine(directory.FullName, (@namespace ?? "Project") + ".2010.csproj"),
                 pw.Write());
+        }
+
+        private void WriteFluentMapping(DatabaseTable table, string @namespace, string fullName)
+        {
+            var fluentMapping = new FluentMappingWriter(table, @namespace);
+            var txt = fluentMapping.Write();
+            var fileName = table.NetName + "Mapping.cs";
+            var path = Path.Combine(fullName, fileName);
+            File.WriteAllText(path, txt);
         }
 
         private void WriteStoredProcedures(string directoryFullName, string @namespace, ProjectWriter pw)

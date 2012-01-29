@@ -17,6 +17,11 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(_indent + s);
         }
 
+        public void AppendFormat(string s, params object[] args)
+        {
+            _sb.AppendLine(_indent + string.Format(CultureInfo.InvariantCulture, s, args));
+        }
+
         public Nester BeginNest(string s)
         {
             return BeginNest(s, null);
