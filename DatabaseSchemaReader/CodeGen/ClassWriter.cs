@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
@@ -24,6 +25,14 @@ namespace DatabaseSchemaReader.CodeGen
             _table = table;
             _cb = new ClassBuilder();
         }
+
+        /// <summary>
+        /// Gets or sets the code target.
+        /// </summary>
+        /// <value>
+        /// The code target.
+        /// </value>
+        public CodeTarget CodeTarget { get; set; }
 
         /// <summary>
         /// Writes the C# code of the table
@@ -52,7 +61,18 @@ namespace DatabaseSchemaReader.CodeGen
 
                 if (_table.HasCompositeKey)
                 {
-                    _cb.AppendAutomaticProperty(className + "Key", "Key");
+                    if (CodeTarget != CodeTarget.PocoEntityCodeFirst)
+                    {
+                        _cb.AppendAutomaticProperty(className + "Key", "Key");
+                    }
+                    else
+                    {
+                        //code first composite key
+                        foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
+                        {
+                            WriteColumn(column);
+                        }
+                    }
                 }
 
                 foreach (var column in _table.Columns)
@@ -95,12 +115,48 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteForeignKeyCollections()
         {
+            var listType = "IList<";
+            if (CodeTarget == CodeTarget.PocoEntityCodeFirst) listType = "ICollection<";
             foreach (var foreignKey in _table.ForeignKeyChildren)
             {
+                if (foreignKey.IsManyToManyTable() && CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                {
+                    WriteManyToManyCollection(foreignKey);
+                    continue;
+                }
+
                 var propertyName = foreignKey.NetName + "Collection";
-                var dataType = "IList<" + foreignKey.NetName + ">";
+                var dataType = listType + foreignKey.NetName + ">";
                 _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
             }
+        }
+
+        private void WriteManyToManyCollection(DatabaseTable foreignKey)
+        {
+            //look over the junction table to find the other many-to-many end
+            var target = foreignKey.ManyToManyTraversal(_table);
+            if (target == null)
+            {
+                Debug.WriteLine("Can't navigate the many to many relationship for " + _table.Name + " to " + foreignKey.Name);
+                return;
+            }
+            var propertyName = target.NetName + "Collection";
+            var dataType = "ICollection<" + target.NetName + ">";
+            _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
+
+        }
+
+        private void WriteManyToManyInitialize(DatabaseTable foreignKey)
+        {
+            //look over the junction table to find the other many-to-many end
+            var target = foreignKey.ManyToManyTraversal(_table);
+            if (target == null)
+            {
+                return;
+            }
+            var propertyName = target.NetName + "Collection";
+            var dataType = "List<" + target.NetName + ">";
+            _cb.AppendLine(propertyName + " = new " + dataType + "();");
         }
 
         private void InitializeCollectionsInConstructor(string className)
@@ -110,6 +166,11 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var foreignKey in _table.ForeignKeyChildren)
                 {
+                    if (foreignKey.IsManyToManyTable() && CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                    {
+                        WriteManyToManyInitialize(foreignKey);
+                        continue;
+                    }
                     var propertyName = foreignKey.NetName + "Collection";
                     var dataType = "List<" + foreignKey.NetName + ">";
                     _cb.AppendLine(propertyName + " = new " + dataType + "();");
@@ -118,11 +179,26 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
         }
 
+
         private void WriteColumn(DatabaseColumn column)
         {
             var propertyName = column.NetName;
             var dt = column.DataType;
-            var dataType = dt != null ? dt.NetCodeName(column) : "object";
+            string dataType;
+            if (dt == null)
+            {
+                dataType = "object";
+            }
+            else if (CodeTarget == CodeTarget.PocoEntityCodeFirst)
+            {
+                //EF needs the default mapping type
+                dataType = dt.NetDataTypeCSharpName;
+            }
+            else
+            {
+                //use precision and scale for more precise conversion
+                dataType = dt.NetCodeName(column);
+            }
             //if it's nullable (and not string or array)
             if (column.Nullable &&
                 dt != null &&
@@ -131,18 +207,29 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 dataType += "?"; //nullable
             }
-            if (column.IsForeignKey && column.ForeignKeyTable != null)
+            var isFk = column.IsForeignKey && column.ForeignKeyTable != null;
+            if (isFk)
             {
+                if (CodeTarget == CodeTarget.PocoEntityCodeFirst && column.IsPrimaryKey)
+                {
+                    //if it's a primary key AND foreign key, CF requires a scalar property
+                    _cb.AppendAutomaticProperty(dataType, propertyName + "Id", true);
+                }
                 dataType = column.ForeignKeyTable.NetName;
             }
 
             DataAnnotationWriter.Write(_cb, column);
-            _cb.AppendAutomaticProperty(dataType, propertyName);
+            //for code first, ordinary properties are non-virtual. 
+            var useVirtual = (CodeTarget != CodeTarget.PocoEntityCodeFirst || isFk);
+            _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
 
 
         private void WriteCompositeKeyClass(string className)
         {
+            //CodeFirst can cope with multi-keys
+            if (CodeTarget == CodeTarget.PocoEntityCodeFirst) return;
+
             using (_cb.BeginNest("public class " + className + "Key", "Class representing " + _table.Name + " composite key"))
             {
                 foreach (var column in _table.Columns)

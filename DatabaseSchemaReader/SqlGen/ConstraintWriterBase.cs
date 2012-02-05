@@ -116,7 +116,7 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 //access format names [table].[column].ValidationRule
                 constraintName = constraintName.Replace("[", "").Replace("]", "").Replace(".", "_");
-                expression = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].") + 1) + " " + expression;
+                expression = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].", StringComparison.Ordinal) + 1) + " " + expression;
             }
             var name = ConstraintName(constraintName);
 

@@ -55,8 +55,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             {
                 var name = row["CONSTRAINT_NAME"].ToString();
                 if (string.IsNullOrEmpty(name)) continue;
-                var brace = name.IndexOf("[");
-                var endBrace = name.IndexOf("].");
+                var brace = name.IndexOf("[", StringComparison.Ordinal);
+                var endBrace = name.IndexOf("].", StringComparison.Ordinal);
                 if (brace == -1 || endBrace == -1) continue;
                 var table = name.Substring(brace + 1, endBrace - brace - 1);
                 row[tableColumnKey] = table;

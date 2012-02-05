@@ -48,12 +48,16 @@
             this.panelTables = new System.Windows.Forms.Panel();
             this.cmbTables = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.chkReadSprocs = new System.Windows.Forms.CheckBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.radData = new System.Windows.Forms.RadioButton();
+            this.panelCodeGen = new System.Windows.Forms.Panel();
+            this.chkReadSprocs = new System.Windows.Forms.CheckBox();
+            this.cmbProjectType = new System.Windows.Forms.ComboBox();
+            this.labProjectType = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.panelTables.SuspendLayout();
+            this.panelCodeGen.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -80,8 +84,8 @@
             // 
             // txtFilePath
             // 
-            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFilePath.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenFilePath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.errorProvider1.SetError(this.txtFilePath, "Invalid path");
             this.txtFilePath.Location = new System.Drawing.Point(83, 32);
@@ -146,8 +150,8 @@
             // 
             // txtNamespace
             // 
-            this.txtNamespace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtNamespace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNamespace.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenNamespace", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtNamespace.Location = new System.Drawing.Point(83, 97);
             this.txtNamespace.Name = "txtNamespace";
@@ -168,8 +172,8 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(83, 205);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(354, 23);
@@ -214,8 +218,8 @@
             // 
             // panelTables
             // 
-            this.panelTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.panelTables.Controls.Add(this.cmbTables);
             this.panelTables.Controls.Add(this.label2);
             this.panelTables.Location = new System.Drawing.Point(13, 150);
@@ -225,8 +229,8 @@
             // 
             // cmbTables
             // 
-            this.cmbTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbTables.FormattingEnabled = true;
             this.cmbTables.Location = new System.Drawing.Point(71, 9);
             this.cmbTables.Name = "cmbTables";
@@ -241,19 +245,6 @@
             this.label2.Size = new System.Drawing.Size(34, 13);
             this.label2.TabIndex = 13;
             this.label2.Text = "Table";
-            // 
-            // chkReadSprocs
-            // 
-            this.chkReadSprocs.AutoSize = true;
-            this.chkReadSprocs.Checked = true;
-            this.chkReadSprocs.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkReadSprocs.Location = new System.Drawing.Point(84, 127);
-            this.chkReadSprocs.Name = "chkReadSprocs";
-            this.chkReadSprocs.Size = new System.Drawing.Size(181, 17);
-            this.chkReadSprocs.TabIndex = 11;
-            this.chkReadSprocs.Text = "Read Stored Procedures Results";
-            this.chkReadSprocs.UseVisualStyleBackColor = true;
-            this.chkReadSprocs.Visible = false;
             // 
             // backgroundWorker1
             // 
@@ -271,13 +262,56 @@
             this.radData.UseVisualStyleBackColor = true;
             this.radData.CheckedChanged += new System.EventHandler(this.RadioCheckedChanged);
             // 
+            // panelCodeGen
+            // 
+            this.panelCodeGen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelCodeGen.Controls.Add(this.labProjectType);
+            this.panelCodeGen.Controls.Add(this.cmbProjectType);
+            this.panelCodeGen.Controls.Add(this.chkReadSprocs);
+            this.panelCodeGen.Location = new System.Drawing.Point(13, 123);
+            this.panelCodeGen.Name = "panelCodeGen";
+            this.panelCodeGen.Size = new System.Drawing.Size(463, 60);
+            this.panelCodeGen.TabIndex = 18;
+            this.panelCodeGen.Visible = false;
+            // 
+            // chkReadSprocs
+            // 
+            this.chkReadSprocs.AutoSize = true;
+            this.chkReadSprocs.Checked = true;
+            this.chkReadSprocs.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkReadSprocs.Location = new System.Drawing.Point(71, 8);
+            this.chkReadSprocs.Name = "chkReadSprocs";
+            this.chkReadSprocs.Size = new System.Drawing.Size(181, 17);
+            this.chkReadSprocs.TabIndex = 12;
+            this.chkReadSprocs.Text = "Read Stored Procedures Results";
+            this.chkReadSprocs.UseVisualStyleBackColor = true;
+            this.chkReadSprocs.Visible = false;
+            // 
+            // cmbProjectType
+            // 
+            this.cmbProjectType.FormattingEnabled = true;
+            this.cmbProjectType.Location = new System.Drawing.Point(71, 28);
+            this.cmbProjectType.Name = "cmbProjectType";
+            this.cmbProjectType.Size = new System.Drawing.Size(121, 21);
+            this.cmbProjectType.TabIndex = 13;
+            // 
+            // labProjectType
+            // 
+            this.labProjectType.AutoSize = true;
+            this.labProjectType.Location = new System.Drawing.Point(0, 31);
+            this.labProjectType.Name = "labProjectType";
+            this.labProjectType.Size = new System.Drawing.Size(67, 13);
+            this.labProjectType.TabIndex = 14;
+            this.labProjectType.Text = "Project Type";
+            // 
             // CodeGenForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(498, 266);
+            this.Controls.Add(this.panelCodeGen);
             this.Controls.Add(this.radData);
-            this.Controls.Add(this.chkReadSprocs);
             this.Controls.Add(this.panelTables);
             this.Controls.Add(this.radSprocs);
             this.Controls.Add(this.radDdl);
@@ -295,13 +329,15 @@
             this.Controls.Add(this.label1);
             this.Name = "CodeGenForm";
             this.Text = "Code Generation";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CodeGenFormFormClosing);
             this.Load += new System.EventHandler(this.CodeGenFormLoad);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CodeGenFormFormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.panelTables.ResumeLayout(false);
             this.panelTables.PerformLayout();
+            this.panelCodeGen.ResumeLayout(false);
+            this.panelCodeGen.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -328,8 +364,11 @@
         private System.Windows.Forms.Panel panelTables;
         private System.Windows.Forms.ComboBox cmbTables;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.CheckBox chkReadSprocs;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.RadioButton radData;
+        private System.Windows.Forms.Panel panelCodeGen;
+        private System.Windows.Forms.CheckBox chkReadSprocs;
+        private System.Windows.Forms.Label labProjectType;
+        private System.Windows.Forms.ComboBox cmbProjectType;
     }
 }

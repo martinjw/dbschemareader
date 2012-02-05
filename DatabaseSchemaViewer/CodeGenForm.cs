@@ -21,6 +21,7 @@ namespace DatabaseSchemaViewer
                 txtFilePath.Text = Environment.CurrentDirectory;
 
             cmbDialect.DataSource = Enum.GetValues(typeof(SqlType));
+            cmbProjectType.DataSource = Enum.GetValues(typeof(DatabaseSchemaReader.CodeGen.CodeTarget));
 
             if (databaseSchema.Tables.Count == 0)
             {
@@ -39,6 +40,7 @@ namespace DatabaseSchemaViewer
             var sqlType = ProviderToSqlType.Convert(_databaseSchema.Provider);
             if (sqlType.HasValue)
                 cmbDialect.SelectedItem = sqlType;
+            cmbProjectType.SelectedItem = DatabaseSchemaReader.CodeGen.CodeTarget.PocoNHibernateHbm;
         }
 
         private void GenerateClick(object sender, EventArgs e)
@@ -50,11 +52,12 @@ namespace DatabaseSchemaViewer
             var directory = new DirectoryInfo(txtFilePath.Text.Trim());
             var ns = txtNamespace.Text.Trim();
             var dialect = (SqlType)cmbDialect.SelectedItem;
+            var codeTarget = (DatabaseSchemaReader.CodeGen.CodeTarget) cmbProjectType.SelectedItem;
 
             if (radCSharp.Checked)
             {
                 //this launches in background worker
-                RunCodeWriter(directory, ns, chkReadSprocs.Checked);
+                RunCodeWriter(directory, ns, chkReadSprocs.Checked, codeTarget);
                 return;
             }
             if (radDdl.Checked)
@@ -131,9 +134,10 @@ namespace DatabaseSchemaViewer
         }
 
 
-        private void RunCodeWriter(DirectoryInfo directory, string ns, bool readStoredProcedures)
+        private void RunCodeWriter(DirectoryInfo directory, string ns, bool readStoredProcedures, DatabaseSchemaReader.CodeGen.CodeTarget codeTarget)
         {
             var runner = new CodeWriterRunner(_databaseSchema, directory, ns, readStoredProcedures);
+            runner.CodeTarget = codeTarget;
             if (readStoredProcedures)
             {
                 toolStripStatusLabel1.Text = @"Reading stored procedures";
@@ -232,6 +236,7 @@ namespace DatabaseSchemaViewer
         {
             if (radCSharp.Checked)
             {
+                panelCodeGen.Visible = true;
                 cmbDialect.Visible = false;
                 labDialect.Visible = false;
                 txtNamespace.Visible = true;
@@ -241,6 +246,7 @@ namespace DatabaseSchemaViewer
             }
             else
             {
+                panelCodeGen.Visible = false;
                 cmbDialect.Visible = true;
                 labDialect.Visible = true;
                 panelTables.Visible = (radSprocs.Checked || radData.Checked);

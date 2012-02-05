@@ -44,10 +44,16 @@ namespace DatabaseSchemaReader.CodeGen
 
         public void AppendAutomaticProperty(string dataType, string propertyName)
         {
+            AppendAutomaticProperty(dataType, propertyName, true);
+        }
+
+        public void AppendAutomaticProperty(string dataType, string propertyName, bool isVirtual)
+        {
             var line = string.Format(
                 CultureInfo.InvariantCulture,
-                "{0}public virtual {1} {2} {{ get; set; }}",
+                "{0}public {1}{2} {3} {{ get; set; }}",
                 _indent,
+                isVirtual ? "virtual " : string.Empty,
                 dataType,
                 propertyName);
 

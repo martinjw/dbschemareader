@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Codegen\CodeWriterTest.cs" />
+    <Compile Include="Codegen\CodeFirstWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />

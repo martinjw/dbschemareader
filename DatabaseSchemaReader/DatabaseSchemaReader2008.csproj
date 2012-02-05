@@ -50,7 +50,10 @@
   <ItemGroup>
     <Compile Include="CodeGen\ClassBuilder.cs" />
     <Compile Include="CodeGen\ClassWriter.cs" />
+    <Compile Include="CodeGen\CodeFirstContextWriter.cs" />
+    <Compile Include="CodeGen\CodeTarget.cs" />
     <Compile Include="CodeGen\CodeWriter.cs" />
+    <Compile Include="CodeGen\CodeFirstMappingWriter.cs" />
     <Compile Include="CodeGen\DataAnnotationWriter.cs" />
     <Compile Include="CodeGen\FluentMappingWriter.cs" />
     <Compile Include="CodeGen\MappingWriter.cs" />

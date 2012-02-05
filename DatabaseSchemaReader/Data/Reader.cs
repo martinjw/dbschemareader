@@ -18,7 +18,7 @@ namespace DatabaseSchemaReader.Data
         private readonly DatabaseTable _databaseTable;
         private readonly string _connectionString;
         private readonly string _providerName;
-        private int _pageSize = 200;
+        private int _pageSize = 1000;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Reader"/> class.
@@ -40,7 +40,7 @@ namespace DatabaseSchemaReader.Data
         }
 
         /// <summary>
-        /// Gets or sets the maximum number of records returned.
+        /// Gets or sets the maximum number of records returned. Default is 1000.
         /// </summary>
         /// <value>The size of the page.</value>
         public int PageSize

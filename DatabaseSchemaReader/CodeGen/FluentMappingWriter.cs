@@ -24,7 +24,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             var className = _table.NetName + "Mapping";
 
-            using (_cb.BeginNest("namespace " + _ns + ".FluentMapping"))
+            using (_cb.BeginNest("namespace " + _ns + ".Mapping"))
             {
                 using (_cb.BeginNest("public class " + className + " : ClassMap<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
                 {
@@ -134,7 +134,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (dt != null)
             {
                 //nvarchar(max) may be -1
-                if (dt.IsString && column.Length > 0)
+                if (dt.IsString && column.Length > 0 && column.Length < 1073741823)
                 {
                     sb.AppendFormat(CultureInfo.InvariantCulture, ".Length({0})", column.Length.GetValueOrDefault());
                 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -13,22 +12,34 @@ namespace DatabaseSchemaReader.CodeGen
     public class CodeWriter
     {
         private readonly DatabaseSchema _schema;
+        private readonly CodeTarget _codeTarget;
+        private string _mappingPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeWriter"/> class.
         /// </summary>
         /// <param name="schema">The schema.</param>
         public CodeWriter(DatabaseSchema schema)
+            : this(schema, CodeTarget.Poco)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CodeWriter"/> class.
+        /// </summary>
+        /// <param name="schema">The schema.</param>
+        /// <param name="codeTarget">The code target.</param>
+        public CodeWriter(DatabaseSchema schema, CodeTarget codeTarget)
         {
             if (schema == null)
                 throw new ArgumentNullException("schema");
             _schema = schema;
-
+            _codeTarget = codeTarget;
             PrepareSchemaNames.Prepare(schema);
         }
 
         /// <summary>
-        /// Uses the specified schema to write class files, NHibernate mapping and a project file. Any existing files are overwritten. If not required, simply discard the mapping and project file. Use these classes as ViewModels in combination with the data access strategy of your choice.
+        /// Uses the specified schema to write class files, NHibernate/EF CodeFirst mapping and a project file. Any existing files are overwritten. If not required, simply discard the mapping and project file. Use these classes as ViewModels in combination with the data access strategy of your choice.
         /// </summary>
         /// <param name="directory">The directory to write the files to. Will create a subdirectory called "mapping". The directory must exist- any files there will be overwritten.</param>
         /// <param name="namespace">The namespace (optional).</param>
@@ -46,16 +57,16 @@ namespace DatabaseSchemaReader.CodeGen
 
             var pw = new ProjectWriter(@namespace);
 
-            var mapping = new DirectoryInfo(Path.Combine(directory.FullName, "Mapping"));
-            if (!mapping.Exists) mapping.Create();
-            var fluentMapping = new DirectoryInfo(Path.Combine(directory.FullName, "FluentMapping"));
-            if (!fluentMapping.Exists) fluentMapping.Create();
+            InitMappingProjects(directory, pw);
 
             foreach (var table in _schema.Tables)
             {
+                if (_codeTarget == CodeTarget.PocoEntityCodeFirst && table.IsManyToManyTable())
+                    continue;
                 var className = table.NetName;
 
                 var cw = new ClassWriter(table, @namespace);
+                cw.CodeTarget = _codeTarget;
                 var txt = cw.Write();
 
                 var fileName = className + ".cs";
@@ -63,16 +74,11 @@ namespace DatabaseSchemaReader.CodeGen
                 File.WriteAllText(path, txt);
                 pw.AddClass(fileName);
 
-                WriteFluentMapping(table, @namespace, fluentMapping.FullName);
-
-                var mw = new MappingWriter(table, @namespace);
-                txt = mw.Write();
-
-                fileName = className + ".hbm.xml";
-                path = Path.Combine(mapping.FullName, fileName);
-                File.WriteAllText(path, txt);
-                pw.AddMap(@"mapping\" + fileName);
-
+                WriteMapping(table, @namespace, pw);
+            }
+            if (_codeTarget == CodeTarget.PocoEntityCodeFirst)
+            {
+                WriteDbContext(directory, @namespace, pw);
             }
 
             //we could write functions (at least scalar functions- not table value functions)
@@ -90,13 +96,76 @@ namespace DatabaseSchemaReader.CodeGen
                 pw.Write());
         }
 
-        private void WriteFluentMapping(DatabaseTable table, string @namespace, string fullName)
+        private void WriteDbContext(FileSystemInfo directory, string ns, ProjectWriter projectWriter)
+        {
+            var writer = new CodeFirstContextWriter(ns);
+            var txt = writer.Write(_schema.Tables);
+            var fileName = writer.ContextName + ".cs";
+            File.WriteAllText(
+                Path.Combine(directory.FullName, fileName),
+                txt);
+            projectWriter.AddClass(fileName);
+        }
+
+        private void InitMappingProjects(FileSystemInfo directory, ProjectWriter pw)
+        {
+            if (_codeTarget == CodeTarget.Poco) return;
+
+            var mapping = new DirectoryInfo(Path.Combine(directory.FullName, "Mapping"));
+            if (!mapping.Exists) mapping.Create();
+            _mappingPath = mapping.FullName;
+
+            //no need to reference NHibernate for HBMs
+            switch (_codeTarget)
+            {
+                case CodeTarget.PocoNHibernateFluent:
+                    pw.AddNHibernateReference();
+                    break;
+                case CodeTarget.PocoEntityCodeFirst:
+                    pw.AddEntityFrameworkReference();
+                    pw.UpgradeTo2010(); //you can only use 2010
+                    break;
+            }
+        }
+
+        private void WriteMapping(DatabaseTable table, string @namespace, ProjectWriter pw)
+        {
+            string fileName;
+            switch (_codeTarget)
+            {
+                case CodeTarget.PocoNHibernateFluent:
+                    fileName = WriteFluentMapping(table, @namespace);
+                    pw.AddClass(@"Mapping\" + fileName);
+                    break;
+                case CodeTarget.PocoNHibernateHbm:
+                    var mw = new MappingWriter(table, @namespace);
+                    var txt = mw.Write();
+
+                    fileName = table.NetName + ".hbm.xml";
+                    var path = Path.Combine(_mappingPath, fileName);
+                    File.WriteAllText(path, txt);
+                    pw.AddMap(@"mapping\" + fileName);
+                    break;
+                case CodeTarget.PocoEntityCodeFirst:
+                    var cfmw = new CodeFirstMappingWriter(table, @namespace);
+                    var cfmap = cfmw.Write();
+
+                    fileName = table.NetName + "Mapping.cs";
+                    var filePath = Path.Combine(_mappingPath, fileName);
+                    File.WriteAllText(filePath, cfmap);
+                    pw.AddClass(@"Mapping\" + fileName);
+                    break;
+            }
+        }
+
+        private string WriteFluentMapping(DatabaseTable table, string @namespace)
         {
             var fluentMapping = new FluentMappingWriter(table, @namespace);
             var txt = fluentMapping.Write();
             var fileName = table.NetName + "Mapping.cs";
-            var path = Path.Combine(fullName, fileName);
+            var path = Path.Combine(_mappingPath, fileName);
             File.WriteAllText(path, txt);
+            return fileName;
         }
 
         private void WriteStoredProcedures(string directoryFullName, string @namespace, ProjectWriter pw)

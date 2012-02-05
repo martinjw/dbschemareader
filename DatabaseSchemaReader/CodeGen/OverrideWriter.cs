@@ -46,7 +46,7 @@ namespace DatabaseSchemaReader.CodeGen
                     if (!column.IsPrimaryKey) continue;
 
                     var primaryKeyName = column.NetName;
-                    var datatype = column.DataType;
+                    var datatype = column.DataType ?? new DataType("x", "x");
                     if (column.IsForeignKey)
                     {
                         _cb.AppendLine("if (" + primaryKeyName + " == null && x." + primaryKeyName + " == null) return ReferenceEquals(this, x);");
@@ -88,7 +88,7 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     if (!column.IsPrimaryKey) continue;
                     var primaryKeyName = column.NetName;
-                    var datatype = column.DataType;
+                    var datatype = column.DataType ?? new DataType("x", "z");
                     if (column.IsForeignKey)
                     {
                         _cb.AppendLine("if (" + primaryKeyName + " == null) return base.GetHashCode(); //transient instance");
@@ -113,7 +113,7 @@ namespace DatabaseSchemaReader.CodeGen
                     if (i != 0) sb.Append(" ^ "); //XOR hashcodes together
                     i++;
                     var primaryKeyName = column.NetName;
-                    var datatype = column.DataType;
+                    var datatype = column.DataType ?? new DataType("x", "x");
                     sb.Append(primaryKeyName);
                     if (datatype.IsInt && !column.IsForeignKey) continue;
                     sb.Append(".GetHashCode()");

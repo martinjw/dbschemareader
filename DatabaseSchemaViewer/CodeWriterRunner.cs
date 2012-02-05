@@ -18,10 +18,13 @@ namespace DatabaseSchemaViewer
             _ns = ns;
             _directory = directory;
             _databaseSchema = databaseSchema;
+            CodeTarget = CodeTarget.Poco;
         }
 
         public string Message { get; private set; }
         public bool Result { get; private set; }
+
+        public CodeTarget CodeTarget { get; set; }
 
         public void RunCodeWriter()
         {
@@ -30,7 +33,7 @@ namespace DatabaseSchemaViewer
                 var sprocRunner = new DatabaseSchemaReader.Procedures.ResultSetReader(_databaseSchema);
                 sprocRunner.Execute();
             }
-            var cw = new CodeWriter(_databaseSchema);
+            var cw = new CodeWriter(_databaseSchema, CodeTarget);
             try
             {
                 cw.Execute(_directory, _ns);

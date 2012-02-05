@@ -63,7 +63,7 @@ namespace DatabaseSchemaReader.DataSchema
         public static DatabaseTable AddIndex(this DatabaseTable databaseTable, string indexName, IEnumerable<DatabaseColumn> columns)
         {
             if (databaseTable == null) throw new ArgumentNullException("databaseTable", "databaseTable must not be null");
-            if (columns.Count() == 0) throw new ArgumentException("columns is empty", "columns");
+            if (!columns.Any()) throw new ArgumentException("columns is empty", "columns");
             var index = new DatabaseIndex
                             {
                                 Name = indexName,
@@ -74,6 +74,32 @@ namespace DatabaseSchemaReader.DataSchema
             index.Columns.AddRange(columns);
             databaseTable.AddIndex(index);
             return databaseTable;
+        }
+
+        /// <summary>
+        /// Determines whether is a many to many table (association or junction table joining two or more other tables in a many to many relationship)
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <returns>
+        /// 	<c>true</c> if this is a many to many table; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsManyToManyTable(this DatabaseTable databaseTable)
+        {
+            return (databaseTable.Columns.All(c => c.IsPrimaryKey && c.IsForeignKey));
+        }
+
+        /// <summary>
+        /// Via a many to many table, find the opposite many relationship
+        /// </summary>
+        /// <param name="manyToManyTable">The many to many table.</param>
+        /// <param name="fromTable">From table.</param>
+        /// <returns></returns>
+        public static DatabaseTable ManyToManyTraversal(this DatabaseTable manyToManyTable, DatabaseTable fromTable)
+        {
+            var foreignKey = manyToManyTable.ForeignKeys.FirstOrDefault(x => x.RefersToTable != fromTable.Name);
+            //a self many to many
+            if (foreignKey == null) return fromTable;
+            return foreignKey.ReferencedTable(fromTable.DatabaseSchema);
         }
     }
 }

@@ -44,17 +44,48 @@ namespace DatabaseSchemaReader.CodeGen
             _itemGroup.Add(embeddedResource);
         }
 
-        public void AddOracleReference()
+        private XElement FindSystemDataReference()
         {
-            if (_hasOracle) return;
-            var reference = _document
+            return _document
                 .Descendants(_xmlns + "Reference")
                 .Where(r => (string)r.Attribute("Include") == "System.Data")
                 .First();
+        }
+
+        public void AddOracleReference()
+        {
+            if (_hasOracle) return;
+            var reference = FindSystemDataReference();
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include", "System.Data.OracleClient")));
             _hasOracle = true;
+        }
+
+        public void AddNHibernateReference()
+        {
+            //the hintpaths are for a hypothetical libs folder
+
+            var reference = FindSystemDataReference();
+            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "FluentNHibernate"), new XElement(_xmlns + "HintPath", @"..\libs\FluentNHibernate.dll"));
+
+            reference.AddAfterSelf(element);
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"), new XElement(_xmlns + "HintPath", @"..\libs\NHibernate.dll"));
+            reference.AddAfterSelf(element);
+
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"), new XElement(_xmlns + "HintPath", @"..\libs\Iesi.Collections.dll"));
+            reference.AddAfterSelf(element);
+        }
+
+        public void AddEntityFrameworkReference()
+        {
+            var reference = FindSystemDataReference();
+            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"), 
+                new XElement(_xmlns + "HintPath", @"..\libs\EntityFramework.dll"));
+            reference.AddAfterSelf(element);
+            reference.AddAfterSelf(
+                new XElement(_xmlns + "Reference",
+                            new XAttribute("Include", "System.Data.Entity")));
         }
 
         public void UpgradeTo2010()

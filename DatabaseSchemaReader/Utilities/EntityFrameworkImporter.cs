@@ -141,7 +141,7 @@ namespace DatabaseSchemaReader.Utilities
                 var tableName = AssociationTypeToTableName(storageSchema, association, role);
 
                 //the EF DDL generator (GenerateTSQL.Utility.ttinclude WriteFKConstraintName) adds the prefix
-                if (!name.StartsWith("FK_", StringComparison.InvariantCultureIgnoreCase))
+                if (!name.StartsWith("FK_", StringComparison.OrdinalIgnoreCase))
                     name = "FK_" + name;
                 var fk = new DatabaseConstraint
                              {

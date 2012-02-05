@@ -38,7 +38,7 @@ namespace DatabaseSchemaReader.CodeGen
             else if (dt.IsString)
             {
                 //if it's over a million characters, no point validating
-                if (column.Length < 1073741823)
+                if (column.Length < 1073741823 && column.Length > 0)
                     cb.AppendLine(string.Format(CultureInfo.InvariantCulture, "[StringLength({0})]", column.Length));
             }
             else if (dt.IsInt)

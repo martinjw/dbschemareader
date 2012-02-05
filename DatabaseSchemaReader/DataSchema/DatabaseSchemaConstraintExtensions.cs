@@ -82,6 +82,7 @@ namespace DatabaseSchemaReader.DataSchema
             };
             table.AddConstraint(foreignKey);
             databaseColumn.IsForeignKey = true;
+            foreignKey.Columns.Add(databaseColumn.Name);
 
             //add the inverse relationship
             var fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);

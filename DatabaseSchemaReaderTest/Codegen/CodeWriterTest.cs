@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
@@ -146,7 +147,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var directory = CreateDirectory("Hr");
             const string @namespace = "Hr.Domain";
 
-            var codeWriter = new CodeWriter(schema);
+            var codeWriter = new CodeWriter(schema, CodeTarget.PocoNHibernateHbm);
             codeWriter.Execute(directory, @namespace);
 
             var mapping = directory.GetDirectories("mapping").FirstOrDefault();
@@ -193,24 +194,15 @@ namespace DatabaseSchemaReaderTest.Codegen
         private static DatabaseSchema PrepareModel()
         {
             var schema = new DatabaseSchema(null, null);
-            var integer = new DataType("INT", typeof(int).FullName);
-            var @string = new DataType("VARCHAR", typeof(string).FullName);
 
-            var categories = new DatabaseTable { Name = "Categories" };
-            var categoryId = new DatabaseColumn { Name = "CategoryId", DataType = integer };
-            var name = new DatabaseColumn { Name = "CategoryName", DataType = @string };
-            categories.Columns.Add(categoryId);
-            categories.Columns.Add(name);
-            schema.Tables.Add(categories);
+            schema.AddTable("Categories")
+                .AddColumn("CategoryId", DbType.Int32).AddPrimaryKey()
+                .AddColumn("CategoryName", DbType.String);
 
-            var products = new DatabaseTable { Name = "Products" };
-            var productId = new DatabaseColumn { Name = "ProductId", DataType = integer };
-            var productName = new DatabaseColumn { Name = "ProductName", DataType = @string };
-            var productCategory = new DatabaseColumn { Name = "CategoryId", DataType = integer, ForeignKeyTableName = "Categories", IsForeignKey = true };
-            products.Columns.Add(productId);
-            products.Columns.Add(productName);
-            products.Columns.Add(productCategory);
-            schema.Tables.Add(products);
+            schema.AddTable("Products")
+                .AddColumn("ProductId", DbType.Int32).AddPrimaryKey()
+                .AddColumn("ProductName", DbType.String)
+                .AddColumn("CategoryId", DbType.Int32).AddForeignKey("fk", "Categories");
 
             DatabaseSchemaFixer.UpdateReferences(schema);
 
