@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.Procedures
 {
     class SprocResultWriter
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.NHibernate
 {
     class MappingWriter
     {
@@ -27,11 +27,20 @@ namespace DatabaseSchemaReader.CodeGen
                                          new XAttribute("name", _table.NetName),
                                          new XAttribute("table", SqlSafe(_table.Name)),
                                          new XAttribute("schema", SqlSafe(_table.SchemaOwner)),
-                                         //consider this
+                //consider this
                                          new XAttribute("dynamic-update", "true"),
                                          new XAttribute("optimistic-lock", "dirty"));
             hibmap.Add(_classElement);
         }
+
+        public ICollectionNamer CollectionNamer { get; set; }
+
+        private string NameCollection(string name)
+        {
+            if (CollectionNamer == null) return name + "Collection";
+            return CollectionNamer.NameCollection(name);
+        }
+
         private static string SqlSafe(string s)
         {
             return "`" + s + "`";
@@ -62,7 +71,7 @@ namespace DatabaseSchemaReader.CodeGen
             _classElement.Add(
                 new XComment(string.Format(CultureInfo.InvariantCulture, "Foreign key to {0} ({1})", foreignKeyTable, childClass)));
 
-            var propertyName = childClass + "Collection";
+            var propertyName = NameCollection(childClass);
             var bag = new XElement(_xmlns + "bag");
             bag.SetAttributeValue("name", propertyName);
             //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");

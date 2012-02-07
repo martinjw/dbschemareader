@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
@@ -15,15 +14,26 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly DatabaseSchema _schema;
         private readonly string _namespace;
         private readonly ClassBuilder _cb;
+        private readonly CodeTarget _codeTarget;
 
-        public UnitTestWriter(DatabaseSchema schema, string ns)
+        public UnitTestWriter(DatabaseSchema schema, string ns, CodeTarget codeTarget)
         {
+            _codeTarget = codeTarget;
             _namespace = ns;
             _schema = schema;
             _cb = new ClassBuilder();
         }
 
         public string ClassName { get; private set; }
+
+        public string ContextName { get; set; }
+        public ICollectionNamer CollectionNamer { get; set; }
+
+        private string NameCollection(string name)
+        {
+            if (CollectionNamer == null) return name + "Collection";
+            return CollectionNamer.NameCollection(name);
+        }
 
         public string Write()
         {
@@ -109,10 +119,22 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("var entity = Create" + entity.NetName + "();");
                 using (_cb.BeginNest("using (new TransactionScope()) //not committed, so rolls back"))
                 {
-                    using (_cb.BeginNest("using (ISession session = OpenSession())"))
+                    if (_codeTarget == CodeTarget.PocoNHibernateHbm || _codeTarget == CodeTarget.PocoNHibernateFluent)
                     {
-                        _cb.AppendLine("session.SaveOrUpdate(entity);");
-                        _cb.AppendLine("session.Delete(entity);");
+                        using (_cb.BeginNest("using (ISession session = OpenSession())"))
+                        {
+                            _cb.AppendLine("session.SaveOrUpdate(entity);");
+                            _cb.AppendLine("session.Delete(entity);");
+                        }
+                    }
+                    else if (_codeTarget == CodeTarget.PocoEntityCodeFirst)
+                    {
+                        var dbSet = NameCollection(entity.NetName);
+                        using (_cb.BeginNest("using (var context = new " + ContextName + "())"))
+                        {
+                            _cb.AppendLine("context." + dbSet + ".Add(entity);");
+                            _cb.AppendLine("context.SaveChanges();");
+                        }
                     }
                 }
             }
@@ -145,6 +167,9 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteOpenSession()
         {
+            if (_codeTarget != CodeTarget.PocoNHibernateHbm && _codeTarget != CodeTarget.PocoNHibernateFluent)
+                return;
+
             using (_cb.BeginNest("private static ISession OpenSession()"))
             {
                 _cb.AppendLine("return SessionFactory.OpenSession();");
@@ -164,14 +189,36 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteStaticConstructor(DatabaseTable entity)
         {
+            if (_codeTarget != CodeTarget.PocoNHibernateHbm && _codeTarget != CodeTarget.PocoNHibernateFluent)
+                return;
+
             _cb.AppendLine("private static readonly ISessionFactory SessionFactory;");
 
             using (_cb.BeginNest("static " + ClassName + "()"))
             {
-                _cb.AppendLine("var configuration = new Configuration();");
-                _cb.AppendLine("configuration.Configure(); //configure from the app.config");
-                _cb.AppendLine("configuration.AddAssembly(typeof(" + entity.NetName + ").Assembly);");
-                _cb.AppendLine("SessionFactory = configuration.BuildSessionFactory();");
+                if (_codeTarget == CodeTarget.PocoNHibernateHbm)
+                {
+
+                    _cb.AppendLine("var configuration = new Configuration();");
+                    _cb.AppendLine("configuration.Configure(); //configure from the app.config");
+                    _cb.AppendLine("configuration.AddAssembly(typeof(" + entity.NetName + ").Assembly);");
+                    _cb.AppendLine("SessionFactory = configuration.BuildSessionFactory();");
+                }
+                else if (_codeTarget == CodeTarget.PocoNHibernateFluent)
+                {
+                    _cb.AppendLine(@"var nhConfig = Fluently.Configure()");
+                    _cb.AppendLine(@"    .ProxyFactoryFactory<ProxyFactoryFactory>()");
+                    _cb.AppendLine(@"    .Database(");
+                    _cb.AppendLine(@"        //TODO Specify database type and connection string here");
+                    _cb.AppendLine(@"        MsSqlConfiguration.MsSql2008");
+                    _cb.AppendLine(@"        .ConnectionString(csb => csb.FromConnectionStringWithKey(""Northwind""))");
+                    _cb.AppendLine(@"    )");
+                    _cb.AppendLine(@"    .Mappings(mappings => mappings.FluentMappings.AddFromAssemblyOf<" + entity.NetName + ">())");
+                    _cb.AppendLine(@"    .ExposeConfiguration(c => c.Properties.Add(""current_session_context_class"", ""web""))");
+                    _cb.AppendLine(@"    .BuildConfiguration();");
+                    _cb.AppendLine(@"SessionFactory = nhConfig.BuildSessionFactory();");
+
+                }
             }
         }
 
@@ -182,8 +229,19 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("using System.Data.Common;");
             _cb.AppendLine("using System.Transactions;");
             _cb.AppendLine("using Microsoft.VisualStudio.TestTools.UnitTesting;");
-            _cb.AppendLine("using NHibernate;");
-            _cb.AppendLine("using NHibernate.Cfg;");
+            switch (_codeTarget)
+            {
+                case CodeTarget.PocoNHibernateFluent:
+                    _cb.AppendLine("using FluentNHibernate.Cfg;");
+                    _cb.AppendLine("using FluentNHibernate.Cfg.Db;");
+                    _cb.AppendLine("using NHibernate;");
+                    break;
+                case CodeTarget.PocoNHibernateHbm:
+                    _cb.AppendLine("using NHibernate;");
+                    _cb.AppendLine("using NHibernate.Cfg;");
+                    break;
+            }
+
             _cb.AppendLine("using " + _namespace + ";");
             if (includeProcedures)
                 _cb.AppendLine("using " + _namespace + ".Procedures;");

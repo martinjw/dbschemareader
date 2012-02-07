@@ -124,7 +124,7 @@ namespace DatabaseSchemaReader.DataSchema
             foreach (DataType type in databaseSchema.DataTypes)
             {
                 //just in case there are duplicate names
-                if(!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
+                if (!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
             }
 
             foreach (DatabaseTable table in databaseSchema.Tables)

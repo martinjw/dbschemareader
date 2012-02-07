@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.NHibernate
 {
     class FluentMappingWriter
     {
@@ -16,6 +16,14 @@ namespace DatabaseSchemaReader.CodeGen
             _ns = ns;
             _table = table;
             _cb = new ClassBuilder();
+        }
+
+        public ICollectionNamer CollectionNamer { get; set; }
+
+        private string NameCollection(string name)
+        {
+            if (CollectionNamer == null) return name + "Collection";
+            return CollectionNamer.NameCollection(name);
         }
 
         public string Write()
@@ -171,7 +179,7 @@ namespace DatabaseSchemaReader.CodeGen
             var fkColumn = foreignKey.Columns[0];
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = childClass + "Collection";
+            var propertyName = NameCollection(childClass);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);

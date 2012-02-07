@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.DataSchema
     {
 
         /// <summary>
-        /// Makes this column the primary key.
+        /// Makes this column the primary key (or part of a composite key)
         /// </summary>
         /// <param name="databaseColumn">The database column.</param>
         /// <returns></returns>
@@ -22,7 +22,7 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
-        /// Adds the primary key.
+        /// Makes this column the primary key (or part of a composite key)
         /// </summary>
         /// <param name="databaseColumn">The database column.</param>
         /// <param name="primaryKeyName">Name of the primary key.</param>
@@ -31,13 +31,21 @@ namespace DatabaseSchemaReader.DataSchema
         {
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var table = databaseColumn.Table;
-            table.PrimaryKey = new DatabaseConstraint
+            if (table.PrimaryKey == null)
             {
-                ConstraintType = ConstraintType.PrimaryKey,
-                TableName = table.Name,
-                Name = primaryKeyName
-            };
-            table.PrimaryKey.Columns.Add(databaseColumn.Name);
+                table.PrimaryKey = new DatabaseConstraint
+                                       {
+                                           ConstraintType = ConstraintType.PrimaryKey,
+                                           TableName = table.Name,
+                                           Name = primaryKeyName
+                                       };
+            }
+            else if (primaryKeyName != null)
+            {
+                table.PrimaryKey.Name = primaryKeyName;
+            }
+            if (!table.PrimaryKey.Columns.Contains(databaseColumn.Name))
+                table.PrimaryKey.Columns.Add(databaseColumn.Name);
             databaseColumn.IsPrimaryKey = true;
             databaseColumn.Nullable = false; //you can't have a nullable pk
             return databaseColumn;
@@ -80,9 +88,9 @@ namespace DatabaseSchemaReader.DataSchema
                 TableName = table.Name,
                 RefersToTable = foreignTableName
             };
+            foreignKey.Columns.Add(databaseColumn.Name);
             table.AddConstraint(foreignKey);
             databaseColumn.IsForeignKey = true;
-            foreignKey.Columns.Add(databaseColumn.Name);
 
             //add the inverse relationship
             var fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);

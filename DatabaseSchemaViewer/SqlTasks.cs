@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.CodeGen;
+using DatabaseSchemaReader.CodeGen.Procedures;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 

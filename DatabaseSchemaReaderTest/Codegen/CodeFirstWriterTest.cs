@@ -20,7 +20,7 @@ namespace DatabaseSchemaReaderTest.Codegen
 
 
     /// <summary>
-    ///Create a simple model and write it to filesystem
+    /// Test code first generation
     ///</summary>
     [TestClass]
     public class CodeFirstWriterTest

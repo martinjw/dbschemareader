@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.Procedures
 {
     class SprocLogic
     {

@@ -10,18 +10,6 @@ namespace DatabaseSchemaReader.CodeGen
     {
         //http://msdn.microsoft.com/en-us/library/hh295844%28v=vs.103%29.aspx
 
-        //many to many
-        //modelBuilder.Entity<Course>()
-        //    .HasMany(t => t.Instructors)
-        //    .WithMany(t => t.Courses)
-        //    .Map(m =>
-        //    {
-        //        m.ToTable("CourseInstructor");
-        //        m.MapLeftKey("CourseID");
-        //        m.MapRightKey("InstructorID");
-        //    });
-
-
         private readonly DatabaseTable _table;
         private readonly string _ns;
         private readonly ClassBuilder _cb;
@@ -31,6 +19,20 @@ namespace DatabaseSchemaReader.CodeGen
             _ns = ns;
             _table = table;
             _cb = new ClassBuilder();
+        }
+
+        /// <summary>
+        /// Gets or sets the collection namer.
+        /// </summary>
+        /// <value>
+        /// The collection namer.
+        /// </value>
+        public ICollectionNamer CollectionNamer { get; set; }
+
+        private string NameCollection(string name)
+        {
+            if (CollectionNamer == null) return name + "Collection";
+            return CollectionNamer.NameCollection(name);
         }
 
         public string Write()
@@ -89,7 +91,6 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("//TODO- you MUST add a primary key!");
                 return;
             }
-            _cb.AppendLine("// Primary key");
             if (_table.HasCompositeKey)
             {
                 AddCompositePrimaryKey();
@@ -97,14 +98,17 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var idColumn = _table.PrimaryKeyColumn;
+            //in case PrepareSchemaNames.Prepare(schema) not done
+            var netName = idColumn.NetName ?? idColumn.Name;
 
             //"Id" or class"Id" is default
-            if (idColumn.NetName.Equals("Id", StringComparison.OrdinalIgnoreCase))
+            if (netName.Equals("Id", StringComparison.OrdinalIgnoreCase))
                 return;
-            if (idColumn.NetName.Equals(_table.NetName + "Id", StringComparison.OrdinalIgnoreCase))
+            if (netName.Equals(_table.NetName + "Id", StringComparison.OrdinalIgnoreCase))
                 return;
 
-            _cb.AppendLine("HasKey(x => x." + idColumn.NetName + ");");
+            _cb.AppendLine("// Primary key");
+            _cb.AppendLine("HasKey(x => x." + netName + ");");
         }
 
         private void AddCompositePrimaryKey()
@@ -115,6 +119,7 @@ namespace DatabaseSchemaReader.CodeGen
                 //primary keys must be scalar so if it's a foreign key use the Id mirror property
                     .Select(x => "x." + x.NetName + (x.IsForeignKey ? "Id" : string.Empty))
                     .ToArray());
+            _cb.AppendLine("// Primary key (composite)");
             //double braces for a format
             _cb.AppendFormat("HasKey(x => new {{ {0} }});", keys);
         }
@@ -137,6 +142,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var propertyName = column.NetName;
+            if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "Property(x => x.{0})", propertyName);
             if (propertyName != column.Name)
@@ -180,10 +186,11 @@ namespace DatabaseSchemaReader.CodeGen
                 column.Nullable ? "Optional" : "Required",
                 propertyName);
             //then map the inverse with our foreign key children convention
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0}Collection)", column.Table.NetName);
+            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", NameCollection(column.Table.NetName));
             if (column.IsPrimaryKey)
             {
                 //for pk/fk we have a mirror property
+                //TODO: don't use Id here
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".HasForeignKey(c => c.{0}Id)", propertyName);
             }
             else
@@ -212,7 +219,7 @@ namespace DatabaseSchemaReader.CodeGen
             //var fkColumn = foreignKey.Columns.FirstOrDefault();
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = childClass + "Collection";
+            var propertyName = NameCollection(childClass);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
@@ -227,13 +234,14 @@ namespace DatabaseSchemaReader.CodeGen
             var otherEnd = foreignKeyChild.ManyToManyTraversal(_table);
             _cb.AppendLine("// Many to many foreign key to " + otherEnd.Name);
             var childClass = otherEnd.NetName;
-            var propertyName = childClass + "Collection";
+            var propertyName = NameCollection(childClass);
+            var reverseName = NameCollection(_table.NetName);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(z => z.{0}Collection)", _table.NetName);
+            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(z => z.{0})", reverseName);
             _cb.AppendLine(sb.ToString());
-            using (_cb.BeginNest(".Map(map => "))
+            using (_cb.BeginBrace(".Map(map => "))
             {
                 _cb.AppendLine("map.ToTable(\"" + foreignKeyChild.Name + "\");");
                 //left key = HasMany side

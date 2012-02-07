@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -31,6 +32,13 @@ namespace DatabaseSchemaReader.CodeGen
         {
             get { return _contextName; }
         }
+        public ICollectionNamer CollectionNamer { get; set; }
+
+        private string NameCollection(string name)
+        {
+            if (CollectionNamer == null) return name + "Collection";
+            return CollectionNamer.NameCollection(name);
+        }
 
         public string Write(ICollection<DatabaseTable> tables)
         {
@@ -44,16 +52,22 @@ namespace DatabaseSchemaReader.CodeGen
                 using (_cb.BeginNest("public class " + ContextName + " : DbContext"))
                 {
                     //consider specifying ctors (esp string connectionName and DbConnection)
+                    var dbSetTables = tables
+                        .Where(x => !x.IsManyToManyTable())
+                        //doesn't support tables without a primary key
+                        .Where(x => x.PrimaryKey != null)
+                        .ToArray();
 
-
-                    foreach (var table in tables)
+                    foreach (var table in dbSetTables)
                     {
-                        if (table.IsManyToManyTable()) continue;
-
                         var className = table.NetName;
-                        //we won't pluralize, let's just suffix it "Set"
+                        var dbSetName = NameCollection(className);
 
-                        _cb.AppendLine("public IDbSet<" + className + "> " + className + "Set { get; set; }");
+                        //we won't pluralize, let's just suffix it "Set"
+                        using (_cb.BeginNest("public IDbSet<" + className + "> " + dbSetName))
+                        {
+                            _cb.AppendLine("get { return Set<" + className + ">(); }");
+                        }
                     }
 
 
@@ -61,10 +75,8 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
                         _cb.AppendLine("modelBuilder.Conventions.Remove<IncludeMetadataConvention>();");
-                        foreach (var table in tables)
+                        foreach (var table in dbSetTables)
                         {
-                            if (table.IsManyToManyTable()) continue;
-
                             var className = table.NetName;
 
                             _cb.AppendLine("modelBuilder.Configurations.Add(new " + className + "Mapping());");

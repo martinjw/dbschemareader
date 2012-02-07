@@ -1,6 +1,6 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.Procedures
 {
     /// <summary>
     /// Write a Stored Procedure ADO class.

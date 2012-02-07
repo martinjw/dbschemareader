@@ -1,4 +1,4 @@
-﻿namespace DatabaseSchemaReader.CodeGen
+﻿namespace DatabaseSchemaReader.CodeGen.Procedures
 {
     enum SprocResultType
     {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
@@ -13,6 +12,7 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly DatabaseTable _table;
         private readonly string _ns;
         private readonly ClassBuilder _cb;
+        private readonly DataTypeWriter _dataTypeWriter = new DataTypeWriter();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
@@ -35,6 +35,19 @@ namespace DatabaseSchemaReader.CodeGen
         public CodeTarget CodeTarget { get; set; }
 
         /// <summary>
+        /// Gets or sets the collection namer.
+        /// </summary>
+        /// <value>
+        /// The collection namer.
+        /// </value>
+        public ICollectionNamer CollectionNamer { get; set; }
+
+        private string NameCollection(string name)
+        {
+            if (CollectionNamer == null) return name + "Collection";
+            return CollectionNamer.NameCollection(name);
+        }
+        /// <summary>
         /// Writes the C# code of the table
         /// </summary>
         /// <returns></returns>
@@ -46,7 +59,7 @@ namespace DatabaseSchemaReader.CodeGen
                 PrepareSchemaNames.Prepare(_table.DatabaseSchema);
                 className = _table.NetName;
             }
-
+            _dataTypeWriter.CodeTarget = CodeTarget;
 
             WriteNamespaces();
 
@@ -125,7 +138,7 @@ namespace DatabaseSchemaReader.CodeGen
                     continue;
                 }
 
-                var propertyName = foreignKey.NetName + "Collection";
+                var propertyName = NameCollection(foreignKey.NetName);
                 var dataType = listType + foreignKey.NetName + ">";
                 _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
             }
@@ -140,7 +153,7 @@ namespace DatabaseSchemaReader.CodeGen
                 Debug.WriteLine("Can't navigate the many to many relationship for " + _table.Name + " to " + foreignKey.Name);
                 return;
             }
-            var propertyName = target.NetName + "Collection";
+            var propertyName = NameCollection(target.NetName);
             var dataType = "ICollection<" + target.NetName + ">";
             _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
 
@@ -154,7 +167,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 return;
             }
-            var propertyName = target.NetName + "Collection";
+            var propertyName = NameCollection(target.NetName);
             var dataType = "List<" + target.NetName + ">";
             _cb.AppendLine(propertyName + " = new " + dataType + "();");
         }
@@ -171,7 +184,7 @@ namespace DatabaseSchemaReader.CodeGen
                         WriteManyToManyInitialize(foreignKey);
                         continue;
                     }
-                    var propertyName = foreignKey.NetName + "Collection";
+                    var propertyName = NameCollection(foreignKey.NetName);
                     var dataType = "List<" + foreignKey.NetName + ">";
                     _cb.AppendLine(propertyName + " = new " + dataType + "();");
                 }
@@ -183,30 +196,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteColumn(DatabaseColumn column)
         {
             var propertyName = column.NetName;
-            var dt = column.DataType;
-            string dataType;
-            if (dt == null)
-            {
-                dataType = "object";
-            }
-            else if (CodeTarget == CodeTarget.PocoEntityCodeFirst)
-            {
-                //EF needs the default mapping type
-                dataType = dt.NetDataTypeCSharpName;
-            }
-            else
-            {
-                //use precision and scale for more precise conversion
-                dataType = dt.NetCodeName(column);
-            }
-            //if it's nullable (and not string or array)
-            if (column.Nullable &&
-                dt != null &&
-                !dt.IsString &&
-                !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
-            {
-                dataType += "?"; //nullable
-            }
+            var dataType = _dataTypeWriter.Write(column);
             var isFk = column.IsForeignKey && column.ForeignKeyTable != null;
             if (isFk)
             {
@@ -223,6 +213,7 @@ namespace DatabaseSchemaReader.CodeGen
             var useVirtual = (CodeTarget != CodeTarget.PocoEntityCodeFirst || isFk);
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
+
 
 
         private void WriteCompositeKeyClass(string className)

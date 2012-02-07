@@ -42,6 +42,15 @@ namespace DatabaseSchemaReader.CodeGen
             return new Nester(this);
         }
 
+        public Nester BeginBrace(string s)
+        {
+            //simple bracing, no leading line
+            _sb.AppendLine(_indent + s);
+            _sb.AppendLine(_indent + "{");
+            PushIndent();
+            return new Nester(this);
+        }
+
         public void AppendAutomaticProperty(string dataType, string propertyName)
         {
             AppendAutomaticProperty(dataType, propertyName, true);
