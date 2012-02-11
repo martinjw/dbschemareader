@@ -32,14 +32,12 @@
             this.label1 = new System.Windows.Forms.Label();
             this.labExplanation = new System.Windows.Forms.Label();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.txtFilePath = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.btnFolderPicker = new System.Windows.Forms.Button();
             this.labDialect = new System.Windows.Forms.Label();
             this.cmbDialect = new System.Windows.Forms.ComboBox();
             this.labNamespace = new System.Windows.Forms.Label();
-            this.txtNamespace = new System.Windows.Forms.TextBox();
             this.btnGenerate = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.radCSharp = new System.Windows.Forms.RadioButton();
@@ -51,9 +49,11 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.radData = new System.Windows.Forms.RadioButton();
             this.panelCodeGen = new System.Windows.Forms.Panel();
-            this.chkReadSprocs = new System.Windows.Forms.CheckBox();
-            this.cmbProjectType = new System.Windows.Forms.ComboBox();
             this.labProjectType = new System.Windows.Forms.Label();
+            this.cmbProjectType = new System.Windows.Forms.ComboBox();
+            this.chkReadSprocs = new System.Windows.Forms.CheckBox();
+            this.txtNamespace = new System.Windows.Forms.TextBox();
+            this.txtFilePath = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.panelTables.SuspendLayout();
@@ -81,19 +81,6 @@
             // errorProvider1
             // 
             this.errorProvider1.ContainerControl = this;
-            // 
-            // txtFilePath
-            // 
-            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFilePath.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenFilePath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.errorProvider1.SetError(this.txtFilePath, "Invalid path");
-            this.txtFilePath.Location = new System.Drawing.Point(83, 32);
-            this.txtFilePath.Name = "txtFilePath";
-            this.txtFilePath.Size = new System.Drawing.Size(354, 20);
-            this.txtFilePath.TabIndex = 2;
-            this.txtFilePath.Text = global::DatabaseSchemaViewer.Properties.Settings.Default.CodeGenFilePath;
-            this.txtFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.FilePathValidating);
             // 
             // statusStrip1
             // 
@@ -147,18 +134,6 @@
             this.labNamespace.Size = new System.Drawing.Size(64, 13);
             this.labNamespace.TabIndex = 7;
             this.labNamespace.Text = "Namespace";
-            // 
-            // txtNamespace
-            // 
-            this.txtNamespace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtNamespace.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenNamespace", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtNamespace.Location = new System.Drawing.Point(83, 97);
-            this.txtNamespace.Name = "txtNamespace";
-            this.txtNamespace.Size = new System.Drawing.Size(354, 20);
-            this.txtNamespace.TabIndex = 8;
-            this.txtNamespace.Text = global::DatabaseSchemaViewer.Properties.Settings.Default.CodeGenNamespace;
-            this.txtNamespace.Validating += new System.ComponentModel.CancelEventHandler(this.NamespaceValidating);
             // 
             // btnGenerate
             // 
@@ -275,18 +250,14 @@
             this.panelCodeGen.TabIndex = 18;
             this.panelCodeGen.Visible = false;
             // 
-            // chkReadSprocs
+            // labProjectType
             // 
-            this.chkReadSprocs.AutoSize = true;
-            this.chkReadSprocs.Checked = true;
-            this.chkReadSprocs.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkReadSprocs.Location = new System.Drawing.Point(71, 8);
-            this.chkReadSprocs.Name = "chkReadSprocs";
-            this.chkReadSprocs.Size = new System.Drawing.Size(181, 17);
-            this.chkReadSprocs.TabIndex = 12;
-            this.chkReadSprocs.Text = "Read Stored Procedures Results";
-            this.chkReadSprocs.UseVisualStyleBackColor = true;
-            this.chkReadSprocs.Visible = false;
+            this.labProjectType.AutoSize = true;
+            this.labProjectType.Location = new System.Drawing.Point(0, 31);
+            this.labProjectType.Name = "labProjectType";
+            this.labProjectType.Size = new System.Drawing.Size(67, 13);
+            this.labProjectType.TabIndex = 14;
+            this.labProjectType.Text = "Project Type";
             // 
             // cmbProjectType
             // 
@@ -296,14 +267,43 @@
             this.cmbProjectType.Size = new System.Drawing.Size(121, 21);
             this.cmbProjectType.TabIndex = 13;
             // 
-            // labProjectType
+            // chkReadSprocs
             // 
-            this.labProjectType.AutoSize = true;
-            this.labProjectType.Location = new System.Drawing.Point(0, 31);
-            this.labProjectType.Name = "labProjectType";
-            this.labProjectType.Size = new System.Drawing.Size(67, 13);
-            this.labProjectType.TabIndex = 14;
-            this.labProjectType.Text = "Project Type";
+            this.chkReadSprocs.AutoSize = true;
+            this.chkReadSprocs.Checked = global::DatabaseSchemaViewer.Properties.Settings.Default.CodeGenReadProcedures;
+            this.chkReadSprocs.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenReadProcedures", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.chkReadSprocs.Location = new System.Drawing.Point(71, 8);
+            this.chkReadSprocs.Name = "chkReadSprocs";
+            this.chkReadSprocs.Size = new System.Drawing.Size(181, 17);
+            this.chkReadSprocs.TabIndex = 12;
+            this.chkReadSprocs.Text = "Read Stored Procedures Results";
+            this.chkReadSprocs.UseVisualStyleBackColor = true;
+            this.chkReadSprocs.Visible = false;
+            // 
+            // txtNamespace
+            // 
+            this.txtNamespace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtNamespace.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenNamespace", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtNamespace.Location = new System.Drawing.Point(83, 97);
+            this.txtNamespace.Name = "txtNamespace";
+            this.txtNamespace.Size = new System.Drawing.Size(354, 20);
+            this.txtNamespace.TabIndex = 8;
+            this.txtNamespace.Text = global::DatabaseSchemaViewer.Properties.Settings.Default.CodeGenNamespace;
+            this.txtNamespace.Validating += new System.ComponentModel.CancelEventHandler(this.NamespaceValidating);
+            // 
+            // txtFilePath
+            // 
+            this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilePath.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CodeGenFilePath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.errorProvider1.SetError(this.txtFilePath, "Invalid path");
+            this.txtFilePath.Location = new System.Drawing.Point(83, 32);
+            this.txtFilePath.Name = "txtFilePath";
+            this.txtFilePath.Size = new System.Drawing.Size(354, 20);
+            this.txtFilePath.TabIndex = 2;
+            this.txtFilePath.Text = global::DatabaseSchemaViewer.Properties.Settings.Default.CodeGenFilePath;
+            this.txtFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.FilePathValidating);
             // 
             // CodeGenForm
             // 

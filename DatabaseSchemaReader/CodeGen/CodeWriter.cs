@@ -109,10 +109,16 @@ namespace DatabaseSchemaReader.CodeGen
             File.WriteAllText(
                 Path.Combine(directory.FullName, (@namespace ?? "Project") + ".csproj"),
                 pw.Write());
-            pw.UpgradeTo2010();
-            File.WriteAllText(
-                Path.Combine(directory.FullName, (@namespace ?? "Project") + ".2010.csproj"),
-                pw.Write());
+            
+            if (_codeTarget != CodeTarget.PocoEntityCodeFirst)
+            {
+                //EF CodeFirst is already .Net 4
+                pw.UpgradeTo2010();
+                File.WriteAllText(
+                    Path.Combine(directory.FullName, (@namespace ?? "Project") + ".2010.csproj"),
+                    pw.Write());
+
+            }
         }
 
         private string WriteDbContext(FileSystemInfo directory, string ns, ProjectWriter projectWriter)

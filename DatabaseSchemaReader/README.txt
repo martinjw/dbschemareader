@@ -10,7 +10,7 @@ Unfortunately the information is returned in datatables, and the schema collecti
 
 This is an adapter which loads those collections into simple collections of plain old CLR objects, which are the same for all providers. It doesn't try to hide the underlying differences: Oracle will have packages and none of the others will. But the many small differences between tables, columns and stored procedure parameters disappear.
 
-Because almost all ADO providers support the GetSchema standard, it can get basic schema metadata for almost all databases. Where the provider schema doesn't provide enough information, there are additional calls for specific databases (often information on primary key and foreign key columns is limited so we call the database metadata directly). We look for additional information in SqlServer, Oracle, SqlServer Ce, MySQL, Postgresql, DB2, Ingres and Sybase ASE/ASA/UltraLite.
+Because almost all ADO providers support the GetSchema standard, it can get basic schema metadata for almost all databases. Where the provider schema doesn't provide enough information, there are additional calls for specific databases (often information on primary key and foreign key columns is limited so we call the database metadata directly). We look for additional information in SqlServer, Oracle, SqlServer Ce, MySQL, Postgresql, DB2, Ingres, VistaDb and Sybase ASE/ASA/UltraLite.
 
 There is are two very simple Winforms UI projects showing example uses. See the tests show how to use the class library.
 
@@ -100,12 +100,17 @@ var schema = dbReader.ReadAll();
 
 //now write the code
 var directory = new DirectoryInfo(Environment.CurrentDirectory);
-var codeWriter = new CodeWriter();
-codeWriter.Execute(schema, directory, "Northwind.Domain");
+var codeWriter = new CodeWriter(schema);
+codeWriter.Execute(directory, "Northwind.Domain");
 
-It writes a C# class for each table, with each column as an automatic property. Relations between classes reflect the foreign key constraints. Composite keys are handled by creating key classes. Overrides for ToString, Equals and GetHashCode are added (the last two are required for NHibernate). The properties are decorated with DataAnnotations validation attributes (there's even commented out .Net 4/SL 3 attributes). 
+It writes a C# class for each table, with each column as an automatic property. Relations between classes reflect the foreign key constraints. Composite keys are handled by creating key classes. Overrides for ToString, Equals and GetHashCode are added (the last two are best practice for NHibernate). The properties are decorated with DataAnnotations validation attributes (there are more for EF Code First .Net 4). 
 
-It also writes an NHibernate mapping class in a "mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started. If you don't need NHibernate, simply ignore this.
+The CodeWriter can just write simple POCOs (just the classes representing the tables). Or it can also write mapping for NHibernate (either hbm or fluent forms) or Entity Framework Code First. Call it like this:
+//or CodeTarget.PocoNHibernateHbm or CodeTarget.PocoNHibernateFluent
+var codeWriter = new CodeWriter(schema, CodeTarget.PocoEntityCodeFirst);
+codeWriter.Execute(directory, "Northwind.Domain");
+
+The mapping files are in a "Mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started.
 
 For each stored procedure, it writes a class to create the DbCommand with all the parameters exposed as simple .net parameters. It also creates a method (Execute) to execute the stored procedure. If you have the result sets (you used ResultSetReader) the Execute method will return classes typed to the result sets and your output parameters, so the only ADO you need is to create the DbConnection. It only understands simple parameter types (numbers, string, dates) plus Oracle ref cursors; lobs and specialized data types are beyond the scope.
 
@@ -113,7 +118,13 @@ If you use Oracle packages, the generated code is grouped with a folder/namespac
 
 If a stored procedure has ResultSets (if you used ResultSetReader), a typed result class is generated, and the stored procedure class has an Execute method.
 
-It also writes VS2008 and VS2010 csproj files, with the same name as the namespace. The mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
+It also writes VS2008 and VS2010 csproj files, with the same name as the namespace. If you used CodeTarget.PocoNHibernateHbm, the mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
+
+The code generation gives you full control of the .Net class names. Each DatabaseTable and DatabaseColumn has a NetName property. Before calling CodeWriter, loop through the tables to set the names. CodeWriter calls PrepareSchemaNames.Prepare(schema) to set any names that have not been assigned (they are correctly cased and made singular, as far as possible). The many-end of foreign keys (and the DbSets in a CodeFirst context) must be set using an ICollectionNamer. The default namer adds "Collection" to the end (eg "ProductCollection") but you can use the PluralizingNamer for plurals (eg "Products"). You can also write your own ICollectionNamer (the PluralizingNamer source code comments explain how to use .net's PluralizingService).
+var codeWriter = new CodeWriter(schema, CodeTarget.PocoEntityCodeFirst);
+codeWriter.CollectionNamer = new PluralizingNamer();
+codeWriter.Execute(directory, "Northwind.Domain");
+
 
 ===Comparisons===
 
@@ -143,4 +154,3 @@ There are two simple UIs.
  - comparing the schema to another database.
 
 * CopyToSQLite. It reads all the schema and creates a new SQLite database file with the same tables and data. If Sql Server CE 4.0 is detected, it can do the same for that database. These databases do not have the full range of data types as other databases, so creating tables may fail (e.g. SqlServer CE 4 does not have VARCHAR(MAX)). In addition, copying data may violate foreign key constraints (especially for identity primary keys) and will fail.
-

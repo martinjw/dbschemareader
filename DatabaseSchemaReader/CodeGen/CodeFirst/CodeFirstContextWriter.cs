@@ -74,7 +74,7 @@ namespace DatabaseSchemaReader.CodeGen
                     using (_cb.BeginNest("protected override void OnModelCreating(DbModelBuilder modelBuilder)"))
                     {
                         _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
-                        _cb.AppendLine("modelBuilder.Conventions.Remove<IncludeMetadataConvention>();");
+                        _cb.AppendLine("//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
                         foreach (var table in dbSetTables)
                         {
                             var className = table.NetName;

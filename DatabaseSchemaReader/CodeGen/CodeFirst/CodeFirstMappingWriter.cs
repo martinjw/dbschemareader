@@ -69,8 +69,11 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void MapTableName()
         {
-            //if it's the same, no need to map
-            if (_table.Name == _table.NetName) return;
+            //NB CodeFirst automatically pluralizes (PluralizingTableNameConvention)
+            //If the name is singular in database, it won't work...
+            //if (_table.Name == _table.NetName) return;
+
+            //Safer to always specify table name!
 
             var name = _table.Name;
             _cb.AppendLine("//table");
@@ -101,7 +104,7 @@ namespace DatabaseSchemaReader.CodeGen
             //in case PrepareSchemaNames.Prepare(schema) not done
             var netName = idColumn.NetName ?? idColumn.Name;
 
-            //"Id" or class"Id" is default
+            //IdKeyDiscoveryConvention: "Id" or class"Id" is default
             if (netName.Equals("Id", StringComparison.OrdinalIgnoreCase))
                 return;
             if (netName.Equals(_table.NetName + "Id", StringComparison.OrdinalIgnoreCase))
@@ -155,19 +158,7 @@ namespace DatabaseSchemaReader.CodeGen
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".HasDatabaseGeneratedOption(DatabaseGeneratedOption.None)");
             }
 
-            var dt = column.DataType;
-            if (dt != null)
-            {
-                //nvarchar(max) may be -1
-                if (dt.IsString && column.Length > 0 && column.Length < 1073741823)
-                {
-                    sb.AppendFormat(CultureInfo.InvariantCulture, ".HasMaxLength({0})", column.Length.GetValueOrDefault());
-                }
-                if (dt.TypeName == "TIMESTAMP")
-                {
-                    sb.Append(".IsConcurrencyToken().HasColumnType(\"timestamp\").HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed)");
-                }
-            }
+            WriteColumnType(column, sb);
 
             if (!column.Nullable)
             {
@@ -176,6 +167,56 @@ namespace DatabaseSchemaReader.CodeGen
 
             sb.Append(";");
             _cb.AppendLine(sb.ToString());
+        }
+
+        private static void WriteColumnType(DatabaseColumn column, StringBuilder sb)
+        {
+            var dt = column.DataType;
+            if (dt == null)
+            {
+                //we don't know the type, so state it explicitly
+                sb.AppendFormat(CultureInfo.InvariantCulture,
+                                ".HasColumnType(\"{0}\")",
+                                column.DbDataType);
+                return;
+            }
+            //nvarchar(max) may be -1
+            if (dt.IsStringClob)
+            {
+                sb.Append(".IsMaxLength()");
+                return;
+            }
+            if (dt.IsString)
+            {
+                if (column.Length == -1 || column.Length >= 1073741823)
+                {
+                    //MaxLength (and Text/Ntext/Clob) should be marked explicitly
+                    sb.Append(".IsMaxLength()");
+                }
+                else if (column.Length > 0)
+                {
+                    //otherwise specify an explicit max size
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ".HasMaxLength({0})",
+                                    column.Length.GetValueOrDefault());
+                }
+                return;
+            }
+            //special types (SQLServer only for now) that can be explicitly mapped
+            if (dt.TypeName.Equals("image", StringComparison.OrdinalIgnoreCase))
+            {
+                sb.Append(".HasColumnType(\"image\")");
+                return;
+            }
+            if (dt.TypeName.Equals("money", StringComparison.OrdinalIgnoreCase))
+            {
+                sb.Append(".HasColumnType(\"money\")");
+                return;
+            }
+            if (dt.TypeName.Equals("timestamp", StringComparison.OrdinalIgnoreCase))
+            {
+                sb.Append(
+                    ".IsConcurrencyToken().HasColumnType(\"timestamp\").HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed)");
+            }
         }
 
         private void WriteForeignKey(DatabaseColumn column)

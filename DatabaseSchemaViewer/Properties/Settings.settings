@@ -23,5 +23,11 @@
     <Setting Name="CompareConnectionString" Type="System.String" Scope="User">
       <Value Profile="(Default)">Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind</Value>
     </Setting>
+    <Setting Name="CodeGenReadProcedures" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CodeGenProjectType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

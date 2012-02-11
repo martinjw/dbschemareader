@@ -41,6 +41,10 @@ namespace DatabaseSchemaViewer
             if (sqlType.HasValue)
                 cmbDialect.SelectedItem = sqlType;
             cmbProjectType.SelectedItem = DatabaseSchemaReader.CodeGen.CodeTarget.PocoNHibernateHbm;
+            if (Properties.Settings.Default.CodeGenProjectType > 0)
+            {
+                cmbProjectType.SelectedIndex = Properties.Settings.Default.CodeGenProjectType;
+            }
         }
 
         private void GenerateClick(object sender, EventArgs e)
@@ -52,7 +56,7 @@ namespace DatabaseSchemaViewer
             var directory = new DirectoryInfo(txtFilePath.Text.Trim());
             var ns = txtNamespace.Text.Trim();
             var dialect = (SqlType)cmbDialect.SelectedItem;
-            var codeTarget = (DatabaseSchemaReader.CodeGen.CodeTarget) cmbProjectType.SelectedItem;
+            var codeTarget = (DatabaseSchemaReader.CodeGen.CodeTarget)cmbProjectType.SelectedItem;
 
             if (radCSharp.Checked)
             {
@@ -293,6 +297,7 @@ namespace DatabaseSchemaViewer
                 e.Cancel = false;
                 return;
             }
+            Properties.Settings.Default.CodeGenProjectType = cmbProjectType.SelectedIndex;
             Properties.Settings.Default.Save();
         }
     }

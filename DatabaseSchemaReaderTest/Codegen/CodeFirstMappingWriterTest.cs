@@ -47,6 +47,87 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.IsTrue(hasManyToMany);
         }
 
+        [TestMethod]
+        public void HasMaxLengthTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            var table = schema.AddTable("Products")
+                .AddColumn("ProductId", DbType.Int32).AddPrimaryKey().AddIdentity()
+                .AddColumn("ProductName", DbType.String).AddLength(20)
+                .Table;
+            //we need datatypes
+            schema.DataTypes.Add(new DataType("INT", "System.Int32"));
+            schema.DataTypes.Add(new DataType("NVARCHAR", "System.String"));
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+
+            var target = new CodeFirstMappingWriter(table, "Domain");
+
+            //act
+            var result = target.Write();
+
+            //assert
+            var hasMaxLength = result.Contains("Property(x => x.ProductName).HasMaxLength(20)");
+
+            Assert.IsTrue(hasMaxLength);
+        }
+
+
+        [TestMethod]
+        public void IsMaxLengthTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            var table = schema.AddTable("Products")
+                .AddColumn("ProductId", DbType.Int32).AddPrimaryKey().AddIdentity()
+                .AddColumn("ProductName", DbType.String).AddLength(-1)
+                .Table;
+            //we need datatypes
+            schema.DataTypes.Add(new DataType("INT", "System.Int32"));
+            schema.DataTypes.Add(new DataType("NVARCHAR", "System.String"));
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+
+            var target = new CodeFirstMappingWriter(table, "Domain");
+
+            //act
+            var result = target.Write();
+
+            //assert
+            var hasMaxLength = result.Contains("Property(x => x.ProductName).IsMaxLength()");
+
+            Assert.IsTrue(hasMaxLength);
+        }
+
+
+        [TestMethod]
+        public void IsImageTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            var table = schema.AddTable("Products")
+                .AddColumn("ProductId", DbType.Int32).AddPrimaryKey().AddIdentity()
+                .AddColumn("Picture", "image")
+                .Table;
+            //we need datatypes
+            schema.DataTypes.Add(new DataType("INT", "System.Int32"));
+            schema.DataTypes.Add(new DataType("image", "System.Byte[]"));
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+
+            var target = new CodeFirstMappingWriter(table, "Domain");
+
+            //act
+            var result = target.Write();
+
+            //assert
+            //EF CF will default to varbinary so we must specify
+            var hasImageType = result.Contains("Property(x => x.Picture).HasColumnType(\"image\")");
+
+            Assert.IsTrue(hasImageType);
+        }
+
         private static DatabaseSchema PrepareModel()
         {
             var schema = new DatabaseSchema(null, null);

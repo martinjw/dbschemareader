@@ -4,24 +4,35 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
-    static class DataAnnotationWriter
+    class DataAnnotationWriter
     {
-        public static void Write(ClassBuilder cb, DatabaseColumn column)
+        private readonly bool _isNet4;
+
+        public DataAnnotationWriter(bool isNet4)
         {
-            var name = column.NetName;
-            //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
-            name = Regex.Replace(name, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
-            if (name != column.NetName)
+            _isNet4 = isNet4;
+        }
+
+        public void Write(ClassBuilder cb, DatabaseColumn column)
+        {
+            if (_isNet4) //Display is .Net 4 and Silverlight 3 only 
             {
-                //.Net 4 and Silverlight 3 only 
-                cb.AppendLine("// [Display(Name=\"" + name + "\")]");
+                var name = column.NetName;
+                //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
+                name = Regex.Replace(name, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+                if (name != column.NetName)
+                {
+                    cb.AppendLine("[Display(Name=\"" + name + "\")]");
+                }
             }
 
             //we won't mark primary keys as required, because they may be assigned by a ORM primary key strategy or database identity/sequence
             if (column.IsPrimaryKey)
             {
                 //.Net 4 and Silverlight 3 only 
-                cb.AppendLine("// [Key]");
+                //NOTE: for EF CodeFirst generation, we also mapped fluently.
+                //Despite the duplication, it's useful to have the key as a marker in the model
+                if (_isNet4) cb.AppendLine("[Key]");
             }
             else if (!column.Nullable)
                 cb.AppendLine("[Required]");
@@ -44,8 +55,9 @@ namespace DatabaseSchemaReader.CodeGen
             else if (dt.IsInt)
             {
                 var max = column.Precision.GetValueOrDefault() - column.Scale.GetValueOrDefault();
-                if (max > 0)
+                if (max > 0 && max < 10)
                 {
+                    //int.MaxValue is 2,147,483,647 (precision 10), no need to range
                     cb.AppendLine(string.Format(CultureInfo.InvariantCulture, "[Range(0, {0})]", new string('9', max)));
                 }
             }
@@ -53,7 +65,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 //[Range(typeof(decimal),"0", "999")]
                 var max = column.Precision.GetValueOrDefault() - column.Scale.GetValueOrDefault();
-                if (max > 0)
+                if (max > 0 && max < 28)
                 {
                     cb.AppendLine(string.Format(CultureInfo.InvariantCulture, "[Range(typeof(decimal), \"0\", \"{0}\")]", new string('9', max)));
                 }

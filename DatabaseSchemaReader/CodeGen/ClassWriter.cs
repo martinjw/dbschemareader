@@ -13,6 +13,7 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly string _ns;
         private readonly ClassBuilder _cb;
         private readonly DataTypeWriter _dataTypeWriter = new DataTypeWriter();
+        private DataAnnotationWriter _dataAnnotationWriter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
@@ -53,6 +54,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         public string Write()
         {
+            _dataAnnotationWriter = new DataAnnotationWriter(CodeTarget == CodeTarget.PocoEntityCodeFirst);
             var className = _table.NetName;
             if (string.IsNullOrEmpty(className) && _table.DatabaseSchema != null)
             {
@@ -208,7 +210,7 @@ namespace DatabaseSchemaReader.CodeGen
                 dataType = column.ForeignKeyTable.NetName;
             }
 
-            DataAnnotationWriter.Write(_cb, column);
+            _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
             var useVirtual = (CodeTarget != CodeTarget.PocoEntityCodeFirst || isFk);
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
