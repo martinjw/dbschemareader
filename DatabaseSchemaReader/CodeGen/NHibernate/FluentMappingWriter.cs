@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
@@ -9,14 +10,27 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
     {
         private readonly DatabaseTable _table;
         private readonly string _ns;
+        private readonly MappingNamer _mappingNamer;
         private readonly ClassBuilder _cb;
 
-        public FluentMappingWriter(DatabaseTable table, string ns)
+        public FluentMappingWriter(DatabaseTable table, string ns, MappingNamer mappingNamer)
         {
+            if (table == null) throw new ArgumentNullException("table");
+            if (mappingNamer == null) throw new ArgumentNullException("mappingNamer");
+
             _ns = ns;
+            _mappingNamer = mappingNamer;
             _table = table;
             _cb = new ClassBuilder();
         }
+
+        /// <summary>
+        /// Gets the name of the mapping class.
+        /// </summary>
+        /// <value>
+        /// The name of the mapping class.
+        /// </value>
+        public string MappingClassName { get; private set; }
 
         public ICollectionNamer CollectionNamer { get; set; }
 
@@ -30,13 +44,13 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         {
             _cb.AppendLine("using FluentNHibernate.Mapping;");
 
-            var className = _table.NetName + "Mapping";
+            MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
 
             using (_cb.BeginNest("namespace " + _ns + ".Mapping"))
             {
-                using (_cb.BeginNest("public class " + className + " : ClassMap<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
+                using (_cb.BeginNest("public class " + MappingClassName + " : ClassMap<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
                 {
-                    using (_cb.BeginNest("public " + className + "()", "Constructor"))
+                    using (_cb.BeginNest("public " + MappingClassName + "()", "Constructor"))
                     {
                         if (_table.Name != _table.NetName)
                         {

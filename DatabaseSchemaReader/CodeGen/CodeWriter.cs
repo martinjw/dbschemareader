@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security;
+using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.CodeGen.NHibernate;
 using DatabaseSchemaReader.CodeGen.Procedures;
 using DatabaseSchemaReader.DataSchema;
@@ -16,6 +18,7 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly DatabaseSchema _schema;
         private readonly CodeTarget _codeTarget;
         private string _mappingPath;
+        private MappingNamer _mappingNamer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeWriter"/> class.
@@ -49,6 +52,14 @@ namespace DatabaseSchemaReader.CodeGen
         public ICollectionNamer CollectionNamer { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether schema includes populated procedures.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if schema includes populated procedures; otherwise, <c>false</c>.
+        /// </value>
+        public bool HasReadProcedures { get; set; }
+
+        /// <summary>
         /// Uses the specified schema to write class files, NHibernate/EF CodeFirst mapping and a project file. Any existing files are overwritten. If not required, simply discard the mapping and project file. Use these classes as ViewModels in combination with the data access strategy of your choice.
         /// </summary>
         /// <param name="directory">The directory to write the files to. Will create a subdirectory called "mapping". The directory must exist- any files there will be overwritten.</param>
@@ -70,17 +81,13 @@ namespace DatabaseSchemaReader.CodeGen
             var pw = new ProjectWriter(@namespace);
 
             InitMappingProjects(directory, pw);
+            _mappingNamer = new MappingNamer();
 
             foreach (var table in _schema.Tables)
             {
-                if (_codeTarget == CodeTarget.PocoEntityCodeFirst)
-                {
-                    if (table.IsManyToManyTable())
-                        continue;
-                    if (table.PrimaryKey == null)
-                        continue;
-                }
+                if (FilterIneligible(table)) continue;
                 var className = table.NetName;
+                UpdateEntityNames(className, table.Name);
 
                 var cw = new ClassWriter(table, @namespace);
                 cw.CodeTarget = _codeTarget;
@@ -102,14 +109,17 @@ namespace DatabaseSchemaReader.CodeGen
 
             //we could write functions (at least scalar functions- not table value functions)
             //you have to check the ReturnType (and remove it from the arguments collections).
-            WriteStoredProcedures(directory.FullName, @namespace, pw);
-            WritePackages(directory.FullName, @namespace, pw);
+            if (HasReadProcedures || _codeTarget == CodeTarget.Poco)
+            {
+                WriteStoredProcedures(directory.FullName, @namespace, pw);
+                WritePackages(directory.FullName, @namespace, pw);
+            }
             WriteUnitTest(directory.FullName, @namespace, contextName);
 
             File.WriteAllText(
                 Path.Combine(directory.FullName, (@namespace ?? "Project") + ".csproj"),
                 pw.Write());
-            
+
             if (_codeTarget != CodeTarget.PocoEntityCodeFirst)
             {
                 //EF CodeFirst is already .Net 4
@@ -121,10 +131,36 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
+        private bool FilterIneligible(DatabaseTable table)
+        {
+            if (_codeTarget != CodeTarget.PocoEntityCodeFirst) return false;
+            if (table.IsManyToManyTable())
+                return true;
+            if (table.PrimaryKey == null)
+                return true;
+            if (table.Name.Equals("__MigrationHistory", StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (table.Name.Equals("EdmMetadata", StringComparison.OrdinalIgnoreCase))
+                return true;
+            return false;
+        }
+
+        private void UpdateEntityNames(string className, string tableName)
+        {
+            if (_mappingNamer.EntityNames.Contains(className))
+            {
+                Debug.WriteLine("Name conflict! " + tableName + "=" + className);
+            }
+            else
+            {
+                _mappingNamer.EntityNames.Add(className);
+            }
+        }
+
         private string WriteDbContext(FileSystemInfo directory, string ns, ProjectWriter projectWriter)
         {
             var writer = new CodeFirstContextWriter(ns);
-            var txt = writer.Write(_schema.Tables);
+            var txt = writer.Write(_schema.Tables.Where(t => !FilterIneligible(t)).ToList());
             var fileName = writer.ContextName + ".cs";
             File.WriteAllText(
                 Path.Combine(directory.FullName, fileName),
@@ -174,11 +210,12 @@ namespace DatabaseSchemaReader.CodeGen
                     pw.AddMap(@"mapping\" + fileName);
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
-                    var cfmw = new CodeFirstMappingWriter(table, @namespace);
+                    var cfmw = new CodeFirstMappingWriter(table, @namespace, _mappingNamer);
                     cfmw.CollectionNamer = CollectionNamer;
                     var cfmap = cfmw.Write();
 
-                    fileName = table.NetName + "Mapping.cs";
+                    fileName = cfmw.MappingClassName + ".cs";
+                    
                     var filePath = Path.Combine(_mappingPath, fileName);
                     File.WriteAllText(filePath, cfmap);
                     pw.AddClass(@"Mapping\" + fileName);
@@ -188,10 +225,10 @@ namespace DatabaseSchemaReader.CodeGen
 
         private string WriteFluentMapping(DatabaseTable table, string @namespace)
         {
-            var fluentMapping = new FluentMappingWriter(table, @namespace);
+            var fluentMapping = new FluentMappingWriter(table, @namespace, _mappingNamer);
             fluentMapping.CollectionNamer = CollectionNamer;
             var txt = fluentMapping.Write();
-            var fileName = table.NetName + "Mapping.cs";
+            var fileName = fluentMapping.MappingClassName + ".cs";
             var path = Path.Combine(_mappingPath, fileName);
             File.WriteAllText(path, txt);
             return fileName;

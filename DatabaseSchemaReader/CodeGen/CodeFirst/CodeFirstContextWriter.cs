@@ -2,7 +2,7 @@
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.CodeFirst
 {
     class CodeFirstContextWriter
     {
@@ -43,15 +43,26 @@ namespace DatabaseSchemaReader.CodeGen
         public string Write(ICollection<DatabaseTable> tables)
         {
             _cb.AppendLine("using System;");
+            _cb.AppendLine("using System.Data.Common;"); //DbConnection
             _cb.AppendLine("using System.Data.Entity;");
-            _cb.AppendLine("using System.Data.Entity.Infrastructure;");
+            _cb.AppendLine("using System.Data.Entity.Infrastructure;"); //IncludeMetadataConvention
             _cb.AppendLine("using " + _ns + ".Mapping;");
 
             using (_cb.BeginNest("namespace " + _ns))
             {
                 using (_cb.BeginNest("public class " + ContextName + " : DbContext"))
                 {
-                    //consider specifying ctors (esp string connectionName and DbConnection)
+                    //ctors (esp string connectionName and DbConnection)
+                    using (_cb.BeginNest("public " + ContextName + "()", "Constructor"))
+                    {
+                        _cb.AppendLine("//default ctor uses app.config connection named " + ContextName);
+                    }
+                    using (_cb.BeginNest("public " + ContextName + "(DbConnection connection) : base(connection,true)", "Constructor"))
+                    {
+                        _cb.AppendLine("//ctor for tracing");
+                    }
+
+
                     var dbSetTables = tables
                         .Where(x => !x.IsManyToManyTable())
                         //doesn't support tables without a primary key

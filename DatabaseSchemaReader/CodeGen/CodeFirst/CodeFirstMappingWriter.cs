@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.CodeGen
+namespace DatabaseSchemaReader.CodeGen.CodeFirst
 {
     class CodeFirstMappingWriter
     {
@@ -12,11 +12,16 @@ namespace DatabaseSchemaReader.CodeGen
 
         private readonly DatabaseTable _table;
         private readonly string _ns;
+        private readonly MappingNamer _mappingNamer;
         private readonly ClassBuilder _cb;
 
-        public CodeFirstMappingWriter(DatabaseTable table, string ns)
+        public CodeFirstMappingWriter(DatabaseTable table, string ns, MappingNamer mappingNamer)
         {
+            if (table == null) throw new ArgumentNullException("table");
+            if (mappingNamer == null) throw new ArgumentNullException("mappingNamer");
+
             _ns = ns;
+            _mappingNamer = mappingNamer;
             _table = table;
             _cb = new ClassBuilder();
         }
@@ -35,18 +40,26 @@ namespace DatabaseSchemaReader.CodeGen
             return CollectionNamer.NameCollection(name);
         }
 
+        /// <summary>
+        /// Gets the name of the mapping class.
+        /// </summary>
+        /// <value>
+        /// The name of the mapping class.
+        /// </value>
+        public string MappingClassName { get; private set; }
+
         public string Write()
         {
             _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
             _cb.AppendLine("using System.Data.Entity.ModelConfiguration;");
 
-            var className = _table.NetName + "Mapping";
+            MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
 
             using (_cb.BeginNest("namespace " + _ns + ".Mapping"))
             {
-                using (_cb.BeginNest("public class " + className + " : EntityTypeConfiguration<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
+                using (_cb.BeginNest("public class " + MappingClassName + " : EntityTypeConfiguration<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
                 {
-                    using (_cb.BeginNest("public " + className + "()", "Constructor"))
+                    using (_cb.BeginNest("public " + MappingClassName + "()", "Constructor"))
                     {
                         MapTableName();
 

@@ -58,6 +58,7 @@
     <Compile Include="CodeGen\DataAnnotationWriter.cs" />
     <Compile Include="CodeGen\DataTypeWriter.cs" />
     <Compile Include="CodeGen\ICollectionNamer.cs" />
+    <Compile Include="CodeGen\MappingNamer.cs" />
     <Compile Include="CodeGen\NameFixer.cs" />
     <Compile Include="CodeGen\Nester.cs" />
     <Compile Include="CodeGen\NHibernate\FluentMappingWriter.cs" />

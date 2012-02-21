@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using DatabaseSchemaReader.CodeGen;
+using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,7 +33,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //arrange
             DatabaseSchema schema = PrepareModel();
             var products = schema.FindTableByName("Products");
-            var target = new CodeFirstMappingWriter(products, "Domain");
+            var target = new CodeFirstMappingWriter(products, "Domain", new MappingNamer());
 
             //act
             var result = target.Write();
@@ -62,7 +63,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain");
+            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
 
             //act
             var result = target.Write();
@@ -89,7 +90,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain");
+            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
 
             //act
             var result = target.Write();
@@ -116,7 +117,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain");
+            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
 
             //act
             var result = target.Write();
@@ -126,6 +127,64 @@ namespace DatabaseSchemaReaderTest.Codegen
             var hasImageType = result.Contains("Property(x => x.Picture).HasColumnType(\"image\")");
 
             Assert.IsTrue(hasImageType);
+        }
+
+
+        [TestMethod]
+        public void MappingNameTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            var table = schema.AddTable("Products")
+                .AddColumn("ProductId", DbType.Int32).AddPrimaryKey().AddIdentity()
+                .Table;
+            table.NetName = "Product";
+            //we need datatypes
+            schema.DataTypes.Add(new DataType("INT", "System.Int32"));
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+
+            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
+
+            //act
+            target.Write();
+            //now the name is assigned
+            var className = target.MappingClassName;
+
+            //assert
+            Assert.AreEqual("ProductMapping", className);
+        }
+
+        [TestMethod]
+        public void MappingNameWithConflictsTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            var table = schema.AddTable("Products")
+                .AddColumn("ProductId", DbType.Int32).AddPrimaryKey().AddIdentity()
+                .Table;
+            table.NetName = "Product";
+            //we need datatypes
+            schema.DataTypes.Add(new DataType("INT", "System.Int32"));
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+
+
+            var mappingNamer = new MappingNamer();
+            var target = new CodeFirstMappingWriter(table, "Domain", mappingNamer);
+            //we also have a table called "ProductMapping"
+            //so we can't call the mapping class for "Product" the same name
+            mappingNamer.EntityNames.Add("ProductMapping");
+            mappingNamer.EntityNames.Add("ProductMappingMap");
+
+            //act
+            target.Write();
+            //now the name is assigned
+            var className = target.MappingClassName;
+
+            //assert
+            Assert.AreEqual("ProductMappingMapMap", className, "Should not conflict with the existing names");
+            Assert.AreEqual(3, mappingNamer.EntityNames.Count, "Should add the name to the list");
         }
 
         private static DatabaseSchema PrepareModel()

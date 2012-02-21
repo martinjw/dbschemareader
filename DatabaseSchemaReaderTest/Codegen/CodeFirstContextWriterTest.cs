@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using DatabaseSchemaReader.CodeGen;
+using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;

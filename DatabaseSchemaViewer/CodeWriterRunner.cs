@@ -28,12 +28,13 @@ namespace DatabaseSchemaViewer
 
         public void RunCodeWriter()
         {
-            if(_readProcedures)
+            if (_readProcedures)
             {
                 var sprocRunner = new DatabaseSchemaReader.Procedures.ResultSetReader(_databaseSchema);
                 sprocRunner.Execute();
             }
             var cw = new CodeWriter(_databaseSchema, CodeTarget);
+            cw.HasReadProcedures = _readProcedures;
             try
             {
                 cw.Execute(_directory, _ns);
