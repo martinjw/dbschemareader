@@ -189,7 +189,8 @@ namespace DatabaseSchemaViewer
         {
             var ns = txtNamespace.Text.Trim();
             //a simplistic regex just to exclude weird punctuation/spaces etc
-            if (Regex.IsMatch(ns, @"^([\w]+)([\w\.])$"))
+            const string expression = @"^[a-zA-Z]{1}([a-zA-Z0-9_])+(\.{1}([a-zA-Z0-9_])+)*?$";
+            if (Regex.IsMatch(ns, expression))
             {
                 errorProvider1.SetError(txtNamespace, string.Empty);
             }
