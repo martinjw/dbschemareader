@@ -12,27 +12,25 @@ namespace DatabaseSchemaReader.CodeGen
          */
 
         private readonly DatabaseSchema _schema;
-        private readonly string _namespace;
         private readonly ClassBuilder _cb;
-        private readonly CodeTarget _codeTarget;
+        private readonly CodeWriterSettings _codeWriterSettings;
 
-        public UnitTestWriter(DatabaseSchema schema, string ns, CodeTarget codeTarget)
+        public UnitTestWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            _codeTarget = codeTarget;
-            _namespace = ns;
+            _codeWriterSettings = codeWriterSettings;
             _schema = schema;
             _cb = new ClassBuilder();
+                
         }
 
         public string ClassName { get; private set; }
 
         public string ContextName { get; set; }
-        public ICollectionNamer CollectionNamer { get; set; }
 
         private string NameCollection(string name)
         {
-            if (CollectionNamer == null) return name + "Collection";
-            return CollectionNamer.NameCollection(name);
+            if (_codeWriterSettings.CollectionNamer == null) return name + "Collection";
+            return _codeWriterSettings.CollectionNamer.NameCollection(name);
         }
 
         public string Write()
@@ -49,7 +47,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteNamespaces(sproc != null);
 
-            using (_cb.BeginNest("namespace " + _namespace + ".Tests"))
+            using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace + ".Tests"))
             {
                 _cb.AppendLine("[TestClass]");
                 using (_cb.BeginNest("public class " + ClassName))
@@ -119,7 +117,8 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("var entity = Create" + entity.NetName + "();");
                 using (_cb.BeginNest("using (new TransactionScope()) //not committed, so rolls back"))
                 {
-                    if (_codeTarget == CodeTarget.PocoNHibernateHbm || _codeTarget == CodeTarget.PocoNHibernateFluent)
+                    var codeTarget = _codeWriterSettings.CodeTarget;
+                    if (codeTarget == CodeTarget.PocoNHibernateHbm || codeTarget == CodeTarget.PocoNHibernateFluent)
                     {
                         using (_cb.BeginNest("using (ISession session = OpenSession())"))
                         {
@@ -127,7 +126,7 @@ namespace DatabaseSchemaReader.CodeGen
                             _cb.AppendLine("session.Delete(entity);");
                         }
                     }
-                    else if (_codeTarget == CodeTarget.PocoEntityCodeFirst)
+                    else if (codeTarget == CodeTarget.PocoEntityCodeFirst || codeTarget == CodeTarget.PocoRiaServices)
                     {
                         var dbSet = NameCollection(entity.NetName);
                         using (_cb.BeginNest("using (var context = new " + ContextName + "())"))
@@ -167,7 +166,8 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteOpenSession()
         {
-            if (_codeTarget != CodeTarget.PocoNHibernateHbm && _codeTarget != CodeTarget.PocoNHibernateFluent)
+            if (_codeWriterSettings.CodeTarget != CodeTarget.PocoNHibernateHbm && 
+                _codeWriterSettings.CodeTarget != CodeTarget.PocoNHibernateFluent)
                 return;
 
             using (_cb.BeginNest("private static ISession OpenSession()"))
@@ -189,14 +189,15 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteStaticConstructor(DatabaseTable entity)
         {
-            if (_codeTarget != CodeTarget.PocoNHibernateHbm && _codeTarget != CodeTarget.PocoNHibernateFluent)
+            var codeTarget = _codeWriterSettings.CodeTarget;
+            if (codeTarget != CodeTarget.PocoNHibernateHbm && codeTarget != CodeTarget.PocoNHibernateFluent)
                 return;
 
             _cb.AppendLine("private static readonly ISessionFactory SessionFactory;");
 
             using (_cb.BeginNest("static " + ClassName + "()"))
             {
-                if (_codeTarget == CodeTarget.PocoNHibernateHbm)
+                if (codeTarget == CodeTarget.PocoNHibernateHbm)
                 {
 
                     _cb.AppendLine("var configuration = new Configuration();");
@@ -204,7 +205,7 @@ namespace DatabaseSchemaReader.CodeGen
                     _cb.AppendLine("configuration.AddAssembly(typeof(" + entity.NetName + ").Assembly);");
                     _cb.AppendLine("SessionFactory = configuration.BuildSessionFactory();");
                 }
-                else if (_codeTarget == CodeTarget.PocoNHibernateFluent)
+                else if (codeTarget == CodeTarget.PocoNHibernateFluent)
                 {
                     _cb.AppendLine(@"var nhConfig = Fluently.Configure()");
                     _cb.AppendLine(@"    .ProxyFactoryFactory<ProxyFactoryFactory>()");
@@ -229,7 +230,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("using System.Data.Common;");
             _cb.AppendLine("using System.Transactions;");
             _cb.AppendLine("using Microsoft.VisualStudio.TestTools.UnitTesting;");
-            switch (_codeTarget)
+            switch (_codeWriterSettings.CodeTarget)
             {
                 case CodeTarget.PocoNHibernateFluent:
                     _cb.AppendLine("using FluentNHibernate.Cfg;");
@@ -242,9 +243,9 @@ namespace DatabaseSchemaReader.CodeGen
                     break;
             }
 
-            _cb.AppendLine("using " + _namespace + ";");
+            _cb.AppendLine("using " + _codeWriterSettings.Namespace + ";");
             if (includeProcedures)
-                _cb.AppendLine("using " + _namespace + ".Procedures;");
+                _cb.AppendLine("using " + _codeWriterSettings.Namespace + ".Procedures;");
         }
     }
 }

@@ -6,13 +6,13 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 {
     class CodeFirstContextWriter
     {
-        private readonly string _ns;
+        private readonly CodeWriterSettings _codeWriterSettings;
         private readonly ClassBuilder _cb;
         private readonly string _contextName;
 
-        public CodeFirstContextWriter(string ns)
+        public CodeFirstContextWriter(CodeWriterSettings codeWriterSettings)
         {
-            _ns = ns;
+            _codeWriterSettings = codeWriterSettings;
             _cb = new ClassBuilder();
             _contextName = CreateContextName();
         }
@@ -20,10 +20,11 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         private string CreateContextName()
         {
             var name = "Domain";
-            if (!string.IsNullOrEmpty(_ns))
+            var ns = _codeWriterSettings.Namespace;
+            if (!string.IsNullOrEmpty(ns))
             {
-                var lastIndex = _ns.LastIndexOf('.');
-                name = lastIndex == -1 ? _ns : _ns.Substring(lastIndex + 1);
+                var lastIndex = ns.LastIndexOf('.');
+                name = lastIndex == -1 ? ns : ns.Substring(lastIndex + 1);
             }
             return name + "Context";
         }
@@ -32,13 +33,6 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         {
             get { return _contextName; }
         }
-        public ICollectionNamer CollectionNamer { get; set; }
-
-        private string NameCollection(string name)
-        {
-            if (CollectionNamer == null) return name + "Collection";
-            return CollectionNamer.NameCollection(name);
-        }
 
         public string Write(ICollection<DatabaseTable> tables)
         {
@@ -46,9 +40,9 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             _cb.AppendLine("using System.Data.Common;"); //DbConnection
             _cb.AppendLine("using System.Data.Entity;");
             _cb.AppendLine("using System.Data.Entity.Infrastructure;"); //IncludeMetadataConvention
-            _cb.AppendLine("using " + _ns + ".Mapping;");
+            _cb.AppendLine("using " + _codeWriterSettings.Namespace + ".Mapping;");
 
-            using (_cb.BeginNest("namespace " + _ns))
+            using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace))
             {
                 using (_cb.BeginNest("public class " + ContextName + " : DbContext"))
                 {
@@ -72,7 +66,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                     foreach (var table in dbSetTables)
                     {
                         var className = table.NetName;
-                        var dbSetName = NameCollection(className);
+                        var dbSetName = _codeWriterSettings.NameCollection(className);
 
                         //we won't pluralize, let's just suffix it "Set"
                         using (_cb.BeginNest("public IDbSet<" + className + "> " + dbSetName))

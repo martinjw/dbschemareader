@@ -280,7 +280,7 @@ namespace DatabaseSchemaViewer
         {
             try
             {
-                var cw = new ClassWriter(databaseTable, "Domain");
+                var cw = new ClassWriter(databaseTable, new CodeWriterSettings());
                 var txt = cw.Write();
                 Clipboard.SetText(txt, TextDataFormat.UnicodeText);
             }

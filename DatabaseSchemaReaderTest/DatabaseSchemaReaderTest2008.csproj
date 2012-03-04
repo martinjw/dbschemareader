@@ -56,8 +56,10 @@
     <Compile Include="Codegen\CodeFirstWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstMappingWriterTest.cs" />
+    <Compile Include="Codegen\DataAnnotationWriterTest.cs" />
     <Compile Include="Codegen\DataTypeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
+    <Compile Include="Codegen\RiaServicesTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />
     <Compile Include="Compare\CompareProceduresTest.cs" />

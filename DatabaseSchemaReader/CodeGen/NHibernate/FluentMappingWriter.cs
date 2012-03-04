@@ -9,16 +9,16 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
     class FluentMappingWriter
     {
         private readonly DatabaseTable _table;
-        private readonly string _ns;
+        private readonly CodeWriterSettings _codeWriterSettings;
         private readonly MappingNamer _mappingNamer;
         private readonly ClassBuilder _cb;
 
-        public FluentMappingWriter(DatabaseTable table, string ns, MappingNamer mappingNamer)
+        public FluentMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
             if (table == null) throw new ArgumentNullException("table");
             if (mappingNamer == null) throw new ArgumentNullException("mappingNamer");
 
-            _ns = ns;
+            _codeWriterSettings = codeWriterSettings;
             _mappingNamer = mappingNamer;
             _table = table;
             _cb = new ClassBuilder();
@@ -32,21 +32,13 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         /// </value>
         public string MappingClassName { get; private set; }
 
-        public ICollectionNamer CollectionNamer { get; set; }
-
-        private string NameCollection(string name)
-        {
-            if (CollectionNamer == null) return name + "Collection";
-            return CollectionNamer.NameCollection(name);
-        }
-
         public string Write()
         {
             _cb.AppendLine("using FluentNHibernate.Mapping;");
 
             MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
 
-            using (_cb.BeginNest("namespace " + _ns + ".Mapping"))
+            using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace + ".Mapping"))
             {
                 using (_cb.BeginNest("public class " + MappingClassName + " : ClassMap<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
                 {
@@ -193,7 +185,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             var fkColumn = foreignKey.Columns[0];
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = NameCollection(childClass);
+            var propertyName = _codeWriterSettings.NameCollection(childClass);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);

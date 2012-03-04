@@ -59,9 +59,10 @@ namespace DatabaseSchemaReaderTest.Codegen
 
             var directory = CreateDirectory("Northwind");
             const string @namespace = "Northwind.Domain";
+            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco };
 
-            var codeWriter = new CodeWriter(schema);
-            codeWriter.Execute(directory, @namespace);
+            var codeWriter = new CodeWriter(schema, settings);
+            codeWriter.Execute(directory);
 
             var files = directory.GetFiles("*.cs");
 
@@ -109,9 +110,10 @@ namespace DatabaseSchemaReaderTest.Codegen
             }
             var directory = CreateDirectory("AdventureWorks");
             const string @namespace = "AdventureWorks.Domain";
+            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco, WriteStoredProcedures = true};
 
-            var codeWriter = new CodeWriter(schema);
-            codeWriter.Execute(directory, @namespace);
+            var codeWriter = new CodeWriter(schema, settings);
+            codeWriter.Execute(directory);
 
             var procedures = directory.GetDirectories("Procedures").FirstOrDefault();
             if (procedures == null)
@@ -146,9 +148,10 @@ namespace DatabaseSchemaReaderTest.Codegen
             }
             var directory = CreateDirectory("Hr");
             const string @namespace = "Hr.Domain";
+            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.PocoNHibernateHbm };
 
-            var codeWriter = new CodeWriter(schema, CodeTarget.PocoNHibernateHbm);
-            codeWriter.Execute(directory, @namespace);
+            var codeWriter = new CodeWriter(schema, settings);
+            codeWriter.Execute(directory);
 
             var mapping = directory.GetDirectories("mapping").FirstOrDefault();
             if (mapping == null)
@@ -158,7 +161,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var employeeMap = files.First(f => f.Name == "Employee.hbm.xml");
             var doc = XDocument.Load(employeeMap.FullName);
 
-            var classElement = doc.Descendants("{urn:nhibernate-mapping-2.2}class").FirstOrDefault();
+            var classElement = doc.Descendants("{urn:nhibernate-mapping-2.2}class").First();
             Assert.AreEqual("Employee", (string)classElement.Attribute("name"));
             Assert.AreEqual("`EMPLOYEES`", (string)classElement.Attribute("table"));
         }
@@ -171,19 +174,20 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void ExecuteTest()
         {
             DatabaseSchema schema = PrepareModel();
-            var target = new CodeWriter(schema);
 
             var directory = CreateDirectory("MyTest");
             const string @namespace = "MyTest";
+            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco };
 
-            target.Execute(directory, @namespace);
+            var target = new CodeWriter(schema, settings);
+            target.Execute(directory);
 
             var files = directory.GetFiles("*.cs");
             var products = files.FirstOrDefault(f => f.Name == "Product.cs");
             Assert.IsNotNull(products, "Should have written Product class to represent [Products] table");
 
             var category = files.FirstOrDefault(f => f.Name == "Category.cs");
-            Assert.IsNotNull(products, "Should have written Category class to represent [Categories] table");
+            Assert.IsNotNull(category, "Should have written Category class to represent [Categories] table");
 
             var cs = File.ReadAllText(category.FullName);
 

@@ -31,7 +31,8 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             //arrange
             DatabaseSchema schema = PrepareModel();
-            var target = new CodeFirstContextWriter("Domain");
+            var settings = new CodeWriterSettings();
+            var target = new CodeFirstContextWriter(settings);
 
             //act
             var result = target.Write(schema.Tables);

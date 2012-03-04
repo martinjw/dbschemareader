@@ -33,11 +33,21 @@ namespace DatabaseSchemaViewer
                 var sprocRunner = new DatabaseSchemaReader.Procedures.ResultSetReader(_databaseSchema);
                 sprocRunner.Execute();
             }
-            var cw = new CodeWriter(_databaseSchema, CodeTarget);
-            cw.HasReadProcedures = _readProcedures;
+            var settings = new CodeWriterSettings { Namespace = _ns, CodeTarget = CodeTarget };
+            //these have no UI, but the user can edit the config.
+            settings.UseForeignKeyIdProperties = Properties.Settings.Default.CodeGenUseForeignKeyIdProperties;
+            if (Properties.Settings.Default.CodeGenUsePluralizingNamer)
+            {
+                settings.CollectionNamer = new PluralizingNamer();
+            }
+            //if poco, write the sprocs - or if read the sprocs, we can generate
+            settings.WriteStoredProcedures = (_readProcedures || CodeTarget == CodeTarget.Poco);
+            settings.WriteUnitTest = Properties.Settings.Default.CodeGenWriteUnitTest;
+            settings.WriteProjectFile = Properties.Settings.Default.CodeGenWriteProjectFile;
+            var cw = new CodeWriter(_databaseSchema, settings);
             try
             {
-                cw.Execute(_directory, _ns);
+                cw.Execute(_directory);
                 Message = @"Wrote to " + _directory.FullName;
                 Result = true;
                 return;

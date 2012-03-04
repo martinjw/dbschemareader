@@ -52,8 +52,10 @@
     <Compile Include="CodeGen\ClassWriter.cs" />
     <Compile Include="CodeGen\CodeFirst\CodeFirstContextWriter.cs" />
     <Compile Include="CodeGen\CodeFirst\CodeFirstMappingWriter.cs" />
+    <Compile Include="CodeGen\CodeFirst\RiaServicesWriter.cs" />
     <Compile Include="CodeGen\CodeTarget.cs" />
     <Compile Include="CodeGen\CodeWriter.cs" />
+    <Compile Include="CodeGen\CodeWriterSettings.cs" />
     <Compile Include="CodeGen\CollectionNamer.cs" />
     <Compile Include="CodeGen\DataAnnotationWriter.cs" />
     <Compile Include="CodeGen\DataTypeWriter.cs" />

@@ -22,6 +22,14 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(_indent + string.Format(CultureInfo.InvariantCulture, s, args));
         }
 
+        public void AppendXmlSummary(string summary)
+        {
+            if (string.IsNullOrEmpty(summary)) return;
+            _sb.AppendLine(_indent + "/// <summary>");
+            _sb.AppendLine(_indent + "/// " + summary);
+            _sb.AppendLine(_indent + "/// </summary>");
+        }
+
         public Nester BeginNest(string s)
         {
             return BeginNest(s, null);
@@ -30,12 +38,7 @@ namespace DatabaseSchemaReader.CodeGen
         public Nester BeginNest(string s, string summary)
         {
             _sb.AppendLine();
-            if (!string.IsNullOrEmpty(summary))
-            {
-                _sb.AppendLine(_indent + "/// <summary>");
-                _sb.AppendLine(_indent + "/// " + summary);
-                _sb.AppendLine(_indent + "/// </summary>");
-            }
+            AppendXmlSummary(summary);
             _sb.AppendLine(_indent + s);
             _sb.AppendLine(_indent + "{");
             PushIndent();

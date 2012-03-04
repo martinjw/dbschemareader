@@ -16,16 +16,16 @@ namespace DatabaseSchemaReader.CodeGen
     public class CodeWriter
     {
         private readonly DatabaseSchema _schema;
-        private readonly CodeTarget _codeTarget;
         private string _mappingPath;
         private MappingNamer _mappingNamer;
+        private readonly CodeWriterSettings _codeWriterSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeWriter"/> class.
         /// </summary>
         /// <param name="schema">The schema.</param>
         public CodeWriter(DatabaseSchema schema)
-            : this(schema, CodeTarget.Poco)
+            : this(schema, new CodeWriterSettings())
         {
         }
 
@@ -33,52 +33,33 @@ namespace DatabaseSchemaReader.CodeGen
         /// Initializes a new instance of the <see cref="CodeWriter"/> class.
         /// </summary>
         /// <param name="schema">The schema.</param>
-        /// <param name="codeTarget">The code target.</param>
-        public CodeWriter(DatabaseSchema schema, CodeTarget codeTarget)
+        /// <param name="codeWriterSettings">The code writer settings.</param>
+        public CodeWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
+            _codeWriterSettings = codeWriterSettings;
             if (schema == null)
                 throw new ArgumentNullException("schema");
             _schema = schema;
-            _codeTarget = codeTarget;
             PrepareSchemaNames.Prepare(schema);
         }
-
-        /// <summary>
-        /// Gets or sets the collection namer.
-        /// </summary>
-        /// <value>
-        /// The collection namer.
-        /// </value>
-        public ICollectionNamer CollectionNamer { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether schema includes populated procedures.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if schema includes populated procedures; otherwise, <c>false</c>.
-        /// </value>
-        public bool HasReadProcedures { get; set; }
 
         /// <summary>
         /// Uses the specified schema to write class files, NHibernate/EF CodeFirst mapping and a project file. Any existing files are overwritten. If not required, simply discard the mapping and project file. Use these classes as ViewModels in combination with the data access strategy of your choice.
         /// </summary>
         /// <param name="directory">The directory to write the files to. Will create a subdirectory called "mapping". The directory must exist- any files there will be overwritten.</param>
-        /// <param name="namespace">The namespace (optional).</param>
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="InvalidOperationException"/>
         /// <exception cref="IOException"/>
         /// <exception cref="UnauthorizedAccessException"/>
         /// <exception cref="SecurityException" />
-        public void Execute(DirectoryInfo directory, string @namespace)
+        public void Execute(DirectoryInfo directory)
         {
             if (directory == null)
                 throw new ArgumentNullException("directory");
             if (!directory.Exists)
                 throw new InvalidOperationException("Directory does not exist");
-            if (CollectionNamer == null)
-                CollectionNamer = new CollectionNamer();
 
-            var pw = new ProjectWriter(@namespace);
+            var pw = new ProjectWriter(_codeWriterSettings.Namespace);
 
             InitMappingProjects(directory, pw);
             _mappingNamer = new MappingNamer();
@@ -89,9 +70,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var className = table.NetName;
                 UpdateEntityNames(className, table.Name);
 
-                var cw = new ClassWriter(table, @namespace);
-                cw.CodeTarget = _codeTarget;
-                cw.CollectionNamer = CollectionNamer;
+                var cw = new ClassWriter(table, _codeWriterSettings);
                 var txt = cw.Write();
 
                 var fileName = className + ".cs";
@@ -99,41 +78,52 @@ namespace DatabaseSchemaReader.CodeGen
                 File.WriteAllText(path, txt);
                 pw.AddClass(fileName);
 
-                WriteMapping(table, @namespace, pw);
+                WriteMapping(table, pw);
             }
             string contextName = null;
-            if (_codeTarget == CodeTarget.PocoEntityCodeFirst)
+            if (IsCodeFirst())
             {
-                contextName = WriteDbContext(directory, @namespace, pw);
+                contextName = WriteDbContext(directory, pw);
             }
 
             //we could write functions (at least scalar functions- not table value functions)
             //you have to check the ReturnType (and remove it from the arguments collections).
-            if (HasReadProcedures || _codeTarget == CodeTarget.Poco)
+            if (_codeWriterSettings.WriteStoredProcedures)
             {
-                WriteStoredProcedures(directory.FullName, @namespace, pw);
-                WritePackages(directory.FullName, @namespace, pw);
+                WriteStoredProcedures(directory.FullName, pw);
+                WritePackages(directory.FullName, pw);
             }
-            WriteUnitTest(directory.FullName, @namespace, contextName);
+            if (_codeWriterSettings.WriteUnitTest)
+                WriteUnitTest(directory.FullName, contextName);
 
+            WriteProjectFile(directory, pw);
+        }
+
+        private void WriteProjectFile(DirectoryInfo directory, ProjectWriter pw)
+        {
+            if (!_codeWriterSettings.WriteProjectFile) return;
+            var projectName = _codeWriterSettings.Namespace ?? "Project";
             File.WriteAllText(
-                Path.Combine(directory.FullName, (@namespace ?? "Project") + ".csproj"),
+                Path.Combine(directory.FullName, projectName + ".csproj"),
                 pw.Write());
 
-            if (_codeTarget != CodeTarget.PocoEntityCodeFirst)
-            {
-                //EF CodeFirst is already .Net 4
-                pw.UpgradeTo2010();
-                File.WriteAllText(
-                    Path.Combine(directory.FullName, (@namespace ?? "Project") + ".2010.csproj"),
-                    pw.Write());
+            if (IsCodeFirst()) return;
+            //EF CodeFirst is already .Net 4
 
-            }
+            pw.UpgradeTo2010();
+            File.WriteAllText(
+                Path.Combine(directory.FullName, projectName + ".2010.csproj"),
+                pw.Write());
+        }
+
+        private bool IsCodeFirst()
+        {
+            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst;
         }
 
         private bool FilterIneligible(DatabaseTable table)
         {
-            if (_codeTarget != CodeTarget.PocoEntityCodeFirst) return false;
+            if (!IsCodeFirst()) return false;
             if (table.IsManyToManyTable())
                 return true;
             if (table.PrimaryKey == null)
@@ -157,9 +147,9 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        private string WriteDbContext(FileSystemInfo directory, string ns, ProjectWriter projectWriter)
+        private string WriteDbContext(FileSystemInfo directory, ProjectWriter projectWriter)
         {
-            var writer = new CodeFirstContextWriter(ns);
+            var writer = new CodeFirstContextWriter(_codeWriterSettings);
             var txt = writer.Write(_schema.Tables.Where(t => !FilterIneligible(t)).ToList());
             var fileName = writer.ContextName + ".cs";
             File.WriteAllText(
@@ -171,37 +161,37 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void InitMappingProjects(FileSystemInfo directory, ProjectWriter pw)
         {
-            if (_codeTarget == CodeTarget.Poco) return;
+            if (_codeWriterSettings.CodeTarget == CodeTarget.Poco) return;
 
             var mapping = new DirectoryInfo(Path.Combine(directory.FullName, "Mapping"));
             if (!mapping.Exists) mapping.Create();
             _mappingPath = mapping.FullName;
 
             //no need to reference NHibernate for HBMs
-            switch (_codeTarget)
+            switch (_codeWriterSettings.CodeTarget)
             {
                 case CodeTarget.PocoNHibernateFluent:
                     pw.AddNHibernateReference();
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
+                case CodeTarget.PocoRiaServices:
                     pw.AddEntityFrameworkReference();
                     pw.UpgradeTo2010(); //you can only use 2010
                     break;
             }
         }
 
-        private void WriteMapping(DatabaseTable table, string @namespace, ProjectWriter pw)
+        private void WriteMapping(DatabaseTable table, ProjectWriter pw)
         {
             string fileName;
-            switch (_codeTarget)
+            switch (_codeWriterSettings.CodeTarget)
             {
                 case CodeTarget.PocoNHibernateFluent:
-                    fileName = WriteFluentMapping(table, @namespace);
+                    fileName = WriteFluentMapping(table);
                     pw.AddClass(@"Mapping\" + fileName);
                     break;
                 case CodeTarget.PocoNHibernateHbm:
-                    var mw = new MappingWriter(table, @namespace);
-                    mw.CollectionNamer = CollectionNamer;
+                    var mw = new MappingWriter(table, _codeWriterSettings);
                     var txt = mw.Write();
 
                     fileName = table.NetName + ".hbm.xml";
@@ -210,12 +200,12 @@ namespace DatabaseSchemaReader.CodeGen
                     pw.AddMap(@"mapping\" + fileName);
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
-                    var cfmw = new CodeFirstMappingWriter(table, @namespace, _mappingNamer);
-                    cfmw.CollectionNamer = CollectionNamer;
+                case CodeTarget.PocoRiaServices:
+                    var cfmw = new CodeFirstMappingWriter(table, _codeWriterSettings, _mappingNamer);
                     var cfmap = cfmw.Write();
 
                     fileName = cfmw.MappingClassName + ".cs";
-                    
+
                     var filePath = Path.Combine(_mappingPath, fileName);
                     File.WriteAllText(filePath, cfmap);
                     pw.AddClass(@"Mapping\" + fileName);
@@ -223,10 +213,9 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        private string WriteFluentMapping(DatabaseTable table, string @namespace)
+        private string WriteFluentMapping(DatabaseTable table)
         {
-            var fluentMapping = new FluentMappingWriter(table, @namespace, _mappingNamer);
-            fluentMapping.CollectionNamer = CollectionNamer;
+            var fluentMapping = new FluentMappingWriter(table, _codeWriterSettings, _mappingNamer);
             var txt = fluentMapping.Write();
             var fileName = fluentMapping.MappingClassName + ".cs";
             var path = Path.Combine(_mappingPath, fileName);
@@ -234,7 +223,7 @@ namespace DatabaseSchemaReader.CodeGen
             return fileName;
         }
 
-        private void WriteStoredProcedures(string directoryFullName, string @namespace, ProjectWriter pw)
+        private void WriteStoredProcedures(string directoryFullName, ProjectWriter pw)
         {
             if (!_schema.StoredProcedures.Any()) return;
 
@@ -242,11 +231,12 @@ namespace DatabaseSchemaReader.CodeGen
             const string procedures = "Procedures";
             var commands = new DirectoryInfo(Path.Combine(directoryFullName, procedures));
             if (!commands.Exists) commands.Create();
-            if (!string.IsNullOrEmpty(@namespace)) @namespace += "." + procedures;
+            var ns = _codeWriterSettings.Namespace;
+            if (!string.IsNullOrEmpty(ns)) ns += "." + procedures;
 
             foreach (var sproc in _schema.StoredProcedures)
             {
-                WriteStoredProcedure(procedures, commands.FullName, @namespace, sproc, pw);
+                WriteStoredProcedure(procedures, commands.FullName, ns, sproc, pw);
             }
         }
 
@@ -274,35 +264,35 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        private void WritePackages(string directoryFullName, string @namespace, ProjectWriter pw)
+        private void WritePackages(string directoryFullName, ProjectWriter pw)
         {
             foreach (var package in _schema.Packages)
             {
                 if (string.IsNullOrEmpty(package.NetName)) continue;
                 if (package.StoredProcedures.Count == 0) continue;
 
-                WritePackage(package, directoryFullName, @namespace, pw);
+                WritePackage(package, directoryFullName, pw);
             }
         }
 
-        private static void WritePackage(DatabasePackage package, string directoryFullName, string @namespace, ProjectWriter pw)
+        private void WritePackage(DatabasePackage package, string directoryFullName, ProjectWriter pw)
         {
             //we'll put stored procedures in subdirectory
             var packDirectory = new DirectoryInfo(Path.Combine(directoryFullName, package.NetName));
             if (!packDirectory.Exists) packDirectory.Create();
-            if (!string.IsNullOrEmpty(@namespace)) @namespace += "." + package.NetName;
+            var ns = _codeWriterSettings.Namespace;
+            if (!string.IsNullOrEmpty(ns)) ns += "." + package.NetName;
 
             foreach (var sproc in package.StoredProcedures)
             {
-                WriteStoredProcedure(package.NetName, packDirectory.FullName, @namespace, sproc, pw);
+                WriteStoredProcedure(package.NetName, packDirectory.FullName, ns, sproc, pw);
             }
         }
 
-        private void WriteUnitTest(string directoryFullName, string @namespace, string contextName)
+        private void WriteUnitTest(string directoryFullName, string contextName)
         {
-            var tw = new UnitTestWriter(_schema, @namespace, _codeTarget);
+            var tw = new UnitTestWriter(_schema, _codeWriterSettings);
             if (!string.IsNullOrEmpty(contextName)) tw.ContextName = contextName;
-            tw.CollectionNamer = CollectionNamer;
             var txt = tw.Write();
             if (string.IsNullOrEmpty(txt)) return;
             var fileName = tw.ClassName + ".cs";

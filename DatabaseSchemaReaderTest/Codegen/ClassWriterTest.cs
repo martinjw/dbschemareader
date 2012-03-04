@@ -1,8 +1,4 @@
-﻿using System;
-using System.Data;
-using System.IO;
-using System.Linq;
-using DatabaseSchemaReader.CodeGen;
+﻿using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,7 +41,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure .Net names are assigned
             PrepareSchemaNames.Prepare(schema);
 
-            var cw = new ClassWriter(table, "Domain");
+            var cw = new ClassWriter(table, new CodeWriterSettings());
 
             //act
             var txt = cw.Write();
@@ -88,7 +84,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var productsTable = schema.FindTableByName("Products");
 
-            var cw = new ClassWriter(productsTable, "Domain");
+            var cw = new ClassWriter(productsTable, new CodeWriterSettings());
 
             //act
             var txt = cw.Write();
@@ -105,8 +101,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             //arrange
             var schema = ArrangeSchema();
             var categoryTable = schema.FindTableByName("Categories");
-            
-            var cw = new ClassWriter(categoryTable, "Domain");
+
+            var cw = new ClassWriter(categoryTable, new CodeWriterSettings());
 
             //act
             var txt = cw.Write();
@@ -124,8 +120,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var categoryTable = schema.FindTableByName("Categories");
 
-            var cw = new ClassWriter(categoryTable, "Domain");
-            cw.CollectionNamer = new PluralizingNamer();
+            var cw = new ClassWriter(categoryTable, new CodeWriterSettings { CollectionNamer = new PluralizingNamer() });
 
             //act
             var txt = cw.Write();
@@ -144,8 +139,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var categoryTable = schema.FindTableByName("Categories");
 
-            var cw = new ClassWriter(categoryTable, "Domain");
-            cw.CodeTarget = CodeTarget.PocoEntityCodeFirst;
+            var cw = new ClassWriter(categoryTable, new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst });
 
             //act
             var txt = cw.Write();

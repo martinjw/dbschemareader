@@ -20,6 +20,10 @@
         /// <summary>
         /// Entities with Entity Framework Code First mapping
         /// </summary>
-        PocoEntityCodeFirst
+        PocoEntityCodeFirst,
+        /// <summary>
+        /// Entities for RIA Services (buddy classes)
+        /// </summary>
+        PocoRiaServices
     }
 }

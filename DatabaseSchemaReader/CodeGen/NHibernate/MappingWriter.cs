@@ -10,16 +10,17 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
     {
         private readonly XNamespace _xmlns = "urn:nhibernate-mapping-2.2";
         private readonly DatabaseTable _table;
-        private readonly string _ns;
         private readonly XDocument _doc;
         private readonly XContainer _classElement;
+        private readonly CodeWriterSettings _codeWriterSettings;
 
-        public MappingWriter(DatabaseTable table, string ns)
+        public MappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings)
         {
-            _ns = ns;
+            _codeWriterSettings = codeWriterSettings;
+            var ns = codeWriterSettings.Namespace;
             _table = table;
             _doc = XDocument.Parse(@"<?xml version=""1.0"" encoding=""utf-8"" ?>
-<hibernate-mapping xmlns=""urn:nhibernate-mapping-2.2"" namespace=""" + _ns + @""" assembly=""" + _ns + @""">
+<hibernate-mapping xmlns=""urn:nhibernate-mapping-2.2"" namespace=""" + ns + @""" assembly=""" + ns + @""">
 </hibernate-mapping>");
             var hibmap = _doc.Descendants(_xmlns + "hibernate-mapping").First();
             //add the class element
@@ -31,14 +32,6 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                                          new XAttribute("dynamic-update", "true"),
                                          new XAttribute("optimistic-lock", "dirty"));
             hibmap.Add(_classElement);
-        }
-
-        public ICollectionNamer CollectionNamer { get; set; }
-
-        private string NameCollection(string name)
-        {
-            if (CollectionNamer == null) return name + "Collection";
-            return CollectionNamer.NameCollection(name);
         }
 
         private static string SqlSafe(string s)
@@ -71,7 +64,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             _classElement.Add(
                 new XComment(string.Format(CultureInfo.InvariantCulture, "Foreign key to {0} ({1})", foreignKeyTable, childClass)));
 
-            var propertyName = NameCollection(childClass);
+            var propertyName = _codeWriterSettings.NameCollection(childClass);
             var bag = new XElement(_xmlns + "bag");
             bag.SetAttributeValue("name", propertyName);
             //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");

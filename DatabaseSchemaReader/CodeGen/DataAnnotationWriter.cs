@@ -7,23 +7,23 @@ namespace DatabaseSchemaReader.CodeGen
     class DataAnnotationWriter
     {
         private readonly bool _isNet4;
+        private readonly CodeWriterSettings _codeWriterSettings;
+        private string _friendlyName;
 
-        public DataAnnotationWriter(bool isNet4)
+        public DataAnnotationWriter(bool isNet4, CodeWriterSettings codeWriterSettings)
         {
+            _codeWriterSettings = codeWriterSettings;
             _isNet4 = isNet4;
         }
 
         public void Write(ClassBuilder cb, DatabaseColumn column)
         {
+            //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
+            _friendlyName = Regex.Replace(column.NetName, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+
             if (_isNet4) //Display is .Net 4 and Silverlight 3 only 
             {
-                var name = column.NetName;
-                //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
-                name = Regex.Replace(name, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
-                if (name != column.NetName)
-                {
-                    cb.AppendLine("[Display(Name=\"" + name + "\")]");
-                }
+                WriteDisplayAttribute(cb, column.NetName);
             }
 
             //we won't mark primary keys as required, because they may be assigned by a ORM primary key strategy or database identity/sequence
@@ -35,7 +35,7 @@ namespace DatabaseSchemaReader.CodeGen
                 if (_isNet4) cb.AppendLine("[Key]");
             }
             else if (!column.Nullable)
-                cb.AppendLine("[Required]");
+                WriteRequiredAttribute(cb);
 
             //foreign keys will not expose the underlying type
             if (column.IsForeignKey)
@@ -50,7 +50,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 //if it's over a million characters, no point validating
                 if (column.Length < 1073741823 && column.Length > 0)
-                    cb.AppendLine(string.Format(CultureInfo.InvariantCulture, "[StringLength({0})]", column.Length));
+                    WriteStringLengthAttribute(cb, column.Length);
             }
             else if (dt.IsInt)
             {
@@ -58,7 +58,7 @@ namespace DatabaseSchemaReader.CodeGen
                 if (max > 0 && max < 10)
                 {
                     //int.MaxValue is 2,147,483,647 (precision 10), no need to range
-                    cb.AppendLine(string.Format(CultureInfo.InvariantCulture, "[Range(0, {0})]", new string('9', max)));
+                    WriteIntegerRange(cb, max);
                 }
             }
             else if (dt.GetNetType() == typeof(decimal))
@@ -67,10 +67,75 @@ namespace DatabaseSchemaReader.CodeGen
                 var max = column.Precision.GetValueOrDefault() - column.Scale.GetValueOrDefault();
                 if (max > 0 && max < 28)
                 {
-                    cb.AppendLine(string.Format(CultureInfo.InvariantCulture, "[Range(typeof(decimal), \"0\", \"{0}\")]", new string('9', max)));
+                    WriteDecimalRange(cb, max);
                 }
             }
 
+        }
+
+        private void WriteDecimalRange(ClassBuilder cb, int max)
+        {
+            var maximum = new string('9', max);
+            var range = string.Format(CultureInfo.InvariantCulture, "[Range(typeof(decimal), \"0\", \"{0}\")]", maximum);
+            var rangeErrorMessage = _codeWriterSettings.RangeErrorMessage;
+            if (!string.IsNullOrEmpty(rangeErrorMessage))
+            {
+                range = range.Replace(")]",
+                    ", ErrorMessage=\"" +
+                    string.Format(CultureInfo.InvariantCulture, rangeErrorMessage, maximum, _friendlyName) +
+                    "\")]");
+            }
+            cb.AppendLine(range);
+        }
+
+        private void WriteIntegerRange(ClassBuilder cb, int max)
+        {
+            var maximum = new string('9', max);
+            var range = string.Format(CultureInfo.InvariantCulture, "[Range(0, {0})]", maximum);
+            var rangeErrorMessage = _codeWriterSettings.RangeErrorMessage;
+            if (!string.IsNullOrEmpty(rangeErrorMessage))
+            {
+                range = range.Replace(")]",
+                    ", ErrorMessage=\"" +
+                    string.Format(CultureInfo.InvariantCulture, rangeErrorMessage, maximum, _friendlyName) +
+                    "\")]");
+            }
+            cb.AppendLine(range);
+        }
+
+        private void WriteStringLengthAttribute(ClassBuilder cb, int? length)
+        {
+            var stringLength = string.Format(CultureInfo.InvariantCulture, "[StringLength({0})]", length);
+            var lengthErrorMessage = _codeWriterSettings.StringLengthErrorMessage;
+            if (!string.IsNullOrEmpty(lengthErrorMessage))
+            {
+                stringLength = stringLength.Replace(")]", 
+                    ", ErrorMessage=\"" +
+                    string.Format(CultureInfo.InvariantCulture, lengthErrorMessage, length, _friendlyName) + 
+                    "\")]");
+            }
+            cb.AppendLine(stringLength);
+        }
+
+        private void WriteRequiredAttribute(ClassBuilder cb)
+        {
+            var required = "[Required]";
+            var requiredErrorMessage = _codeWriterSettings.RequiredErrorMessage;
+            if (!string.IsNullOrEmpty(requiredErrorMessage))
+            {
+                required = "[Required(ErrorMessage=\"" + 
+                    string.Format(CultureInfo.InvariantCulture, requiredErrorMessage, _friendlyName) + 
+                    "\")]";
+            }
+            cb.AppendLine(required);
+        }
+
+        private void WriteDisplayAttribute(ClassBuilder cb, string name)
+        {
+            if (_friendlyName != name)
+            {
+                cb.AppendLine("[Display(Name=\"" + _friendlyName + "\")]");
+            }
         }
     }
 }

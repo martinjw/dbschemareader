@@ -100,15 +100,17 @@ var schema = dbReader.ReadAll();
 
 //now write the code
 var directory = new DirectoryInfo(Environment.CurrentDirectory);
-var codeWriter = new CodeWriter(schema);
-codeWriter.Execute(directory, "Northwind.Domain");
+var codeWriterSettings = new CodeWriterSettings { Namespace = "Northwind.Domain" };
+var codeWriter = new CodeWriter(schema, settings);
+codeWriter.Execute(directory);
 
 It writes a C# class for each table, with each column as an automatic property. Relations between classes reflect the foreign key constraints. Composite keys are handled by creating key classes. Overrides for ToString, Equals and GetHashCode are added (the last two are best practice for NHibernate). The properties are decorated with DataAnnotations validation attributes (there are more for EF Code First .Net 4). 
 
 The CodeWriter can just write simple POCOs (just the classes representing the tables). Or it can also write mapping for NHibernate (either hbm or fluent forms) or Entity Framework Code First. Call it like this:
 //or CodeTarget.PocoNHibernateHbm or CodeTarget.PocoNHibernateFluent
-var codeWriter = new CodeWriter(schema, CodeTarget.PocoEntityCodeFirst);
-codeWriter.Execute(directory, "Northwind.Domain");
+var codeWriterSettings = new CodeWriterSettings { Namespace = "Northwind.Domain", CodeTarget =  CodeTarget.PocoEntityCodeFirst };
+var codeWriter = new CodeWriter(schema, settings);
+codeWriter.Execute(directory);
 
 The mapping files are in a "Mapping" subdirectory. The mapping is simple, and you probably will want to change this. It's just to get you started.
 
@@ -121,9 +123,13 @@ If a stored procedure has ResultSets (if you used ResultSetReader), a typed resu
 It also writes VS2008 and VS2010 csproj files, with the same name as the namespace. If you used CodeTarget.PocoNHibernateHbm, the mapping files are correctly included as embedded resources. In practice, you'll probably include the class files in your own project.
 
 The code generation gives you full control of the .Net class names. Each DatabaseTable and DatabaseColumn has a NetName property. Before calling CodeWriter, loop through the tables to set the names. CodeWriter calls PrepareSchemaNames.Prepare(schema) to set any names that have not been assigned (they are correctly cased and made singular, as far as possible). The many-end of foreign keys (and the DbSets in a CodeFirst context) must be set using an ICollectionNamer. The default namer adds "Collection" to the end (eg "ProductCollection") but you can use the PluralizingNamer for plurals (eg "Products"). You can also write your own ICollectionNamer (the PluralizingNamer source code comments explain how to use .net's PluralizingService).
-var codeWriter = new CodeWriter(schema, CodeTarget.PocoEntityCodeFirst);
-codeWriter.CollectionNamer = new PluralizingNamer();
-codeWriter.Execute(directory, "Northwind.Domain");
+var codeWriterSettings = new CodeWriterSettings { 
+    Namespace = "Northwind.Domain", 
+    CodeTarget =  CodeTarget.PocoEntityCodeFirst, 
+    CollectionNamer = new PluralizingNamer() //plurals, not "xCollection"
+    };
+var codeWriter = new CodeWriter(schema, settings);
+codeWriter.Execute(directory);
 
 
 ===Comparisons===

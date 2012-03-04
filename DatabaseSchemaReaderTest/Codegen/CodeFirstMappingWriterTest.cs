@@ -33,19 +33,43 @@ namespace DatabaseSchemaReaderTest.Codegen
             //arrange
             DatabaseSchema schema = PrepareModel();
             var products = schema.FindTableByName("Products");
-            var target = new CodeFirstMappingWriter(products, "Domain", new MappingNamer());
+            var target = new CodeFirstMappingWriter(products, new CodeWriterSettings(), new MappingNamer());
 
             //act
             var result = target.Write();
 
             //assert
             var hasMappingClass = result.Contains("public class ProductMapping : EntityTypeConfiguration<Product>");
-            var hasForeignKey = result.Contains("HasRequired(x => x.Supplier).WithMany(c => c.ProductCollection)");
+            //we don't have the UseForeignKeyIdProperties=true, so map back to the instance property
+            var hasForeignKey = 
+                result.Contains("HasRequired(x => x.SupplierKey).WithMany(c => c.ProductCollection).Map(m => m.MapKey(\"SupplierKey\"))");
             var hasManyToMany = result.Contains("HasMany(x => x.CategoryCollection).WithMany(z => z.ProductCollection)");
 
             Assert.IsTrue(hasMappingClass);
             Assert.IsTrue(hasForeignKey);
             Assert.IsTrue(hasManyToMany);
+        }
+
+        [TestMethod]
+        public void ForeignKeyIdTest()
+        {
+            //arrange
+            DatabaseSchema schema = PrepareModel();
+            var products = schema.FindTableByName("Products");
+            var target = new CodeFirstMappingWriter(products, new CodeWriterSettings { UseForeignKeyIdProperties = true }, new MappingNamer());
+
+            //act
+            var result = target.Write();
+
+            //assert
+            var hasMappingClass = result.Contains("public class ProductMapping : EntityTypeConfiguration<Product>");
+            var hasForeignKeyIdProperty =
+                result.Contains("Property(x => x.SupplierKeyId).HasColumnName(\"SupplierKey\")");
+            var hasForeignKey = result.Contains("HasRequired(x => x.SupplierKey).WithMany(c => c.ProductCollection).HasForeignKey(c => c.SupplierKeyId);");
+
+            Assert.IsTrue(hasMappingClass);
+            Assert.IsTrue(hasForeignKeyIdProperty);
+            Assert.IsTrue(hasForeignKey);
         }
 
         [TestMethod]
@@ -63,7 +87,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
+            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
 
             //act
             var result = target.Write();
@@ -90,7 +114,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
+            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
 
             //act
             var result = target.Write();
@@ -117,7 +141,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
+            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
 
             //act
             var result = target.Write();
@@ -144,7 +168,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, "Domain", new MappingNamer());
+            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
 
             //act
             target.Write();
@@ -171,7 +195,7 @@ namespace DatabaseSchemaReaderTest.Codegen
 
 
             var mappingNamer = new MappingNamer();
-            var target = new CodeFirstMappingWriter(table, "Domain", mappingNamer);
+            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), mappingNamer);
             //we also have a table called "ProductMapping"
             //so we can't call the mapping class for "Product" the same name
             mappingNamer.EntityNames.Add("ProductMapping");
@@ -202,7 +226,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             schema.AddTable("Products")
                 .AddColumn("ProductId", DbType.Int32).AddPrimaryKey().AddIdentity()
                 .AddColumn("ProductName", DbType.String)
-                .AddColumn("SupplierId", DbType.Int32).AddForeignKey("fk", "Suppliers");
+                .AddColumn("SupplierKey", DbType.Int32).AddForeignKey("fk", "Suppliers");
 
             schema.AddTable("CategoryProducts")
                 .AddColumn("CategoryId", DbType.Int32).AddPrimaryKey()

@@ -30,7 +30,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 dataType = "object";
             }
-            else if (CodeTarget == CodeTarget.PocoEntityCodeFirst)
+            else if (CodeTarget == CodeTarget.PocoEntityCodeFirst || CodeTarget == CodeTarget.PocoRiaServices)
             {
                 //EF needs the default mapping type
                 dataType = dt.NetDataTypeCSharpName;

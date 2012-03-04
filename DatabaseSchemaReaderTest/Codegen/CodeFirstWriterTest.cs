@@ -45,12 +45,13 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void ExecuteTest()
         {
             DatabaseSchema schema = PrepareModel();
-            var target = new CodeWriter(schema, CodeTarget.PocoEntityCodeFirst);
+            const string @namespace = "MyTest";
+            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var target = new CodeWriter(schema, settings);
 
             var directory = CreateDirectory("MyTest");
-            const string @namespace = "MyTest";
 
-            target.Execute(directory, @namespace);
+            target.Execute(directory);
 
             //assert
             var mapping = directory.GetDirectories("mapping").FirstOrDefault();

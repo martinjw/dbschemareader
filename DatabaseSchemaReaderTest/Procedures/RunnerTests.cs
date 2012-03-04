@@ -61,9 +61,10 @@ namespace DatabaseSchemaReaderTest.Procedures
 
             var directory = CreateDirectory("NorthwindSproc");
             const string @namespace = "Northwind.Domain";
+            var settings = new CodeWriterSettings { Namespace = @namespace };
 
-            var codeWriter = new CodeWriter(schema);
-            codeWriter.Execute(directory, @namespace);
+            var codeWriter = new CodeWriter(schema, settings);
+            codeWriter.Execute(directory);
 
             Debug.WriteLine("Check project in " + directory.FullName);
         }

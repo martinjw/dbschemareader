@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -10,98 +11,55 @@ namespace DatabaseSchemaReader.CodeGen
     public class ClassWriter
     {
         private readonly DatabaseTable _table;
-        private readonly string _ns;
         private readonly ClassBuilder _cb;
         private readonly DataTypeWriter _dataTypeWriter = new DataTypeWriter();
         private DataAnnotationWriter _dataAnnotationWriter;
+        private readonly CodeWriterSettings _codeWriterSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
         /// </summary>
         /// <param name="table">The table.</param>
-        /// <param name="ns">The ns.</param>
-        public ClassWriter(DatabaseTable table, string ns)
+        /// <param name="codeWriterSettings">The code writer settings.</param>
+        public ClassWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings)
         {
-            _ns = ns;
+            _codeWriterSettings = codeWriterSettings;
             _table = table;
             _cb = new ClassBuilder();
         }
 
-        /// <summary>
-        /// Gets or sets the code target.
-        /// </summary>
-        /// <value>
-        /// The code target.
-        /// </value>
-        public CodeTarget CodeTarget { get; set; }
-
-        /// <summary>
-        /// Gets or sets the collection namer.
-        /// </summary>
-        /// <value>
-        /// The collection namer.
-        /// </value>
-        public ICollectionNamer CollectionNamer { get; set; }
-
-        private string NameCollection(string name)
-        {
-            if (CollectionNamer == null) return name + "Collection";
-            return CollectionNamer.NameCollection(name);
-        }
         /// <summary>
         /// Writes the C# code of the table
         /// </summary>
         /// <returns></returns>
         public string Write()
         {
-            _dataAnnotationWriter = new DataAnnotationWriter(CodeTarget == CodeTarget.PocoEntityCodeFirst);
+            var codeTarget = _codeWriterSettings.CodeTarget;
+            _dataAnnotationWriter = new DataAnnotationWriter(IsEntityFramework(), _codeWriterSettings);
             var className = _table.NetName;
             if (string.IsNullOrEmpty(className) && _table.DatabaseSchema != null)
             {
                 PrepareSchemaNames.Prepare(_table.DatabaseSchema);
                 className = _table.NetName;
             }
-            _dataTypeWriter.CodeTarget = CodeTarget;
+            _dataTypeWriter.CodeTarget = codeTarget;
 
             WriteNamespaces();
 
-            if (!string.IsNullOrEmpty(_ns))
+            if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
-                _cb.BeginNest("namespace " + _ns);
+                _cb.BeginNest("namespace " + _codeWriterSettings.Namespace);
             }
 
-            using (_cb.BeginNest("public class " + className, "Class representing " + _table.Name + " table"))
+            if (codeTarget == CodeTarget.PocoRiaServices)
             {
-                InitializeCollectionsInConstructor(className);
-
-                if (_table.HasCompositeKey)
+                WriteRiaClass(className);
+            }
+            else
+            {
+                using (_cb.BeginNest("public class " + className, "Class representing " + _table.Name + " table"))
                 {
-                    if (CodeTarget != CodeTarget.PocoEntityCodeFirst)
-                    {
-                        _cb.AppendAutomaticProperty(className + "Key", "Key");
-                    }
-                    else
-                    {
-                        //code first composite key
-                        foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
-                        {
-                            WriteColumn(column);
-                        }
-                    }
-                }
-
-                foreach (var column in _table.Columns)
-                {
-                    if (_table.HasCompositeKey && column.IsPrimaryKey) continue;
-                    WriteColumn(column);
-                }
-
-                WriteForeignKeyCollections();
-
-                if (!_table.HasCompositeKey)
-                {
-                    var overrider = new OverrideWriter(_cb, _table);
-                    overrider.AddOverrides();
+                    WriteClassMembers(className);
                 }
             }
 
@@ -110,12 +68,78 @@ namespace DatabaseSchemaReader.CodeGen
                 WriteCompositeKeyClass(className);
             }
 
-            if (!string.IsNullOrEmpty(_ns))
+            if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
                 _cb.EndNest();
             }
 
             return _cb.ToString();
+        }
+
+        private void WriteRiaClass(string className)
+        {
+            _cb.AppendLine("[MetadataType(typeof(" + className + "." + className + "Metadata))]");
+            using (_cb.BeginBrace("public partial class " + className))
+            {
+                //write the buddy class
+                using (_cb.BeginNest("internal sealed class " + className + "Metadata"))
+                {
+                    WriteClassMembers(className);
+                }
+            }
+        }
+
+        private void WriteClassMembers(string className)
+        {
+            if (_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
+            {
+                RiaServicesWriter.WritePrivateConstructor(className, _cb);
+            }
+            else
+            {
+                InitializeCollectionsInConstructor(className);
+            }
+
+            if (_table.HasCompositeKey)
+            {
+                if (!IsEntityFramework())
+                {
+                    _cb.AppendAutomaticProperty(className + "Key", "Key");
+                }
+                else
+                {
+                    //code first composite key
+                    foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
+                    {
+                        WriteColumn(column);
+                    }
+                }
+            }
+
+            foreach (var column in _table.Columns)
+            {
+                if (_table.HasCompositeKey && column.IsPrimaryKey) continue;
+                WriteColumn(column);
+            }
+
+            WriteForeignKeyCollections();
+
+            if (!_table.HasCompositeKey && _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices)
+            {
+                var overrider = new OverrideWriter(_cb, _table);
+                overrider.AddOverrides();
+            }
+        }
+
+        private bool IsCodeFirst()
+        {
+            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst;
+        }
+
+        private bool IsEntityFramework()
+        {
+            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices;
         }
 
         private void WriteNamespaces()
@@ -131,16 +155,18 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteForeignKeyCollections()
         {
             var listType = "IList<";
-            if (CodeTarget == CodeTarget.PocoEntityCodeFirst) listType = "ICollection<";
+            if (IsEntityFramework()) listType = "ICollection<";
             foreach (var foreignKey in _table.ForeignKeyChildren)
             {
-                if (foreignKey.IsManyToManyTable() && CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                if (foreignKey.IsManyToManyTable() && IsCodeFirst())
                 {
                     WriteManyToManyCollection(foreignKey);
                     continue;
                 }
 
-                var propertyName = NameCollection(foreignKey.NetName);
+                if(_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
+                    _cb.AppendLine("[Include]");
+                var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
                 var dataType = listType + foreignKey.NetName + ">";
                 _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
             }
@@ -155,7 +181,7 @@ namespace DatabaseSchemaReader.CodeGen
                 Debug.WriteLine("Can't navigate the many to many relationship for " + _table.Name + " to " + foreignKey.Name);
                 return;
             }
-            var propertyName = NameCollection(target.NetName);
+            var propertyName = _codeWriterSettings.NameCollection(target.NetName);
             var dataType = "ICollection<" + target.NetName + ">";
             _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
 
@@ -169,7 +195,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 return;
             }
-            var propertyName = NameCollection(target.NetName);
+            var propertyName = _codeWriterSettings.NameCollection(target.NetName);
             var dataType = "List<" + target.NetName + ">";
             _cb.AppendLine(propertyName + " = new " + dataType + "();");
         }
@@ -181,12 +207,12 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var foreignKey in _table.ForeignKeyChildren)
                 {
-                    if (foreignKey.IsManyToManyTable() && CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                    if (foreignKey.IsManyToManyTable() && IsCodeFirst())
                     {
                         WriteManyToManyInitialize(foreignKey);
                         continue;
                     }
-                    var propertyName = NameCollection(foreignKey.NetName);
+                    var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
                     var dataType = "List<" + foreignKey.NetName + ">";
                     _cb.AppendLine(propertyName + " = new " + dataType + "();");
                 }
@@ -202,9 +228,10 @@ namespace DatabaseSchemaReader.CodeGen
             var isFk = column.IsForeignKey && column.ForeignKeyTable != null;
             if (isFk)
             {
-                if (CodeTarget == CodeTarget.PocoEntityCodeFirst && column.IsPrimaryKey)
+                if (IsEntityFramework() && (column.IsPrimaryKey || _codeWriterSettings.UseForeignKeyIdProperties))
                 {
                     //if it's a primary key AND foreign key, CF requires a scalar property
+                    //optionally allow a shadow Id property to be created (convenient for CF)
                     _cb.AppendAutomaticProperty(dataType, propertyName + "Id", true);
                 }
                 dataType = column.ForeignKeyTable.NetName;
@@ -212,7 +239,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
-            var useVirtual = (CodeTarget != CodeTarget.PocoEntityCodeFirst || isFk);
+            var useVirtual = (!IsEntityFramework() || isFk);
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
 
@@ -221,7 +248,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteCompositeKeyClass(string className)
         {
             //CodeFirst can cope with multi-keys
-            if (CodeTarget == CodeTarget.PocoEntityCodeFirst) return;
+            if (IsEntityFramework()) return;
 
             using (_cb.BeginNest("public class " + className + "Key", "Class representing " + _table.Name + " composite key"))
             {

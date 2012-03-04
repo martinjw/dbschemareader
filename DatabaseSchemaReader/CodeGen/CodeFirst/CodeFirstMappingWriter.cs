@@ -11,33 +11,19 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         //http://msdn.microsoft.com/en-us/library/hh295844%28v=vs.103%29.aspx
 
         private readonly DatabaseTable _table;
-        private readonly string _ns;
+        private readonly CodeWriterSettings _codeWriterSettings;
         private readonly MappingNamer _mappingNamer;
         private readonly ClassBuilder _cb;
 
-        public CodeFirstMappingWriter(DatabaseTable table, string ns, MappingNamer mappingNamer)
+        public CodeFirstMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
             if (table == null) throw new ArgumentNullException("table");
             if (mappingNamer == null) throw new ArgumentNullException("mappingNamer");
 
-            _ns = ns;
+            _codeWriterSettings = codeWriterSettings;
             _mappingNamer = mappingNamer;
             _table = table;
             _cb = new ClassBuilder();
-        }
-
-        /// <summary>
-        /// Gets or sets the collection namer.
-        /// </summary>
-        /// <value>
-        /// The collection namer.
-        /// </value>
-        public ICollectionNamer CollectionNamer { get; set; }
-
-        private string NameCollection(string name)
-        {
-            if (CollectionNamer == null) return name + "Collection";
-            return CollectionNamer.NameCollection(name);
         }
 
         /// <summary>
@@ -55,7 +41,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
             MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
 
-            using (_cb.BeginNest("namespace " + _ns + ".Mapping"))
+            using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace + ".Mapping"))
             {
                 using (_cb.BeginNest("public class " + MappingClassName + " : EntityTypeConfiguration<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
                 {
@@ -240,12 +226,14 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 column.Nullable ? "Optional" : "Required",
                 propertyName);
             //then map the inverse with our foreign key children convention
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", NameCollection(column.Table.NetName));
-            if (column.IsPrimaryKey)
+            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", _codeWriterSettings.NameCollection(column.Table.NetName));
+            if (column.IsPrimaryKey || _codeWriterSettings.UseForeignKeyIdProperties)
             {
                 //for pk/fk we have a mirror property
                 //TODO: don't use Id here
-                sb.AppendFormat(CultureInfo.InvariantCulture, ".HasForeignKey(c => c.{0}Id)", propertyName);
+                var fkIdName = propertyName + "Id";
+                _cb.AppendFormat("Property(x => x.{0}).HasColumnName(\"{1}\");", fkIdName, column.Name);
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".HasForeignKey(c => c.{0})", fkIdName);
             }
             else
             {
@@ -273,7 +261,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             //var fkColumn = foreignKey.Columns.FirstOrDefault();
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = NameCollection(childClass);
+            var propertyName = _codeWriterSettings.NameCollection(childClass);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
@@ -288,8 +276,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             var otherEnd = foreignKeyChild.ManyToManyTraversal(_table);
             _cb.AppendLine("// Many to many foreign key to " + otherEnd.Name);
             var childClass = otherEnd.NetName;
-            var propertyName = NameCollection(childClass);
-            var reverseName = NameCollection(_table.NetName);
+            var propertyName = _codeWriterSettings.NameCollection(childClass);
+            var reverseName = _codeWriterSettings.NameCollection(_table.NetName);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
