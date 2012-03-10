@@ -6,6 +6,7 @@ using System.Security;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.CodeGen.NHibernate;
 using DatabaseSchemaReader.CodeGen.Procedures;
+using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -36,10 +37,12 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="codeWriterSettings">The code writer settings.</param>
         public CodeWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            _codeWriterSettings = codeWriterSettings;
-            if (schema == null)
-                throw new ArgumentNullException("schema");
+            if (schema == null) throw new ArgumentNullException("schema");
+            if (codeWriterSettings == null) throw new ArgumentNullException("codeWriterSettings");
+
             _schema = schema;
+            _codeWriterSettings = codeWriterSettings;
+
             PrepareSchemaNames.Prepare(schema);
         }
 
@@ -150,6 +153,8 @@ namespace DatabaseSchemaReader.CodeGen
         private string WriteDbContext(FileSystemInfo directory, ProjectWriter projectWriter)
         {
             var writer = new CodeFirstContextWriter(_codeWriterSettings);
+            if (ProviderToSqlType.Convert(_schema.Provider) == SqlType.Oracle)
+                writer.IsOracle = true;
             var txt = writer.Write(_schema.Tables.Where(t => !FilterIneligible(t)).ToList());
             var fileName = writer.ContextName + ".cs";
             File.WriteAllText(

@@ -34,6 +34,11 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             get { return _contextName; }
         }
 
+        /// <summary>
+        /// A flag if this is Oracle (Devart)
+        /// </summary>
+        public bool IsOracle { get; set; }
+
         public string Write(ICollection<DatabaseTable> tables)
         {
             _cb.AppendLine("using System;");
@@ -46,16 +51,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             {
                 using (_cb.BeginNest("public class " + ContextName + " : DbContext"))
                 {
-                    //ctors (esp string connectionName and DbConnection)
-                    using (_cb.BeginNest("public " + ContextName + "()", "Constructor"))
-                    {
-                        _cb.AppendLine("//default ctor uses app.config connection named " + ContextName);
-                    }
-                    using (_cb.BeginNest("public " + ContextName + "(DbConnection connection) : base(connection,true)", "Constructor"))
-                    {
-                        _cb.AppendLine("//ctor for tracing");
-                    }
-
+                    WriteConstructors();
 
                     var dbSetTables = tables
                         .Where(x => !x.IsManyToManyTable())
@@ -63,34 +59,67 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                         .Where(x => x.PrimaryKey != null)
                         .ToArray();
 
-                    foreach (var table in dbSetTables)
-                    {
-                        var className = table.NetName;
-                        var dbSetName = _codeWriterSettings.NameCollection(className);
-
-                        //we won't pluralize, let's just suffix it "Set"
-                        using (_cb.BeginNest("public IDbSet<" + className + "> " + dbSetName))
-                        {
-                            _cb.AppendLine("get { return Set<" + className + ">(); }");
-                        }
-                    }
+                    WriteDbSets(dbSetTables);
 
 
-                    using (_cb.BeginNest("protected override void OnModelCreating(DbModelBuilder modelBuilder)"))
-                    {
-                        _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
-                        _cb.AppendLine("//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
-                        foreach (var table in dbSetTables)
-                        {
-                            var className = table.NetName;
-
-                            _cb.AppendLine("modelBuilder.Configurations.Add(new " + className + "Mapping());");
-                        }
-
-                    }
+                    WriteOnModelCreating(dbSetTables);
                 }
             }
             return _cb.ToString();
+        }
+
+        private void WriteConstructors()
+        {
+            //ctors (esp string connectionName and DbConnection)
+            using (_cb.BeginNest("public " + ContextName + "()", "Constructor"))
+            {
+                _cb.AppendLine("//default ctor uses app.config connection named " + ContextName);
+            }
+            using (_cb.BeginNest("public " + ContextName + "(DbConnection connection) : base(connection,true)", "Constructor"))
+            {
+                _cb.AppendLine("//ctor for tracing");
+            }
+        }
+
+        private void WriteDbSets(IEnumerable<DatabaseTable> dbSetTables)
+        {
+            foreach (var table in dbSetTables)
+            {
+                var className = table.NetName;
+                var dbSetName = _codeWriterSettings.NameCollection(className);
+
+                //we won't pluralize, let's just suffix it "Set"
+                using (_cb.BeginNest("public IDbSet<" + className + "> " + dbSetName))
+                {
+                    _cb.AppendLine("get { return Set<" + className + ">(); }");
+                }
+            }
+        }
+
+        private void WriteOnModelCreating(IEnumerable<DatabaseTable> dbSetTables)
+        {
+            using (_cb.BeginNest("protected override void OnModelCreating(DbModelBuilder modelBuilder)"))
+            {
+                _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
+                _cb.AppendLine(
+                    "//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
+                if (IsOracle)
+                {
+                    _cb.AppendLine("// Oracle is case sensitive");
+                    _cb.AppendLine("modelBuilder.Conventions.Remove<System.Data.Entity.ModelConfiguration.Conventions.ColumnTypeCasingConvention>();");
+                    _cb.AppendLine("var config = Devart.Data.Oracle.Entity.Configuration.OracleEntityProviderConfig.Instance;");
+                    _cb.AppendLine("config.Workarounds.ColumnTypeCasingConventionCompatibility = true;");
+                    _cb.AppendLine("//switch off schema name generation for DML and DDL");
+                    _cb.AppendLine("config.Workarounds.IgnoreSchemaName = true;");
+                }
+
+                foreach (var table in dbSetTables)
+                {
+                    var className = table.NetName;
+
+                    _cb.AppendLine("modelBuilder.Configurations.Add(new " + className + "Mapping());");
+                }
+            }
         }
     }
 }

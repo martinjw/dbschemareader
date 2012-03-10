@@ -81,8 +81,9 @@ namespace DatabaseSchemaReader.CodeGen
         {
             //use the HintPath of the Nuget package
             var reference = FindSystemDataReference();
-            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"), 
-                new XElement(_xmlns + "HintPath", @"..\libs\EntityFramework.dll"));
+            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"), 
+                new XElement(_xmlns + "SpecificVersion", "False"),
+                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.4.3.1\lib\net40\EntityFramework.dll"));
             reference.AddAfterSelf(element);
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
