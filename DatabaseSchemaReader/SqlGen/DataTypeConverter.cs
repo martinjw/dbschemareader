@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen
@@ -79,6 +82,14 @@ namespace DatabaseSchemaReader.SqlGen
                 providerType = column.DataType.ProviderDbType;
             return (providerType == (int)SqlDbType.Timestamp); //this is just a byte array
         }
+        public static bool IsInteger(string dataType)
+        {
+            return (dataType == "INTEGER" ||
+                    dataType == "INT" ||
+                    dataType == "BIGINT" ||
+                    dataType == "SMALLINT" ||
+                    dataType == "TINYINT");
+        }
 
         public static string OracleNumberConversion(int? precision, int? scale)
         {
@@ -140,6 +151,89 @@ namespace DatabaseSchemaReader.SqlGen
             }
 
             return column;
+        }
+
+        /// <summary>
+        /// Adds a dataType object to a column.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        public static void AddDataType(DatabaseColumn column)
+        {
+            if (column == null) return;
+            //a datatype already assigned
+            if (column.DataType != null) return;
+            //use upper case
+            var dbType = column.DbDataType.ToUpper(CultureInfo.InvariantCulture);
+            //nothing to convert
+            if (string.IsNullOrEmpty(dbType)) return;
+            var sqlType = SqlType.SqlServer;
+            var dataTypeList = new List<DataType>();
+            if (column.Table != null)
+            {
+                //look up the full schema if it exists
+                var schema = column.Table.DatabaseSchema;
+                if (schema != null)
+                {
+                    var provider = schema.Provider;
+                    sqlType = Conversion.ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
+                    dataTypeList = schema.DataTypes;
+                }
+            }
+            //does the schema data types contain this type? if so, assign it.
+            var match = dataTypeList.FirstOrDefault(d => d.TypeName.Equals(dbType, StringComparison.OrdinalIgnoreCase));
+            if (match != null)
+            {
+                column.DataType = match;
+                return;
+            }
+            //we need to invent a dataType - we need a .Net typeName
+            if (IsVariableString(dbType) || IsFixedLengthString(dbType))
+            {
+                var dataType = new DataType(dbType, typeof(string).FullName);
+                column.DataType = dataType;
+                dataTypeList.Add(dataType);
+                return;
+            }
+            if (IsBinary(dbType) || IsBlob(dbType, column))
+            {
+                var dataType = new DataType(dbType, "System.Byte[]");
+                column.DataType = dataType;
+                dataTypeList.Add(dataType);
+                return;
+            }
+
+            if (sqlType == SqlType.SqlServer &&
+                dbType.StartsWith("TIMESTAMP(", StringComparison.OrdinalIgnoreCase))
+            {
+                var dataType = new DataType(dbType, "System.Byte[]");
+                dataType.ProviderDbType = (int)SqlDbType.Timestamp;
+                column.DataType = dataType;
+                dataTypeList.Add(dataType);
+                return;
+            }
+            if (IsDateTime(dbType))
+            {
+                var dataType = new DataType(dbType, typeof(DateTime).FullName);
+                column.DataType = dataType;
+                dataTypeList.Add(dataType);
+                return;
+            }
+            if (IsInteger(dbType))
+            {
+                var netType = typeof(int).FullName;
+                if (dbType.Equals("BIGINT")) netType = typeof(long).FullName;
+                var dataType = new DataType(dbType, netType);
+                column.DataType = dataType;
+                dataTypeList.Add(dataType);
+                return;
+            }
+            if (HasPrecision(dbType))
+            {
+                var dataType = new DataType(dbType, typeof(decimal).FullName);
+                column.DataType = dataType;
+                dataTypeList.Add(dataType);
+            }
+            //we've picked off the most common types here
         }
 
     }

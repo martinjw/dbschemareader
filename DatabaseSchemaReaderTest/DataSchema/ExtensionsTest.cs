@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 #if !NUNIT
@@ -121,7 +122,8 @@ namespace DatabaseSchemaReaderTest.DataSchema
 
             Assert.AreEqual("VARCHAR", catName.DbDataType);
             Assert.AreEqual(50, catName.Length);
-
+            Assert.IsNotNull(catName.DataType);
+            Assert.AreEqual(true, catName.DataType.IsString);
         }
 
         [TestMethod]
@@ -142,6 +144,8 @@ namespace DatabaseSchemaReaderTest.DataSchema
             Assert.AreEqual("NVARCHAR", catName.DbDataType);
             Assert.AreEqual(50, catName.Length);
             Assert.AreEqual(true, catName.Nullable);
+            Assert.IsNotNull(catName.DataType);
+            Assert.AreEqual(true, catName.DataType.IsString);
 
             var cost = cats.FindColumn("Cost");
 
@@ -149,6 +153,8 @@ namespace DatabaseSchemaReaderTest.DataSchema
             Assert.AreEqual(15, cost.Precision);
             Assert.AreEqual(4, cost.Scale);
             Assert.AreEqual(true, cost.Nullable);
+            Assert.IsNotNull(cost.DataType);
+            Assert.AreEqual(true, cost.DataType.IsNumeric);
         }
 
         [TestMethod]
@@ -169,6 +175,77 @@ namespace DatabaseSchemaReaderTest.DataSchema
             var catName = cats.FindColumn("CategoryName");
 
             Assert.AreEqual("NVARCHAR", catName.DbDataType);
+        }
+
+        [TestMethod]
+        public void DataTypeWithTypeTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("Categories")
+                .AddColumn<int>("CategoryId").AddPrimaryKey()
+                .AddColumn<string>("CategoryName").AddLength(50).AddNullable()
+                .AddColumn<decimal>("StockLevel").AddPrecisionScale(8, 2).AddNullable()
+                .AddColumn<DateTime>("Updated");
+
+            //assert
+            var cats = schema.FindTableByName("Categories");
+
+            var id = cats.PrimaryKeyColumn;
+            Assert.AreEqual("INT", id.DbDataType);
+            Assert.AreEqual(true, id.DataType.IsInt);
+
+            var catName = cats.FindColumn("CategoryName");
+
+            Assert.AreEqual("NVARCHAR", catName.DbDataType);
+            Assert.AreEqual(true, catName.DataType.IsString);
+
+            var stock = cats.FindColumn("StockLevel");
+
+            Assert.AreEqual("DECIMAL", stock.DbDataType);
+            Assert.AreEqual(true, stock.DataType.IsNumeric);
+
+            var updated = cats.FindColumn("Updated");
+
+            Assert.AreEqual("DATETIME", updated.DbDataType);
+            Assert.AreEqual(true, updated.DataType.IsDateTime);
+        }
+               
+
+        [TestMethod]
+        public void DataTypeWithGenericTypeTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("Categories")
+                .AddColumn<int>("CategoryId").AddPrimaryKey()
+                .AddColumn<string>("CategoryName").AddLength(50).AddNullable()
+                .AddColumn<decimal>("StockLevel").AddPrecisionScale(8,2).AddNullable()
+                .AddColumn<DateTime>("Updated");
+
+            //assert
+            var cats = schema.FindTableByName("Categories");
+
+            var id = cats.PrimaryKeyColumn;
+            Assert.AreEqual("INT", id.DbDataType);
+            Assert.AreEqual(true, id.DataType.IsInt);
+
+            var catName = cats.FindColumn("CategoryName");
+
+            Assert.AreEqual("NVARCHAR", catName.DbDataType);
+            Assert.AreEqual(true, catName.DataType.IsString);
+
+            var stock = cats.FindColumn("StockLevel");
+
+            Assert.AreEqual("DECIMAL", stock.DbDataType);
+            Assert.AreEqual(true, stock.DataType.IsNumeric);
+
+            var updated = cats.FindColumn("Updated");
+
+            Assert.AreEqual("DATETIME", updated.DbDataType);
+            Assert.AreEqual(true, updated.DataType.IsDateTime);
         }
     }
 }

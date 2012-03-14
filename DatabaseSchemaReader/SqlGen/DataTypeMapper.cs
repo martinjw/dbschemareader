@@ -11,7 +11,11 @@ namespace DatabaseSchemaReader.SqlGen
         {
             //map common .Net types to the DbType, and then to the platform type
             var type = typeof (T);
+            return Map(type);
+        }
 
+        public string Map(Type type)
+        {
             if (type == typeof(string))
                 return Map(DbType.String);
             if (type == typeof(char))

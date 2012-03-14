@@ -23,6 +23,8 @@ namespace DatabaseSchemaReader.DataSchema
             databaseTable.Columns.Add(databaseColumn);
             databaseColumn.Table = databaseTable;
             databaseColumn.TableName = databaseTable.Name;
+            databaseColumn.DatabaseSchema = databaseTable.DatabaseSchema;
+            DataTypeConverter.AddDataType(databaseColumn);
             return databaseColumn;
         }
 
@@ -192,6 +194,75 @@ namespace DatabaseSchemaReader.DataSchema
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var dataType = DataTypeMappingFactory.DataTypeMapper(databaseColumn.Table).Map(dbType);
             return databaseColumn.AddColumn(columnName, dataType, columnInitialization);
+        }
+
+        /// <summary>
+        /// Adds the column.
+        /// </summary>
+        /// <typeparam name="T">The specified .Net type (string, int, decimal)</typeparam>
+        /// <param name="databasetable">The database table.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public static DatabaseColumn AddColumn<T>(this DatabaseTable databasetable, string columnName)
+        {
+            if (databasetable == null) throw new ArgumentNullException("databasetable", "databasetable must not be null");
+            //we can't use a generic type constraint because we want primitive structs and strings.
+            var dataType = TypeToString(databasetable, typeof(T));
+            return databasetable.AddColumn(columnName, dataType);
+        }
+
+        /// <summary>
+        /// Adds the column.
+        /// </summary>
+        /// <typeparam name="T">The specified .Net type (string, int, decimal)</typeparam>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public static DatabaseColumn AddColumn<T>(this DatabaseColumn databaseColumn, string columnName)
+        {
+            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            var dataType = TypeToString(databaseColumn.Table, typeof(T));
+            return databaseColumn.AddColumn(columnName, dataType);
+        }
+
+        /// <summary>
+        /// Adds the column.
+        /// </summary>
+        /// <param name="databasetable">The database table.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <param name="netType">A CLR type (will attempt to translate to database type)</param>
+        /// <returns></returns>
+        public static DatabaseColumn AddColumn(this DatabaseTable databasetable, string columnName, Type netType)
+        {
+            if (databasetable == null) throw new ArgumentNullException("databasetable", "databasetable must not be null");
+            var dataType = TypeToString(databasetable, netType);
+            return databasetable.AddColumn(columnName, dataType);
+        }
+
+        /// <summary>
+        /// Adds the column.
+        /// </summary>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <param name="netType">A CLR type (will attempt to translate to database type)</param>
+        /// <returns></returns>
+        public static DatabaseColumn AddColumn(this DatabaseColumn databaseColumn, string columnName, Type netType)
+        {
+            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            var dataType = TypeToString(databaseColumn.Table, netType);
+            return databaseColumn.AddColumn(columnName, dataType);
+        }
+        private static string TypeToString(DatabaseTable databasetable, Type type)
+        {
+            if (type == typeof(string))
+            {
+                return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(DbType.String);
+            }
+            if (type.IsValueType)
+            {
+                return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(type);
+            }
+            return "VARCHAR";
         }
 
         /// <summary>
