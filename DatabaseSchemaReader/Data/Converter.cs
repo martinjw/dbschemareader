@@ -6,18 +6,33 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Data
 {
-    class Converter
+    /// <summary>
+    /// Converts data to strings
+    /// </summary>
+    public class Converter
     {
         private readonly SqlType _sqlType;
         private readonly IDictionary<string, string> _dateTypes;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Converter"/> class.
+        /// </summary>
+        /// <param name="sqlType">Type of the SQL.</param>
+        /// <param name="dateTypes">The date types, required to distinguish DATE vs TIME</param>
         public Converter(SqlType sqlType, IDictionary<string, string> dateTypes)
         {
             _dateTypes = dateTypes;
             _sqlType = sqlType;
         }
 
-        public string Convert(string columnName, Type type, object data)
+        /// <summary>
+        /// Converts the specified data into a string
+        /// </summary>
+        /// <param name="type">The CLR type of the data.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="columnName">Name of the column (optional, required to work out dateTime types)</param>
+        /// <returns></returns>
+        public string Convert(Type type, object data, string columnName)
         {
             if (data == null || data == DBNull.Value)
             {
@@ -39,7 +54,9 @@ namespace DatabaseSchemaReader.Data
             }
             if (type == typeof(DateTime))
             {
-                var dbType = _dateTypes[columnName];
+                var dbType = "DATETIME";
+                if (!string.IsNullOrEmpty(columnName) && _dateTypes.ContainsKey(columnName))
+                    dbType = _dateTypes[columnName];
                 return new DateConverter(_sqlType).Convert((DateTime)data, dbType);
             }
             if (type == typeof(decimal))

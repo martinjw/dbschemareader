@@ -43,6 +43,9 @@ namespace DatabaseSchemaReader.SqlGen
             if (type == typeof(Guid))
                 return Map(DbType.Guid);
 
+            if (type == typeof(bool))
+                return Map(DbType.Boolean);
+
             return null;
         }
     }

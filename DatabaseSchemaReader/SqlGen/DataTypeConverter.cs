@@ -160,6 +160,8 @@ namespace DatabaseSchemaReader.SqlGen
         public static void AddDataType(DatabaseColumn column)
         {
             if (column == null) return;
+            //there is no data type at all
+            if (string.IsNullOrEmpty(column.DbDataType)) return;
             //a datatype already assigned
             if (column.DataType != null) return;
             //use upper case

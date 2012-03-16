@@ -203,11 +203,13 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="databasetable">The database table.</param>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Cannot map the CLR type to a database type</exception>
         public static DatabaseColumn AddColumn<T>(this DatabaseTable databasetable, string columnName)
         {
             if (databasetable == null) throw new ArgumentNullException("databasetable", "databasetable must not be null");
             //we can't use a generic type constraint because we want primitive structs and strings.
             var dataType = TypeToString(databasetable, typeof(T));
+            if (string.IsNullOrEmpty(dataType)) throw new ArgumentException("Cannot map .net type to a database type");
             return databasetable.AddColumn(columnName, dataType);
         }
 
@@ -218,10 +220,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="databaseColumn">The database column.</param>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Cannot map the CLR type to a database type</exception>
         public static DatabaseColumn AddColumn<T>(this DatabaseColumn databaseColumn, string columnName)
         {
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var dataType = TypeToString(databaseColumn.Table, typeof(T));
+            if (string.IsNullOrEmpty(dataType)) throw new ArgumentException("Cannot map .net type to a database type");
             return databaseColumn.AddColumn(columnName, dataType);
         }
 
@@ -232,10 +236,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="columnName">Name of the column.</param>
         /// <param name="netType">A CLR type (will attempt to translate to database type)</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Cannot map the CLR type to a database type</exception>
         public static DatabaseColumn AddColumn(this DatabaseTable databasetable, string columnName, Type netType)
         {
             if (databasetable == null) throw new ArgumentNullException("databasetable", "databasetable must not be null");
             var dataType = TypeToString(databasetable, netType);
+            if (string.IsNullOrEmpty(dataType)) throw new ArgumentException("Cannot map .net type to a database type", "netType");
             return databasetable.AddColumn(columnName, dataType);
         }
 
@@ -246,10 +252,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="columnName">Name of the column.</param>
         /// <param name="netType">A CLR type (will attempt to translate to database type)</param>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Cannot map the CLR type to a database type</exception>
         public static DatabaseColumn AddColumn(this DatabaseColumn databaseColumn, string columnName, Type netType)
         {
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var dataType = TypeToString(databaseColumn.Table, netType);
+            if (string.IsNullOrEmpty(dataType)) throw new ArgumentException("Cannot map .net type to a database type", "netType");
             return databaseColumn.AddColumn(columnName, dataType);
         }
         private static string TypeToString(DatabaseTable databasetable, Type type)

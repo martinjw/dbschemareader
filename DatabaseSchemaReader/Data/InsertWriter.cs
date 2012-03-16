@@ -167,7 +167,7 @@ namespace DatabaseSchemaReader.Data
                 var columnType = _columnTypes[databaseColumn.Name];
 
                 object data = row[databaseColumn.Name];
-                values.Add(_converter.Convert(databaseColumn.Name, columnType, data));
+                values.Add(_converter.Convert(columnType, data, databaseColumn.Name));
             }
 
             var value = string.Join(" ,", values.ToArray());
@@ -177,7 +177,7 @@ namespace DatabaseSchemaReader.Data
 
         private void PrepareTemplate()
         {
-            var cols = GetAllColumns(); //we ignore IDENTITY here
+            var cols = GetAllColumns();
 
             _template = "INSERT INTO " + _sqlWriter.EscapedTableName + @" (
 " + FormattedColumns(cols) + @") VALUES (
