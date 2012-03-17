@@ -266,6 +266,10 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(DbType.String);
             }
+            if (type == typeof(byte[]))
+            {
+                return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(DbType.Binary);
+            }
             if (type.IsValueType)
             {
                 return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(type);
