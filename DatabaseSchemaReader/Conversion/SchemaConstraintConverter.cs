@@ -123,6 +123,8 @@ namespace DatabaseSchemaReader.Conversion
         /// </summary>
         public static void AddIdentity(DataTable dt, DatabaseTable table)
         {
+            bool hasSeedInfo = dt.Columns.Contains("IdentitySeed");
+            bool hasIncrementInfo = dt.Columns.Contains("IdentityIncrement");
             foreach (DataRow row in dt.Rows)
             {
                 string tableName = row["TableName"].ToString();
@@ -134,6 +136,10 @@ namespace DatabaseSchemaReader.Conversion
                     if (col.Name.Equals(colName, StringComparison.OrdinalIgnoreCase))
                     {
                         col.IsIdentity = true;
+                        if (hasSeedInfo)
+                            col.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
+                        if (hasIncrementInfo)
+                            col.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
                         //col.IsPrimaryKey = true;
                         break;
                     }

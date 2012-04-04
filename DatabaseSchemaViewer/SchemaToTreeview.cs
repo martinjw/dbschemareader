@@ -277,6 +277,14 @@ namespace DatabaseSchemaViewer
             if (column.IsIdentity)
             {
                 sb.Append(" Identity");
+                if(column.IdentitySeed != 1 || column.IdentityIncrement != 1)
+                {
+                    sb.Append('(');
+                    sb.Append(column.IdentitySeed);
+                    sb.Append(',');
+                    sb.Append(column.IdentityIncrement);
+                    sb.Append(')');
+                }
             }
             if (column.IsForeignKey)
             {

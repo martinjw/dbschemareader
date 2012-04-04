@@ -121,7 +121,9 @@ WHERE
             const string sqlCommand = @"SELECT 
 SchemaOwner = s.name, 
 TableName = o.name, 
-ColumnName = c.name 
+ColumnName = c.name,
+IdentitySeed = seed_value,
+IdentityIncrement = increment_value
 FROM sys.identity_columns c
 INNER JOIN sys.all_objects o ON c.object_id = o.object_id
 INNER JOIN sys.schemas s ON s.schema_id = o.schema_id

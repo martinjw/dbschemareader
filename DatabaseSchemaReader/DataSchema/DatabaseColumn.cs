@@ -12,6 +12,15 @@ namespace DatabaseSchemaReader.DataSchema
 
         #endregion
 
+        /// <summary>
+        /// Initialize optional properties to default values for a DatabaseColumn
+        /// </summary>
+        public DatabaseColumn()
+        {
+            IdentitySeed = 1;
+            IdentityIncrement = 1;
+        }
+
         #region Basic Properties
 
         /// <summary>
@@ -94,6 +103,16 @@ namespace DatabaseSchemaReader.DataSchema
         /// The name of the table.
         /// </value>
         public string TableName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the seed value for an identity column (or equivalent)
+        /// </summary>
+        public long IdentitySeed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the identity increment for an identity column (or equivalent)
+        /// </summary>
+        public long IdentityIncrement { get; set; }
 
         #endregion
 
@@ -194,7 +213,7 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return Name + " (" + DbDataType + ")"
                 + (IsPrimaryKey ? " PK" : "")
-                + (IsIdentity ? " Identity" : "");
+                + (IsIdentity ? " Identity(" + IdentitySeed + "," + IdentityIncrement + ")" : "");
         }
 
         #endregion

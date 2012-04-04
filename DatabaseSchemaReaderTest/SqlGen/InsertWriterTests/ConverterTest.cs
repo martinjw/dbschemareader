@@ -33,7 +33,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(string), s);
+            var result = converter.Convert(typeof(string), s, "Name");
 
             //assert
             Assert.AreEqual("NULL", result);
@@ -50,7 +50,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(string), dbNull);
+            var result = converter.Convert(typeof(string), dbNull, "Name");
 
             //assert
             Assert.AreEqual("NULL", result);
@@ -67,7 +67,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(string), s);
+            var result = converter.Convert(typeof(string), s, "Name");
 
             //assert
             Assert.AreEqual("'Hello'", result);
@@ -84,7 +84,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(string), s);
+            var result = converter.Convert(typeof(string), s, "Name");
 
             //assert
             Assert.AreEqual("'Hello ''Boys'''", result);
@@ -101,7 +101,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(string), s);
+            var result = converter.Convert(typeof(string), s, "Name");
 
             //assert
             Assert.AreEqual("N'Hello'", result);
@@ -119,7 +119,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(int), i);
+            var result = converter.Convert(typeof(int), i, "Name");
 
             //assert
             Assert.AreEqual("10", result);
@@ -136,7 +136,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(decimal), i);
+            var result = converter.Convert(typeof(decimal), i, "Name");
 
             //assert
             Assert.AreEqual("10.5", result);
@@ -154,7 +154,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("StartDate", typeof(DateTime), dt);
+            var result = converter.Convert(typeof(DateTime), dt, "StartDate");
 
             //assert
             Assert.AreEqual("'2001-03-30 10:45:30.839'", result);
@@ -172,7 +172,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var converter = new Converter(sqlType, dateTypes);
 
             //act
-            var result = converter.Convert("Name", typeof(TimeSpan), ts);
+            var result = converter.Convert(typeof(TimeSpan), ts, "Name");
 
             //assert
             Assert.AreEqual("'01:02:03'", result);
