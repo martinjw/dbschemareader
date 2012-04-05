@@ -217,5 +217,56 @@ WHERE o1.XTYPE = 'TR' AND
 
             return CommandForTable(tableName, conn, "Triggers", sqlCommand);
         }
+
+        protected override DataTable Sequences(DbConnection connection)
+        {
+            //future compatibility- if they support Sequences, use that
+            if (SchemaCollectionExists(connection, "Sequences"))
+                return base.Sequences(connection);
+
+            //2 steps - check if have any sequences (SqlServer 2012+), then load them
+            var dt = CreateDataTable("SEQUENCES");
+            using (var conn = Factory.CreateConnection())
+            {
+                conn.ConnectionString = ConnectionString;
+                conn.Open();
+
+                var cmd = conn.CreateCommand();
+                //step 1- check if there are any sequences (backwards compatible)
+                cmd.CommandText = @"SELECT COUNT(*) 
+FROM sys.objects 
+WHERE type= 'SO' AND
+(Schema_name(schema_id) = @schemaOwner OR @schemaOwner IS NULL)";
+                cmd.Parameters.Add(
+                        AddDbParameter("schemaOwner", Owner));
+                var hasSequences = (int)cmd.ExecuteScalar() > 0;
+                if (!hasSequences)
+                {
+                    return dt;
+                }
+                //step 2- they have them
+                //we can use the SqlServer 2012 sys.sequences catalog view
+                //renamed for compatibility with Oracle's ALL_SEQUENCES
+                using (DbDataAdapter da = Factory.CreateDataAdapter())
+                {
+                    da.SelectCommand = conn.CreateCommand();
+                    da.SelectCommand.CommandText = @"
+SELECT Schema_name(schema_id) AS sequence_owner,
+       name                   AS sequence_name,
+       start_value            AS min_value,
+       increment              AS increment_by,
+       is_cycling             AS cycle_flag
+FROM   sys.sequences
+WHERE  
+(Schema_name(schema_id) = @schemaOwner OR @schemaOwner IS NULL)";
+                    da.SelectCommand.Parameters.Add(
+                        AddDbParameter("schemaOwner", Owner));
+                    da.Fill(dt);
+
+                    return dt;
+                }
+
+            }
+        }
     }
 }
