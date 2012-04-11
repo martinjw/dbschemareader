@@ -27,6 +27,7 @@ namespace DatabaseSchemaReader.Conversion
         private void ConvertDataTable()
         {
             var columnsKeyMap = new ColumnsKeyMap(ColumnsDataTable);
+
             foreach (DataRowView row in ColumnsDataTable.DefaultView)
             {
                 var column = new DatabaseColumn();
@@ -60,6 +61,9 @@ namespace DatabaseSchemaReader.Conversion
 
                 _list.Add(column);
             }
+
+            // Sort columns according to ordinal to get the original order in CREATE TABLE
+            _list.Sort((x, y) => x.Ordinal.CompareTo(y.Ordinal));
         }
 
         /// <summary>
@@ -81,8 +85,6 @@ namespace DatabaseSchemaReader.Conversion
             if (_list.Count == 0) ConvertDataTable();
             return _list;
         }
-
-
 
         private static void AddColumnDefault(DataRowView row, string defaultKey, DatabaseColumn column)
         {

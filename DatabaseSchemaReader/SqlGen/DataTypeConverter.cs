@@ -71,7 +71,8 @@ namespace DatabaseSchemaReader.SqlGen
         {
             return (dataType == "DATETIME" ||
                     dataType == "DATETIME2" ||
-                    dataType == "TIMESTAMP");
+                    dataType == "TIMESTAMP" ||
+                    dataType == "SMALLDATETIME");
         }
         public static bool IsSqlServerTimestamp(string dataType, DatabaseColumn column)
         {

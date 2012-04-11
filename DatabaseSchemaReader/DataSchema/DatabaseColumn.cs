@@ -202,6 +202,14 @@ namespace DatabaseSchemaReader.DataSchema
 
         #region Utility methods
 
+        /// <summary>
+        /// Get non-triviality of an identity column
+        /// </summary>
+        /// <returns>True if the identity sequence does not start at 1 and increment by 1.</returns>
+        public bool IsNonTrivialIdentity()
+        {
+            return IdentitySeed != 1 || IdentityIncrement != 1;
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -213,7 +221,8 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return Name + " (" + DbDataType + ")"
                 + (IsPrimaryKey ? " PK" : "")
-                + (IsIdentity ? " Identity(" + IdentitySeed + "," + IdentityIncrement + ")" : "");
+                + (IsIdentity ? " Identity" : "")
+                + (IsNonTrivialIdentity() ? "(" + IdentitySeed + "," + IdentityIncrement + ")" : "");
         }
 
         #endregion

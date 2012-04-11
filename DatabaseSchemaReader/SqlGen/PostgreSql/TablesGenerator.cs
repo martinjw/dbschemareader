@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         protected override ConstraintWriterBase LoadConstraintWriter(DatabaseTable table)
         {
-            return null;
+            return new ConstraintWriter(table);
         }
 
         protected override ITableGenerator LoadTableGenerator(DatabaseTable table)

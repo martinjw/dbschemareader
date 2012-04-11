@@ -59,6 +59,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 //else if (dataType == "BIGSERIAL") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
             if (dataType == "INT8") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
             if (dataType == "INT2") return "SMALLINT"; //this is a PostgreSql alias, we'll use standard SQL
+            if (dataType == "TINYINT") return "SMALLINT"; //this is a MsSql alias, we'll use standard SQL
             if (dataType == "NUMBER")
                 return DataTypeConverter.OracleNumberConversion(column.Precision, column.Scale);
 

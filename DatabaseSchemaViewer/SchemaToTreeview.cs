@@ -277,7 +277,7 @@ namespace DatabaseSchemaViewer
             if (column.IsIdentity)
             {
                 sb.Append(" Identity");
-                if(column.IdentitySeed != 1 || column.IdentityIncrement != 1)
+                if(column.IsNonTrivialIdentity())
                 {
                     sb.Append('(');
                     sb.Append(column.IdentitySeed);

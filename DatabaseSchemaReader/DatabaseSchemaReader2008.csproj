@@ -173,6 +173,7 @@
     <Compile Include="SqlGen\MySql\MySqlMigrationGenerator.cs" />
     <Compile Include="SqlGen\Oracle\OracleDataTypeMapper.cs" />
     <Compile Include="SqlGen\Oracle\OracleMigrationGenerator.cs" />
+    <Compile Include="SqlGen\PostgreSql\AutoIncrementWriter.cs" />
     <Compile Include="SqlGen\PostgreSql\ConstraintWriter.cs" />
     <Compile Include="SqlGen\PostgreSql\DataTypeWriter.cs" />
     <Compile Include="SqlGen\PostgreSql\PostgreSqlDataTypeMapper.cs" />

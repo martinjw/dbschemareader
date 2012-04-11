@@ -76,7 +76,6 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         protected override string WriteDataType(DatabaseColumn column)
         {
-
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
@@ -86,12 +85,23 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             var sql = DataTypeWriter.WriteDataType(column);
             if (sql == "BIT") _hasBit = true;
 
-
-            if (column.IsIdentity) sql = " SERIAL";
-            if (column.IsPrimaryKey)
-                sql += " NOT NULL";
+            if (column.IsIdentity)
+            {
+                bool isLong = column.DataType != null && column.DataType.GetNetType() == typeof(long);
+                // Non trivial identities are hooked to a sequence up by AutoIncrementWriter.
+                // Newer postgres versions require specifying UNIQUE explicitly.
+                if (column.IsNonTrivialIdentity())
+                    sql = (isLong ? " BIGINT" : " INT") + " NOT NULL UNIQUE";
+                else
+                    sql = isLong ? " BIGSERIAL" : " SERIAL";
+            }
             else
-                sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + defaultValue;
+            {
+                if (column.IsPrimaryKey)
+                    sql += " NOT NULL";
+                else
+                    sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + defaultValue;
+            }
             return sql;
         }
 
@@ -141,7 +151,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         protected override string NonNativeAutoIncrementWriter()
         {
-            return string.Empty;
+            return new AutoIncrementWriter(Table).Write();
         }
     }
 }
