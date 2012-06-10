@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 foreach (var foreignKey in table.ForeignKeys)
                 {
-                    sb.AppendLine("-- ALTER TABLE " + formatter.Escape(table.Name) + " DROP FOREIGN KEY " + foreignKey.Name + ";");
+                    sb.AppendLine("-- ALTER TABLE " + formatter.Escape(table.Name) + " DROP CONSTRAINT " + foreignKey.Name + ";");
 
                 }
             }
