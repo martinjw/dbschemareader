@@ -75,12 +75,18 @@ namespace DatabaseSchemaReader.CodeGen
 
         public void AppendAutomaticCollectionProperty(string dataType, string propertyName)
         {
+            AppendAutomaticCollectionProperty(dataType, propertyName, false);
+        }
+        public void AppendAutomaticCollectionProperty(string dataType, string propertyName, bool protectedSetter)
+        {
             var line = string.Format(
                 CultureInfo.InvariantCulture,
-                "{0}public virtual {1} {2} {{ get; private set; }}",
+                "{0}public virtual {1} {2} {{ get; {3} set; }}",
                 _indent,
                 dataType,
-                propertyName);
+                propertyName,
+                //Starting with NH 3.2, setters must be protected, not private
+                protectedSetter ? "protected" : "private");
 
             _sb.AppendLine(line);
             _sb.AppendLine(); //add an empty line

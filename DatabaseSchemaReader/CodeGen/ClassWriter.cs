@@ -142,6 +142,12 @@ namespace DatabaseSchemaReader.CodeGen
                 _codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices;
         }
 
+        private bool IsNHibernate()
+        {
+            return _codeWriterSettings.CodeTarget == CodeTarget.PocoNHibernateFluent ||
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoNHibernateHbm;
+        }
+
         private void WriteNamespaces()
         {
             _cb.AppendLine("using System;");
@@ -168,7 +174,7 @@ namespace DatabaseSchemaReader.CodeGen
                     _cb.AppendLine("[Include]");
                 var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
                 var dataType = listType + foreignKey.NetName + ">";
-                _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
+                _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
             }
         }
 
@@ -183,7 +189,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
             var propertyName = _codeWriterSettings.NameCollection(target.NetName);
             var dataType = "ICollection<" + target.NetName + ">";
-            _cb.AppendAutomaticCollectionProperty(dataType, propertyName);
+            _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
 
         }
 

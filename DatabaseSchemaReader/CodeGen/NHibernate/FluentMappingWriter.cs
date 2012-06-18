@@ -169,7 +169,8 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
             sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\")", column.Name);
-            sb.Append(".NotFound.Ignore()");
+            //bad idea unless you expect the database to be inconsistent
+            //sb.Append(".NotFound.Ignore()");
             //could look up cascade rule here
             sb.Append(";");
             _cb.AppendLine(sb.ToString());

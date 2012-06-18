@@ -159,7 +159,8 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 property.SetAttributeValue("column", SqlSafe(column.Name));
             }
             property.SetAttributeValue("class", dataType);
-            property.SetAttributeValue("not-found", "ignore"); //inconsistent db
+            //bad idea unless you expect the database to be inconsistent
+            //property.SetAttributeValue("not-found", "ignore");
             _classElement.Add(property);
         }
 

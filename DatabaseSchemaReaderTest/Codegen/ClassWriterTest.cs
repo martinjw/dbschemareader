@@ -114,6 +114,26 @@ namespace DatabaseSchemaReaderTest.Codegen
         }
 
         [TestMethod]
+        public void WriteForeignKeyInverseTestForNHibernate()
+        {
+            //arrange
+            var schema = ArrangeSchema();
+            var categoryTable = schema.FindTableByName("Categories");
+
+            var codeWriterSettings = new CodeWriterSettings();
+            codeWriterSettings.CodeTarget = CodeTarget.PocoNHibernateHbm;
+            var cw = new ClassWriter(categoryTable, codeWriterSettings);
+
+            //act
+            var txt = cw.Write();
+
+            //assert
+            var hasProducts = txt.Contains("public virtual IList<Product> ProductCollection { get; protected set; }");
+
+            Assert.IsTrue(hasProducts, "NHibernate 3.2 requires *all* setters to be protected or public");
+        }
+
+        [TestMethod]
         public void WriteForeignKeyInverseWithCollectionNamerTest()
         {
             //arrange
