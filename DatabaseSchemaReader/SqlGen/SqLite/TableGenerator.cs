@@ -52,6 +52,8 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             foreach (var checkConstraint in Table.CheckConstraints)
             {
                 var expression = SqlTranslator.Fix(checkConstraint.Expression);
+                //nothing to write?
+                if (string.IsNullOrEmpty(expression)) continue;
 
                 //check if Access and reformat
                 if (checkConstraint.Name.Contains("]."))

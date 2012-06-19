@@ -16,6 +16,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return new SqlFormatProvider();
         }
 
+        protected override bool IsSelfReferencingCascadeAllowed()
+        {
+            return false;
+        }
+
         #endregion
 
     }

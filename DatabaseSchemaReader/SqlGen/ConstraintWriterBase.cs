@@ -158,6 +158,13 @@ namespace DatabaseSchemaReader.SqlGen
                 // { CASCADE | NO ACTION | SET DEFAULT | SET NULL }
                 deleteUpdateRule += " ON UPDATE " + foreignKey.UpdateRule;
             }
+            if (_table.Name == foreignKeyTableName 
+                && !string.IsNullOrEmpty(deleteUpdateRule)
+                && !IsSelfReferencingCascadeAllowed())
+            {
+                //SqlServer cannot have cascade rules on self-referencing tables
+                deleteUpdateRule = string.Empty;
+            }
 
             //arguably we should fully qualify the refersToTable with its schema
             return string.Format(CultureInfo.InvariantCulture,
@@ -168,6 +175,12 @@ namespace DatabaseSchemaReader.SqlGen
                                  foreignKeyTableName,
                                  fkColumnList,
                                  deleteUpdateRule) + SqlFormatProvider().LineEnding();
+        }
+
+        protected virtual bool IsSelfReferencingCascadeAllowed()
+        {
+            //SQLSERVER only: A foreign key constraint that has an UPDATE or a DELETE CASCADE rule, and self-references a column in the same table, is not allowed
+            return true;
         }
 
         private string ForeignKeyTableName(DatabaseConstraint foreignKey)

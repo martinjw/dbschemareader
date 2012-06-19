@@ -65,9 +65,22 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             foreach (var index in Table.Indexes)
             {
                 if (index.IsUniqueKeyIndex(Table)) continue;
+                //are all indexed columns in table? 
+                // If not, could be a function index which must be done manually
+                if (IndexColumnsNotInTable(index)) continue;
 
                 sb.AppendLine(migration.AddIndex(Table, index));
             }
+        }
+
+        private bool IndexColumnsNotInTable(DatabaseIndex index)
+        {
+            foreach (var column in index.Columns)
+            {
+                if (!Table.Columns.Any(c => c.Name == column.Name))
+                    return true;
+            }
+            return false;
         }
 
         protected override ISqlFormatProvider SqlFormatProvider()
@@ -85,7 +98,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
                 var value = FixDefaultValue(column.DefaultValue);
-                if(_hasBit)
+                if (_hasBit)
                 {
                     //Access Yes/No boolean
                     if (value.Equals("No", StringComparison.OrdinalIgnoreCase)) value = "0";

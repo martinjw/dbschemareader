@@ -27,6 +27,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         private static string GetCheckSql()
         {
             //all_constraints includes NULL constraints. They have generated names- so we exclude them.
+            //Hmm, search_condition is an Oracle LONG which we can't read.
+            //TO_LOB can only be used on create table as select, xml fails on < in there... 
             const string sqlCommand = @"SELECT 
 cons.constraint_name, 
 cons.table_name,

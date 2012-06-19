@@ -67,8 +67,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (dataType == "NUMERIC" ||
                 dataType == "DECIMAL")
             {
-                var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
-                dataType = dataType + " (" + precision + writeScale + ")";
+                if (precision != null)
+                {
+                    var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
+                    dataType = dataType + " (" + precision + writeScale + ")";
+                }
             }
 
             return dataType;
@@ -134,16 +137,16 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
             if (dataType == "VARCHAR2") return "VARCHAR";
             if (dataType == "NVARCHAR2") return "NVARCHAR";
-                //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
+            //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
             if (dataType == "DATE" && providerType != (int)SqlDbType.Date)
                 return "DATETIME";
-                //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
+            //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
             if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != (int)SqlDbType.Timestamp)
                 return "DATETIME";
-                //Oracle numbers- use precise SqlServer versiom
+            //Oracle numbers- use precise SqlServer versiom
             if (dataType == "NUMBER")
                 return DataTypeConverter.OracleNumberConversion(precision, scale);
-                //not an exact match
+            //not an exact match
             if (dataType == "XMLTYPE") return "XML";
             return dataType;
         }
