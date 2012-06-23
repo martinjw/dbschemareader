@@ -84,8 +84,71 @@ namespace CopyToSQLite
                 //don't use the C:\Program Files\Microsoft SQL Server Compact Edition\v4.0\Samples version as you need admin rights
                 contextMenuStrip1.Items.Add("SqlServerCe (Northwind)").Click += (s, ev) => FillConnectionString(@"Data Source=""C:\Data\northwind.sdf"";");
             }
+            AllowDrop = true;
+            DragEnter += FormDragEnter;
+            DragDrop += FormDragDrop;
         }
 
+        private void FormDragDrop(object sender, DragEventArgs e)
+        {
+            //Windows7 User Interface Privilege Isolation stops this if RunAs Admin
+            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (files == null || files.Length != 1)
+            {
+                var cs = e.Data.GetData(DataFormats.UnicodeText) as string;
+                if (!string.IsNullOrEmpty(cs))
+                    ConnectionString.Text = cs.Replace("\n", "").Replace("\r", "");
+                return;
+            }
+            var file = files[0];
+            var type = Path.GetExtension(file);
+            if (string.IsNullOrEmpty(type)) return;
+            switch (type.ToUpperInvariant())
+            {
+                case ".MDF": //local Sql Express database
+                    ConnectionString.Text = @"Server=.\SQLExpress;AttachDbFilename=" + file + ";User Instance=true;Integrated Security=true;";
+                    SelectProvider("System.Data.SqlClient");
+                    SchemaOwner.Text = "dbo";
+                    ReadSchemaClick(this, EventArgs.Empty);
+                    break;
+                case ".SDF": //SqlServer Ce
+                    ConnectionString.Text = "Data Source=" + file;
+                    SelectProvider("System.Data.SqlServerCe.4.0");
+                    SchemaOwner.Text = "";
+                    ReadSchemaClick(this, EventArgs.Empty);
+                    break;
+                case ".DB":
+                case ".SQLITE": //SQLite (could be other extensions)
+                    ConnectionString.Text = "Data Source=" + file;
+                    var selectedValue = "System.Data.SQLite";
+                    if (!_installedProviders.Contains(selectedValue)) selectedValue = "Devart.Data.SQLite";
+                    SelectProvider(selectedValue);
+                    SchemaOwner.Text = "";
+                    ReadSchemaClick(this, EventArgs.Empty);
+                    break;
+                case ".FDB": //Firebird
+                    ConnectionString.Text = "User=SYSDBA;Password=masterkey;Database="
+                         + file +
+                         ";Server=localhost; Connection lifetime=15;Pooling=true";
+                    SelectProvider("FirebirdSql.Data.FirebirdClient");
+                    SchemaOwner.Text = "";
+                    break;
+            }
+        }
+
+        private void SelectProvider(string provider)
+        {
+            if (!_installedProviders.Contains(provider)) provider = "System.Data.SqlClient";
+            DataProviders.SelectedItem = provider;
+        }
+
+        private void FormDragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(DataFormats.UnicodeText))
+                e.Effect = DragDropEffects.Copy;
+        }
         private void FillConnectionString(string connectionString)
         {
             FillConnectionString(connectionString, string.Empty);

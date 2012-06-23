@@ -37,9 +37,16 @@ namespace DatabaseSchemaViewer
         {
             //Windows7 User Interface Privilege Isolation stops this if RunAs Admin
             var files = e.Data.GetData(DataFormats.FileDrop) as string[];
-            if (files == null || files.Length != 1) return;
+            if (files == null || files.Length != 1)
+            {
+                var cs = e.Data.GetData(DataFormats.UnicodeText) as string;
+                if (!string.IsNullOrEmpty(cs))
+                    ConnectionString.Text = cs.Replace("\n", "").Replace("\r", "");
+                return;
+            }
             var file = files[0];
             var type = Path.GetExtension(file);
+            if (string.IsNullOrEmpty(type)) return;
             switch (type.ToUpperInvariant())
             {
                 case ".MDF": //local Sql Express database
@@ -82,6 +89,8 @@ namespace DatabaseSchemaViewer
         private void FormDragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(DataFormats.UnicodeText))
                 e.Effect = DragDropEffects.Copy;
         }
 

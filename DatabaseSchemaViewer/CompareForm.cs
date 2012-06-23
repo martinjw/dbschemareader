@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Data.Common;
+using System.IO;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
@@ -26,8 +27,53 @@ namespace DatabaseSchemaViewer
 
             contextMenuStrip1.Items.Clear();
             contextMenuStrip1.Items.Add(_databaseSchema.ConnectionString).Click += (s, ev) => ConnectionString.Text = _databaseSchema.ConnectionString;
+            AllowDrop = true;
+            DragEnter += FormDragEnter;
+            DragDrop += FormDragDrop;
         }
 
+
+        private void FormDragDrop(object sender, DragEventArgs e)
+        {
+            //Windows7 User Interface Privilege Isolation stops this if RunAs Admin
+            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (files == null || files.Length != 1)
+            {
+                var cs = e.Data.GetData(DataFormats.UnicodeText) as string;
+                if (!string.IsNullOrEmpty(cs))
+                    ConnectionString.Text = cs.Replace("\n", "").Replace("\r", "");
+                return;
+            }
+            var file = files[0];
+            var type = Path.GetExtension(file);
+            if (string.IsNullOrEmpty(type)) return;
+            switch (type.ToUpperInvariant())
+            {
+                case ".MDF": //local Sql Express database
+                    ConnectionString.Text = @"Server=.\SQLExpress;AttachDbFilename=" + file + ";User Instance=true;Integrated Security=true;";
+                    break;
+                case ".SDF": //SqlServer Ce
+                    ConnectionString.Text = "Data Source=" + file;
+                    break;
+                case ".DB":
+                case ".SQLITE": //SQLite (could be other extensions)
+                    ConnectionString.Text = "Data Source=" + file;
+                    break;
+                case ".FDB": //Firebird
+                    ConnectionString.Text = "User=SYSDBA;Password=masterkey;Database="
+                         + file +
+                         ";Server=localhost; Connection lifetime=15;Pooling=true";
+                    break;
+            }
+        }
+
+        private void FormDragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(DataFormats.UnicodeText))
+                e.Effect = DragDropEffects.Copy;
+        }
 
         private void ConnectionStringValidating(object sender, CancelEventArgs e)
         {
