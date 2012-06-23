@@ -172,5 +172,38 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.IsTrue(hasProducts);
         }
 
+        [TestMethod]
+        public void WriteViewTest()
+        {
+            //arrange
+            var view = new DatabaseView();
+            view.Name = "AlphabeticNames";
+            view.AddColumn("FirstName", typeof(string)).AddNullable()
+                .AddColumn("LastName", typeof(string)).AddNullable();
+            
+            var schema = new DatabaseSchema(null, null);
+            schema.Views.Add(view);
+            PrepareSchemaNames.Prepare(schema);
+
+            var codeWriterSettings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoNHibernateHbm,
+                IncludeViews = true
+            };
+            var cw = new ClassWriter(view, codeWriterSettings);
+
+            //act
+            var txt = cw.Write();
+
+            //assert
+            var hasFirstName = txt.Contains("public virtual string FirstName");
+            var hasLastName = txt.Contains("public virtual string LastName");
+            var hasEquals = txt.Contains("public override bool Equals(object obj)");
+
+            Assert.IsTrue(hasFirstName);
+            Assert.IsTrue(hasLastName);
+            Assert.IsTrue(hasEquals);
+        }
+
     }
 }

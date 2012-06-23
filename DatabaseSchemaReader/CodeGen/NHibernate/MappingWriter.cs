@@ -31,6 +31,10 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 //consider this
                                          new XAttribute("dynamic-update", "true"),
                                          new XAttribute("optimistic-lock", "dirty"));
+            if (_table is DatabaseView)
+            {
+                _classElement.Add(new XAttribute("mutable", "false"));
+            }
             hibmap.Add(_classElement);
         }
 
@@ -168,6 +172,11 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         {
             if (_table.PrimaryKey == null || _table.PrimaryKey.Columns.Count == 0)
             {
+                if (_table is DatabaseView)
+                {
+                    AddCompositePrimaryKeyForView();
+                    return;
+                }
                 _classElement.Add(new XComment("TODO- you MUST add a primary key!"));
                 return;
             }
@@ -217,6 +226,19 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
             id.Add(gen);
 
+            _classElement.Add(id);
+        }
+
+        private void AddCompositePrimaryKeyForView()
+        {
+            var id = new XElement(_xmlns + "composite-id");
+            foreach (var column in _table.Columns)
+            {
+                var key = new XElement(_xmlns + "key-property");
+                key.SetAttributeValue("column", SqlSafe(column.Name));
+                key.SetAttributeValue("name", column.NetName);
+                id.Add(key);
+            }
             _classElement.Add(id);
         }
 

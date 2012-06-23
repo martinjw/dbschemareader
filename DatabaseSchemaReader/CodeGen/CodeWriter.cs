@@ -76,13 +76,30 @@ namespace DatabaseSchemaReader.CodeGen
                 var cw = new ClassWriter(table, _codeWriterSettings);
                 var txt = cw.Write();
 
-                var fileName = className + ".cs";
-                var path = Path.Combine(directory.FullName, fileName);
-                File.WriteAllText(path, txt);
+                var fileName = WriteClassFile(directory, className, txt);
                 pw.AddClass(fileName);
 
                 WriteMapping(table, pw);
             }
+
+            if (_codeWriterSettings.IncludeViews)
+            {
+                foreach (var view in _schema.Views)
+                {
+                    var className = view.NetName;
+                    UpdateEntityNames(className, view.Name);
+
+                    var cw = new ClassWriter(view, _codeWriterSettings);
+                    var txt = cw.Write();
+
+                    var fileName = WriteClassFile(directory, className, txt);
+                    pw.AddClass(fileName);
+
+                    WriteMapping(view, pw);
+                }
+            }
+
+
             string contextName = null;
             if (IsCodeFirst())
             {
@@ -100,6 +117,14 @@ namespace DatabaseSchemaReader.CodeGen
                 WriteUnitTest(directory.FullName, contextName);
 
             WriteProjectFile(directory, pw);
+        }
+
+        private static string WriteClassFile(DirectoryInfo directory, string className, string txt)
+        {
+            var fileName = className + ".cs";
+            var path = Path.Combine(directory.FullName, fileName);
+            File.WriteAllText(path, txt);
+            return fileName;
         }
 
         private void WriteProjectFile(DirectoryInfo directory, ProjectWriter pw)
@@ -155,7 +180,13 @@ namespace DatabaseSchemaReader.CodeGen
             var writer = new CodeFirstContextWriter(_codeWriterSettings);
             if (ProviderToSqlType.Convert(_schema.Provider) == SqlType.Oracle)
                 writer.IsOracle = true;
-            var txt = writer.Write(_schema.Tables.Where(t => !FilterIneligible(t)).ToList());
+            var databaseTables = _schema.Tables.Where(t => !FilterIneligible(t))
+                .ToList();
+            if (_codeWriterSettings.IncludeViews)
+            {
+                databaseTables.AddRange(_schema.Views.OfType<DatabaseTable>());
+            }
+            var txt = writer.Write(databaseTables);
             var fileName = writer.ContextName + ".cs";
             File.WriteAllText(
                 Path.Combine(directory.FullName, fileName),

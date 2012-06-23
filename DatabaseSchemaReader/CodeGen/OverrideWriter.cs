@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -7,6 +9,7 @@ namespace DatabaseSchemaReader.CodeGen
     {
         private readonly ClassBuilder _cb;
         private readonly DatabaseTable _table;
+        private ICollection<DatabaseColumn> _columns;
 
         public OverrideWriter(ClassBuilder classBuilder, DatabaseTable table)
         {
@@ -23,7 +26,17 @@ namespace DatabaseSchemaReader.CodeGen
         public void AddOverrides()
         {
             //if there is no pk, these won't work
-            if (_table.PrimaryKey == null) return;
+            if (_table is DatabaseView)
+            {
+                _columns = _table.Columns.Where(x => !x.Nullable).ToList();
+                if (!_columns.Any())
+                    _columns = _table.Columns;
+            }
+            else
+            {
+                if (_table.PrimaryKey == null) return;
+                _columns = _table.Columns.Where(x => x.IsPrimaryKey).ToList();
+            }
 
             _cb.AppendLine("#region overrides");
 
@@ -41,10 +54,8 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("var x = obj as " + NetName + ";");
                 _cb.AppendLine("if (x == null) return false;");
 
-                foreach (var column in _table.Columns)
+                foreach (var column in _columns)
                 {
-                    if (!column.IsPrimaryKey) continue;
-
                     var primaryKeyName = column.NetName;
                     var datatype = column.DataType ?? new DataType("x", "x");
                     if (column.IsForeignKey)
@@ -63,9 +74,8 @@ namespace DatabaseSchemaReader.CodeGen
                 var sb = new StringBuilder();
                 sb.Append("return ");
                 var i = 0;
-                foreach (var column in _table.Columns)
+                foreach (var column in _columns)
                 {
-                    if (!column.IsPrimaryKey) continue;
                     if (i != 0) sb.Append(" && ");
                     i++;
                     var primaryKeyName = column.NetName;
@@ -84,9 +94,8 @@ namespace DatabaseSchemaReader.CodeGen
             {
 
                 //first check if any key is transient
-                foreach (var column in _table.Columns)
+                foreach (var column in _columns)
                 {
-                    if (!column.IsPrimaryKey) continue;
                     var primaryKeyName = column.NetName;
                     var datatype = column.DataType ?? new DataType("x", "z");
                     if (column.IsForeignKey)
@@ -107,9 +116,8 @@ namespace DatabaseSchemaReader.CodeGen
                 var sb = new StringBuilder();
                 var i = 0;
                 sb.Append("return ");
-                foreach (var column in _table.Columns)
+                foreach (var column in _columns)
                 {
-                    if (!column.IsPrimaryKey) continue;
                     if (i != 0) sb.Append(" ^ "); //XOR hashcodes together
                     i++;
                     var primaryKeyName = column.NetName;
@@ -132,10 +140,8 @@ namespace DatabaseSchemaReader.CodeGen
 
                 sb.Append("return \"[");
                 var i = 0;
-                foreach (var column in _table.Columns)
+                foreach (var column in _columns)
                 {
-                    if (!column.IsPrimaryKey) continue;
-
                     if (i != 0) sb.Append(" + \" [");
                     i++;
                     sb.Append(column.NetName + "] = \" + " + column.NetName);

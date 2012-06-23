@@ -106,5 +106,11 @@
         /// </summary>
         /// <value><c>true</c> if to write project files; otherwise, <c>false</c>.</value>
         public bool WriteProjectFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to include views.
+        /// </summary>
+        /// <value><c>true</c> if include views; otherwise, <c>false</c>.</value>
+        public bool IncludeViews { get; set; }
     }
 }

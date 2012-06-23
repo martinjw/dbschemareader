@@ -57,7 +57,8 @@ namespace DatabaseSchemaReader.CodeGen
             }
             else
             {
-                using (_cb.BeginNest("public class " + className, "Class representing " + _table.Name + " table"))
+                var tableOrView = _table is DatabaseView ? "view" : "table";
+                using (_cb.BeginNest("public class " + className, "Class representing " + _table.Name + " " + tableOrView))
                 {
                     WriteClassMembers(className);
                 }

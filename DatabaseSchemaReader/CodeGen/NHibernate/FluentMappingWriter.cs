@@ -69,6 +69,11 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         {
             if (_table.PrimaryKey == null || _table.PrimaryKey.Columns.Count == 0)
             {
+                if (_table is DatabaseView)
+                {
+                    AddCompositePrimaryKeyForView();
+                    return;
+                }
                 _cb.AppendLine("//TODO- you MUST add a primary key!");
                 return;
             }
@@ -94,6 +99,23 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
             sb.Append(";");
             _cb.AppendLine(sb.ToString());
+        }
+
+        private void AddCompositePrimaryKeyForView()
+        {
+            var sb = new StringBuilder();
+            sb.Append("CompositeId()");
+            //we map ALL columns as the key.
+            foreach (var column in _table.Columns)
+            {
+                sb.AppendFormat(CultureInfo.InvariantCulture,
+                                ".KeyProperty(x => x.{0}, \"{1}\")",
+                                column.NetName,
+                                column.Name);
+            }
+            sb.Append(";");
+            _cb.AppendLine(sb.ToString());
+            _cb.AppendLine("ReadOnly();");
         }
 
         private void AddCompositePrimaryKey()

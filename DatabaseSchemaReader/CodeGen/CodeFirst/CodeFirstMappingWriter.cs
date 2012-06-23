@@ -90,6 +90,11 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         {
             if (_table.PrimaryKey == null || _table.PrimaryKey.Columns.Count == 0)
             {
+                if (_table is DatabaseView)
+                {
+                    AddCompositePrimaryKeyForView();
+                    return;
+                }
                 _cb.AppendLine("//TODO- you MUST add a primary key!");
                 return;
             }
@@ -122,6 +127,25 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                     .Select(x => "x." + x.NetName + (x.IsForeignKey ? "Id" : string.Empty))
                     .ToArray());
             _cb.AppendLine("// Primary key (composite)");
+            //double braces for a format
+            _cb.AppendFormat("HasKey(x => new {{ {0} }});", keys);
+        }
+        private void AddCompositePrimaryKeyForView()
+        {
+            //we make all the non-nullable columns as keys. 
+            //Nullable pks make EF die (EntityKey.AddHashValue NullReference)
+            var candidatePrimaryKeys = _table.Columns.Where(x => !x.Nullable).ToArray();
+            if (!candidatePrimaryKeys.Any())
+            {
+                candidatePrimaryKeys = _table.Columns.ToArray();
+                _cb.AppendLine("// Warning: nullable columns may cause EntityKey errors. Try AsNoTracking()");
+            }
+            var keys = string.Join(", ",
+                    candidatePrimaryKeys
+                //primary keys must be scalar so if it's a foreign key use the Id mirror property
+                    .Select(x => "x." + x.NetName + (x.IsForeignKey ? "Id" : string.Empty))
+                    .ToArray());
+            _cb.AppendLine("// Primary key (composite for view)");
             //double braces for a format
             _cb.AppendFormat("HasKey(x => new {{ {0} }});", keys);
         }

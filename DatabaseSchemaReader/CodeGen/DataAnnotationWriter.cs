@@ -18,12 +18,13 @@ namespace DatabaseSchemaReader.CodeGen
 
         public void Write(ClassBuilder cb, DatabaseColumn column)
         {
+            var netName = column.NetName ?? column.Name;
             //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
-            _friendlyName = Regex.Replace(column.NetName, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+            _friendlyName = Regex.Replace(netName, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
 
             if (_isNet4) //Display is .Net 4 and Silverlight 3 only 
             {
-                WriteDisplayAttribute(cb, column.NetName);
+                WriteDisplayAttribute(cb, netName);
             }
 
             //we won't mark primary keys as required, because they may be assigned by a ORM primary key strategy or database identity/sequence
@@ -109,9 +110,9 @@ namespace DatabaseSchemaReader.CodeGen
             var lengthErrorMessage = _codeWriterSettings.StringLengthErrorMessage;
             if (!string.IsNullOrEmpty(lengthErrorMessage))
             {
-                stringLength = stringLength.Replace(")]", 
+                stringLength = stringLength.Replace(")]",
                     ", ErrorMessage=\"" +
-                    string.Format(CultureInfo.InvariantCulture, lengthErrorMessage, length, _friendlyName) + 
+                    string.Format(CultureInfo.InvariantCulture, lengthErrorMessage, length, _friendlyName) +
                     "\")]");
             }
             cb.AppendLine(stringLength);
@@ -123,8 +124,8 @@ namespace DatabaseSchemaReader.CodeGen
             var requiredErrorMessage = _codeWriterSettings.RequiredErrorMessage;
             if (!string.IsNullOrEmpty(requiredErrorMessage))
             {
-                required = "[Required(ErrorMessage=\"" + 
-                    string.Format(CultureInfo.InvariantCulture, requiredErrorMessage, _friendlyName) + 
+                required = "[Required(ErrorMessage=\"" +
+                    string.Format(CultureInfo.InvariantCulture, requiredErrorMessage, _friendlyName) +
                     "\")]";
             }
             cb.AppendLine(required);

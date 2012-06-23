@@ -56,8 +56,10 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                     var dbSetTables = tables
                         .Where(x => !x.IsManyToManyTable())
                         //doesn't support tables without a primary key
-                        .Where(x => x.PrimaryKey != null)
-                        .ToArray();
+                        .Where(x => x.PrimaryKey != null ||
+                            //unless it's a view
+                            (_codeWriterSettings.IncludeViews && x is DatabaseView))
+                        .ToList();
 
                     WriteDbSets(dbSetTables);
 

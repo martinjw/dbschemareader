@@ -44,6 +44,7 @@ namespace DatabaseSchemaViewer
             settings.WriteStoredProcedures = (_readProcedures || CodeTarget == CodeTarget.Poco);
             settings.WriteUnitTest = Properties.Settings.Default.CodeGenWriteUnitTest;
             settings.WriteProjectFile = Properties.Settings.Default.CodeGenWriteProjectFile;
+            settings.IncludeViews = Properties.Settings.Default.CodeGenIncludeViews;
             var cw = new CodeWriter(_databaseSchema, settings);
             try
             {

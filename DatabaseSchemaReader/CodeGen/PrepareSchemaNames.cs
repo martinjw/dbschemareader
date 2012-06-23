@@ -17,16 +17,16 @@ namespace DatabaseSchemaReader.CodeGen
                     table.NetName = NameFixer.ToPascalCase(table.Name);
                 foreach (var column in table.Columns)
                 {
-                    if (!string.IsNullOrEmpty(column.NetName)) continue;
-
-                    column.NetName = NameFixer.ToPascalCase(column.Name);
-                    //if it's a foreign key (CategoryId)
-                    if (column.IsForeignKey && column.NetName.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //remove the "Id" - it's just a "Category"
-                        var netName = column.NetName;
-                        column.NetName = netName.Substring(0, netName.Length - 2);
-                    }
+                    Prepare(column);
+                }
+            }
+            foreach (var view in schema.Views)
+            {
+                if (string.IsNullOrEmpty(view.NetName))
+                    view.NetName = NameFixer.ToPascalCase(view.Name);
+                foreach (var column in view.Columns)
+                {
+                    Prepare(column);
                 }
             }
             foreach (var sproc in schema.StoredProcedures)
@@ -41,6 +41,20 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     PrepareStoredProcedureNames(sproc);
                 }
+            }
+        }
+
+        private static void Prepare(DatabaseColumn column)
+        {
+            if (!string.IsNullOrEmpty(column.NetName)) return;
+
+            column.NetName = NameFixer.ToPascalCase(column.Name);
+            //if it's a foreign key (CategoryId)
+            if (column.IsForeignKey && column.NetName.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+            {
+                //remove the "Id" - it's just a "Category"
+                var netName = column.NetName;
+                column.NetName = netName.Substring(0, netName.Length - 2);
             }
         }
 
