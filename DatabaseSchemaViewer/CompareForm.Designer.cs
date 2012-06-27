@@ -34,6 +34,8 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.OpenSaved = new System.Windows.Forms.Button();
+            this.chkInverse = new System.Windows.Forms.CheckBox();
             this.ConnectionString = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Database = new System.Windows.Forms.GroupBox();
@@ -42,7 +44,7 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.chkInverse = new System.Windows.Forms.CheckBox();
+            this.UseSavedSchema = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.Database.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -53,7 +55,7 @@
             // 
             this.CompareSchema.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.CompareSchema.Location = new System.Drawing.Point(35, 171);
+            this.CompareSchema.Location = new System.Drawing.Point(35, 199);
             this.CompareSchema.Name = "CompareSchema";
             this.CompareSchema.Size = new System.Drawing.Size(632, 80);
             this.CompareSchema.TabIndex = 4;
@@ -75,7 +77,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(23, 29);
+            this.label2.Location = new System.Drawing.Point(23, 46);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(91, 13);
             this.label2.TabIndex = 2;
@@ -85,15 +87,39 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.UseSavedSchema);
+            this.groupBox1.Controls.Add(this.OpenSaved);
             this.groupBox1.Controls.Add(this.chkInverse);
             this.groupBox1.Controls.Add(this.ConnectionString);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Location = new System.Drawing.Point(12, 60);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(658, 94);
+            this.groupBox1.Size = new System.Drawing.Size(658, 111);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Compare To Database";
+            // 
+            // OpenSaved
+            // 
+            this.OpenSaved.Image = ((System.Drawing.Image)(resources.GetObject("OpenSaved.Image")));
+            this.OpenSaved.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.OpenSaved.Location = new System.Drawing.Point(26, 20);
+            this.OpenSaved.Name = "OpenSaved";
+            this.OpenSaved.Size = new System.Drawing.Size(174, 23);
+            this.OpenSaved.TabIndex = 5;
+            this.OpenSaved.Text = "Open Saved Schema";
+            this.OpenSaved.UseVisualStyleBackColor = true;
+            this.OpenSaved.Click += new System.EventHandler(this.OpenSavedClick);
+            // 
+            // chkInverse
+            // 
+            this.chkInverse.AutoSize = true;
+            this.chkInverse.Location = new System.Drawing.Point(23, 88);
+            this.chkInverse.Name = "chkInverse";
+            this.chkInverse.Size = new System.Drawing.Size(198, 17);
+            this.chkInverse.TabIndex = 4;
+            this.chkInverse.Text = "Inverse comparison (Second to First)";
+            this.chkInverse.UseVisualStyleBackColor = true;
             // 
             // ConnectionString
             // 
@@ -101,7 +127,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ConnectionString.ContextMenuStrip = this.contextMenuStrip1;
             this.ConnectionString.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::DatabaseSchemaViewer.Properties.Settings.Default, "CompareConnectionString", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.ConnectionString.Location = new System.Drawing.Point(23, 44);
+            this.ConnectionString.Location = new System.Drawing.Point(23, 61);
             this.ConnectionString.Name = "ConnectionString";
             this.ConnectionString.Size = new System.Drawing.Size(632, 20);
             this.ConnectionString.TabIndex = 3;
@@ -157,15 +183,15 @@
             // 
             this.errorProvider1.ContainerControl = this;
             // 
-            // chkInverse
+            // UseSavedSchema
             // 
-            this.chkInverse.AutoSize = true;
-            this.chkInverse.Location = new System.Drawing.Point(23, 71);
-            this.chkInverse.Name = "chkInverse";
-            this.chkInverse.Size = new System.Drawing.Size(198, 17);
-            this.chkInverse.TabIndex = 4;
-            this.chkInverse.Text = "Inverse comparison (Second to First)";
-            this.chkInverse.UseVisualStyleBackColor = true;
+            this.UseSavedSchema.AutoSize = true;
+            this.UseSavedSchema.Location = new System.Drawing.Point(224, 25);
+            this.UseSavedSchema.Name = "UseSavedSchema";
+            this.UseSavedSchema.Size = new System.Drawing.Size(15, 14);
+            this.UseSavedSchema.TabIndex = 6;
+            this.UseSavedSchema.UseVisualStyleBackColor = true;
+            this.UseSavedSchema.Visible = false;
             // 
             // CompareForm
             // 
@@ -209,5 +235,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.CheckBox chkInverse;
+        private System.Windows.Forms.Button OpenSaved;
+        private System.Windows.Forms.CheckBox UseSavedSchema;
     }
 }

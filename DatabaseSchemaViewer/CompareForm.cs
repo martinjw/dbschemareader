@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
@@ -106,6 +108,13 @@ namespace DatabaseSchemaViewer
             StartWaiting();
             var connectionString = ConnectionString.Text.Trim();
             _inverseComparison = chkInverse.Checked;
+            if (UseSavedSchema.Checked && _compareSchema != null)
+            {
+                //the compare schema is already loaded
+                RunCompare();
+                StopWaiting();
+                return;
+            }
             var providerName = _databaseSchema.Provider;
             var rdr = new DatabaseReader(connectionString, providerName);
             var owner = _databaseSchema.Owner;
@@ -189,6 +198,43 @@ namespace DatabaseSchemaViewer
                 e.Cancel = false;
                 return;
             }
+        }
+
+        private void OpenSavedClick(object sender, EventArgs e)
+        {
+            using (var picker = new OpenFileDialog())
+            {
+                picker.DefaultExt = ".dbschema";
+                picker.Title = "Open saved schema.";
+                picker.InitialDirectory =
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var result = picker.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    UseSavedSchema.Text = "Use " + Path.GetFileName(picker.FileName);
+                    UseSavedSchema.Visible = true;
+                    UseSavedSchema.Checked = true;
+                    StartWaiting();
+                    using (var stream = picker.OpenFile())
+                    {
+                        var f = new BinaryFormatter();
+                        try
+                        {
+                            _compareSchema = f.Deserialize(stream) as DatabaseSchema;
+                        }
+                        catch (SerializationException)
+                        {
+                            toolStripStatusLabel1.Text = "Invalid serialization format";
+                        }
+                    }
+                    if (_compareSchema != null)
+                    {
+                        ConnectionString.Text = _databaseSchema.ConnectionString;
+                        RunCompare();
+                    }
+                }
+            }
+            StopWaiting();
         }
     }
 }

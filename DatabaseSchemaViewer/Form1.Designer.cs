@@ -34,6 +34,8 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.openSchema = new System.Windows.Forms.ToolStripButton();
+            this.saveSchema = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.label3 = new System.Windows.Forms.Label();
@@ -49,6 +51,7 @@
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.treeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.statusStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -102,6 +105,9 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openSchema,
+            this.saveSchema,
+            this.toolStripSeparator1,
             this.toolStripButton1,
             this.toolStripButton2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
@@ -109,6 +115,29 @@
             this.toolStrip1.Size = new System.Drawing.Size(625, 25);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // openSchema
+            // 
+            this.openSchema.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.openSchema.Image = ((System.Drawing.Image)(resources.GetObject("openSchema.Image")));
+            this.openSchema.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.openSchema.Name = "openSchema";
+            this.openSchema.Size = new System.Drawing.Size(23, 22);
+            this.openSchema.Text = "Open";
+            this.openSchema.ToolTipText = "Open Saved Schema";
+            this.openSchema.Click += new System.EventHandler(this.OpenSchemaClick);
+            // 
+            // saveSchema
+            // 
+            this.saveSchema.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.saveSchema.Enabled = false;
+            this.saveSchema.Image = ((System.Drawing.Image)(resources.GetObject("saveSchema.Image")));
+            this.saveSchema.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.saveSchema.Name = "saveSchema";
+            this.saveSchema.Size = new System.Drawing.Size(23, 22);
+            this.saveSchema.Text = "Save";
+            this.saveSchema.ToolTipText = "Save Schema";
+            this.saveSchema.Click += new System.EventHandler(this.SaveSchemaClick);
             // 
             // toolStripButton1
             // 
@@ -232,13 +261,18 @@
             // 
             // backgroundWorker1
             // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BackgroundWorker1DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker1RunWorkerCompleted);
             // 
             // treeContext
             // 
             this.treeContext.Name = "treeContext";
             this.treeContext.Size = new System.Drawing.Size(61, 4);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // Form1
             // 
@@ -286,6 +320,9 @@
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.ContextMenuStrip connectionContext;
         private System.Windows.Forms.ContextMenuStrip treeContext;
+        private System.Windows.Forms.ToolStripButton openSchema;
+        private System.Windows.Forms.ToolStripButton saveSchema;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
 

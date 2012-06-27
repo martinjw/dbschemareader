@@ -4,7 +4,10 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data.Common;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.Conversion;
@@ -203,6 +206,7 @@ namespace DatabaseSchemaViewer
             var owner = SchemaOwner.Text.Trim();
             if (!string.IsNullOrEmpty(owner))
                 rdr.Owner = owner;
+            toolStripStatusLabel1.Text = "Reading...";
 
             backgroundWorker1.RunWorkerAsync(rdr);
         }
@@ -225,7 +229,7 @@ namespace DatabaseSchemaViewer
             Update();
         }
 
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        private void BackgroundWorker1DoWork(object sender, DoWorkEventArgs e)
         {
             var rdr = (DatabaseReader)e.Argument;
             e.Result = rdr.ReadAll();
@@ -242,12 +246,14 @@ namespace DatabaseSchemaViewer
             else
             {
                 //it worked
+                toolStripStatusLabel1.Text = string.Empty;
                 _databaseSchema = e.Result as DatabaseSchema;
                 if (_databaseSchema != null)
                 {
                     SchemaToTreeview.PopulateTreeView(_databaseSchema, treeView1);
                     toolStripButton1.Enabled = true;
                     toolStripButton2.Enabled = true;
+                    saveSchema.Enabled = true;
                 }
             }
             StopWaiting();
@@ -471,6 +477,65 @@ namespace DatabaseSchemaViewer
         {
             var sqlType = ProviderToSqlType.Convert(_databaseSchema.Provider);
             return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
+        }
+
+        private void SaveSchemaClick(object sender, EventArgs e)
+        {
+            using (var picker = new SaveFileDialog())
+            {
+                picker.FileName = "db" +
+                    DateTime.Now.ToString("yyyyMMddThhmmss", CultureInfo.InvariantCulture);
+                picker.DefaultExt = ".dbschema";
+                picker.Title = "Save schema to file.";
+                picker.InitialDirectory =
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var result = picker.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    using (var stream = picker.OpenFile())
+                    {
+                        var f = new BinaryFormatter();
+                        f.Serialize(stream, _databaseSchema);
+                    }
+                }
+            }
+        }
+
+        private void OpenSchemaClick(object sender, EventArgs e)
+        {
+            using (var picker = new OpenFileDialog())
+            {
+                picker.DefaultExt = ".dbschema";
+                picker.Title = "Open saved schema.";
+                picker.InitialDirectory =
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var result = picker.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    using (var stream = picker.OpenFile())
+                    {
+                        var f = new BinaryFormatter();
+                        try
+                        {
+                            _databaseSchema = f.Deserialize(stream) as DatabaseSchema;
+                        }
+                        catch (SerializationException)
+                        {
+                            toolStripStatusLabel1.Text = "Invalid serialization format";
+                        }
+                    }
+                    if (_databaseSchema != null)
+                    {
+                        ConnectionString.Text = _databaseSchema.ConnectionString;
+                        SchemaOwner.Text = _databaseSchema.Owner;
+                        SelectProvider(_databaseSchema.Provider);
+                        SchemaToTreeview.PopulateTreeView(_databaseSchema, treeView1);
+                        toolStripButton1.Enabled = true;
+                        toolStripButton2.Enabled = true;
+                        saveSchema.Enabled = true;
+                    }
+                }
+            }
         }
 
     }

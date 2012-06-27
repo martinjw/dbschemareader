@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -21,17 +22,17 @@ namespace DatabaseSchemaReader.DataSchema
         //we expose readonly collections because the constraints need logic to add
         //readonly collections cannot be serialized, but it's just a wrapper of the underlying list
         [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private readonly ReadOnlyCollection<DatabaseConstraint> _readOnlyForeignKeys;
+        private ReadOnlyCollection<DatabaseConstraint> _readOnlyForeignKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _uniqueKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private readonly ReadOnlyCollection<DatabaseConstraint> _readOnlyUniqueKeys;
+        private ReadOnlyCollection<DatabaseConstraint> _readOnlyUniqueKeys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseIndex> _indexes;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _checkConstraints;
         [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private readonly ReadOnlyCollection<DatabaseConstraint> _readOnlyCheckConstraints;
+        private ReadOnlyCollection<DatabaseConstraint> _readOnlyCheckConstraints;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseColumn> _columns;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -57,6 +58,15 @@ namespace DatabaseSchemaReader.DataSchema
             _checkConstraints = new List<DatabaseConstraint>();
             _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
         }
+
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            _readOnlyForeignKeys = new ReadOnlyCollection<DatabaseConstraint>(_foreignKeys);
+            _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);
+            _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
+        }
+
         /// <summary>
         /// Gets or sets the database schema.
         /// </summary>
