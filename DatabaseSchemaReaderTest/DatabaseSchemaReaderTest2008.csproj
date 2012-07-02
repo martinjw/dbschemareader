@@ -102,6 +102,7 @@
     <Compile Include="SqlGen\Db2\NumberDataTypesTest.cs" />
     <Compile Include="SqlGen\Db2\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\InsertWriterTests\ConverterTest.cs" />
+    <Compile Include="SqlGen\InsertWriterTests\ScriptWriterTest.cs" />
     <Compile Include="SqlGen\InsertWriterTests\DateConverterTest.cs" />
     <Compile Include="SqlGen\InsertWriterTests\InsertWriterTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationDb2Test.cs" />
