@@ -224,15 +224,25 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 }
                 return;
             }
+            if (dt.TypeName.Equals("money", StringComparison.OrdinalIgnoreCase))
+            {
+                sb.Append(".HasColumnType(\"money\")");
+                return;
+            }
+            if (dt.IsNumeric && !dt.IsInt && !dt.IsFloat && column.Precision.HasValue) //decimal
+            {
+                if (column.Precision != 18 || column.Scale != 0)
+                {
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ".HasPrecision({0}, {1})",
+                                    column.Precision.GetValueOrDefault(),
+                                    column.Scale.GetValueOrDefault());
+                    return;
+                }
+            }
             //special types (SQLServer only for now) that can be explicitly mapped
             if (dt.TypeName.Equals("image", StringComparison.OrdinalIgnoreCase))
             {
                 sb.Append(".HasColumnType(\"image\")");
-                return;
-            }
-            if (dt.TypeName.Equals("money", StringComparison.OrdinalIgnoreCase))
-            {
-                sb.Append(".HasColumnType(\"money\")");
                 return;
             }
             if (dt.TypeName.Equals("timestamp", StringComparison.OrdinalIgnoreCase))
