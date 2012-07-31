@@ -30,7 +30,15 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
         {
             //arrange
 
-            var factory = DbProviderFactories.GetFactory(ProviderName);
+            DbProviderFactory factory = null;
+            try
+            {
+                factory = DbProviderFactories.GetFactory(ProviderName);
+            }
+            catch (ArgumentException)
+            {
+                Assert.Inconclusive("Unable to find System.Data.SqlServerCe.4.0 Data Provider. It may not be installed.");
+            }
             if (!File.Exists(FilePath))
             {
                 Assert.Inconclusive("SqlServerCe4 test requires database file " + FilePath);

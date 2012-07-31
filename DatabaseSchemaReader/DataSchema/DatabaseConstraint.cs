@@ -118,13 +118,26 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
-        /// If this is a foreign key constraint, gets the primary key columns of a referenced table.
+        /// If this is a foreign key constraint, gets the primary/unique key columns of a referenced table.
         /// </summary>
         /// <param name="schema">The schema.</param>
         public IEnumerable<string> ReferencedColumns(DatabaseSchema schema)
         {
             var referencedTable = ReferencedTable(schema);
             if (referencedTable == null) return null;
+
+            //work item #1023 foreign key references to unique keys
+            if (!string.IsNullOrEmpty(RefersToConstraint))
+            {
+                foreach (var uniqueKey in referencedTable.UniqueKeys)
+                {
+                    if (RefersToConstraint.Equals(uniqueKey.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return uniqueKey.Columns;
+                    }
+                }
+            }
+
             if (referencedTable.PrimaryKey == null) return null; //No primary key defined! 
             var refColumnList = referencedTable.PrimaryKey.Columns;
             return refColumnList;

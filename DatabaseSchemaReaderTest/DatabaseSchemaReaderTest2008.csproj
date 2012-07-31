@@ -68,6 +68,7 @@
     <Compile Include="ConnectionStrings.cs" />
     <Compile Include="DatabaseReaderTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
+    <Compile Include="DataSchema\ForeignKeyTests.cs" />
     <Compile Include="DataSchema\ManyToManyExtensionsTest.cs" />
     <Compile Include="DataSchema\DatabaseConstraintTest.cs" />
     <Compile Include="DataSchema\DatabaseSchemaTest.cs" />
