@@ -37,6 +37,11 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         public string Write()
         {
             _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+            if (_table.PrimaryKeyColumn != null && !_table.PrimaryKeyColumn.IsIdentity)
+            {
+                //in EF v5 DatabaseGeneratedOption is in DataAnnotations.Schema
+                _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            }
             _cb.AppendLine("using System.Data.Entity.ModelConfiguration;");
 
             MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
@@ -170,6 +175,13 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             var propertyName = column.NetName;
             if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
             var sb = new StringBuilder();
+            if (column.IsPrimaryKey)
+            {
+                //let's comment it to make it explicit
+                _cb.AppendLine("//  " + propertyName + " is primary key" +
+                    ((column.IsIdentity) ? " (identity)" : ""));
+            }
+
             sb.AppendFormat(CultureInfo.InvariantCulture, "Property(x => x.{0})", propertyName);
             if (propertyName != column.Name)
             {
@@ -178,7 +190,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             if (column.IsPrimaryKey && !column.IsIdentity)
             {
                 //assumed to be identity by default
-                sb.AppendFormat(CultureInfo.InvariantCulture, ".HasDatabaseGeneratedOption(DatabaseGeneratedOption.None)");
+                sb.AppendFormat(CultureInfo.InvariantCulture,
+                                ".HasDatabaseGeneratedOption(DatabaseGeneratedOption.None)");
             }
 
             WriteColumnType(column, sb);
