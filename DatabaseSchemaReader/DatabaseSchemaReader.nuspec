@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>DatabaseSchemaReader</id>
+		<version>$version$</version>
+		<authors>Martin Willey</authors>
+		<owners>Martin Willey</owners>
+		<licenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</licenseUrl>
+		<projectUrl>http://dbschemareader.codeplex.com/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
+		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
+		<tags>ADO, Entity Framework Code First, SQL Server, SQLite, Oracle</tags>
+	</metadata>
+	<files>
+		<file src="..\bin\DatabaseSchemaReader.dll" target="lib\net35" /> 
+		<file src="..\bin\DatabaseSchemaReader.xml" target="lib\net35" /> 
+		<file src="README.txt" target="" /> 
+	</files>
+</package>

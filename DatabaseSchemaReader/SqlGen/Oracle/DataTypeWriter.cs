@@ -17,6 +17,8 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public static string OracleDataTypeForParameter(DatabaseColumn column)
         {
+            if (column == null) return string.Empty;
+            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
             var dataType = column.DbDataType.ToUpperInvariant();
             var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
             if (brace != -1) //timestamp(6)
@@ -37,6 +39,8 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         /// <returns></returns>
         public static string OracleDataType(DatabaseColumn column)
         {
+            if (column == null) return string.Empty;
+            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
             var dataType = column.DbDataType.ToUpperInvariant();
             int providerType = GetProviderType(column);
 
@@ -116,7 +120,10 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public string WriteDataType(DatabaseColumn column)
         {
+            if (column == null) return string.Empty;
+            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
             var sql = string.Empty;
+
             var dataType = column.DbDataType.ToUpperInvariant();
             var precision = column.Precision;
             var scale = column.Scale;
