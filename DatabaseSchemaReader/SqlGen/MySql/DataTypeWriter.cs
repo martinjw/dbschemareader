@@ -12,6 +12,8 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         /// <returns></returns>
         public string WriteDataType(DatabaseColumn column)
         {
+            if (column == null) return string.Empty;
+            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
             var dataType = column.DbDataType.ToUpperInvariant();
             //int providerType = -1;
             //if (column.DataType != null)

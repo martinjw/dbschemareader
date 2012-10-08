@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             //the ado provider uses the column types for richer support
             //ado mapping http://sqlite.phxsoftware.com/forums/t/31.aspx
 
-            var dataType = column.DbDataType.ToUpperInvariant();
+            if (column == null) return string.Empty;
             var dt = column.DataType;
             if (dt != null)
             {
@@ -25,6 +25,8 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                 if (dt.IsFloat)
                     return "REAL";
             }
+            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
+            var dataType = column.DbDataType.ToUpperInvariant();
             if (dataType == "IMAGE" || dataType.IndexOf("BINARY", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 return "BLOB";

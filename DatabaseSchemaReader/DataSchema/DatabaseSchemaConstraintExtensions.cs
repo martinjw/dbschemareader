@@ -48,6 +48,9 @@ namespace DatabaseSchemaReader.DataSchema
                 table.PrimaryKey.Columns.Add(databaseColumn.Name);
             databaseColumn.IsPrimaryKey = true;
             databaseColumn.Nullable = false; //you can't have a nullable pk
+            //if they haven't explicitly set a type, make it integer
+            if (string.IsNullOrEmpty(databaseColumn.DbDataType))
+                databaseColumn.DbDataType = "INT";
             return databaseColumn;
         }
 
@@ -66,6 +69,8 @@ namespace DatabaseSchemaReader.DataSchema
                 existingIdentity.IsIdentity = false;
             }
             databaseColumn.IsIdentity = true;
+            if (string.IsNullOrEmpty(databaseColumn.DbDataType))
+                databaseColumn.DbDataType = "INT";
             return databaseColumn;
         }
 
