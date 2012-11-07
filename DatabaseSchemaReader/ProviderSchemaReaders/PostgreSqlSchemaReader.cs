@@ -16,20 +16,26 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, "PRIMARY KEY", connection);
+            var dt = FindKeys(tableName, "PRIMARY KEY", connection);
+            dt.TableName = PrimaryKeysCollectionName;
+            return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, "FOREIGN KEY", connection);
+            var dt = FindKeys(tableName, "FOREIGN KEY", connection);
+            dt.TableName = ForeignKeysCollectionName;
+            return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, "UNIQUE", connection);
+            var dt = FindKeys(tableName, "UNIQUE", connection);
+            dt.TableName = UniqueKeysCollectionName;
+            return dt;
         }
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
             string sqlCommand = GetCheckSql();
-            return CommandForTable(tableName, connection, "Checks", sqlCommand);
+            return CommandForTable(tableName, connection, CheckConstraintsCollectionName, sqlCommand);
         }
         private static string GetCheckSql()
         {
@@ -124,12 +130,12 @@ WHERE
 (EVENT_OBJECT_TABLE = :tableName OR :tableName IS NULL) AND 
 (TRIGGER_SCHEMA = :schemaOwner OR :schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, conn, "Triggers", sqlCommand);
+            return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
 
         protected override DataTable Functions(DbConnection connection)
         {
-            const string collectionName = "Functions";
+            string collectionName = FunctionsCollectionName;
             if (SchemaCollectionExists(connection, collectionName))
             {
                 return base.Functions(connection);
@@ -169,7 +175,9 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
         protected override  DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             var argReader = new PostgreSqlArgumentReader(Factory, Owner);
-            return argReader.StoredProcedureArguments(storedProcedureName, connection);
+            var dt = argReader.StoredProcedureArguments(storedProcedureName, connection);
+            dt.TableName = ProcedureParametersCollectionName;
+            return dt;
         }
 
         public override void PostProcessing(DatabaseTable databaseTable)

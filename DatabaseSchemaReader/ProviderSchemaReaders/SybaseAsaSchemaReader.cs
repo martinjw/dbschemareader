@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
@@ -38,7 +36,7 @@ AND (u.user_name = ? OR ? IS NULL)
 AND t.creator <> 0
 ORDER BY t.table_name, i.index_name, ic.sequence";
 
-            return SybaseCommandForTable(connection, "PrimaryKey", tableName, sql);
+            return SybaseCommandForTable(connection, PrimaryKeysCollectionName, tableName, sql);
         }
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
@@ -67,7 +65,7 @@ AND (u.user_name = ? OR ? IS NULL)
 AND t.creator <> 0
 ORDER BY t.table_name, i.index_name, ic.sequence";
 
-            return SybaseCommandForTable(connection, "ForeignKey", tableName, sql);
+            return SybaseCommandForTable(connection, ForeignKeysCollectionName, tableName, sql);
         }
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
@@ -87,7 +85,7 @@ AND (u.user_name = ? OR ? IS NULL)
 AND t.creator <> 0
 ORDER BY t.table_name, con.constraint_name";
 
-            return SybaseCommandForTable(connection, "CheckConstraints", tableName, sql);
+            return SybaseCommandForTable(connection, CheckConstraintsCollectionName, tableName, sql);
         }
 
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
@@ -109,7 +107,7 @@ AND (u.user_name = ? OR ? IS NULL)
 AND t.creator <> 0
 ORDER BY t.table_name, con.constraint_name";
 
-            return SybaseCommandForTable(connection, "UniqueKeys", tableName, sql);
+            return SybaseCommandForTable(connection, UniqueKeysCollectionName, tableName, sql);
         }
 
         private DataTable SybaseCommandForTable(DbConnection connection, string dataTableName, string tableName, string sql)

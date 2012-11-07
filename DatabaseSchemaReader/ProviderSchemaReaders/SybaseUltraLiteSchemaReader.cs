@@ -33,8 +33,8 @@ WHERE
 c.table_id = t.object_id";
 
             var columns = (string.IsNullOrEmpty(tableName))
-                              ? SybaseCommandForTable(connection, "Columns", sql)
-                              : SybaseCommandForTable(connection, "Columns", tableName,
+                              ? SybaseCommandForTable(connection, ColumnsCollectionName, sql)
+                              : SybaseCommandForTable(connection, ColumnsCollectionName, tableName,
                                                       sql + " AND (t.table_name = ?)");
 
             //The numbers in syscolumn.domain don't correspond to the ProviderDbType inthe DataTypes collection
@@ -90,8 +90,8 @@ JOIN syscolumn c ON c.table_id = t.object_id AND ic.column_id = c.object_id
 WHERE i.type  = 'primary'";
 
             var data = (string.IsNullOrEmpty(tableName))
-                              ? SybaseCommandForTable(connection, "PrimaryKey", sql)
-                              : SybaseCommandForTable(connection, "PrimaryKey", tableName,
+                              ? SybaseCommandForTable(connection, PrimaryKeysCollectionName, sql)
+                              : SybaseCommandForTable(connection, PrimaryKeysCollectionName, tableName,
                                                       sql + " AND (t.table_name = ?)");
             return data;
         }
@@ -119,8 +119,8 @@ JOIN sysindex fki
 WHERE i.type  = 'foreign'";
 
             var data = (string.IsNullOrEmpty(tableName))
-                              ? SybaseCommandForTable(connection, "ForeignKey", sql)
-                              : SybaseCommandForTable(connection, "ForeignKey", tableName,
+                              ? SybaseCommandForTable(connection, ForeignKeysCollectionName, sql)
+                              : SybaseCommandForTable(connection, ForeignKeysCollectionName, tableName,
                                                       sql + " AND (t.table_name = ?)");
             return data;
         }
@@ -138,8 +138,8 @@ JOIN syscolumn c ON c.table_id = t.object_id AND ic.column_id = c.object_id
 WHERE i.type  = 'unique'";
 
             var data = (string.IsNullOrEmpty(tableName))
-                              ? SybaseCommandForTable(connection, "UniqueKeys", sql)
-                              : SybaseCommandForTable(connection, "UniqueKeys", tableName,
+                              ? SybaseCommandForTable(connection, UniqueKeysCollectionName, sql)
+                              : SybaseCommandForTable(connection, UniqueKeysCollectionName, tableName,
                                                       sql + " AND (t.table_name = ?)");
             return data;
         }

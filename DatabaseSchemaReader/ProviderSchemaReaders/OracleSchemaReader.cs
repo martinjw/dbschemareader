@@ -22,7 +22,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         protected override DataTable CheckConstraints(string tableName, DbConnection conn)
         {
             string sqlCommand = GetCheckSql();
-            return CommandForTable(tableName, conn, "Checks", sqlCommand);
+            return CommandForTable(tableName, conn, CheckConstraintsCollectionName, sqlCommand);
         }
         private static string GetCheckSql()
         {
@@ -46,7 +46,7 @@ ORDER BY cons.table_name, cons.constraint_name";
         protected override DataTable Columns(string tableName, DbConnection connection)
         {
             //for Oracle, we do our own thing
-            var dt = CreateDataTable("Columns");
+            var dt = CreateDataTable(ColumnsCollectionName);
             using (DbDataAdapter da = Factory.CreateDataAdapter())
             {
                 //this is almost exactly the same sql as the System.Data.OracleClient uses, plus data_default. We use Char_Length (chars) rather than Data_Length (bytes)
@@ -91,7 +91,7 @@ ORDER BY OWNER,
 
         public override DataTable Functions()
         {
-            DataTable dt = CreateDataTable("Functions");
+            DataTable dt = CreateDataTable(FunctionsCollectionName);
 
             using (DbConnection conn = Factory.CreateConnection())
             {
@@ -182,31 +182,37 @@ ORDER BY cols.table_name, cols.position";
 
         public override DataTable IdentityColumns(string tableName)
         {
-            DataTable dt = CreateDataTable("IdentityColumns");
+            DataTable dt = CreateDataTable(IdentityColumnsCollectionName);
             return dt;
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, "P", connection);
+            var dt = FindKeys(tableName, "P", connection);
+            dt.TableName = PrimaryKeysCollectionName;
+            return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, "R", connection);
+            var dt = FindKeys(tableName, "R", connection);
+            dt.TableName = ForeignKeysCollectionName;
+            return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, "U", connection);
+            var dt = FindKeys(tableName, "U", connection);
+            dt.TableName = UniqueKeysCollectionName;
+            return dt;
         }
         public override DataTable ForeignKeyColumns(string tableName)
         {
             //we return this in ForeignKeys
-            return CreateDataTable("ForeignKeyColumns");
+            return CreateDataTable(ForeignKeyColumnsCollectionName);
         }
 
         public override DataTable ProcedureSource(string name)
         {
-            DataTable dt = CreateDataTable("ProcedureSource");
+            DataTable dt = CreateDataTable(ProcedureSourceCollectionName);
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
@@ -256,7 +262,7 @@ WHERE STATUS = 'ENABLED' AND
 (OWNER = :schemaOwner OR :schemaOwner IS NULL) AND 
 TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
 
-            return CommandForTable(tableName, conn, "Triggers", sqlCommand);
+            return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
 
 

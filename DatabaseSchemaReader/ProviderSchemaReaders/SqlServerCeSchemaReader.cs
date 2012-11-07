@@ -21,7 +21,7 @@ WHERE
     (@schemaOwner IS NOT NULL OR @schemaOwner IS NULL) AND 
     AUTOINC_NEXT IS NOT NULL";
 
-            return CommandForTable(tableName, conn, "IdentityColumns", sqlCommand);
+            return CommandForTable(tableName, conn, IdentityColumnsCollectionName, sqlCommand);
         }
 
         private DataTable FindKeys(string tableName, string constraintType, DbConnection conn)
@@ -74,25 +74,31 @@ WHERE
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
             //no triggers in CE
-            return CreateDataTable("Triggers");
+            return CreateDataTable(TriggersCollectionName);
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetPrimaryKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetPrimaryKeyType(), connection);
+            dt.TableName = PrimaryKeysCollectionName;
+            return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetForeignKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetForeignKeyType(), connection);
+            dt.TableName = ForeignKeysCollectionName;
+            return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetUniqueKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetUniqueKeyType(), connection);
+            dt.TableName = UniqueKeysCollectionName;
+            return dt;
         }
         public override DataTable ForeignKeyColumns(string tableName)
         {
             //we return this in ForeignKeys
-            return CreateDataTable("ForeignKeyColumns");
+            return CreateDataTable(ForeignKeyColumnsCollectionName);
         }
         private static string GetPrimaryKeyType()
         {

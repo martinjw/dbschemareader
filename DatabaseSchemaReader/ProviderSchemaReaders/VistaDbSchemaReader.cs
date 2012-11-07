@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
@@ -21,7 +20,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                 connection.ConnectionString = ConnectionString;
                 connection.Open();
 
-                const string collectionName = "ViewColumns";
+                var collectionName = ViewColumnsCollectionName;
                 return GenericCollection(collectionName, connection, viewName);
             }
         }
@@ -29,14 +28,16 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         protected override DataTable StoredProcedures(DbConnection connection)
         {
             //it's not reported in the MetaDataCollections, but it is there.
-            const string collectionName = "Procedures";
+            var collectionName = ProceduresCollectionName;
             return connection.GetSchema(collectionName, new string[] { });
         }
 
         protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             //it's not reported in the MetaDataCollections, but it is there.
-            return connection.GetSchema("PROCEDUREPARAMETERS", new[] { null, null, storedProcedureName, null });
+            var dt = connection.GetSchema("PROCEDUREPARAMETERS", new[] { null, null, storedProcedureName, null });
+            dt.TableName = ProcedureParametersCollectionName;
+            return dt;
         }
 
     }

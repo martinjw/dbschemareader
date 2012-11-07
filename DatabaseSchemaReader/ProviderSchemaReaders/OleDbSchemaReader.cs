@@ -23,7 +23,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
             try
             {
-                return oleDbConnection.GetOleDbSchemaTable(schema, new object[] { null, null, tableName });
+                var dt = oleDbConnection.GetOleDbSchemaTable(schema, new object[] { null, null, tableName });
+                dt.TableName = collectionName;
+                return dt;
             }
             catch (ArgumentException)
             {
@@ -34,19 +36,19 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Primary_Keys, tableName, connection, "PrimaryKeys");
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Primary_Keys, tableName, connection, PrimaryKeysCollectionName);
             return schemaTable;
         }
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, tableName, connection, "ForeignKeys");
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, tableName, connection, ForeignKeysCollectionName);
             return schemaTable;
         }
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Check_Constraints, null, connection, "CheckConstraints");
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Check_Constraints, null, connection, CheckConstraintsCollectionName);
 
             //let's try to read the table name from the constraint name
             const string tableColumnKey = "TABLE_NAME";
@@ -67,14 +69,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable Indexes(string tableName, DbConnection connection)
         {
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Indexes, null, connection, "Indexes");
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Indexes, null, connection, IndexesCollectionName);
             return schemaTable;
         }
 
         protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection) 
         {
             //for JET and ACE providers this isn't supported, but we'll try anyway
-            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Procedure_Parameters, storedProcedureName, connection, "StoredProcedureArguments");
+            var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Procedure_Parameters, storedProcedureName, connection, ProcedureParametersCollectionName);
             return schemaTable;
         }
 
