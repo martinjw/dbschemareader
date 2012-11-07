@@ -23,7 +23,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         protected override DataTable CheckConstraints(string tableName, DbConnection conn)
         {
             string sqlCommand = GetCheckSql();
-            return CommandForTable(tableName, conn, "Checks", sqlCommand);
+            var dt = CommandForTable(tableName, conn, "Checks", sqlCommand);
+            dt.TableName = CheckConstraintsCollectionName;
+            return dt;
         }
         private static string GetCheckSql()
         {
@@ -133,30 +135,36 @@ WHERE
 o.type= 'U' 
 ORDER BY o.name, c.name";
 
-            return CommandForTable(tableName, conn, "IdentityColumns", sqlCommand);
+            return CommandForTable(tableName, conn, IdentityColumnsCollectionName, sqlCommand);
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetPrimaryKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetPrimaryKeyType(), connection);
+            dt.TableName = PrimaryKeysCollectionName;
+            return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetForeignKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetForeignKeyType(), connection);
+            dt.TableName = ForeignKeysCollectionName;
+            return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetUniqueKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetUniqueKeyType(), connection);
+            dt.TableName = UniqueKeysCollectionName;
+            return dt;
         }
         public override DataTable ForeignKeyColumns(string tableName)
         {
             //we return this in ForeignKeys
-            return CreateDataTable("ForeignKeyColumns");
+            return CreateDataTable(ForeignKeyColumnsCollectionName);
         }
 
         public override DataTable ProcedureSource(string name)
         {
-            DataTable dt = CreateDataTable("ProcedureSource");
+            DataTable dt = CreateDataTable(ProcedureSourceCollectionName);
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
@@ -215,17 +223,17 @@ WHERE o1.XTYPE = 'TR' AND
 (o1.NAME = @tableName OR @tableName IS NULL) AND 
 (SCHEMA_NAME(o1.uid) = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, conn, "Triggers", sqlCommand);
+            return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
 
         protected override DataTable Sequences(DbConnection connection)
         {
             //future compatibility- if they support Sequences, use that
-            if (SchemaCollectionExists(connection, "Sequences"))
+            if (SchemaCollectionExists(connection, SequencesCollectionName))
                 return base.Sequences(connection);
 
             //2 steps - check if have any sequences (SqlServer 2012+), then load them
-            var dt = CreateDataTable("SEQUENCES");
+            var dt = CreateDataTable(SequencesCollectionName);
             using (var conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;

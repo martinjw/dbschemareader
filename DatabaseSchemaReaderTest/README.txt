@@ -8,6 +8,10 @@ These tests are INTEGRATION TESTS. They all interact with the database, IO and .
 This means the databases must exist in order to run it.
 *     SqlExpress with Northwind and AdventureWorks (integrated security)
 *     Oracle Express with HR (userId HR, password HR)
+         to enable HR in Oracle XE open sqlplus
+        > ALTER USER hr ACCOUNT UNLOCK;
+        > ALTER USER hr IDENTIFIED BY HR;
+
 *     MySQL with Northwind (user id root, password mysql)
 Plus additional databases
 *     Postgresql with world

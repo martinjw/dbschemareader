@@ -143,6 +143,7 @@
     <Compile Include="Data\Converter.cs" />
     <Compile Include="Data\DateConverter.cs" />
     <Compile Include="Data\InsertWriter.cs" />
+    <Compile Include="Data\ChangesWriter.cs" />
     <Compile Include="Data\Reader.cs" />
     <Compile Include="Data\ScriptWriter.cs" />
     <Compile Include="IDatabaseReader.cs" />

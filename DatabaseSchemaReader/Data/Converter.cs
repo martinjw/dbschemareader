@@ -48,6 +48,10 @@ namespace DatabaseSchemaReader.Data
                 }
                 return "'" + data + "'";
             }
+            if (type == typeof(Guid))
+            {
+                return "'" + data + "'";
+            }
             if (type == typeof(byte[]))
             {
                 return ConvertBytes(data);

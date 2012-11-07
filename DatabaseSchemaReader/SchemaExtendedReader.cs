@@ -14,6 +14,11 @@ namespace DatabaseSchemaReader
     /// </summary>
     internal class SchemaExtendedReader : SchemaReader
     {
+        #region Names of collections
+        public virtual string ProcedureSourceCollectionName { get { return "ProcedureSource"; } }
+        public virtual string ViewColumnsCollectionName { get { return "ViewColumns"; } }
+        #endregion
+
         /// <summary>
         /// Constructor with connectionString and ProviderName
         /// </summary>
@@ -47,7 +52,7 @@ namespace DatabaseSchemaReader
                 if (string.IsNullOrEmpty(Owner))
                 {
                     //we need schema for constraint look ups
-                    Owner = SchemaConverter.FindSchema(ds.Tables["Columns"]);
+                    Owner = SchemaConverter.FindSchema(ds.Tables[ColumnsCollectionName]);
                 }
 
                 ds.Tables.Add(PrimaryKeys(tableName, conn));
@@ -74,19 +79,19 @@ namespace DatabaseSchemaReader
         protected virtual DataTable IdentityColumns(string tableName, DbConnection connection)
         {
             //override this if provider has identity
-            DataTable dt = CreateDataTable("IdentityColumns");
+            DataTable dt = CreateDataTable(IdentityColumnsCollectionName);
             return dt;
         }
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
-            return GenericCollection("Triggers", conn, tableName);
+            return GenericCollection(TriggersCollectionName, conn, tableName);
         }
 
 
         public virtual DataTable ProcedureSource(string name)
         {
-            return CreateDataTable("ProcedureSource");
+            return CreateDataTable(ProcedureSourceCollectionName);
         }
 
         public virtual void PostProcessing(DatabaseTable databaseTable)
@@ -115,7 +120,9 @@ namespace DatabaseSchemaReader
         public virtual DataTable ViewColumns(string viewName)
         {
             //in most cases this is exposed via the table columns
-            return Columns(viewName);
+            var dt = Columns(viewName);
+            dt.TableName = ViewColumnsCollectionName;
+            return dt;
         }
 
         #region protected helpers
@@ -160,4 +167,3 @@ namespace DatabaseSchemaReader
 
     }
 }
-

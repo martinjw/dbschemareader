@@ -95,7 +95,7 @@ WHERE EXTRA = 'auto_increment' AND
 (TABLE_NAME = @tableName OR @tableName IS NULL) AND 
 (TABLE_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, conn, "IdentityColumns", sqlCommand);
+            return CommandForTable(tableName, conn, IdentityColumnsCollectionName, sqlCommand);
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
@@ -109,7 +109,9 @@ WHERE EXTRA = 'auto_increment' AND
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return FindKeys(tableName, GetUniqueKeyType(), connection);
+            DataTable dt = FindKeys(tableName, GetUniqueKeyType(), connection);
+            dt.TableName = UniqueKeysCollectionName;
+            return dt;
         }
         public override DataTable ForeignKeyColumns(string tableName)
         {
@@ -144,7 +146,7 @@ WHERE
 (EVENT_OBJECT_TABLE = @tableName OR @tableName IS NULL) AND 
 (TRIGGER_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, conn, "Triggers", sqlCommand);
+            return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
     }
 }

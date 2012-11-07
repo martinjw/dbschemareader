@@ -62,6 +62,27 @@ namespace DatabaseSchemaReader
             Factory = DbProviderFactories.GetFactory(ProviderName);
         }
 
+        #region Names of collections
+        internal virtual string CheckConstraintsCollectionName { get { return "CheckConstraints"; } }
+        internal virtual string ColumnsCollectionName { get { return "Columns"; } }
+        internal virtual string ForeignKeyColumnsCollectionName { get { return "ForeignKeyColumns"; } }
+        internal virtual string ForeignKeysCollectionName { get { return "ForeignKeys"; } }
+        internal virtual string FunctionsCollectionName { get { return "Functions"; } }
+        internal virtual string IdentityColumnsCollectionName { get { return "IdentityColumns"; } }
+        internal virtual string IndexColumnsCollectionName { get { return "IndexColumns"; } }
+        internal virtual string IndexesCollectionName { get { return "Indexes"; } }
+        internal virtual string PackagesCollectionName { get { return "Packages"; } }
+        internal virtual string PrimaryKeysCollectionName { get { return "PrimaryKeys"; } }
+        internal virtual string ProcedureParametersCollectionName { get { return "ProcedureParameters"; } }
+        internal virtual string ProceduresCollectionName { get { return "Procedures"; } }
+        internal virtual string SequencesCollectionName { get { return "Sequences"; } }
+        internal virtual string TablesCollectionName { get { return "Tables"; } }
+        internal virtual string TriggersCollectionName { get { return "Triggers"; } }
+        internal virtual string UniqueKeysCollectionName { get { return "UniqueKeys"; } }
+        internal virtual string UsersCollectionName { get { return "Users"; } }
+        internal virtual string ViewsCollectionName { get { return "Views"; } }
+        #endregion
+
 
         /// <summary>
         /// Gets or sets the owner (for Oracle) /schema (for SqlServer) / database (MySql). Always set it with Oracle; if you use other than dbo in SqlServer you should also set it. 
@@ -101,7 +122,7 @@ namespace DatabaseSchemaReader
         /// <returns>Datatable with columns NAME, ID, CREATEDDATE</returns>
         public DataTable Users()
         {
-            const string collection = "Users";
+            string collection = UsersCollectionName;
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
@@ -117,7 +138,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         public DataTable Tables()
         {
-            const string collectionName = "Tables";
+            string collectionName = TablesCollectionName;
             using (DbConnection conn = Factory.CreateConnection())
             {
                 conn.ConnectionString = ConnectionString;
@@ -179,9 +200,9 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                string collectionName = "Views";
+                string collectionName = ViewsCollectionName;
                 if (!SchemaCollectionExists(conn, collectionName))
-                    collectionName = "Tables";
+                    collectionName = TablesCollectionName;
                 if (!SchemaCollectionExists(conn, collectionName))
                     return CreateDataTable(collectionName); //doesn't exist in SqlServerCe
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
@@ -210,8 +231,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         protected virtual DataTable Columns(string tableName, DbConnection connection)
         {
-            string[] restrictions = SchemaRestrictions.ForTable(connection, "Columns", tableName);
-            return connection.GetSchema("Columns", restrictions);
+            string[] restrictions = SchemaRestrictions.ForTable(connection, ColumnsCollectionName, tableName);
+            return connection.GetSchema(ColumnsCollectionName, restrictions);
         }
 
         /// <summary>
@@ -237,7 +258,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable Indexes(string tableName, DbConnection connection)
         {
-            const string collectionName = "Indexes";
+            string collectionName = IndexesCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
             {
                 return CreateDataTable(collectionName);
@@ -291,10 +312,10 @@ namespace DatabaseSchemaReader
 
         private DataTable IndexColumns(string tableName, DbConnection connection)
         {
-            string collectionName = "IndexColumns";
+            string collectionName = IndexColumnsCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
             {
-                collectionName = "Indexes";
+                collectionName = IndexesCollectionName;
                 if (!SchemaCollectionExists(connection, collectionName))
                     return CreateDataTable(collectionName);
             }
@@ -325,7 +346,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
-            const string collectionName = "PrimaryKeys";
+            string collectionName = PrimaryKeysCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
                 return CreateDataTable(collectionName);
 
@@ -362,25 +383,31 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable ForeignKeys(string tableName, DbConnection connection)
         {
-            string collectionName = "Foreign Keys";
+            string collectionName = ForeignKeysCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
             {
-                collectionName = "ForeignKeys";
+                collectionName = "Foreign Keys";
                 if (!SchemaCollectionExists(connection, collectionName))
-                    return CreateDataTable(collectionName);
+                {
+                    collectionName = "Foreign_Keys";
+                    if (!SchemaCollectionExists(connection, collectionName))
+                        return CreateDataTable(ForeignKeysCollectionName);
+                }
             }
             if (!SchemaCollectionExists(connection, collectionName))
-                return CreateDataTable(collectionName);
+                return CreateDataTable(ForeignKeysCollectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             try
             {
-                return connection.GetSchema(collectionName, restrictions);
+                var dt = connection.GetSchema(collectionName, restrictions);
+                dt.TableName = ForeignKeysCollectionName;
+                return dt;
             }
             catch (ArgumentException)
             {
                 //may not be allowed without tablename
-                return CreateDataTable(collectionName);
+                return CreateDataTable(ForeignKeysCollectionName);
             }
         }
 
@@ -406,7 +433,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable ForeignKeyColumns(string tableName, DbConnection connection)
         {
-            const string collectionName = "ForeignKeyColumns";
+            string collectionName = ForeignKeyColumnsCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
                 return CreateDataTable(collectionName);
 
@@ -437,7 +464,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable UniqueKeys(string tableName, DbConnection connection)
         {
-            return GenericCollection("UniqueKeys", connection, tableName);
+            return GenericCollection(UniqueKeysCollectionName, connection, tableName);
         }
 
         /// <summary>
@@ -460,7 +487,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable CheckConstraints(string tableName, DbConnection connection)
         {
-            return GenericCollection("CheckConstraints", connection, tableName);
+            return GenericCollection(CheckConstraintsCollectionName, connection, tableName);
         }
 
         /// <summary>
@@ -484,13 +511,15 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable Sequences(DbConnection connection)
         {
-            string collectionName = "Sequences";
+            string collectionName = SequencesCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
                 collectionName = "Generators"; //Firebird calls sequences "Generators"
             if (!SchemaCollectionExists(connection, collectionName))
-                return CreateDataTable(collectionName);
+                return CreateDataTable(SequencesCollectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
-            return connection.GetSchema(collectionName, restrictions);
+            var dt = connection.GetSchema(collectionName, restrictions);
+            dt.TableName = SequencesCollectionName;
+            return dt;
         }
 
         /// <summary>
@@ -516,7 +545,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable Triggers(string tableName, DbConnection connection)
         {
-            return GenericCollection("Triggers", connection, tableName);
+            return GenericCollection(TriggersCollectionName, connection, tableName);
         }
 
         /// <summary>
@@ -559,7 +588,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable Functions(DbConnection connection)
         {
-            const string collectionName = "Functions";
+            string collectionName = FunctionsCollectionName;
             if (!SchemaCollectionExists(connection, collectionName))
                 return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
@@ -587,7 +616,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable StoredProcedures(DbConnection connection)
         {
-            const string collectionName = "Procedures";
+             string collectionName = ProceduresCollectionName;
             if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
             return connection.GetSchema(collectionName, restrictions);
@@ -616,14 +645,16 @@ namespace DatabaseSchemaReader
         protected virtual DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             //different collections here- we could just if(IsOracle)
-            string collectionName = "ProcedureParameters";
+            string collectionName = ProcedureParametersCollectionName;
             if (!SchemaCollectionExists(connection, collectionName)) collectionName = "Arguments";
             if (ProviderType == SqlType.MySql) collectionName = "Procedure Parameters";
             else if (ProviderType == SqlType.Oracle) collectionName = "Arguments"; //Oracle, assume packages
-            if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(collectionName);
+            if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(ProcedureParametersCollectionName);
 
             string[] restrictions = SchemaRestrictions.ForRoutine(connection, collectionName, storedProcedureName);
-            return connection.GetSchema(collectionName, restrictions);
+            var dt = connection.GetSchema(collectionName, restrictions);
+            dt.TableName = ProcedureParametersCollectionName;
+            return dt;
         }
 
         /// <summary>
@@ -637,13 +668,15 @@ namespace DatabaseSchemaReader
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
                 //for SqlServer the restriction doesn't apply
-                string collectionName = "ProcedureParameters";
+                string collectionName = ProcedureParametersCollectionName;
                 if (ProviderType == SqlType.Oracle)
                     collectionName = "Arguments"; //Oracle, we assume you mean packages
-                if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
+                if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(ProcedureParametersCollectionName);
 
                 string[] restrictions = SchemaRestrictions.ForSpecific(conn, collectionName, packageName, "PACKAGENAME");
-                return conn.GetSchema(collectionName, restrictions);
+                var dt = conn.GetSchema(collectionName, restrictions);
+                dt.TableName = ProcedureParametersCollectionName;
+                return dt;
             }
         }
         /// <summary>
@@ -655,7 +688,7 @@ namespace DatabaseSchemaReader
             {
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
-                const string collectionName = "Packages";
+                string collectionName = PackagesCollectionName;
                 if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
                 return conn.GetSchema(collectionName, restrictions);

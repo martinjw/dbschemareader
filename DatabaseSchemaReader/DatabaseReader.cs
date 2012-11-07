@@ -314,36 +314,36 @@ namespace DatabaseSchemaReader
                 table.SchemaOwner = _sr.Owner;
                 //columns must be done first as it is updated by the others
                 table.Columns.Clear();
-                var columnConverter = new ColumnConverter(ds.Tables["Columns"]);
+                var columnConverter = new ColumnConverter(ds.Tables[_sr.ColumnsCollectionName]);
                 table.Columns.AddRange(columnConverter.Columns());
-                if (ds.Tables.Contains("PrimaryKeys"))
+                if (ds.Tables.Contains(_sr.PrimaryKeysCollectionName))
                 {
-                    var converter = new SchemaConstraintConverter(ds.Tables["PrimaryKeys"], ConstraintType.PrimaryKey);
+                    var converter = new SchemaConstraintConverter(ds.Tables[_sr.PrimaryKeysCollectionName], ConstraintType.PrimaryKey);
                     var pkConstraints = converter.Constraints();
                     PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
                 }
-                if (ds.Tables.Contains("Foreign_Keys"))
+                if (ds.Tables.Contains(_sr.ForeignKeysCollectionName))
                 {
-                    var converter = new SchemaConstraintConverter(ds.Tables["Foreign_Keys"], ConstraintType.ForeignKey);
+                    var converter = new SchemaConstraintConverter(ds.Tables[_sr.ForeignKeysCollectionName], ConstraintType.ForeignKey);
                     table.AddConstraints(converter.Constraints());
                 }
-                if (ds.Tables.Contains("ForeignKeyColumns"))
+                if (ds.Tables.Contains(_sr.ForeignKeyColumnsCollectionName))
                 {
-                    var fkConverter = new ForeignKeyColumnConverter(ds.Tables["ForeignKeyColumns"]);
+                    var fkConverter = new ForeignKeyColumnConverter(ds.Tables[_sr.ForeignKeyColumnsCollectionName]);
                     fkConverter.AddForeignKeyColumns(table.ForeignKeys);
                 }
 
-                if (ds.Tables.Contains("Unique_Keys"))
+                if (ds.Tables.Contains(_sr.UniqueKeysCollectionName))
                 {
-                    var converter = new SchemaConstraintConverter(ds.Tables["Unique_Keys"], ConstraintType.UniqueKey);
+                    var converter = new SchemaConstraintConverter(ds.Tables[_sr.UniqueKeysCollectionName], ConstraintType.UniqueKey);
                     table.AddConstraints(converter.Constraints());
                 }
 
-                var indexConverter = new IndexConverter(ds.Tables["IndexColumns"], null);
+                var indexConverter = new IndexConverter(ds.Tables[_sr.IndexColumnsCollectionName], null);
                 table.Indexes.AddRange(indexConverter.Indexes(tableName));
 
-                if (ds.Tables.Contains("IdentityColumns"))
-                    SchemaConstraintConverter.AddIdentity(ds.Tables["IdentityColumns"], table);
+                if (ds.Tables.Contains(_sr.IdentityColumnsCollectionName))
+                    SchemaConstraintConverter.AddIdentity(ds.Tables[_sr.IdentityColumnsCollectionName], table);
             }
 
             if (DatabaseSchema.DataTypes.Count > 0)

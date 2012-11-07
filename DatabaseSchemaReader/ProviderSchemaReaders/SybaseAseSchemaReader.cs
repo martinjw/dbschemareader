@@ -15,11 +15,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
             //the sproc only operates on table-level, so return empty table for whole database
-            if (string.IsNullOrEmpty(tableName)) return CreateDataTable("PrimaryKeys");
+            if (string.IsNullOrEmpty(tableName)) return CreateDataTable(PrimaryKeysCollectionName);
 
             const string sql = @"sp_pkeys @tableName";
 
-            return SybaseCommandForTable(connection, "PrimaryKey", tableName, sql);
+            return SybaseCommandForTable(connection, PrimaryKeysCollectionName, tableName, sql);
         }
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
@@ -34,7 +34,7 @@ join sysconstraints c on c.constrid = r.constrid
 join syscolumns tc on tc.id = r.tableid and tc.colid = c.colid
 where (t.name = @tableName OR @tableName IS NULL)
 order by t.name, ft.name, c.colid";
-            return SybaseCommandForTable(connection, "ForeignKeys", tableName, sql);
+            return SybaseCommandForTable(connection, ForeignKeysCollectionName, tableName, sql);
         }
 
         private DataTable SybaseCommandForTable(DbConnection connection, string dataTableName, string tableName, string sql)

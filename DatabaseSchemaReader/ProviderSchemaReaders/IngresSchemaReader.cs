@@ -31,7 +31,7 @@ WHERE
     (trim(table_name) = @tableName OR @tableName IS NULL) AND 
     (trim(schema_name) = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, connection, "PrimaryKeys", sql);
+            return CommandForTable(tableName, connection, PrimaryKeysCollectionName, sql);
         }
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
@@ -47,7 +47,7 @@ WHERE
     (trim(table_name) = @tableName OR @tableName IS NULL) AND 
     (trim(schema_name) = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, connection, "CheckKeys", sql);
+            return CommandForTable(tableName, connection, CheckConstraintsCollectionName, sql);
         }
 
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
@@ -63,7 +63,7 @@ WHERE
     (trim(table_name) = @tableName OR @tableName IS NULL) AND 
     (trim(schema_name) = @schemaOwner OR @schemaOwner IS NULL)";
 
-            var uniqueKeys = CommandForTable(tableName, connection, "CheckKeys", sql);
+            var uniqueKeys = CommandForTable(tableName, connection, UniqueKeysCollectionName, sql);
             uniqueKeys.Columns.Add("column_name", typeof(string));
             var additions = new List<DataRow>();
             foreach (DataRow row in uniqueKeys.Rows)
@@ -117,7 +117,7 @@ WHERE
     (trim(c.ref_table_name) = @tableName OR @tableName IS NULL) AND 
     (trim(c.ref_schema_name) = @schemaOwner OR @schemaOwner IS NULL)";
 
-            var foreignKeys = CommandForTable(tableName, connection, "ForeignKeys", sql);
+            var foreignKeys = CommandForTable(tableName, connection, ForeignKeysCollectionName, sql);
             foreignKeys.Columns.Add("column_name", typeof(string));
             var additions = new List<DataRow>();
             //text_segment: FOREIGN KEY (al_ccode) REFERENCES "martin".country(ct_code)
