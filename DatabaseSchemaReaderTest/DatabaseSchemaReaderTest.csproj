@@ -130,6 +130,7 @@
     <Compile Include="SqlGen\MySql\DataTypesTest.cs" />
     <Compile Include="SqlGen\Oracle\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\Oracle\NumberDataTypesTest.cs" />
+    <Compile Include="DataSchema\OracleSchemaReaderTest.cs" />
     <Compile Include="SqlGen\Oracle\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\Oracle\DataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
