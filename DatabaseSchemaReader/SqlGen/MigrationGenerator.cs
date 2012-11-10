@@ -328,7 +328,20 @@ namespace DatabaseSchemaReader.SqlGen
         public string AddSequence(DatabaseSequence sequence)
         {
             //amazingly SQLServer Denali has the same syntax as Oracle. http://msdn.microsoft.com/en-us/library/ff878091%28v=SQL.110%29.aspx
-            return "CREATE SEQUENCE " + SchemaPrefix(sequence.SchemaOwner) + Escape(sequence.Name) + " INCREMENT BY " + sequence.IncrementBy + " MINVALUE " + sequence.MinimumValue + " MAXVALUE " + sequence.MaximumValue + ";";
+            var sb = new StringBuilder();
+            sb.Append("CREATE SEQUENCE " + SchemaPrefix(sequence.SchemaOwner) + Escape(sequence.Name) +
+                " INCREMENT BY " + sequence.IncrementBy);
+            //min/max are optional- if they look like defaults, no need to write them out
+            if (sequence.MinimumValue.HasValue && sequence.MinimumValue != 0)
+            {
+                sb.Append(" MINVALUE " + sequence.MinimumValue);
+            }
+            if (sequence.MaximumValue.HasValue && sequence.MaximumValue != 999999999999999999999999999M)
+            {
+                sb.Append(" MAXVALUE " + sequence.MaximumValue);
+            }
+            sb.Append(";");
+            return sb.ToString();
         }
 
         public string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)

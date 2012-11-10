@@ -309,10 +309,11 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
             if (triggers.Count == 0) return;
             //the trigger body will look something like "SELECT MYSEQ.NEXTVAL INTO :NEW.ID FROM DUAL;"
             var pattern = ".NEXTVAL\\s+?INTO\\s+?:NEW.\"?" + pk.Name;
+            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
             foreach (var databaseTrigger in triggers)
             {
                 var body = databaseTrigger.TriggerBody;
-                if (Regex.IsMatch(body, pattern, RegexOptions.IgnoreCase))
+                if (regex.IsMatch(body))
                 {
                     pk.IsIdentity = true;
                     return;

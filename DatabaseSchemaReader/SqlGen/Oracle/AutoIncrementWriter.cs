@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
@@ -21,6 +22,10 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         public string Write()
         {
             if (!_table.HasIdentityColumn) return null;
+
+            var txt = WriteExistingTrigger();
+            if (txt != null) return txt;
+
 
             var identityColumn = _table.Columns.First(x => x.IsIdentity).Name;
 
@@ -51,6 +56,49 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             sb.AppendLine("-- auto-increment trigger for " + _table.Name);
             sb.AppendLine(WriteTrigger(triggerName, sequenceName, identityColumn));
             return sb.ToString();
+        }
+
+        private string WriteExistingTrigger()
+        {
+            //does it already have a trigger which sets the sequence? In which case, note it...
+            var pk = _table.PrimaryKeyColumn;
+            var pattern = ".NEXTVAL\\s+?INTO\\s+?:NEW.\"?" + pk.Name;
+            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            foreach (var databaseTrigger in _table.Triggers)
+            {
+                var body = databaseTrigger.TriggerBody;
+                var match = regex.Match(body);
+                if (match.Success)
+                {
+                    var generator = new OracleMigrationGenerator();
+                    var sb = new StringBuilder();
+                    if (_table.DatabaseSchema != null)
+                    {
+                        //let's write the sequence if we can find it
+                        var startPos = match.Index;
+                        var seqStart = body.Substring(0, startPos).LastIndexOfAny(new[] { ' ', '\"', '.', '\n' });
+                        if (seqStart != -1)
+                        {
+                            var start = seqStart + 1;
+                            var length = startPos - start;
+                            var seqName = body.Substring(start, length);
+                            var seq = _table.DatabaseSchema.Sequences
+                                .FirstOrDefault(x => seqName.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                            if (seq != null)
+                            {
+                                sb.AppendLine(generator.AddSequence(seq));
+                            }
+                        }
+
+                    }
+
+                    sb.AppendLine("-- use auto-increment trigger " + databaseTrigger.Name);
+                    sb.Append(generator.AddTrigger(_table, databaseTrigger));
+                    return sb.ToString();
+                }
+            }
+            //nothing found
+            return null;
         }
 
         private static bool FindSequenceName(DatabaseSchema schema, string sequenceName)
