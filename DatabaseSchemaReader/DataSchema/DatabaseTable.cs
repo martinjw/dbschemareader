@@ -218,6 +218,31 @@ namespace DatabaseSchemaReader.DataSchema
         #endregion
 
         /// <summary>
+        /// Removes the foreign key and cleans the column markers.
+        /// </summary>
+        /// <param name="foreignKey">The foreign key.</param>
+        /// <exception cref="System.ArgumentNullException">foreignKey;foreignkey cannot be null</exception>
+        /// <exception cref="System.InvalidOperationException">Must be a foreign key</exception>
+        internal void RemoveForeignKey(DatabaseConstraint foreignKey)
+        {
+            if (foreignKey == null) throw new ArgumentNullException("foreignKey", "foreignkey cannot be null");
+            if (foreignKey.ConstraintType != ConstraintType.ForeignKey) throw new InvalidOperationException("Must be a foreign key");
+            if (!_foreignKeys.Contains(foreignKey)) throw new InvalidOperationException("Foreign key not for this table or already removed");
+            _foreignKeys.Remove(foreignKey);
+            foreach (var columnName in foreignKey.Columns)
+            {
+                var column = FindColumn(columnName);
+                if (column != null)
+                {
+                    column.IsForeignKey = false;
+                    column.ForeignKeyTableName = null;
+                    column.ForeignKeyTable = null;
+                }
+            }
+
+        }
+
+        /// <summary>
         /// Gets the foreign key children.
         /// </summary>
         public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren; } }

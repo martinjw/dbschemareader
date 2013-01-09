@@ -10,6 +10,43 @@ namespace DatabaseSchemaReader.DataSchema
     public static class DatabaseSchemaExtensions
     {
         /// <summary>
+        /// Removes the table from the schema and also all foreign key references.
+        /// </summary>
+        /// <param name="databaseSchema">The database schema.</param>
+        /// <param name="tableName">Name of the table.</param>
+        public static void RemoveTable(this DatabaseSchema databaseSchema, string tableName)
+        {
+            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema", "databaseSchema must not be null");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName", "tableName must not be null");
+
+            var table = databaseSchema.FindTableByName(tableName);
+            RemoveTable(databaseSchema,table);
+        }
+
+        /// <summary>
+        /// Removes the table from the schema and also all foreign key references.
+        /// </summary>
+        /// <param name="databaseSchema">The database schema.</param>
+        /// <param name="table">The table.</param>
+        /// <exception cref="System.ArgumentNullException">databaseSchema;databaseSchema must not be null</exception>
+        public static void RemoveTable(this DatabaseSchema databaseSchema, DatabaseTable table)
+        {
+            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema", "databaseSchema must not be null");
+            if (table == null) throw new ArgumentNullException("table", "table must not be null");
+
+            foreach (var foreignKeyChild in table.ForeignKeyChildren)
+            {
+                var deleteKeys = foreignKeyChild.ForeignKeys.Where(x => x.RefersToTable == table.Name).ToList();
+                foreach (var fk in deleteKeys)
+                {
+                    foreignKeyChild.RemoveForeignKey(fk);
+                }
+            }
+            databaseSchema.Tables.Remove(table);
+        }
+
+
+        /// <summary>
         /// Adds a table.
         /// </summary>
         /// <param name="databaseSchema">The database schema.</param>
