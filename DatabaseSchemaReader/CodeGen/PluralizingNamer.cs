@@ -5,16 +5,16 @@ namespace DatabaseSchemaReader.CodeGen
     /// <summary>
     /// Names collections by trying to pluralize them. Use with caution!
     /// </summary>
-    public class PluralizingNamer : ICollectionNamer
+    public class PluralizingNamer : Namer
     {
-        #region Implementation of ICollectionNamer
+        #region Override Implementation of ICollectionNamer
 
         /// <summary>
         /// Names the collection.
         /// </summary>
         /// <param name="className">Name of the class.</param>
         /// <returns></returns>
-        public string NameCollection(string className)
+        public override string NameCollection(string className)
         {
             //you can reference System.Data.Entity.Design.dll
             //use System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(CultureInfo.GetCultureInfo("en-us"))

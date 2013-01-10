@@ -43,7 +43,7 @@ namespace DatabaseSchemaReader.CodeGen
             _schema = schema;
             _codeWriterSettings = codeWriterSettings;
 
-            PrepareSchemaNames.Prepare(schema);
+            PrepareSchemaNames.Prepare(schema, codeWriterSettings.Namer);
         }
 
         /// <summary>

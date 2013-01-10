@@ -64,7 +64,7 @@ namespace DatabaseSchemaReaderTest.Codegen
                 .AddColumn("CategoryName", DbType.String);
 
             DatabaseSchemaFixer.UpdateReferences(schema);
-            PrepareSchemaNames.Prepare(schema);
+            PrepareSchemaNames.Prepare(schema, new Namer());
 
             return schema;
         }

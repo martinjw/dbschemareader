@@ -39,7 +39,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             schema.DataTypes.Add(new DataType("NVARCHAR", "System.String"));
             DatabaseSchemaFixer.UpdateDataTypes(schema);
             //make sure .Net names are assigned
-            PrepareSchemaNames.Prepare(schema);
+            PrepareSchemaNames.Prepare(schema, new Namer());
 
             var cw = new ClassWriter(table, new CodeWriterSettings());
 
@@ -73,7 +73,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
             //make sure .Net names are assigned
-            PrepareSchemaNames.Prepare(schema);
+            PrepareSchemaNames.Prepare(schema, new Namer());
             return schema;
         }
 
@@ -183,7 +183,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             
             var schema = new DatabaseSchema(null, null);
             schema.Views.Add(view);
-            PrepareSchemaNames.Prepare(schema);
+            PrepareSchemaNames.Prepare(schema, new Namer());
 
             var codeWriterSettings = new CodeWriterSettings
             {
