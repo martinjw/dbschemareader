@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A database object that has an unique schema and name
     /// </summary>
     [Serializable]
-    public abstract class NamedSchemaObject
+    public abstract class NamedSchemaObject : NamedObject
     {
 
 
@@ -17,14 +17,6 @@ namespace DatabaseSchemaReader.DataSchema
         /// The schema owner.
         /// </value>
         public string SchemaOwner { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name (original database format)
-        /// </summary>
-        /// <value>
-        /// The table name.
-        /// </value>
-        public string Name { get; set; }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.

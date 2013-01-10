@@ -1,10 +1,14 @@
-﻿namespace DatabaseSchemaReader.CodeGen
+﻿using System;
+
+namespace DatabaseSchemaReader.CodeGen
 {
     /// <summary>
     /// Code generation settings. Customize the defaults.
     /// </summary>
     public class CodeWriterSettings
     {
+        private INamer _namer;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeWriterSettings"/> class.
         /// </summary>
@@ -12,7 +16,9 @@
         {
             Namespace = "Domain";
             CodeTarget = CodeTarget.Poco;
-            CollectionNamer = new CollectionNamer();
+            var namer = new Namer();
+            Namer = namer;
+            CollectionNamer = namer;
         }
 
         /// <summary>
@@ -35,9 +41,25 @@
         /// </value>
         public ICollectionNamer CollectionNamer { get; set; }
 
+        /// <summary>
+        /// Gets or sets the namer, which translates table and column names to classes and properties.
+        /// </summary>
+        /// <value>
+        /// The namer.
+        /// </value>
+        public INamer Namer
+        {
+            get { return _namer; }
+            set
+            {
+                if(value == null) throw new ArgumentNullException();
+                _namer = value;
+            }
+        }
+
         internal string NameCollection(string name)
         {
-            if (CollectionNamer == null) return name + "Collection";
+            if (CollectionNamer == null) return _namer.NameCollection(name);
             return CollectionNamer.NameCollection(name);
         }
 

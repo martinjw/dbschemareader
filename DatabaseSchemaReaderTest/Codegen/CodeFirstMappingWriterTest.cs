@@ -235,7 +235,7 @@ namespace DatabaseSchemaReaderTest.Codegen
                 .AddForeignKey("fk", "Products");
 
             DatabaseSchemaFixer.UpdateReferences(schema);
-            PrepareSchemaNames.Prepare(schema);
+            PrepareSchemaNames.Prepare(schema, new Namer());
 
             return schema;
         }

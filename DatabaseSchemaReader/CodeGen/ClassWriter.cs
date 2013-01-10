@@ -39,7 +39,7 @@ namespace DatabaseSchemaReader.CodeGen
             var className = _table.NetName;
             if (string.IsNullOrEmpty(className) && _table.DatabaseSchema != null)
             {
-                PrepareSchemaNames.Prepare(_table.DatabaseSchema);
+                PrepareSchemaNames.Prepare(_table.DatabaseSchema, _codeWriterSettings.Namer);
                 className = _table.NetName;
             }
             _dataTypeWriter.CodeTarget = codeTarget;
