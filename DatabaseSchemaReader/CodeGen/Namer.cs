@@ -25,6 +25,11 @@ namespace DatabaseSchemaReader.CodeGen
                     //remove the "Id" - it's just a "Category"
                     name = name.Substring(0, name.Length - 2);
                 }
+                //member name cannot be same as class name
+                if (name == column.Table.NetName)
+                {
+                    name += "Property";
+                }
             }
             return name;
         }

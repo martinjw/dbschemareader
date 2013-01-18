@@ -99,7 +99,11 @@ namespace DatabaseSchemaReader.DataSchema
 
             //add the inverse relationship
             var fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);
-            if (fkTable != null) fkTable.ForeignKeyChildren.Add(table);
+            if (fkTable != null)
+            {
+                fkTable.ForeignKeyChildren.Add(table);
+                databaseColumn.ForeignKeyTable = fkTable;
+            }
 
             return databaseColumn;
         }
@@ -174,6 +178,37 @@ namespace DatabaseSchemaReader.DataSchema
             table.AddConstraint(uk);
             databaseColumn.IsUniqueKey = true;
             return databaseColumn;
+        }
+
+        /// <summary>
+        /// Adds the column.
+        /// </summary>
+        /// <param name="databaseConstraint">The database constraint.</param>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">databaseConstraint</exception>
+        public static DatabaseConstraint AddColumn(this DatabaseConstraint databaseConstraint, DatabaseColumn databaseColumn)
+        {
+            if (databaseConstraint == null) throw new ArgumentNullException("databaseConstraint");
+            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn");
+            if (databaseColumn.TableName != databaseConstraint.TableName) throw new InvalidOperationException("Constraint and column must belong to same table");
+
+            databaseConstraint.Columns.Add(databaseColumn.Name);
+            switch (databaseConstraint.ConstraintType)
+            {
+                case ConstraintType.ForeignKey:
+                    databaseColumn.IsForeignKey = true;
+                    databaseColumn.ForeignKeyTableName = databaseConstraint.RefersToTable;
+                    break;
+                case ConstraintType.PrimaryKey:
+                    databaseColumn.IsPrimaryKey = true;
+                    break;
+                case ConstraintType.UniqueKey:
+                    databaseColumn.IsUniqueKey = true;
+                    break;
+            }
+
+            return databaseConstraint;
         }
     }
 }
