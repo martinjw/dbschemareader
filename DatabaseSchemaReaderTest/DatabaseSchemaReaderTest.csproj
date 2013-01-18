@@ -64,10 +64,12 @@
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\ClassWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterWithViewTest.cs" />
+    <Compile Include="Codegen\ClassWriterCompositeKeyTest.cs" />
     <Compile Include="Codegen\RiaServicesTest.cs" />
     <Compile Include="Codegen\DataAnnotationWriterTest.cs" />
     <Compile Include="Codegen\DataTypeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
+    <Compile Include="Codegen\ClassWirterAssociationTableTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />
     <Compile Include="Compare\CompareProceduresTest.cs" />

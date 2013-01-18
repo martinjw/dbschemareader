@@ -112,7 +112,7 @@ namespace DatabaseSchemaReader.CodeGen
                     //code first composite key
                     foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
                     {
-                        WriteColumn(column);
+                        WriteColumn(column, false);
                     }
                 }
             }
@@ -120,7 +120,13 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var column in _table.Columns)
             {
                 if (_table.HasCompositeKey && column.IsPrimaryKey) continue;
+                if (column.IsForeignKey) continue;
                 WriteColumn(column);
+            }
+
+            foreach (var foreignKey in _table.ForeignKeys)
+            {
+                WriteForeignKey(foreignKey);
             }
 
             WriteForeignKeyCollections();
@@ -131,6 +137,7 @@ namespace DatabaseSchemaReader.CodeGen
                 overrider.AddOverrides();
             }
         }
+
 
         private bool IsCodeFirst()
         {
@@ -171,7 +178,7 @@ namespace DatabaseSchemaReader.CodeGen
                     continue;
                 }
 
-                if(_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
+                if (_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
                     _cb.AppendLine("[Include]");
                 var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
                 var dataType = listType + foreignKey.NetName + ">";
@@ -227,30 +234,96 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
         }
 
-
         private void WriteColumn(DatabaseColumn column)
         {
+            WriteColumn(column, false);
+        }
+
+        private void WriteColumn(DatabaseColumn column, bool notNetName)
+        {
             var propertyName = column.NetName;
-            var dataType = _dataTypeWriter.Write(column);
-            var isFk = column.IsForeignKey && column.ForeignKeyTable != null;
-            if (isFk)
+            // KL: Ensures that property name doesn't match class name
+            if (propertyName == column.Table.NetName)
             {
-                if (IsEntityFramework() && (column.IsPrimaryKey || _codeWriterSettings.UseForeignKeyIdProperties))
-                {
-                    //if it's a primary key AND foreign key, CF requires a scalar property
-                    //optionally allow a shadow Id property to be created (convenient for CF)
-                    _cb.AppendAutomaticProperty(dataType, propertyName + "Id", true);
-                }
-                dataType = column.ForeignKeyTable.NetName;
+                propertyName = string.Format("{0}Column", propertyName);
+            }
+            var dataType = _dataTypeWriter.Write(column);
+
+            if (column.IsPrimaryKey && column.IsForeignKey)
+            {
+                //a foreign key will be written, so we need to avoid a collision
+                var refTable = column.ForeignKeyTable;
+                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
+                if (fkDataType == propertyName)
+                    notNetName = true;
+            }
+
+            if (notNetName)
+            {
+                //in EF, you want a fk Id property
+                //must not conflict with entity fk name
+                propertyName += "Id";
             }
 
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
-            var useVirtual = (!IsEntityFramework() || isFk);
+            var useVirtual = !IsEntityFramework();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
 
 
+        /// <summary>
+        /// KL:
+        /// Similar to WriteColumn. Will send the appropriate dataType and propertyName to
+        /// _cb.AppendAutomaticProperty to be written.
+        /// 
+        /// This method was needed to support composite foreign keys.
+        /// </summary>
+        /// <param name="fKey"></param>
+        private void WriteForeignKey(DatabaseConstraint fKey)
+        {
+            // get the reference table
+            var refTable = fKey.ReferencedTable(_table.DatabaseSchema);
+
+            var propertyName = refTable != null ? refTable.NetName : fKey.RefersToTable;
+
+            var dataType = propertyName;
+
+            // Check whether the referenced table is used in any other key. This ensures that the property names
+            // are unique.
+            if (_table.ForeignKeys.Count(x => x.RefersToTable == fKey.RefersToTable) > 1)
+            {
+                // Append the key name to the property name. In the event of multiple foreign keys to the same table
+                // This will give the consumer context.
+                propertyName += fKey.Name;
+            }
+
+            // Ensures that property name cannot be the same as class name
+            if (propertyName == _table.NetName)
+            {
+                propertyName += "Key";
+            }
+
+            _cb.AppendAutomaticProperty(dataType, propertyName);
+
+
+            if (IsEntityFramework() && _codeWriterSettings.UseForeignKeyIdProperties)
+            {
+                //for code first, we may have to write scalar properties
+                //1 if the fk is also a pk
+                //2 if they selected use Foreign Key Ids
+                foreach (var columnName in fKey.Columns)
+                {
+                    var column = _table.FindColumn(columnName);
+                    if (column == null) continue;
+                    //primary keys are already been written
+                    if (!column.IsPrimaryKey)
+                    {
+                        WriteColumn(column, propertyName.Equals(column.NetName));
+                    }
+                }
+            }
+        }
 
         private void WriteCompositeKeyClass(string className)
         {
@@ -259,10 +332,9 @@ namespace DatabaseSchemaReader.CodeGen
 
             using (_cb.BeginNest("public class " + className + "Key", "Class representing " + _table.Name + " composite key"))
             {
-                foreach (var column in _table.Columns)
+                foreach (var column in _table.Columns.Where(x => x.IsPrimaryKey))
                 {
-                    if (column.IsPrimaryKey)
-                        WriteColumn(column);
+                    WriteColumn(column);
                 }
 
                 var overrider = new OverrideWriter(_cb, _table);

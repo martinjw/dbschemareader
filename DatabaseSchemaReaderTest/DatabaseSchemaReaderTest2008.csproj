@@ -51,6 +51,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codegen\ClassWirterAssociationTableTest.cs" />
+    <Compile Include="Codegen\ClassWriterCompositeKeyTest.cs" />
     <Compile Include="Codegen\ClassWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterWithViewTest.cs" />
     <Compile Include="Codegen\CodeWriterTest.cs" />

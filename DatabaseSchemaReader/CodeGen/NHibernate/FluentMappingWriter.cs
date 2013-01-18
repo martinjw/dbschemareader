@@ -124,18 +124,25 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             var sb = new StringBuilder();
             //our convention is always to generate a key class with property name Key
             sb.Append("CompositeId(x => x.Key)");
-            foreach (var column in _table.Columns.Where(x => x.IsPrimaryKey))
+
+            // KL: Ensuring composite primary key is generated in order of define key and not
+            // simply the order of the tables.
+            foreach (var col in _table.PrimaryKey.Columns)
             {
-                var keyType = "KeyReference";
-                if (column.ForeignKeyTable == null)
-                {
-                    keyType = "KeyProperty";
-                }
+                DatabaseColumn column = _table.FindColumn(col);
+
+                const string keyType = "KeyProperty";
+                // KL: Mapping the foreign keys separately. KeyReference was causing issues.
+                //var keyType = "KeyReference";
+                //if (column.ForeignKeyTable == null)
+                //{
+                //    keyType = "KeyProperty";
+                //}
                 sb.AppendFormat(CultureInfo.InvariantCulture,
-                                ".{0}(x => x.{1}, \"{2}\")",
-                                keyType,
-                                column.NetName,
-                                column.Name);
+                                                ".{0}(x => x.{1}, \"{2}\")",
+                                                keyType,
+                                                column.NetName,
+                                                column.Name);
             }
             sb.Append(";");
             _cb.AppendLine(sb.ToString());
@@ -144,19 +151,29 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         private void WriteColumns()
         {
             //map the columns
-            foreach (var column in _table.Columns.Where(c => !c.IsPrimaryKey))
+            // KL: Only write empty columns. Then, foreign keys.
+            foreach (var column in _table.Columns.Where(c => !c.IsPrimaryKey && !c.IsForeignKey))
             {
                 WriteColumn(column);
             }
+
+            // KL: Writing foreign key separately
+            foreach (var fKey in _table.ForeignKeys)
+            {
+                WriteForeignKey(fKey);
+            }
         }
+
+
 
         private void WriteColumn(DatabaseColumn column)
         {
-            if (column.IsForeignKey)
-            {
-                WriteForeignKey(column);
-                return;
-            }
+            //if (column.IsForeignKey)
+            //{
+            //    // KL: Needed to write foreign keys in their own step in order to support composite
+            //    //WriteForeignKey(column);
+            //    return;
+            //}
 
             var propertyName = column.NetName;
             var sb = new StringBuilder();
@@ -185,16 +202,59 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             _cb.AppendLine(sb.ToString());
         }
 
-        private void WriteForeignKey(DatabaseColumn column)
+        //private void WriteForeignKey(DatabaseColumn column)
+        //{
+        //    var propertyName = column.NetName;
+        //    var sb = new StringBuilder();
+        //    sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
+        //    sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\")", column.Name);
+        //    //bad idea unless you expect the database to be inconsistent
+        //    //sb.Append(".NotFound.Ignore()");
+        //    //could look up cascade rule here
+        //    sb.Append(";");
+        //    _cb.AppendLine(sb.ToString());
+        //}
+
+        /// <summary>
+        /// KL: Writes the foreign key an also supports composite foreign keys.
+        /// </summary>
+        /// <param name="fKey">The f key.</param>
+        private void WriteForeignKey(DatabaseConstraint fKey)
         {
-            var propertyName = column.NetName;
+            var propertyName = "Unknown";
+            var refTable = _table.DatabaseSchema.FindTableByName(fKey.RefersToTable);
+            var parentTable = _table.DatabaseSchema.FindTableByName(fKey.TableName);
+            if (refTable != null)
+                propertyName = refTable.NetName;
+
+            // Check whether the referenced table is used in any other key. This ensures that the property names
+            // are unique.
+            if (parentTable.ForeignKeys.Count(x => x.RefersToTable == fKey.RefersToTable) > 1)
+            {
+                // Append the key name to the property name. In the event of multiple foreign keys to the same table
+                // This will give the consumer context.
+                propertyName += fKey.Name;
+            }
+
+            // Ensures that property name cannot be the same as class name
+            if (propertyName == parentTable.NetName)
+            {
+                propertyName += "Key";
+            }
+
             var sb = new StringBuilder();
+
+            var cols = fKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+
             sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\")", column.Name);
-            //bad idea unless you expect the database to be inconsistent
-            //sb.Append(".NotFound.Ignore()");
-            //could look up cascade rule here
-            sb.Append(";");
+            if (cols.Length > 1)
+            {
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".Columns(new string[] {{ {0} }});", String.Join(", ", cols));
+            }
+            else
+            {
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\");", fKey.Columns.FirstOrDefault());
+            }
             _cb.AppendLine(sb.ToString());
         }
 
@@ -213,7 +273,18 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
             //defaults to x_id
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumn(\"{0}\")", fkColumn);
+
+            // KL: Only use .KeyColumn() if the foreign key is not composite
+            if (foreignKey.Columns.Count == 1)
+            {
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumn(\"{0}\")", fkColumn);
+            }
+            // If composite key, generate .KeyColumns(...) with array of keys
+            else
+            {
+                var cols = foreignKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumns.Add(new string[] {{ {0} }})", String.Join(", ", cols));
+            }
             sb.Append(".Inverse()");
             sb.AppendFormat(CultureInfo.InvariantCulture, ".ForeignKeyConstraintName(\"{0}\")", foreignKey.Name);
 
