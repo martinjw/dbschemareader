@@ -6,6 +6,7 @@ using System.Diagnostics;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.Conversion.Loaders;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Filters;
 using DatabaseSchemaReader.ProviderSchemaReaders;
 
 namespace DatabaseSchemaReader
@@ -18,6 +19,7 @@ namespace DatabaseSchemaReader
     /// </remarks>
     public class DatabaseReader : IDatabaseReader
     {
+        private readonly Exclusions _exclusions = new Exclusions();
         private readonly SchemaExtendedReader _sr;
         private readonly DatabaseSchema _db;
         private bool _fixUp = true;
@@ -132,6 +134,14 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Exclude specified items when reading schema
+        /// </summary>
+        /// <value>
+        /// The exclusions.
+        /// </value>
+        public Exclusions Exclusions { get { return _exclusions; } }
+
+        /// <summary>
         /// Gets or sets the owner user. Always set it with Oracle (otherwise you'll get SYS, MDSYS etc...)
         /// </summary>
         /// <value>The user.</value>
@@ -231,6 +241,11 @@ namespace DatabaseSchemaReader
             var triggerConverter = new TriggerConverter(triggers);
 
             var tables = SchemaConverter.Tables(tabs);
+            var tableFilter = Exclusions.TableFilter;
+            if (tableFilter != null)
+            {
+                tables.RemoveAll(t => tableFilter.Exclude(t.Name));
+            }
             tables.Sort(delegate(DatabaseTable t1, DatabaseTable t2)
             {
                 //doesn't account for mixed schemas
@@ -279,6 +294,11 @@ namespace DatabaseSchemaReader
         {
             DataTable dt = _sr.Views();
             List<DatabaseView> views = SchemaConverter.Views(dt);
+            var viewFilter = Exclusions.ViewFilter;
+            if (viewFilter != null)
+            {
+                views.RemoveAll(v => viewFilter.Exclude(v.Name));
+            }
             //get full datatables for all tables, to minimize database calls
             var columnLoader = new ViewColumnLoader(_sr);
             foreach (DatabaseView v in views)
@@ -388,6 +408,11 @@ namespace DatabaseSchemaReader
 
             DataTable dt = _sr.StoredProcedures();
             SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
+            var procFilter = Exclusions.StoredProcedureFilter;
+            if (procFilter != null)
+            {
+                DatabaseSchema.StoredProcedures.RemoveAll(p => procFilter.Exclude(p.Name));
+            }
 
             DatabaseSchema.Packages.Clear();
             DatabaseSchema.Packages.AddRange(SchemaProcedureConverter.Packages(_sr.Packages()));

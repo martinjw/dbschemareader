@@ -148,6 +148,9 @@
     <Compile Include="Data\ChangesWriter.cs" />
     <Compile Include="Data\Reader.cs" />
     <Compile Include="Data\ScriptWriter.cs" />
+    <Compile Include="Filters\Exclusions.cs" />
+    <Compile Include="Filters\Filter.cs" />
+    <Compile Include="Filters\IFilter.cs" />
     <Compile Include="IDatabaseReader.cs" />
     <Compile Include="ProviderSchemaReaders\VistaDbSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OleDbSchemaReader.cs" />
