@@ -4,10 +4,11 @@ using System.Data;
 using System.Globalization;
 using DatabaseSchemaReader.Conversion.KeyMaps;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Filters;
 
 namespace DatabaseSchemaReader.Conversion
 {
-    static class SchemaProcedureConverter
+    class SchemaProcedureConverter
     {
 
         public static List<DatabaseSequence> Sequences(DataTable dt)
@@ -28,7 +29,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (!string.IsNullOrEmpty(sequenceKeyMap.IncrementKey))
                     seq.IncrementBy = GetNullableInt(row[sequenceKeyMap.IncrementKey]) ?? 1;
                 list.Add(seq);
-            } 
+            }
             return list;
         }
 
@@ -48,7 +49,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (functionKeyMap.LangKey != null) fun.Language = row[functionKeyMap.LangKey].ToString();
                 if (functionKeyMap.ReturnKey != null) fun.ReturnType = row[functionKeyMap.ReturnKey].ToString();
                 list.Add(fun);
-            } 
+            }
             return list;
         }
 
@@ -109,7 +110,10 @@ namespace DatabaseSchemaReader.Conversion
             return isFunction;
         }
 
-        public static void UpdateArguments(DatabaseSchema databaseSchema, DataTable arguments)
+        public IFilter StoredProcedureFilter { get; set; }
+        public IFilter PackageFilter { get; set; }
+
+        public void UpdateArguments(DatabaseSchema databaseSchema, DataTable arguments)
         {
             if (arguments.Columns.Count == 0) return; //empty datatable
 
@@ -128,12 +132,16 @@ namespace DatabaseSchemaReader.Conversion
                     sprocTable = sprocNames.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey, argumentsKeyMap.PackageKey);
             }
 
+            var sprocFilter = StoredProcedureFilter;
+            var packFilter = PackageFilter;
             //go thru all sprocs with arguments- if not in sproc list, add it
             foreach (DataRow row in sprocTable.Rows)
             {
                 string name = row[argumentsKeyMap.SprocName].ToString();
                 //a procedure without a name?
                 if (string.IsNullOrEmpty(name)) continue;
+                if (sprocFilter != null && sprocFilter.Exclude(name)) continue;
+
                 string owner = row[argumentsKeyMap.OwnerKey].ToString();
                 if (argumentsKeyMap.IsDb2)
                 {
@@ -146,6 +154,7 @@ namespace DatabaseSchemaReader.Conversion
                 {
                     package = row[argumentsKeyMap.PackageKey].ToString();
                     if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
+                    else if (packFilter != null && packFilter.Exclude(package)) continue;
                 }
 
                 using (DataView dv = new DataView(arguments))
@@ -253,7 +262,7 @@ namespace DatabaseSchemaReader.Conversion
                     argument.Precision = GetNullableInt(row[argumentsKeyMap.PrecisionKey]);
                 if (argumentsKeyMap.ScaleKey != null)
                     argument.Scale = GetNullableInt(row[argumentsKeyMap.ScaleKey]);
-            } 
+            }
             return list;
         }
 

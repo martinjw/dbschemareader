@@ -416,27 +416,35 @@ namespace DatabaseSchemaReader
 
             DatabaseSchema.Packages.Clear();
             DatabaseSchema.Packages.AddRange(SchemaProcedureConverter.Packages(_sr.Packages()));
+            var packFilter = Exclusions.PackageFilter;
+            if (packFilter != null)
+            {
+                DatabaseSchema.Packages.RemoveAll(p => packFilter.Exclude(p.Name));
+            }
             //do all the arguments as one call and sort them out. 
             //NB: This is often slow on Oracle
             DataTable args = _sr.StoredProcedureArguments(null);
 
+            var converter = new SchemaProcedureConverter();
+            converter.PackageFilter = Exclusions.PackageFilter;
+            converter.StoredProcedureFilter = Exclusions.StoredProcedureFilter;
             if (args.Rows.Count == 0)
             {
                 //MySql v6 won't do all stored procedures. So we have to do them individually.
                 foreach (var sproc in DatabaseSchema.StoredProcedures)
                 {
                     args = _sr.StoredProcedureArguments(sproc.Name);
-                    SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
+                    converter.UpdateArguments(DatabaseSchema, args);
                 }
 
                 foreach (var function in DatabaseSchema.Functions)
                 {
                     args = _sr.StoredProcedureArguments(function.Name);
-                    SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
+                    converter.UpdateArguments(DatabaseSchema, args);
                 }
             }
             //arguments could be for functions too
-            SchemaProcedureConverter.UpdateArguments(DatabaseSchema, args);
+            converter.UpdateArguments(DatabaseSchema, args);
             foreach (var function in DatabaseSchema.Functions)
             {
                 //return types are assigned as arguments (in most platforms). Move them to return type.

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace DatabaseSchemaReader.Filters
 {
     /// <summary>
@@ -5,6 +7,14 @@ namespace DatabaseSchemaReader.Filters
     /// </summary>
     public interface IFilter
     {
+        /// <summary>
+        /// An exclusions list. The implementation may use simple names, regex strings, or not use this list at all.
+        /// </summary>
+        /// <value>
+        /// The exclusions.
+        /// </value>
+        IList<string> FilterExclusions { get; }
+
         /// <summary>
         /// Excludes the specified name.
         /// </summary>
