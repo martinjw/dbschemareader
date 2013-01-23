@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 using DatabaseSchemaReader;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -162,7 +163,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             //	public bool Discontinued { get; set; }
 
             //get the sql
-            var sqlWriter = 
+            var sqlWriter =
                 new SqlWriter(table, DatabaseSchemaReader.DataSchema.SqlType.SqlServer);
             var sql = sqlWriter.SelectPageSql(); //paging sql
             sql = SqlWriter.SimpleFormat(sql); //remove line breaks
@@ -175,6 +176,31 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             //FROM [Products]) AS countedTable 
             //WHERE rowNumber >= (@pageSize * (@currentPage - 1)) 
             //AND rowNumber <= (@pageSize * @currentPage)
+        }
+
+
+        [TestMethod]
+        public void ReadNorthwindWithFilters()
+        {
+            //arrange
+            const string category = "Categories";
+            const string alphaList = "Alphabetical list of products";
+            const string custorderhist = "CustOrderHist";
+            var dbReader = GetNortwindReader();
+            dbReader.Exclusions.TableFilter.FilterExclusions.Add(category);
+            dbReader.Exclusions.ViewFilter.FilterExclusions.Add(alphaList);
+            dbReader.Exclusions.StoredProcedureFilter.FilterExclusions.Add(custorderhist);
+
+            //act
+            var schema = dbReader.ReadAll();
+
+            //assert
+            var table = schema.FindTableByName(category);
+            Assert.IsNull(table);
+            var view = schema.Views.FirstOrDefault(v => v.Name == alphaList);
+            Assert.IsNull(view);
+            var sproc = schema.StoredProcedures.FirstOrDefault(sp => sp.Name == custorderhist);
+            Assert.IsNull(sproc);
         }
 
     }

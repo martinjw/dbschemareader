@@ -279,23 +279,29 @@ namespace DatabaseSchemaReader.CodeGen
         /// 
         /// This method was needed to support composite foreign keys.
         /// </summary>
-        /// <param name="fKey"></param>
-        private void WriteForeignKey(DatabaseConstraint fKey)
+        /// <param name="foreignKey"></param>
+        private void WriteForeignKey(DatabaseConstraint foreignKey)
         {
             // get the reference table
-            var refTable = fKey.ReferencedTable(_table.DatabaseSchema);
+            var refTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
 
-            var propertyName = refTable != null ? refTable.NetName : fKey.RefersToTable;
+            if (refTable == null)
+            {
+                //we can't find the foreign key table, so just write the columns
+                WriteForeignKeyColumns(foreignKey, "");
+                return;
+            }
+            var propertyName = refTable.NetName;
 
             var dataType = propertyName;
 
             // Check whether the referenced table is used in any other key. This ensures that the property names
             // are unique.
-            if (_table.ForeignKeys.Count(x => x.RefersToTable == fKey.RefersToTable) > 1)
+            if (_table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
             {
                 // Append the key name to the property name. In the event of multiple foreign keys to the same table
                 // This will give the consumer context.
-                propertyName += fKey.Name;
+                propertyName += foreignKey.Name;
             }
 
             // Ensures that property name cannot be the same as class name
@@ -309,18 +315,23 @@ namespace DatabaseSchemaReader.CodeGen
 
             if (IsEntityFramework() && _codeWriterSettings.UseForeignKeyIdProperties)
             {
-                //for code first, we may have to write scalar properties
-                //1 if the fk is also a pk
-                //2 if they selected use Foreign Key Ids
-                foreach (var columnName in fKey.Columns)
+                WriteForeignKeyColumns(foreignKey, propertyName);
+            }
+        }
+
+        private void WriteForeignKeyColumns(DatabaseConstraint foreignKey, string propertyName)
+        {
+            //for code first, we may have to write scalar properties
+            //1 if the fk is also a pk
+            //2 if they selected use Foreign Key Ids
+            foreach (var columnName in foreignKey.Columns)
+            {
+                var column = _table.FindColumn(columnName);
+                if (column == null) continue;
+                //primary keys are already been written
+                if (!column.IsPrimaryKey)
                 {
-                    var column = _table.FindColumn(columnName);
-                    if (column == null) continue;
-                    //primary keys are already been written
-                    if (!column.IsPrimaryKey)
-                    {
-                        WriteColumn(column, propertyName.Equals(column.NetName));
-                    }
+                    WriteColumn(column, propertyName.Equals(column.NetName));
                 }
             }
         }

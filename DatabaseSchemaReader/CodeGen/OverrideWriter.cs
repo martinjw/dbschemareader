@@ -56,7 +56,8 @@ namespace DatabaseSchemaReader.CodeGen
 
                 foreach (var column in _columns)
                 {
-                    var primaryKeyName = column.NetName;
+                    var primaryKeyName = PrimaryKeyName(column);
+
                     var datatype = column.DataType ?? new DataType("x", "x");
                     if (column.IsForeignKey)
                     {
@@ -88,6 +89,20 @@ namespace DatabaseSchemaReader.CodeGen
 
         }
 
+        private static string PrimaryKeyName(DatabaseColumn column)
+        {
+            var primaryKeyName = column.NetName;
+            if (column.IsPrimaryKey && column.IsForeignKey)
+            {
+                //a foreign key will be written, so we need to avoid a collision
+                var refTable = column.ForeignKeyTable;
+                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
+                if (fkDataType == primaryKeyName)
+                    primaryKeyName += "Id";
+            }
+            return primaryKeyName;
+        }
+
         private void AddGetHashCode()
         {
             using (_cb.BeginNest("public override int GetHashCode()"))
@@ -96,7 +111,7 @@ namespace DatabaseSchemaReader.CodeGen
                 //first check if any key is transient
                 foreach (var column in _columns)
                 {
-                    var primaryKeyName = column.NetName;
+                    var primaryKeyName = PrimaryKeyName(column);
                     var datatype = column.DataType ?? new DataType("x", "z");
                     if (column.IsForeignKey)
                     {
@@ -142,9 +157,10 @@ namespace DatabaseSchemaReader.CodeGen
                 var i = 0;
                 foreach (var column in _columns)
                 {
+                    var primaryKeyName = PrimaryKeyName(column);
                     if (i != 0) sb.Append(" + \" [");
                     i++;
-                    sb.Append(column.NetName + "] = \" + " + column.NetName);
+                    sb.Append(primaryKeyName + "] = \" + " + primaryKeyName);
                 }
                 sb.AppendLine(";");
 
