@@ -64,16 +64,16 @@ namespace DatabaseSchemaReader.CodeGen
 
         public void AddNHibernateReference()
         {
-            //the hintpaths are for a hypothetical libs folder
+            //the hintpaths are for a hypothetical nuget folder
 
             var reference = FindSystemDataReference();
-            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "FluentNHibernate"), new XElement(_xmlns + "HintPath", @"..\libs\FluentNHibernate.dll"));
+            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "FluentNHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\FluentNHibernate.1.3.0.733\lib\FluentNHibernate.dll"));
 
             reference.AddAfterSelf(element);
-            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"), new XElement(_xmlns + "HintPath", @"..\libs\NHibernate.dll"));
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\NHibernate.3.3.2.4000\lib\Net35\NHibernate.dll"));
             reference.AddAfterSelf(element);
 
-            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"), new XElement(_xmlns + "HintPath", @"..\libs\Iesi.Collections.dll"));
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"), new XElement(_xmlns + "HintPath", @"..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll"));
             reference.AddAfterSelf(element);
         }
 
@@ -81,9 +81,9 @@ namespace DatabaseSchemaReader.CodeGen
         {
             //use the HintPath of the Nuget package
             var reference = FindSystemDataReference();
-            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"), 
+            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework"), 
                 new XElement(_xmlns + "SpecificVersion", "False"),
-                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.4.3.1\lib\net40\EntityFramework.dll"));
+                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll"));
             reference.AddAfterSelf(element);
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",

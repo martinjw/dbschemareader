@@ -253,19 +253,20 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 //two possibilities:
                 //* <key-property name="OrderId" column="Order_Id" />
                 //* <key-many-to-one name="Order" column="Order_Id" />
-                var keyType = "key-many-to-one";
+                var keyType = "key-property"; //"key-many-to-one";
                 var column = _table.FindColumn(colName);
                 if (column == null) continue; //corruption in our model
 
-                if (column.ForeignKeyTable == null)
-                {
-                    //the database may be missing a fk reference
-                    keyType = "key-property";
-                }
+                //if (column.ForeignKeyTable == null)
+                //{
+                //    //the database may be missing a fk reference
+                //    keyType = "key-property";
+                //}
+                var propertyName = _codeWriterSettings.Namer.PrimaryKeyName(column);
 
                 var key = new XElement(_xmlns + keyType);
                 key.SetAttributeValue("column", SqlSafe(colName));
-                key.SetAttributeValue("name", column.NetName);
+                key.SetAttributeValue("name", propertyName);
                 if (column.ForeignKeyTable != null)
                     key.SetAttributeValue("class", column.ForeignKeyTable.NetName);
                 id.Add(key);

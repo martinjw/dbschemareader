@@ -129,19 +129,27 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteProjectFile(DirectoryInfo directory, ProjectWriter pw)
         {
-            if (!_codeWriterSettings.WriteProjectFile) return;
+            var vs2010 = _codeWriterSettings.WriteProjectFile;
+            var vs2008 = _codeWriterSettings.WriteProjectFileNet35;
+            if (IsCodeFirst()) vs2008 = false;
+            if (!vs2010 && !vs2008) return;
+
             var projectName = _codeWriterSettings.Namespace ?? "Project";
-            File.WriteAllText(
-                Path.Combine(directory.FullName, projectName + ".csproj"),
-                pw.Write());
 
-            if (IsCodeFirst()) return;
-            //EF CodeFirst is already .Net 4
-
-            pw.UpgradeTo2010();
-            File.WriteAllText(
-                Path.Combine(directory.FullName, projectName + ".2010.csproj"),
-                pw.Write());
+            if (vs2008)
+            {
+                File.WriteAllText(
+                    Path.Combine(directory.FullName, projectName + ".csproj"),
+                    pw.Write());
+            }
+            if (vs2010)
+            {
+                pw.UpgradeTo2010();
+                if (vs2008) projectName += ".2010";
+                File.WriteAllText(
+                    Path.Combine(directory.FullName, projectName + ".csproj"),
+                    pw.Write());
+            }
         }
 
         private bool IsCodeFirst()

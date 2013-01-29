@@ -9,12 +9,14 @@ namespace DatabaseSchemaReader.CodeGen
     {
         private readonly ClassBuilder _cb;
         private readonly DatabaseTable _table;
+        private readonly INamer _namer;
         private ICollection<DatabaseColumn> _columns;
 
-        public OverrideWriter(ClassBuilder classBuilder, DatabaseTable table)
+        public OverrideWriter(ClassBuilder classBuilder, DatabaseTable table, INamer namer)
         {
             _cb = classBuilder;
             _table = table;
+            _namer = namer;
             NetName = table.NetName;
         }
 
@@ -56,14 +58,16 @@ namespace DatabaseSchemaReader.CodeGen
 
                 foreach (var column in _columns)
                 {
-                    var primaryKeyName = PrimaryKeyName(column);
+                    var primaryKeyName = _namer.PrimaryKeyName(column);
 
                     var datatype = column.DataType ?? new DataType("x", "x");
-                    if (column.IsForeignKey)
-                    {
-                        _cb.AppendLine("if (" + primaryKeyName + " == null && x." + primaryKeyName + " == null) return ReferenceEquals(this, x);");
-                    }
-                    else if (datatype.IsNumeric)
+                    //we'll only use scalar key properties
+                    //if (column.IsForeignKey)
+                    //{
+                    //    _cb.AppendLine("if (" + primaryKeyName + " == null && x." + primaryKeyName + " == null) return ReferenceEquals(this, x);");
+                    //}
+                    //else 
+                    if (datatype.IsNumeric)
                     {
                         _cb.AppendLine("if (" + primaryKeyName + " == 0 && x." + primaryKeyName + " == 0) return ReferenceEquals(this, x);");
                     }
@@ -79,7 +83,7 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     if (i != 0) sb.Append(" && ");
                     i++;
-                    var primaryKeyName = column.NetName;
+                    var primaryKeyName = _namer.PrimaryKeyName(column);
                     sb.Append("(" + primaryKeyName + " == x." + primaryKeyName + ")");
                 }
                 sb.AppendLine(";");
@@ -87,20 +91,6 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
 
-        }
-
-        private static string PrimaryKeyName(DatabaseColumn column)
-        {
-            var primaryKeyName = column.NetName;
-            if (column.IsPrimaryKey && column.IsForeignKey)
-            {
-                //a foreign key will be written, so we need to avoid a collision
-                var refTable = column.ForeignKeyTable;
-                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
-                if (fkDataType == primaryKeyName)
-                    primaryKeyName += "Id";
-            }
-            return primaryKeyName;
         }
 
         private void AddGetHashCode()
@@ -111,13 +101,15 @@ namespace DatabaseSchemaReader.CodeGen
                 //first check if any key is transient
                 foreach (var column in _columns)
                 {
-                    var primaryKeyName = PrimaryKeyName(column);
+                    var primaryKeyName = _namer.PrimaryKeyName(column);
                     var datatype = column.DataType ?? new DataType("x", "z");
-                    if (column.IsForeignKey)
-                    {
-                        _cb.AppendLine("if (" + primaryKeyName + " == null) return base.GetHashCode(); //transient instance");
-                    }
-                    else if (datatype.IsNumeric)
+                    //we'll only use scalar key properties
+                    //if (column.IsForeignKey)
+                    //{
+                    //    _cb.AppendLine("if (" + primaryKeyName + " == null) return base.GetHashCode(); //transient instance");
+                    //}
+                    //else 
+                    if (datatype.IsNumeric)
                     {
                         _cb.AppendLine("if (" + primaryKeyName + " == 0) return base.GetHashCode(); //transient instance");
                     }
@@ -135,7 +127,7 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     if (i != 0) sb.Append(" ^ "); //XOR hashcodes together
                     i++;
-                    var primaryKeyName = column.NetName;
+                    var primaryKeyName = _namer.PrimaryKeyName(column);
                     var datatype = column.DataType ?? new DataType("x", "x");
                     sb.Append(primaryKeyName);
                     if (datatype.IsInt && !column.IsForeignKey) continue;
@@ -157,7 +149,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var i = 0;
                 foreach (var column in _columns)
                 {
-                    var primaryKeyName = PrimaryKeyName(column);
+                    var primaryKeyName = _namer.PrimaryKeyName(column);
                     if (i != 0) sb.Append(" + \" [");
                     i++;
                     sb.Append(primaryKeyName + "] = \" + " + primaryKeyName);

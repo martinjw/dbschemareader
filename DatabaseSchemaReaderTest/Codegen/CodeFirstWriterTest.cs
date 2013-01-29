@@ -26,18 +26,6 @@ namespace DatabaseSchemaReaderTest.Codegen
     public class CodeFirstWriterTest
     {
 
-        private static DirectoryInfo CreateDirectory(string folder)
-        {
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
-            if (directory.GetDirectories(folder).Any())
-            {
-                //if it's already there, clear it out
-                var sub = directory.GetDirectories(folder).First();
-                sub.Delete(true);
-            }
-            return directory.CreateSubdirectory(folder);
-        }
-
         /// <summary>
         ///A test for Execute with CodeFirst
         ///</summary>
@@ -49,7 +37,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.PocoEntityCodeFirst };
             var target = new CodeWriter(schema, settings);
 
-            var directory = CreateDirectory("MyTest");
+            var directory = TestHelper.CreateDirectory("MyTest");
 
             target.Execute(directory);
 

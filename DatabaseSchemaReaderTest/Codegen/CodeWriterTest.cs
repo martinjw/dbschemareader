@@ -30,34 +30,13 @@ namespace DatabaseSchemaReaderTest.Codegen
     [TestClass]
     public class CodeWriterTest
     {
-        private static DatabaseReader GetNortwindReader()
-        {
-            const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
-            ProviderChecker.Check(providername, connectionString);
-
-            return new DatabaseReader(connectionString, providername);
-        }
-
-        private static DirectoryInfo CreateDirectory(string folder)
-        {
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
-            if (directory.GetDirectories(folder).Any())
-            {
-                //if it's already there, clear it out
-                var sub = directory.GetDirectories(folder).First();
-                sub.Delete(true);
-            }
-            return directory.CreateSubdirectory(folder);
-        }
-
         [TestMethod]
         public void NorthwindTest()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var schema = dbReader.ReadAll();
 
-            var directory = CreateDirectory("Northwind");
+            var directory = TestHelper.CreateDirectory("Northwind");
             const string @namespace = "Northwind.Domain";
             var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco };
 
@@ -108,7 +87,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             {
                 Assert.Inconclusive("Cannot access database " + exception.Message);
             }
-            var directory = CreateDirectory("AdventureWorks");
+            var directory = TestHelper.CreateDirectory("AdventureWorks");
             const string @namespace = "AdventureWorks.Domain";
             var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco, WriteStoredProcedures = true};
 
@@ -146,7 +125,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             {
                 Assert.Inconclusive("Cannot access database " + exception.Message);
             }
-            var directory = CreateDirectory("Hr");
+            var directory = TestHelper.CreateDirectory("Hr");
             const string @namespace = "Hr.Domain";
             var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.PocoNHibernateHbm };
 
@@ -175,7 +154,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             DatabaseSchema schema = PrepareModel();
 
-            var directory = CreateDirectory("MyTest");
+            var directory = TestHelper.CreateDirectory("MyTest");
             const string @namespace = "MyTest";
             var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco };
 

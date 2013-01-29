@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -26,20 +24,11 @@ namespace DatabaseSchemaReaderTest.DataSchema
     [TestClass]
     public class CanSerializeTest
     {
-        private static DatabaseReader GetNortwindReader()
-        {
-            const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
-            ProviderChecker.Check(providername, connectionString);
-
-            var databaseReader = new DatabaseReader(connectionString, providername);
-            return databaseReader;
-        }
 
         [TestMethod]
         public void BinarySerializeTest()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var schema = dbReader.ReadAll();
 
             var f = new BinaryFormatter();
@@ -65,7 +54,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
         [TestMethod]
         public void DataContractSerializeTest()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var schema = dbReader.ReadAll();
 
             //XmlSerializer won't work because there are circular dependencies

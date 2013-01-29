@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
@@ -35,15 +33,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var schema = dbReader.ReadAll();
             return schema.FindTableByName("Categories");
         }
-        private static DirectoryInfo CreateDirectory(string folder)
-        {
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
-            if (directory.GetDirectories(folder).Any())
-            {
-                return directory.GetDirectories(folder).First();
-            }
-            return directory.CreateSubdirectory(folder);
-        }
+
 
         [TestMethod]
         public void TestWritingNorthwindTables()
@@ -116,7 +106,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             //let's create the SQLServer crud procedures
             var gen = new DdlGeneratorFactory(SqlType.SqlServer).ProcedureGenerator(table);
             gen.ManualPrefix = table.Name + "__";
-            var destination = CreateDirectory("sql").FullName;
+            var destination = TestHelper.CreateDirectory("sql").FullName;
             var path = Path.Combine(destination, "sqlserver_sprocs.sql");
             gen.WriteToScript(path);
 
@@ -139,7 +129,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             oracleGen.FormatParameter = name => "p_" + name;
             //also define the cursor parameter
             oracleGen.CursorParameterName = "p_cursor";
-            var destination = CreateDirectory("sql").FullName;
+            var destination = TestHelper.CreateDirectory("sql").FullName;
             var oraclePath = Path.Combine(destination, "oracle_sprocs.sql");
             oracleGen.WriteToScript(oraclePath);
 

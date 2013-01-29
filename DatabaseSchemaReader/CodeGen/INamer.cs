@@ -20,5 +20,20 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="className">Name of the class.</param>
         /// <returns></returns>
         string NameCollection(string className);
+
+        /// <summary>
+        /// For a column, returns the property name for a primary key
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
+        string PrimaryKeyName(DatabaseColumn column);
+
+        /// <summary>
+        /// Returns the name of a foreign key property for a given foreign key.
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="foreignKey">The foreign key.</param>
+        /// <returns></returns>
+        string ForeignKeyName(DatabaseTable table, DatabaseConstraint foreignKey);
     }
 }

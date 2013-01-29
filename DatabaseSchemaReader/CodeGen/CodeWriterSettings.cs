@@ -52,7 +52,7 @@ namespace DatabaseSchemaReader.CodeGen
             get { return _namer; }
             set
             {
-                if(value == null) throw new ArgumentNullException();
+                if (value == null) throw new ArgumentNullException();
                 _namer = value;
             }
         }
@@ -124,10 +124,17 @@ namespace DatabaseSchemaReader.CodeGen
         public bool WriteUnitTest { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to write a csproj project file.
+        /// Gets or sets a value indicating whether to write a csproj project file for .Net 4.0 (VS 2010/2012)
         /// </summary>
-        /// <value><c>true</c> if to write project files; otherwise, <c>false</c>.</value>
+        /// <value><c>true</c> if to write project file; otherwise, <c>false</c>.</value>
         public bool WriteProjectFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to write a csproj project file for .Net 3.5 (VS 2008)
+        /// </summary>
+        /// <value><c>true</c> if to write project file; otherwise, <c>false</c>.</value>
+        public bool WriteProjectFileNet35 { get; set; }
+
 
         /// <summary>
         /// Gets or sets a value indicating whether to include views.

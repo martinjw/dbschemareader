@@ -133,7 +133,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             if (!_table.HasCompositeKey && _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices)
             {
-                var overrider = new OverrideWriter(_cb, _table);
+                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
                 overrider.AddOverrides();
             }
         }
@@ -291,27 +291,11 @@ namespace DatabaseSchemaReader.CodeGen
                 WriteForeignKeyColumns(foreignKey, "");
                 return;
             }
-            var propertyName = refTable.NetName;
 
-            var dataType = propertyName;
-
-            // Check whether the referenced table is used in any other key. This ensures that the property names
-            // are unique.
-            if (_table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
-            {
-                // Append the key name to the property name. In the event of multiple foreign keys to the same table
-                // This will give the consumer context.
-                propertyName += foreignKey.Name;
-            }
-
-            // Ensures that property name cannot be the same as class name
-            if (propertyName == _table.NetName)
-            {
-                propertyName += "Key";
-            }
+            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey);
+            var dataType = refTable.NetName;
 
             _cb.AppendAutomaticProperty(dataType, propertyName);
-
 
             if (IsEntityFramework() && _codeWriterSettings.UseForeignKeyIdProperties)
             {
@@ -348,7 +332,7 @@ namespace DatabaseSchemaReader.CodeGen
                     WriteColumn(column);
                 }
 
-                var overrider = new OverrideWriter(_cb, _table);
+                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
                 overrider.NetName = className + "Key";
                 overrider.AddOverrides();
             }
