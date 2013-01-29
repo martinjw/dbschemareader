@@ -21,19 +21,10 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     public class SqlServerNorthwind
     {
 
-        private static DatabaseReader GetNortwindReader()
-        {
-            const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
-            ProviderChecker.Check(providername, connectionString);
-
-            return new DatabaseReader(connectionString, providername);
-        }
-
         [TestMethod]
         public void ReadNorthwindProducts()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var table = dbReader.Table("Products");
             Debug.WriteLine("Table " + table.Name);
 
@@ -63,7 +54,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod]
         public void ReadNorthwindAllTables()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var tables = dbReader.AllTables();
             foreach (var table in tables)
             {
@@ -97,7 +88,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod]
         public void ReadNorthwind()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var schema = dbReader.ReadAll();
 
             foreach (var table in schema.Tables)
@@ -129,7 +120,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod]
         public void ReadNorthwindViews()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var schema = dbReader.ReadAll();
             foreach (var view in schema.Views)
             {
@@ -141,7 +132,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod]
         public void ReadNorthwindProductsWithCodeGen()
         {
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             dbReader.DataTypes(); //load the datatypes
             var table = dbReader.Table("Products");
             Debug.WriteLine("Table " + table.Name);
@@ -186,7 +177,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             const string category = "Categories";
             const string alphaList = "Alphabetical list of products";
             const string custorderhist = "CustOrderHist";
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             dbReader.Exclusions.TableFilter.FilterExclusions.Add(category);
             dbReader.Exclusions.ViewFilter.FilterExclusions.Add(alphaList);
             dbReader.Exclusions.StoredProcedureFilter.FilterExclusions.Add(custorderhist);

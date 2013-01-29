@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -42,6 +43,75 @@ namespace DatabaseSchemaReader.CodeGen
         public virtual string NameCollection(string className)
         {
             return className + "Collection";
+        }
+
+        /// <summary>
+        /// For a column, returns the property name for a primary key
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
+        public virtual string PrimaryKeyName(DatabaseColumn column)
+        {
+            var primaryKeyName = column.NetName;
+            if (column.IsPrimaryKey && column.IsForeignKey)
+            {
+                //a foreign key will be written, so we need to avoid a collision
+                var refTable = column.ForeignKeyTable;
+                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
+                if (fkDataType == primaryKeyName)
+                    primaryKeyName += "Id";
+            }
+            return primaryKeyName;
+        }
+
+        /// <summary>
+        /// Returns the name of a foreign key property for a given foreign key.
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="foreignKey">The foreign key.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If it is a simple foreign key, it is the NetName of the column
+        /// if it is a composite foreign key, it is the NetName of the foreign table
+        /// if there is a collision with the class name, append "Key"
+        /// If there are multiple foreign keys to one table, ensure they are unique.
+        /// </remarks>
+        public virtual string ForeignKeyName(DatabaseTable table, DatabaseConstraint foreignKey)
+        {
+            var refTable = foreignKey.ReferencedTable(table.DatabaseSchema);
+
+            if (refTable == null)
+            {
+                //we can't find the foreign key table, so just write the columns
+                return null;
+            }
+            //This is a name for the foreign key. Only used for composite keys.
+            var propertyName = refTable.NetName;
+
+            //if there is only one column (not composite) use the netName of that column
+            if (foreignKey.Columns.Count == 1)
+            {
+                var col = foreignKey.Columns.Single();
+                propertyName = table.FindColumn(col).NetName;
+            }
+            else //composite keys
+            {
+                // Check whether the referenced table is used in any other key. This ensures that the property names
+                // are unique.
+                if (table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
+                {
+                    // Append the key name to the property name. In the event of multiple foreign keys to the same table
+                    // This will give the consumer context.
+                    propertyName += foreignKey.Name;
+                }
+            }
+
+            // Ensures that property name cannot be the same as class name
+            if (propertyName == table.NetName)
+            {
+                propertyName += "Key";
+            }
+            return propertyName;
         }
     }
 }

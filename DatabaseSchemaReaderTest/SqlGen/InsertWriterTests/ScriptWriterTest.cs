@@ -1,5 +1,4 @@
-﻿using DatabaseSchemaReader;
-using DatabaseSchemaReader.Data;
+﻿using DatabaseSchemaReader.Data;
 using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,18 +19,12 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         const string Providername = "System.Data.SqlClient";
         const string ConnectionString = ConnectionStrings.Northwind;
 
-        private static DatabaseReader GetNortwindReader()
-        {
-            ProviderChecker.Check(Providername, ConnectionString);
-
-            return new DatabaseReader(ConnectionString, Providername);
-        }
 
         [TestMethod]
         public void TestInsertIntegration()
         {
             //arrange
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var table = dbReader.Table("Customers");
 
             var rdr = new ScriptWriter();

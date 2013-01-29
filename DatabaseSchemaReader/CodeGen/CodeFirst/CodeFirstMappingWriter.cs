@@ -244,6 +244,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
             if (dt.IsNumeric && !dt.IsInt && !dt.IsFloat && column.Precision.HasValue) //decimal
             {
+                if (Type.GetType(dt.NetDataType) == typeof(short))
+                    return; //shorts don't have precision either
                 if (column.Precision != 18 || column.Scale != 0)
                 {
                     sb.AppendFormat(CultureInfo.InvariantCulture, ".HasPrecision({0}, {1})",

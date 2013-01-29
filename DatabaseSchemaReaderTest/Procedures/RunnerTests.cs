@@ -1,11 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using DatabaseSchemaReader;
+﻿using System.Diagnostics;
 using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.Procedures;
-using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -25,41 +20,18 @@ namespace DatabaseSchemaReaderTest.Procedures
     [TestClass]
     public class RunnerTests
     {
-        private static DatabaseReader GetNortwindReader()
-        {
-            const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
-            ProviderChecker.Check(providername, connectionString);
-
-            var databaseReader = new DatabaseReader(connectionString, providername);
-            return databaseReader;
-        }
-
-        private static DirectoryInfo CreateDirectory(string folder)
-        {
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
-            if (directory.GetDirectories(folder).Any())
-            {
-                //if it's already there, clear it out
-                var sub = directory.GetDirectories(folder).First();
-                sub.Delete(true);
-            }
-            return directory.CreateSubdirectory(folder);
-        }
-
-
 
         [TestMethod]
         public void TestRunnerWithNorthwind()
         {
             //smoke test - does this run without any exceptions
-            var dbReader = GetNortwindReader();
+            var dbReader = TestHelper.GetNorthwindReader();
             var schema = dbReader.ReadAll();
 
             var runner = new ResultSetReader(schema);
             runner.Execute();
 
-            var directory = CreateDirectory("NorthwindSproc");
+            var directory = TestHelper.CreateDirectory("NorthwindSproc");
             const string @namespace = "Northwind.Domain";
             var settings = new CodeWriterSettings { Namespace = @namespace };
 

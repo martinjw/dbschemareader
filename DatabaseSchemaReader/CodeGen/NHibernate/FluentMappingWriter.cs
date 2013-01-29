@@ -132,6 +132,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 DatabaseColumn column = _table.FindColumn(col);
 
                 const string keyType = "KeyProperty";
+                var name = _codeWriterSettings.Namer.PrimaryKeyName(column);
                 // KL: Mapping the foreign keys separately. KeyReference was causing issues.
                 //var keyType = "KeyReference";
                 //if (column.ForeignKeyTable == null)
@@ -141,7 +142,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 sb.AppendFormat(CultureInfo.InvariantCulture,
                                                 ".{0}(x => x.{1}, \"{2}\")",
                                                 keyType,
-                                                column.NetName,
+                                                name,
                                                 column.Name);
             }
             sb.Append(";");
@@ -218,33 +219,15 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         /// <summary>
         /// KL: Writes the foreign key an also supports composite foreign keys.
         /// </summary>
-        /// <param name="fKey">The f key.</param>
-        private void WriteForeignKey(DatabaseConstraint fKey)
+        /// <param name="foreignKey">The foreign key.</param>
+        private void WriteForeignKey(DatabaseConstraint foreignKey)
         {
-            var propertyName = "Unknown";
-            var refTable = _table.DatabaseSchema.FindTableByName(fKey.RefersToTable);
-            var parentTable = _table.DatabaseSchema.FindTableByName(fKey.TableName);
-            if (refTable != null)
-                propertyName = refTable.NetName;
-
-            // Check whether the referenced table is used in any other key. This ensures that the property names
-            // are unique.
-            if (parentTable.ForeignKeys.Count(x => x.RefersToTable == fKey.RefersToTable) > 1)
-            {
-                // Append the key name to the property name. In the event of multiple foreign keys to the same table
-                // This will give the consumer context.
-                propertyName += fKey.Name;
-            }
-
-            // Ensures that property name cannot be the same as class name
-            if (propertyName == parentTable.NetName)
-            {
-                propertyName += "Key";
-            }
+            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey);
+            if (string.IsNullOrEmpty(propertyName)) return;
 
             var sb = new StringBuilder();
 
-            var cols = fKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+            var cols = foreignKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
 
             sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
             if (cols.Length > 1)
@@ -253,7 +236,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             }
             else
             {
-                sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\");", fKey.Columns.FirstOrDefault());
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\");", foreignKey.Columns.FirstOrDefault());
             }
             _cb.AppendLine(sb.ToString());
         }
