@@ -42,7 +42,7 @@ namespace DatabaseSchemaReaderTest.Codegen
 
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var directory = CreateDirectory("MyTest");
+            var directory = TestHelper.CreateDirectory("TestRiaServices");
             const string @namespace = "MyTest";
             var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.PocoRiaServices };
 
@@ -62,18 +62,6 @@ namespace DatabaseSchemaReaderTest.Codegen
 
             var ok = cs.Contains("[MetadataType(typeof(Category.CategoryMetadata))]");
             Assert.IsTrue(ok, "Should contain nested metadata class");
-        }
-
-        private static DirectoryInfo CreateDirectory(string folder)
-        {
-            var directory = new DirectoryInfo(Environment.CurrentDirectory);
-            if (directory.GetDirectories(folder).Any())
-            {
-                //if it's already there, clear it out
-                var sub = directory.GetDirectories(folder).First();
-                sub.Delete(true);
-            }
-            return directory.CreateSubdirectory(folder);
         }
     }
 }
