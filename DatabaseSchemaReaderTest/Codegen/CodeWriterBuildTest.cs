@@ -37,6 +37,7 @@ namespace DatabaseSchemaReaderTest.Codegen
                                {
                                    Namespace = @namespace, 
                                    CodeTarget = CodeTarget.PocoNHibernateHbm, 
+                                   Namer = new PluralizingNamer(),
                                    WriteProjectFile = true
                                };
 

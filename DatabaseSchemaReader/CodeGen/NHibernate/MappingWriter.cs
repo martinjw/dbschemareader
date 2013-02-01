@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
@@ -27,7 +28,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             _classElement = new XElement(_xmlns + "class",
                                          new XAttribute("name", _table.NetName),
                                          new XAttribute("table", SqlSafe(_table.Name)),
-                                         new XAttribute("schema", SqlSafe(_table.SchemaOwner)),
+                                         _table.SchemaOwner != null ? new XAttribute("schema", SqlSafe(_table.SchemaOwner)) : null,
                 //consider this
                                          new XAttribute("dynamic-update", "true"),
                                          new XAttribute("optimistic-lock", "dirty"));
@@ -73,7 +74,8 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             bag.SetAttributeValue("name", propertyName);
             //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");
             bag.SetAttributeValue("table", SqlSafe(foreignKeyTable));
-            bag.SetAttributeValue("schema", SqlSafe(foreignKeyChild.SchemaOwner));
+            if (foreignKeyChild.SchemaOwner != null)
+                bag.SetAttributeValue("schema", SqlSafe(foreignKeyChild.SchemaOwner));
             bag.SetAttributeValue("cascade", "all-delete-orphan");
             //assume child always controls collection
             bag.SetAttributeValue("inverse", "true");
@@ -92,13 +94,41 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
         private void WriteColumns()
         {
-            foreach (var column in _table.Columns)
+            var columns = _table.Columns.Where(column => !column.IsPrimaryKey);
+            columns = WriteNaturalKey(columns);
+            foreach (var column in columns)
             {
-                if (!column.IsPrimaryKey)
-                {
-                    WriteColumn(column);
-                }
+                WriteColumn(column);
             }
+        }
+
+        private IEnumerable<DatabaseColumn> WriteNaturalKey(IEnumerable<DatabaseColumn> columns)
+        {
+            var uk = _table.UniqueKeys.FirstOrDefault();
+            if (uk == null) return columns;
+
+            //we only deal with one natural key
+            var ukcols = uk.Columns.Select(x => _table.FindColumn(x)).ToList();
+            //in databases unique keys can be nullable, but not in NHibernate
+            //for now we don't want to deal with foreign keys either
+            if (!ukcols.Any(x => x.IsForeignKey && x.Nullable))
+            {
+                var naturalKey = new XElement(_xmlns + "natural-id", new XAttribute("mutable", "true"));
+                _classElement.Add(naturalKey);
+
+                var list = columns.ToList();
+                foreach (var ukcol in ukcols)
+                {
+                    var property = CreateColumn(ukcol);
+                    //add columns to natural key
+                    naturalKey.Add(property);
+                    //remove uk columns from list
+                    list.RemoveAll(c => c.Name == ukcol.Name);
+                }
+                columns = list;
+            }
+
+            return columns;
         }
 
         private void WriteColumn(DatabaseColumn column)
@@ -109,10 +139,17 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 return;
             }
 
+            var property = CreateColumn(column);
+
+            _classElement.Add(property);
+        }
+
+        private XElement CreateColumn(DatabaseColumn column)
+        {
             var propertyName = column.NetName;
 
             var property = new XElement(_xmlns + "property",
-                new XAttribute("name", propertyName));
+                                        new XAttribute("name", propertyName));
             if (propertyName != column.Name)
             {
                 property.SetAttributeValue("column", SqlSafe(column.Name));
@@ -134,22 +171,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             {
                 property.SetAttributeValue("not-null", "true");
             }
-
-            if (WriteNaturalKey(column, property)) return;
-
-            _classElement.Add(property);
-        }
-
-        private bool WriteNaturalKey(DatabaseColumn column, XElement property)
-        {
-            //in databases unique keys can be nullable, but not in NHibernate
-            var isNaturalKey = (column.IsUniqueKey && !column.Nullable);
-            if (!isNaturalKey) return false;
-
-            var naturalKey = new XElement(_xmlns + "natural-id", new XAttribute("mutable", "true"));
-            _classElement.Add(naturalKey);
-            naturalKey.Add(property);
-            return true;
+            return property;
         }
 
         private void WriteForeignKey(DatabaseColumn column)
@@ -267,8 +289,8 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 var key = new XElement(_xmlns + keyType);
                 key.SetAttributeValue("column", SqlSafe(colName));
                 key.SetAttributeValue("name", propertyName);
-                if (column.ForeignKeyTable != null)
-                    key.SetAttributeValue("class", column.ForeignKeyTable.NetName);
+                //if (column.ForeignKeyTable != null)
+                //    key.SetAttributeValue("class", column.ForeignKeyTable.NetName);
                 id.Add(key);
             }
 

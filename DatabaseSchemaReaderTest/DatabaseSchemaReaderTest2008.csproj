@@ -62,6 +62,7 @@
     <Compile Include="Codegen\DataAnnotationWriterTest.cs" />
     <Compile Include="Codegen\DataTypeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
+    <Compile Include="Codegen\NHibernateMappingWriterTest.cs" />
     <Compile Include="Codegen\RiaServicesTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <EmbeddedResource Include="Codegen\nhibernate-mapping.xsd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
