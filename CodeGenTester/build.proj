@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Run">
+  <PropertyGroup>
+    <!-- properties that are used in this build file - referenced as $(PropertyName) -->
+    <ProjectName>DatabaseSchemaReader</ProjectName>
+	<OutputPath>$(MSBuildProjectDirectory)\Bin\</OutputPath>
+  </PropertyGroup>
+  
+  <!-- targets -->
+   
+  <Target Name="Run" DependsOnTargets="Build; Execute">
+    <Message Text="Done" />
+  </Target>
+  
+  <Target Name="Build">
+	<Copy SourceFiles="..\bin\DatabaseSchemaReader.dll" DestinationFolder="$(OutputPath)" />
+    <Message Text="Building CodeGenTester" />
+    <MSBuild Projects="CodeGenTester\CodeGenTester.csproj" 
+		Properties="OutputPath=$(OutputPath)"/>
+    <Message Text="CodeGenTester Built" />
+  </Target>
+  <Target Name="Execute">
+	<Exec Command="Bin\CodeGenTester.exe"/>
+  </Target>
+  
+</Project>
