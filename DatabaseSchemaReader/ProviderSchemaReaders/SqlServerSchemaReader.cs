@@ -118,7 +118,7 @@ WHERE
             return sqlCommand;
         }
 
-        protected override DataTable IdentityColumns(string tableName, DbConnection conn)
+        protected override DataTable IdentityColumns(string tableName, DbConnection connection)
         {
             const string sqlCommand = @"SELECT 
 SchemaOwner = s.name, 
@@ -135,7 +135,26 @@ WHERE
 o.type= 'U' 
 ORDER BY o.name, c.name";
 
-            return CommandForTable(tableName, conn, IdentityColumnsCollectionName, sqlCommand);
+            return CommandForTable(tableName, connection, IdentityColumnsCollectionName, sqlCommand);
+        }
+
+        protected override DataTable ComputedColumns(string tableName, DbConnection connection)
+        {
+            const string sqlCommand = @"SELECT 
+SchemaOwner = s.name, 
+TableName = o.name, 
+ColumnName = c.name,
+ComputedDefinition = c.definition
+FROM sys.computed_columns c
+INNER JOIN sys.all_objects o ON c.object_id = o.object_id
+INNER JOIN sys.schemas s ON s.schema_id = o.schema_id
+WHERE 
+(o.name = @tableName OR @tableName IS NULL) AND 
+(s.name = @schemaOwner OR @schemaOwner IS NULL) AND 
+o.type= 'U' 
+ORDER BY o.name, c.name";
+
+            return CommandForTable(tableName, connection, ComputedColumnsCollectionName, sqlCommand);
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)

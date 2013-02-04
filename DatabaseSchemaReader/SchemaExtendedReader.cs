@@ -17,6 +17,7 @@ namespace DatabaseSchemaReader
         #region Names of collections
         public virtual string ProcedureSourceCollectionName { get { return "ProcedureSource"; } }
         public virtual string ViewColumnsCollectionName { get { return "ViewColumns"; } }
+        public virtual string ComputedColumnsCollectionName { get { return "ComputedColumns"; } }
         #endregion
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace DatabaseSchemaReader
                 ds.Tables.Add(CheckConstraints(tableName, conn));
 
                 ds.Tables.Add(IdentityColumns(tableName, conn));
-
+                ds.Tables.Add(ComputedColumns(tableName, conn));
             }
             return ds;
         }
@@ -122,6 +123,34 @@ namespace DatabaseSchemaReader
             //in most cases this is exposed via the table columns
             var dt = Columns(viewName);
             dt.TableName = ViewColumnsCollectionName;
+            return dt;
+        }
+
+        /// <summary>
+        /// Gets all the "computed" (or "virtual") columns
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        public virtual DataTable ComputedColumns(string tableName)
+        {
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return ComputedColumns(tableName, connection);
+            }
+        }
+        /// <summary>
+        /// Gets all the "computed" (or "virtual") columns
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        protected virtual DataTable ComputedColumns(string tableName, DbConnection connection)
+        {
+            //override this if provider has computed columns
+            DataTable dt = CreateDataTable(ComputedColumnsCollectionName);
             return dt;
         }
 

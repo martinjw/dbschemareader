@@ -249,6 +249,23 @@ ORDER BY OWNER, NAME, TYPE, LINE";
             }
         }
 
+        protected override DataTable ComputedColumns(string tableName, DbConnection connection)
+        {
+            const string sqlCommand = @"SELECT 
+OWNER,
+TABLE_NAME, 
+COLUMN_NAME, 
+DATA_DEFAULT AS COMPUTEDDEFINITION 
+FROM user_tab_cols
+WHERE 
+VIRTUAL_COLUMN = 'YES' AND
+(TABLE_NAME = @tableName OR @tableName IS NULL) AND 
+(OWNER = @schemaOwner OR @schemaOwner IS NULL) 
+ORDER BY TABLE_NAME, COLUMN_NAME";
+
+            return CommandForTable(tableName, connection, ComputedColumnsCollectionName, sqlCommand);
+        }
+
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
             const string sqlCommand = @"SELECT OWNER,

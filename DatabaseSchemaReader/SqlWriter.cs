@@ -161,7 +161,7 @@ namespace DatabaseSchemaReader
             foreach (var column in _table.Columns)
             {
                 //also not SqlServer timestamp
-                if (!column.IsIdentity && !column.IsTimestamp())
+                if (!column.IsIdentity && !column.IsTimestamp() && !column.IsComputed)
                     list.Add(column.Name);
             }
             return list.ToArray();
