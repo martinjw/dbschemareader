@@ -236,6 +236,7 @@ namespace DatabaseSchemaReader
             var indexLoader = new IndexLoader(_sr);
 
             DataTable ids = _sr.IdentityColumns(null);
+            DataTable computeds = _sr.ComputedColumns(null);
 
             DataTable triggers = _sr.Triggers(null);
             var triggerConverter = new TriggerConverter(triggers);
@@ -271,6 +272,8 @@ namespace DatabaseSchemaReader
                 indexLoader.AddIndexes(table);
 
                 SchemaConstraintConverter.AddIdentity(ids, table);
+                SchemaConstraintConverter.AddComputed(computeds, table);
+
                 table.Triggers.Clear();
                 table.Triggers.AddRange(triggerConverter.Triggers(tableName));
                 _sr.PostProcessing(table);

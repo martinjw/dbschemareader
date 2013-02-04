@@ -128,21 +128,36 @@ namespace DatabaseSchemaReader.Conversion
             foreach (DataRow row in dt.Rows)
             {
                 string tableName = row["TableName"].ToString();
-                string colName = row["ColumnName"].ToString();
                 if (!tableName.Equals(table.Name, StringComparison.OrdinalIgnoreCase))
                     continue;
-                foreach (DatabaseColumn col in table.Columns)
+                string colName = row["ColumnName"].ToString();
+                var col = table.FindColumn(colName);
+                if (col != null)
                 {
-                    if (col.Name.Equals(colName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        col.IsIdentity = true;
-                        if (hasSeedInfo)
-                            col.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
-                        if (hasIncrementInfo)
-                            col.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
-                        //col.IsPrimaryKey = true;
-                        break;
-                    }
+                    col.IsIdentity = true;
+                    if (hasSeedInfo)
+                        col.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
+                    if (hasIncrementInfo)
+                        col.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
+                    //col.IsPrimaryKey = true;
+                }
+            }
+        }
+
+        public static void AddComputed(DataTable dt, DatabaseTable table)
+        {
+            foreach (DataRow row in dt.Rows)
+            {
+                var tableName = row["TableName"].ToString();
+                if (!tableName.Equals(table.Name, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var colName = row["ColumnName"].ToString();
+                var col = table.FindColumn(colName);
+                if (col != null)
+                {
+                    col.ComputedDefinition = row["COMPUTEDDEFINITION"].ToString();
+                    //remove the default value - it's readonly!
+                    col.DefaultValue = null;
                 }
             }
         }

@@ -114,6 +114,13 @@ namespace DatabaseSchemaReader.DataSchema
         /// </summary>
         public long IdentityIncrement { get; set; }
 
+        /// <summary>
+        /// Gets or sets the "computed" (or "virtual") definition.
+        /// </summary>
+        /// <value>
+        /// The computed definition.
+        /// </value>
+        public string ComputedDefinition { get; set; }
         #endregion
 
         #region Derived properties
@@ -201,6 +208,14 @@ namespace DatabaseSchemaReader.DataSchema
         #endregion
 
         #region Utility methods
+
+        /// <summary>
+        /// Gets a value indicating whether this column is "computed" or "virtual".
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this column is computed; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsComputed { get { return !string.IsNullOrEmpty(ComputedDefinition); } }
 
         /// <summary>
         /// Get non-triviality of an identity column
