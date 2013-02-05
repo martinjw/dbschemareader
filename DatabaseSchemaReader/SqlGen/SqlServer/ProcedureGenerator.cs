@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.Conversion;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
@@ -17,7 +18,10 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             : base(table)
         {
             SqlWriter = new SqlWriter(table, SqlType.SqlServer);
-            _dataTypeWriter = new DataTypeWriter();
+            SqlType? originSqlType = null;
+            if (table.DatabaseSchema != null)
+                originSqlType = ProviderToSqlType.Convert(table.DatabaseSchema.Provider);
+            _dataTypeWriter = new DataTypeWriter(originSqlType);
         }
 
         protected override IProcedureWriter CreateProcedureWriter(string procName)

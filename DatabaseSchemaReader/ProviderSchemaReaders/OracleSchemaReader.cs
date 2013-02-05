@@ -7,9 +7,31 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
     class OracleSchemaReader : SchemaExtendedReader
     {
+
         public OracleSchemaReader(string connectionString, string providerName)
             : base(connectionString, providerName)
         {
+        }
+
+        /// <summary>
+        /// The database version.
+        /// </summary>
+        private int? _version;
+
+        /// <summary>
+        /// Parse out the server version (9, 10 or 11, hopefully)
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns></returns>
+        private int? Version(DbConnection connection)
+        {
+            if (!_version.HasValue)
+            {
+                var version = connection.ServerVersion;
+                var match = Regex.Match(version, @"\b(\d+)(?=\D)");
+                _version = int.Parse(match.Value);
+            }
+            return _version;
         }
 
         public override DataTable CheckConstraints(string tableName)
@@ -251,20 +273,26 @@ ORDER BY OWNER, NAME, TYPE, LINE";
 
         protected override DataTable ComputedColumns(string tableName, DbConnection connection)
         {
+            if (Version(connection) < 11)
+            {
+                //only supported in 11g+
+                return base.ComputedColumns(tableName);
+            }
             const string sqlCommand = @"SELECT 
 OWNER,
 TABLE_NAME, 
 COLUMN_NAME, 
 DATA_DEFAULT AS COMPUTEDDEFINITION 
-FROM user_tab_cols
+FROM all_tab_cols
 WHERE 
 VIRTUAL_COLUMN = 'YES' AND
-(TABLE_NAME = @tableName OR @tableName IS NULL) AND 
-(OWNER = @schemaOwner OR @schemaOwner IS NULL) 
+(TABLE_NAME = :tableName OR :tableName IS NULL) AND 
+(OWNER = :schemaOwner OR :schemaOwner IS NULL) 
 ORDER BY TABLE_NAME, COLUMN_NAME";
 
             return CommandForTable(tableName, connection, ComputedColumnsCollectionName, sqlCommand);
         }
+
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {

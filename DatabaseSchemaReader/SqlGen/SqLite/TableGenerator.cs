@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
@@ -32,6 +33,9 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             if (!string.IsNullOrEmpty(column.DefaultValue) && !SqlTranslator.IsGuidGenerator(column.DefaultValue))
             {
                 var value = SqlTranslator.Fix(column.DefaultValue);
+                //SqlServer (N'string') format
+                if (value.StartsWith("(N'", StringComparison.OrdinalIgnoreCase)) 
+                    value = value.Replace("(N'", "('");
                 type += " DEFAULT " + value;
             }
 

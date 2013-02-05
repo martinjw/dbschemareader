@@ -193,12 +193,19 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 sb.AppendFormat(CultureInfo.InvariantCulture,
                                 ".HasDatabaseGeneratedOption(DatabaseGeneratedOption.None)");
             }
-
-            WriteColumnType(column, sb);
-
-            if (!column.Nullable)
+            if (column.IsComputed)
             {
-                sb.Append(".IsRequired()");
+                sb.AppendLine("//NB cannot specify definition, so DDL in CreateDatabase and migrations will fail");
+                sb.AppendLine(".HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed)");
+            }
+            else
+            {
+                WriteColumnType(column, sb);
+
+                if (!column.Nullable)
+                {
+                    sb.Append(".IsRequired()");
+                }
             }
 
             sb.Append(";");
@@ -244,8 +251,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
             if (dt.IsNumeric && !dt.IsInt && !dt.IsFloat && column.Precision.HasValue) //decimal
             {
-                if (Type.GetType(dt.NetDataType) == typeof(short))
-                    return; //shorts don't have precision either
+                if (Type.GetType(dt.NetDataType) != typeof(decimal))
+                    return; //short and long don't have precision either
                 if (column.Precision != 18 || column.Scale != 0)
                 {
                     sb.AppendFormat(CultureInfo.InvariantCulture, ".HasPrecision({0}, {1})",

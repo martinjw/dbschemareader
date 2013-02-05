@@ -26,5 +26,10 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
             //this will ensure the add constraints don't have schema naming
             return new SqlServerCeMigrationGenerator();
         }
+
+        protected override bool HandleComputed(DatabaseColumn column)
+        {
+            return false; //computed columns aren't supported
+        }
     }
 }

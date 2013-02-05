@@ -144,6 +144,7 @@
     <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\AccessCheckConstraintTest.cs" />
     <Compile Include="SqlGen\SqlServer\AccessConversionTest.cs" />
+    <Compile Include="SqlGen\SqlServer\TableGeneratorTest.cs" />
     <Compile Include="SqlGen\SqlServer\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\NumberDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\StringDataTypesTest.cs" />

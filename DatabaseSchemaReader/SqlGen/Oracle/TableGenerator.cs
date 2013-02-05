@@ -56,6 +56,11 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         protected override string WriteDataType(DatabaseColumn column)
         {
+            if (column.IsComputed)
+            {
+                //Generated Always and Virtual are optional keywords
+                return "GENERATED ALWAYS AS " + column.ComputedDefinition + " VIRTUAL";
+            }
             return new DataTypeWriter().WriteDataType(column);
         }
 

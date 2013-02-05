@@ -84,6 +84,23 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             Assert.AreEqual("VARBINARY (MAX)", result);
         }
 
+
+        [TestMethod]
+        public void TestBinary()
+        {
+            //arrange
+            _column.DbDataType = "BINARY";
+            _column.Length = 400;
+            //specify that we are coming from SqlServer, so keep Binary format
+            var typeWriter = new DataTypeWriter(SqlType.SqlServer);
+
+            //act
+            var result = typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("BINARY (400)", result);
+        }
+
         [TestMethod]
         public void TestVarImage()
         {
