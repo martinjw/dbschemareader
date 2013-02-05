@@ -31,55 +31,62 @@ namespace DatabaseSchemaReader
         /// <param name="providerName">Name of the provider.</param>
         public DatabaseReader(string connectionString, string providerName)
         {
-            _sr = new SchemaExtendedReader(connectionString, providerName);
-            if (!string.IsNullOrEmpty(providerName))
+            if (string.IsNullOrEmpty(providerName))
+                throw new ArgumentNullException("providerName", "providerName must not be empty");
+
+            var type = ProviderToSqlType.Convert(providerName);
+            switch (type)
             {
-                var type = ProviderToSqlType.Convert(providerName);
-                switch (type)
-                {
-                    case SqlType.Oracle:
-                        _sr = new OracleSchemaReader(connectionString, providerName);
-                        break;
-                    case SqlType.SqlServer:
-                        _sr = new SqlServerSchemaReader(connectionString, providerName);
-                        break;
-                    case SqlType.SqlServerCe:
-                        _sr = new SqlServerCeSchemaReader(connectionString, providerName);
-                        break;
-                    case SqlType.MySql:
-                        _sr = new MySqlSchemaReader(connectionString, providerName);
-                        break;
-                    case SqlType.PostgreSql:
-                        _sr = new PostgreSqlSchemaReader(connectionString, providerName);
-                        break;
-                    case SqlType.Db2:
-                        _sr = new Db2SchemaReader(connectionString, providerName);
-                        break;
-                }
-                if (providerName.Equals("Ingres.Client", StringComparison.OrdinalIgnoreCase))
-                {
-                    _sr = new IngresSchemaReader(connectionString, providerName);
-                }
-                else if (providerName.Equals("iAnyWhere.Data.SQLAnyWhere", StringComparison.OrdinalIgnoreCase))
-                {
-                    _sr = new SybaseAsaSchemaReader(connectionString, providerName);
-                }
-                else if (providerName.Equals("Sybase.Data.AseClient", StringComparison.OrdinalIgnoreCase))
-                {
-                    _sr = new SybaseAseSchemaReader(connectionString, providerName);
-                }
-                else if (providerName.Equals("iAnyWhere.Data.UltraLite", StringComparison.OrdinalIgnoreCase))
-                {
-                    _sr = new SybaseUltraLiteSchemaReader(connectionString, providerName);
-                }
-                else if (providerName.Equals("System.Data.OleDb", StringComparison.OrdinalIgnoreCase))
-                {
-                    _sr = new OleDbSchemaReader(connectionString, providerName);
-                }
-                else if (providerName.Equals("System.Data.VistaDB", StringComparison.OrdinalIgnoreCase))
-                {
-                    _sr = new VistaDbSchemaReader(connectionString, providerName);
-                }
+                case SqlType.Oracle:
+                    _sr = new OracleSchemaReader(connectionString, providerName);
+                    break;
+                case SqlType.SqlServer:
+                    _sr = new SqlServerSchemaReader(connectionString, providerName);
+                    break;
+                case SqlType.SqlServerCe:
+                    _sr = new SqlServerCeSchemaReader(connectionString, providerName);
+                    break;
+                case SqlType.MySql:
+                    _sr = new MySqlSchemaReader(connectionString, providerName);
+                    break;
+                case SqlType.PostgreSql:
+                    _sr = new PostgreSqlSchemaReader(connectionString, providerName);
+                    break;
+                case SqlType.Db2:
+                    _sr = new Db2SchemaReader(connectionString, providerName);
+                    break;
+                default:
+                    //all the other types
+                    if (providerName.Equals("Ingres.Client", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sr = new IngresSchemaReader(connectionString, providerName);
+                    }
+                    else if (providerName.Equals("iAnyWhere.Data.SQLAnyWhere", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sr = new SybaseAsaSchemaReader(connectionString, providerName);
+                    }
+                    else if (providerName.Equals("Sybase.Data.AseClient", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sr = new SybaseAseSchemaReader(connectionString, providerName);
+                    }
+                    else if (providerName.Equals("iAnyWhere.Data.UltraLite", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sr = new SybaseUltraLiteSchemaReader(connectionString, providerName);
+                    }
+                    else if (providerName.Equals("System.Data.OleDb", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sr = new OleDbSchemaReader(connectionString, providerName);
+                    }
+                    else if (providerName.Equals("System.Data.VistaDB", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _sr = new VistaDbSchemaReader(connectionString, providerName);
+                    }
+
+                    break;
+            }
+            if (_sr == null)
+            {
+                _sr = new SchemaExtendedReader(connectionString, providerName);
             }
             _db = new DatabaseSchema(connectionString, providerName);
         }

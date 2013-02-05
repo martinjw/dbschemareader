@@ -155,21 +155,28 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 property.SetAttributeValue("column", SqlSafe(column.Name));
             }
 
-            var dt = column.DataType;
-            if (dt != null)
+            if (column.IsComputed)
             {
-                var dataType = dt.NetCodeName(column);
-                property.SetAttributeValue("type", dataType);
-                //nvarchar(max) may be -1
-                if (dt.IsString && column.Length > 0)
-                {
-                    property.SetAttributeValue("length", column.Length.ToString());
-                }
+                property.SetAttributeValue("generated", "always");
             }
-
-            if (!column.Nullable)
+            else
             {
-                property.SetAttributeValue("not-null", "true");
+                var dt = column.DataType;
+                if (dt != null)
+                {
+                    var dataType = dt.NetCodeName(column);
+                    property.SetAttributeValue("type", dataType);
+                    //nvarchar(max) may be -1
+                    if (dt.IsString && column.Length > 0)
+                    {
+                        property.SetAttributeValue("length", column.Length.ToString());
+                    }
+                }
+
+                if (!column.Nullable)
+                {
+                    property.SetAttributeValue("not-null", "true");
+                }
             }
             return property;
         }

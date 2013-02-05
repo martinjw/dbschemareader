@@ -154,6 +154,25 @@ namespace DatabaseSchemaReader
             return dt;
         }
 
+        /// <summary>
+        /// Gets the database version string
+        /// </summary>
+        /// <returns></returns>
+        public virtual string ServerVersion()
+        {
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return ServerVersion(connection);
+            }
+        }
+        protected virtual string ServerVersion(DbConnection connection)
+        {
+            return connection.ServerVersion;
+        }
+
         #region protected helpers
 
         protected virtual DataTable CommandForTable(string tableName, DbConnection conn, string collectionName, string sqlCommand)

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -14,7 +15,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         public TableGenerator(DatabaseTable table)
             : base(table)
         {
-            DataTypeWriter = new DataTypeWriter();
+            SqlType? originSqlType = null;
+            if (table.DatabaseSchema != null)
+                originSqlType = ProviderToSqlType.Convert(table.DatabaseSchema.Provider);
+
+            DataTypeWriter = new DataTypeWriter(originSqlType);
         }
 
         protected override string ConstraintWriter()
@@ -88,8 +93,17 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return new SqlFormatProvider();
         }
 
+        protected virtual bool HandleComputed(DatabaseColumn column)
+        {
+            return (column.IsComputed);
+        }
+
         protected override string WriteDataType(DatabaseColumn column)
         {
+            if (HandleComputed(column))
+            {
+                return "AS " + column.ComputedDefinition;
+            }
 
             var sql = DataTypeWriter.WriteDataType(column);
             if (sql == "BIT") _hasBit = true;
@@ -106,14 +120,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 }
 
                 const string defaultConstraint = "DEFAULT ";
-                if (IsStringColumn(column))
-                {
-                    defaultValue = defaultConstraint + "'" + value + "'";
-                }
-                else //numeric default
-                {
-                    defaultValue = defaultConstraint + value;
-                }
+                //strings should already have the single quotes in place
+                defaultValue = defaultConstraint + value;
             }
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))
@@ -137,14 +145,14 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return SqlTranslator.Fix(defaultValue);
         }
 
-        private static bool IsStringColumn(DatabaseColumn column)
-        {
-            var dataType = column.DbDataType.ToUpperInvariant();
-            var isString = (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR");
-            var dt = column.DataType;
-            if (dt != null && dt.IsString) isString = true;
-            return isString;
-        }
+        //private static bool IsStringColumn(DatabaseColumn column)
+        //{
+        //    var dataType = column.DbDataType.ToUpperInvariant();
+        //    var isString = (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR");
+        //    var dt = column.DataType;
+        //    if (dt != null && dt.IsString) isString = true;
+        //    return isString;
+        //}
 
         protected override string NonNativeAutoIncrementWriter()
         {

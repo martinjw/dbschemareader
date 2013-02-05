@@ -167,6 +167,14 @@ namespace DatabaseSchemaReader
             return list.ToArray();
         }
 
+        private string[] GetAllNoncomputedColumns()
+        {
+            return _table.Columns
+                .Where(c => !c.IsComputed)
+                .Select(x => x.Name)
+                .ToArray();
+        }
+
         private string[] GetAllColumns()
         {
             var cols = new string[_table.Columns.Count];
@@ -279,6 +287,8 @@ namespace DatabaseSchemaReader
                     if (PrimaryKeys.Contains(name)) continue;
                     //also not SqlServer timestamp
                     if (column.IsTimestamp()) continue;
+                    //not computer
+                    if (column.IsComputed) continue;
                     cols.Add(name);
                 }
                 return cols;
@@ -597,7 +607,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
             if (!includeIdentityInInsert)
                 cols = GetColumns(); //excluding identity and timestamps
             else
-                cols = GetAllColumns(); //incl indentity
+                cols = GetAllNoncomputedColumns(); //incl indentity
 
             var values = new string[cols.Length];
             for (int i = 0; i < cols.Length; i++)

@@ -13,6 +13,18 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     /// </remarks>
     class DataTypeWriter : IDataTypeWriter
     {
+        public DataTypeWriter()
+            : this(null)
+        {
+        }
+        public DataTypeWriter(SqlType? originSqlType)
+        {
+            _originSqlType = originSqlType;
+        }
+
+        private readonly SqlType? _originSqlType;
+
+
         public static string WriteDataType(string dataType)
         {
             //don't know provider
@@ -48,7 +60,29 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 dataType = "NVARCHAR";
                 length = -1;
             }
-            dataType = ConvertOtherPlatformTypes(dataType, providerType, length, precision, scale);
+
+            //In SqlServer, the maximum length allowed for any data type is 8000.
+            //Ergo, TEXTs and NTEXTs that are larger (int.MaxValue or int.MaxValue/2) must be SqlServer types
+            if (dataType == "NTEXT" && length > 8000)
+            {
+                return "NTEXT";
+            }
+            if (dataType == "TEXT" && length > 8000)
+            {
+                return "TEXT";
+            }
+            if (_originSqlType == SqlType.SqlServer)
+            {
+                if (dataType == "BINARY")
+                {
+                    //should not be varbinary
+                    return WriteDataTypeWithLength(dataType, length);
+                }
+            }
+            else
+            {
+                dataType = ConvertOtherPlatformTypes(dataType, providerType, length, precision, scale);
+            }
 
             if ((dataType == "DATETIME2" || dataType == "TIME") && column.DateTimePrecision.HasValue)
             {

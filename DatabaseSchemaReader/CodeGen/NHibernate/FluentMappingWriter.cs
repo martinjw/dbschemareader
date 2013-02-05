@@ -184,19 +184,27 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\")", column.Name);
             }
 
-            var dt = column.DataType;
-            if (dt != null)
+            if (column.IsComputed)
             {
-                //nvarchar(max) may be -1
-                if (dt.IsString && column.Length > 0 && column.Length < 1073741823)
-                {
-                    sb.AppendFormat(CultureInfo.InvariantCulture, ".Length({0})", column.Length.GetValueOrDefault());
-                }
+                sb.Append(".ReadOnly().Generated.Always()");
             }
-
-            if (!column.Nullable)
+            else
             {
-                sb.Append(".Not.Nullable()");
+
+                var dt = column.DataType;
+                if (dt != null)
+                {
+                    //nvarchar(max) may be -1
+                    if (dt.IsString && column.Length > 0 && column.Length < 1073741823)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, ".Length({0})", column.Length.GetValueOrDefault());
+                    }
+                }
+
+                if (!column.Nullable)
+                {
+                    sb.Append(".Not.Nullable()");
+                }
             }
 
             sb.Append(";");
