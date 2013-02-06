@@ -138,6 +138,7 @@
     <Compile Include="SqlGen\SqlServer\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\NumberDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServer\StringDataTypesTest.cs" />
+    <Compile Include="SqlGen\SqlServer\TableGeneratorTest.cs" />
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterDb2Test.cs" />
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterPostgreSqlTest.cs" />
     <Compile Include="SqlGen\Migrations\MigrationSqlServerCeTest.cs" />
