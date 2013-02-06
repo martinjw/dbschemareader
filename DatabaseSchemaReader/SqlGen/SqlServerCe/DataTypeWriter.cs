@@ -1,4 +1,6 @@
-﻿namespace DatabaseSchemaReader.SqlGen.SqlServerCe
+﻿using DatabaseSchemaReader.DataSchema;
+
+namespace DatabaseSchemaReader.SqlGen.SqlServerCe
 {
 
     /// <summary>
@@ -6,8 +8,23 @@
     /// </summary>
     class DataTypeWriter : SqlServer.DataTypeWriter
     {
+        public override string WriteDataType(DatabaseColumn column)
+        {
+            var dataType = base.WriteDataType(column);
+            if (dataType == "TEXT")
+            {
+                dataType = "NTEXT";
+            }
+            return dataType;
+        }
+
         protected override string ConvertOtherPlatformTypes(string dataType, int providerType, int? length, int? precision, int? scale)
         {
+            if (dataType == "BINARY")
+            {
+                //should not be varbinary
+                return WriteDataTypeWithLength(dataType, length);
+            }
             dataType = base.ConvertOtherPlatformTypes(dataType, providerType, length, precision, scale);
 
             //do the subset of SqlServer features of CE
@@ -15,6 +32,9 @@
 
             switch (dataType)
             {
+                case "DECIMAL":
+                    dataType = "NUMERIC";
+                    break;
                 case "VARCHAR":
                     dataType = "NVARCHAR";
                     break;
@@ -36,7 +56,7 @@
                 case "DATE":
                 case "TIME":
                 case "DATETIMEOFFSET":
-                    dataType = "NVARCHAR";
+                    dataType = "DATETIME";
                     break;
             }
 

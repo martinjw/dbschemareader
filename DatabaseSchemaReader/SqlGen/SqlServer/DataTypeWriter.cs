@@ -36,7 +36,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// </summary>
         /// <param name="column">The column.</param>
         /// <returns></returns>
-        public string WriteDataType(DatabaseColumn column)
+        public virtual string WriteDataType(DatabaseColumn column)
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
@@ -71,7 +71,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             {
                 return "TEXT";
             }
-            if (_originSqlType == SqlType.SqlServer)
+            if (_originSqlType == SqlType.SqlServer || _originSqlType == SqlType.SqlServerCe)
             {
                 if (dataType == "BINARY")
                 {

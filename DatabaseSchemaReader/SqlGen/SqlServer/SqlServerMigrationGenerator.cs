@@ -8,6 +8,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             : base(SqlType.SqlServer)
         {
         }
+
         protected override string AlterColumnFormat
         {
             get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
