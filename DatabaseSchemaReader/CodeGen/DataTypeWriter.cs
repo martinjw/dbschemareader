@@ -28,6 +28,17 @@ namespace DatabaseSchemaReader.CodeGen
             string dataType;
             if (dt == null)
             {
+                if (CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                {
+                    if ("geometry".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "System.Data.Spatial.DbGeometry";
+                    }
+                    if ("geography".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "System.Data.Spatial.DbGeography";
+                    }
+                }
                 dataType = "object";
             }
             else if (CodeTarget == CodeTarget.PocoEntityCodeFirst || CodeTarget == CodeTarget.PocoRiaServices)
