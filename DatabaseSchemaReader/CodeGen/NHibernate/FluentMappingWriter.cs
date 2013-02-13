@@ -260,6 +260,14 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
             var propertyName = _codeWriterSettings.NameCollection(childClass);
+            if (_table.IsSharedPrimaryKey(foreignKeyChild))
+            {
+                if (foreignKey.Columns.Count == 1)
+                    _cb.AppendFormat("References(x => x.{0}).Column(\"{1}\").ForeignKey(\"{2}\");",
+                        childClass, fkColumn, foreignKey.Name);
+                //TODO composite keys
+                return;
+            }
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);

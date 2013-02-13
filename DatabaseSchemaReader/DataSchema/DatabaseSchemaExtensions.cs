@@ -138,5 +138,24 @@ namespace DatabaseSchemaReader.DataSchema
             if (foreignKey == null) return fromTable;
             return foreignKey.ReferencedTable(fromTable.DatabaseSchema);
         }
+
+        /// <summary>
+        /// Determines whether two tables are related one to one (shared primary keys)
+        /// </summary>
+        /// <param name="destination">The destination table (principal).</param>
+        /// <param name="origin">The origin table (dependent, has foreign key relationship to principal).</param>
+        /// <returns>
+        ///   <c>true</c> if [is one to one] [the specified destination]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsSharedPrimaryKey(this DatabaseTable destination, DatabaseTable origin)
+        {
+            if (origin == null || destination == null) return false;
+            var pk = origin.PrimaryKey;
+            if (pk == null) return false;
+            var columns = pk.Columns.Select(origin.FindColumn);
+            //the primary key of the origin is also a foreign key to this table
+            var allFk = columns.All(c => c.ForeignKeyTableName == destination.Name);
+            return allFk;
+        }
     }
 }

@@ -58,6 +58,10 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
                         _cb.AppendLine("// Properties");
                         WriteColumns();
+                        foreach (var foreignKey in _table.ForeignKeys)
+                        {
+                            WriteForeignKey(foreignKey);
+                        }
 
                         _cb.AppendLine("// Navigation properties");
                         foreach (var foreignKeyChild in _table.ForeignKeyChildren)
@@ -168,7 +172,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         {
             if (column.IsForeignKey)
             {
-                WriteForeignKey(column);
+                //WriteForeignKey(column);
                 return;
             }
 
@@ -274,27 +278,44 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
         }
 
-        private void WriteForeignKey(DatabaseColumn column)
+        private void WriteForeignKey(DatabaseConstraint foreignKey)
         {
-            var propertyName = column.NetName;
+            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey);
+            if (string.IsNullOrEmpty(propertyName)) return;
+
+            var columnName = foreignKey.Columns.FirstOrDefault();
+            var columns = foreignKey.Columns.Select(colName => _table.FindColumn(colName)).ToList();
+            var optional = columns.All(col => col.Nullable);
+            //foreign key is a primary key = shared with another table
+            var isPrimaryKey = columns.All(col => col.IsPrimaryKey);
+
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "Has{0}(x => x.{1})",
-                column.Nullable ? "Optional" : "Required",
+                optional ? "Optional" : "Required",
                 propertyName);
+
+            //1:1 shared primary key 
+            if (isPrimaryKey)
+            {
+                sb.Append(";");
+                _cb.AppendLine(sb.ToString());
+                return;
+            }
+
             //then map the inverse with our foreign key children convention
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", _codeWriterSettings.NameCollection(column.Table.NetName));
-            if (column.IsPrimaryKey || _codeWriterSettings.UseForeignKeyIdProperties)
+            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", _codeWriterSettings.NameCollection(_table.NetName));
+            if (_codeWriterSettings.UseForeignKeyIdProperties)
             {
                 //for pk/fk we have a mirror property
                 //TODO: don't use Id here
                 var fkIdName = propertyName + "Id";
-                _cb.AppendFormat("Property(x => x.{0}).HasColumnName(\"{1}\");", fkIdName, column.Name);
+                _cb.AppendFormat("Property(x => x.{0}).HasColumnName(\"{1}\");", fkIdName, columnName);
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".HasForeignKey(c => c.{0})", fkIdName);
             }
             else
             {
                 //otherwise specify the underlying column name
-                sb.AppendFormat(CultureInfo.InvariantCulture, ".Map(m => m.MapKey(\"{0}\"))", column.Name);
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".Map(m => m.MapKey(\"{0}\"))", columnName);
             }
             //could look up cascade rule here
             sb.Append(";");
@@ -314,7 +335,12 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             var foreignKey = foreignKeyChild.ForeignKeys.FirstOrDefault(fk => fk.RefersToTable == _table.Name);
             if (foreignKey == null) return; //corruption in our database
             //we won't deal with composite keys
-            //var fkColumn = foreignKey.Columns.FirstOrDefault();
+            if (_table.IsSharedPrimaryKey(foreignKeyChild))
+            {
+                _cb.AppendFormat("//shared primary key to {0} ({1})", foreignKeyTable, childClass);
+                _cb.AppendFormat("HasOptional(x => x.{0});", childClass);
+                return;
+            }
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
             var propertyName = _codeWriterSettings.NameCollection(childClass);
