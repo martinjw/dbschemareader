@@ -151,6 +151,38 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.IsTrue(hasProducts);
         }
 
+        [TestMethod]
+        public void WriteSharedPrimaryKeyTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("vehicle")
+                .AddColumn<string>("regnum").AddPrimaryKey().AddLength(25)
+                .AddColumn<string>("model").AddLength(32)
+                .AddTable("car")
+                .AddColumn<string>("regnum").AddLength(25).AddPrimaryKey().AddForeignKey("fk", "vehicle")
+                .AddColumn<int>("doors");
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+            //make sure .Net names are assigned
+            PrepareSchemaNames.Prepare(schema, new Namer());
+            var table = schema.FindTableByName("car");
+
+            var cw = new ClassWriter(table, new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst });
+
+            //act
+            var txt = cw.Write();
+
+            //assert
+            var hasScalarKey = txt.Contains("public string Regnum { get; set; }");
+            var hasForeignKey = txt.Contains("public virtual Vehicle Vehicle { get; set; }");
+
+            Assert.IsTrue(hasScalarKey);
+            Assert.IsTrue(hasForeignKey);
+        }
+
+
 
         [TestMethod]
         public void WriteCodeFirstTest()
@@ -180,7 +212,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             view.Name = "AlphabeticNames";
             view.AddColumn("FirstName", typeof(string)).AddNullable()
                 .AddColumn("LastName", typeof(string)).AddNullable();
-            
+
             var schema = new DatabaseSchema(null, null);
             schema.Views.Add(view);
             PrepareSchemaNames.Prepare(schema, new Namer());

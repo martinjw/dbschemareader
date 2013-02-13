@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace DatabaseSchemaReaderTest.Codegen
 {
     [TestClass]
-    public class ClassWirterAssociationTableTest
+    public class ClassWriterAssociationTableTest
     {
         [TestMethod]
         public void TestAssociationTable()

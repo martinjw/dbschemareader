@@ -211,6 +211,39 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.AreEqual(3, mappingNamer.EntityNames.Count, "Should add the name to the list");
         }
 
+        [TestMethod]
+        public void MappingSharedPrimaryKeyTest()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, null);
+            schema
+                .AddTable("vehicle")
+                .AddColumn<string>("regnum").AddPrimaryKey().AddLength(25)
+                .AddColumn<string>("model").AddLength(32)
+                .AddTable("car")
+                .AddColumn<string>("regnum").AddLength(25).AddPrimaryKey().AddForeignKey("fk", "vehicle")
+                .AddColumn<int>("doors");
+            //make sure it's all tied up
+            DatabaseSchemaFixer.UpdateReferences(schema);
+            //make sure .Net names are assigned
+            PrepareSchemaNames.Prepare(schema, new Namer());
+            var table = schema.FindTableByName("car");
+
+            var mappingNamer = new MappingNamer();
+            var codeWriterSettings = new CodeWriterSettings{ CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var target = new CodeFirstMappingWriter(table, codeWriterSettings, mappingNamer);
+
+            //act
+            var txt = target.Write();
+
+            //assert
+            var hasScalarKey = txt.Contains("HasKey(x => x.Regnum);");
+            var hasForeignKey = txt.Contains("HasRequired(x => x.Vehicle);");
+
+            Assert.IsTrue(hasScalarKey);
+            Assert.IsTrue(hasForeignKey);
+        }
+
         private static DatabaseSchema PrepareModel()
         {
             var schema = new DatabaseSchema(null, null);

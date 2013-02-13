@@ -91,8 +91,11 @@ namespace DatabaseSchemaReader.CodeGen
             //if there is only one column (not composite) use the netName of that column
             if (foreignKey.Columns.Count == 1)
             {
-                var col = foreignKey.Columns.Single();
-                propertyName = table.FindColumn(col).NetName;
+                var columnName = foreignKey.Columns.Single();
+                var column = table.FindColumn(columnName);
+                //if it is a primary key, we've used the original name for a scalar property
+                if (!column.IsPrimaryKey)
+                    propertyName = column.NetName;
             }
             else //composite keys
             {

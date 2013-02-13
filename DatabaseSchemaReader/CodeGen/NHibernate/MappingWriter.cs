@@ -69,6 +69,20 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             _classElement.Add(
                 new XComment(string.Format(CultureInfo.InvariantCulture, "Foreign key to {0} ({1})", foreignKeyTable, childClass)));
 
+            if (_table.IsSharedPrimaryKey(foreignKeyChild))
+            {
+                if (foreignKey.Columns.Count == 1)
+                {
+                    var one2One = new XElement(_xmlns + "one-to-one");
+                    one2One.SetAttributeValue("name", childClass);
+                    one2One.SetAttributeValue("constrained", "true");
+                    one2One.SetAttributeValue("foreign-key", "none");
+                    one2One.SetAttributeValue("class", childClass);
+                    _classElement.Add(one2One);
+                    return;
+                }
+            }
+
             var propertyName = _codeWriterSettings.NameCollection(childClass);
             var bag = new XElement(_xmlns + "bag");
             bag.SetAttributeValue("name", propertyName);

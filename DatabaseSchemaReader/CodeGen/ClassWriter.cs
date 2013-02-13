@@ -116,10 +116,18 @@ namespace DatabaseSchemaReader.CodeGen
                     }
                 }
             }
+            else
+            {
+                //single primary key column
+                var column = _table.PrimaryKeyColumn;
+                //could be a view or have no primary key
+                if (column != null)
+                    WriteColumn(column);
+            }
 
             foreach (var column in _table.Columns)
             {
-                if (_table.HasCompositeKey && column.IsPrimaryKey) continue;
+                if (column.IsPrimaryKey) continue;
                 if (column.IsForeignKey) continue;
                 WriteColumn(column);
             }
@@ -177,6 +185,12 @@ namespace DatabaseSchemaReader.CodeGen
                     WriteManyToManyCollection(foreignKey);
                     continue;
                 }
+                if (_table.IsSharedPrimaryKey(foreignKey))
+                {
+                    //type and property name are the same
+                    _cb.AppendAutomaticProperty(foreignKey.NetName, foreignKey.NetName, true);
+                    continue;
+                }
 
                 if (_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
                     _cb.AppendLine("[Include]");
@@ -224,6 +238,10 @@ namespace DatabaseSchemaReader.CodeGen
                     if (foreignKey.IsManyToManyTable() && IsCodeFirst())
                     {
                         WriteManyToManyInitialize(foreignKey);
+                        continue;
+                    }
+                    if (_table.IsSharedPrimaryKey(foreignKey))
+                    {
                         continue;
                     }
                     var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
