@@ -270,6 +270,20 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             id.Add(gen);
 
             _classElement.Add(id);
+
+            if (idColumn.IsForeignKey)
+            {
+                var fk = _table.ForeignKeys.FirstOrDefault(x => x.RefersToTable == idColumn.ForeignKeyTableName);
+                if (fk == null) return;
+                var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, fk);
+                gen.SetAttributeValue("class", "foreign");
+                gen.Add(new XElement(_xmlns + "param", 
+                    new XAttribute("name", "property"), 
+                    propertyName));
+                var one2One = new XElement(_xmlns + "one-to-one");
+                one2One.SetAttributeValue("name", propertyName);
+                _classElement.Add(one2One);
+            }
         }
 
         private void AddCompositePrimaryKeyForView()

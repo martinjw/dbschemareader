@@ -96,6 +96,17 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".GeneratedBy.Identity()");
                 //other GeneratedBy values (Guid, Assigned) are left to defaults
             }
+            //one to one with generator foreign
+            if (idColumn.IsForeignKey)
+            {
+                //primary key is also a foreign key
+                var fk = _table.ForeignKeys.FirstOrDefault(x => x.RefersToTable == idColumn.ForeignKeyTableName);
+                if (fk != null)
+                {
+                    var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, fk);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ".GeneratedBy.Foreign(\"{0}\")", propertyName);
+                }
+            }
 
             sb.Append(";");
             _cb.AppendLine(sb.ToString());
@@ -233,10 +244,23 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey);
             if (string.IsNullOrEmpty(propertyName)) return;
 
-            var sb = new StringBuilder();
+            var isPrimaryKey = false;
+            if (_table.PrimaryKey != null)
+            {
+                //the primary key is also this foreign key
+                isPrimaryKey = _table.PrimaryKey.Columns.SequenceEqual(foreignKey.Columns);
+            }
+            //1:1 shared primary key 
+            if (isPrimaryKey)
+            {
+                _cb.AppendFormat("HasOne(x => x.{0}).ForeignKey(\"{1}\");",
+                    propertyName, foreignKey.Name);
+                return;
+            }
 
             var cols = foreignKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
 
+            var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
             if (cols.Length > 1)
             {
@@ -263,8 +287,9 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             if (_table.IsSharedPrimaryKey(foreignKeyChild))
             {
                 if (foreignKey.Columns.Count == 1)
-                    _cb.AppendFormat("References(x => x.{0}).Column(\"{1}\").ForeignKey(\"{2}\");",
-                        childClass, fkColumn, foreignKey.Name);
+                    _cb.AppendFormat("HasOne(x => x.{0}).Constrained();", childClass);
+                //_cb.AppendFormat("References(x => x.{0}).Column(\"{1}\").ForeignKey(\"{2}\");",
+                //      childClass, fkColumn, foreignKey.Name);
                 //TODO composite keys
                 return;
             }
