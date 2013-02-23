@@ -48,8 +48,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             return _document
                 .Descendants(_xmlns + "Reference")
-                .Where(r => (string)r.Attribute("Include") == "System.Data")
-                .First();
+                .First(r => (string)r.Attribute("Include") == "System.Data");
         }
 
         public void AddOracleReference()
@@ -59,6 +58,25 @@ namespace DatabaseSchemaReader.CodeGen
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include", "System.Data.OracleClient")));
+            _hasOracle = true;
+        }
+
+        public void AddDevartOracleReference()
+        {
+            if (_hasOracle) return;
+            var reference = FindSystemDataReference();
+            reference.AddAfterSelf(
+                new XElement(_xmlns + "Reference",
+                            new XAttribute("Include",
+                                "Devart.Data.Oracle.Entity, Version=7.5.179.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+            reference.AddAfterSelf(
+                new XElement(_xmlns + "Reference",
+                            new XAttribute("Include",
+                                "Devart.Data.Oracle, Version=7.5.179.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+            reference.AddAfterSelf(
+                new XElement(_xmlns + "Reference",
+                            new XAttribute("Include",
+                                "Devart.Data, Version=5.0.638.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             _hasOracle = true;
         }
 

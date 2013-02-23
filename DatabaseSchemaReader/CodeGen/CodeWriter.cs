@@ -187,7 +187,10 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var writer = new CodeFirstContextWriter(_codeWriterSettings);
             if (ProviderToSqlType.Convert(_schema.Provider) == SqlType.Oracle)
+            {
                 writer.IsOracle = true;
+                projectWriter.AddDevartOracleReference();
+            }
             var databaseTables = _schema.Tables.Where(t => !FilterIneligible(t))
                 .ToList();
             if (_codeWriterSettings.IncludeViews)

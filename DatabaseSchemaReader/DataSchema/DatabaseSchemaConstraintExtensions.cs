@@ -99,7 +99,7 @@ namespace DatabaseSchemaReader.DataSchema
 
             //add the inverse relationship
             var fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);
-            if (fkTable != null)
+            if (fkTable != null && !fkTable.ForeignKeyChildren.Contains(table))
             {
                 fkTable.ForeignKeyChildren.Add(table);
                 databaseColumn.ForeignKeyTable = fkTable;
