@@ -283,7 +283,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             var fkColumn = foreignKey.Columns[0];
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = _codeWriterSettings.NameCollection(childClass);
+            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
             if (_table.IsSharedPrimaryKey(foreignKeyChild))
             {
                 if (foreignKey.Columns.Count == 1)

@@ -83,7 +83,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 }
             }
 
-            var propertyName = _codeWriterSettings.NameCollection(childClass);
+            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
             var bag = new XElement(_xmlns + "bag");
             bag.SetAttributeValue("name", propertyName);
             //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");

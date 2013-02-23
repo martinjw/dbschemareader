@@ -88,7 +88,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             foreach (var table in dbSetTables)
             {
                 var className = table.NetName;
-                var dbSetName = _codeWriterSettings.NameCollection(className);
+                var dbSetName = _codeWriterSettings.Namer.NameCollection(className);
 
                 //we won't pluralize, let's just suffix it "Set"
                 using (_cb.BeginNest("public IDbSet<" + className + "> " + dbSetName))

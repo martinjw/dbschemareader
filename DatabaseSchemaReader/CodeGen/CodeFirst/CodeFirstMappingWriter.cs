@@ -303,7 +303,9 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
 
             //then map the inverse with our foreign key children convention
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", _codeWriterSettings.NameCollection(_table.NetName));
+            var fkPropertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(foreignKey.RefersToTable, _table, foreignKey);
+
+            sb.AppendFormat(CultureInfo.InvariantCulture, ".WithMany(c => c.{0})", fkPropertyName);
             if (_codeWriterSettings.UseForeignKeyIdProperties)
             {
                 //for pk/fk we have a mirror property
@@ -343,7 +345,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = _codeWriterSettings.NameCollection(childClass);
+            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
@@ -358,8 +360,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             var otherEnd = foreignKeyChild.ManyToManyTraversal(_table);
             _cb.AppendLine("// Many to many foreign key to " + otherEnd.Name);
             var childClass = otherEnd.NetName;
-            var propertyName = _codeWriterSettings.NameCollection(childClass);
-            var reverseName = _codeWriterSettings.NameCollection(_table.NetName);
+            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
+            var reverseName = _codeWriterSettings.Namer.NameCollection(_table.NetName);
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);

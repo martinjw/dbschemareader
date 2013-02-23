@@ -38,7 +38,7 @@ namespace DatabaseSchemaViewer
             settings.UseForeignKeyIdProperties = Properties.Settings.Default.CodeGenUseForeignKeyIdProperties;
             if (Properties.Settings.Default.CodeGenUsePluralizingNamer)
             {
-                settings.CollectionNamer = new PluralizingNamer();
+                settings.Namer = new PluralizingNamer();
             }
             //if poco, write the sprocs - or if read the sprocs, we can generate
             settings.WriteStoredProcedures = (_readProcedures || CodeTarget == CodeTarget.Poco);
