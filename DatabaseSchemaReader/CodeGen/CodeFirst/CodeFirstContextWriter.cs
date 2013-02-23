@@ -103,16 +103,17 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             using (_cb.BeginNest("protected override void OnModelCreating(DbModelBuilder modelBuilder)"))
             {
                 _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
-                _cb.AppendLine(
-                    "//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
+                //_cb.AppendLine(
+                //    "//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
                 if (IsOracle)
                 {
-                    _cb.AppendLine("// Oracle is case sensitive");
-                    _cb.AppendLine("modelBuilder.Conventions.Remove<System.Data.Entity.ModelConfiguration.Conventions.ColumnTypeCasingConvention>();");
+                    _cb.AppendLine("// Oracle devart configuration http://www.devart.com/dotconnect/oracle/docs/?EFProviderConfiguration.html");
                     _cb.AppendLine("var config = Devart.Data.Oracle.Entity.Configuration.OracleEntityProviderConfig.Instance;");
-                    _cb.AppendLine("config.Workarounds.ColumnTypeCasingConventionCompatibility = true;");
-                    _cb.AppendLine("//switch off schema name generation for DML and DDL");
                     _cb.AppendLine("config.Workarounds.IgnoreSchemaName = true;");
+                    // This option must be True for EF Code-First Migrations (EF v4.3.x and v5.x) to work correctly.
+                    _cb.AppendLine("config.Workarounds.ColumnTypeCasingConventionCompatibility = true;");
+                    // if it is set to false, you must turn off ColumnTypeCasingConvention explicitly for each DbContext ie this...
+                    //_cb.AppendLine("modelBuilder.Conventions.Remove<System.Data.Entity.ModelConfiguration.Conventions.ColumnTypeCasingConvention>();");
                 }
 
                 foreach (var table in dbSetTables)
