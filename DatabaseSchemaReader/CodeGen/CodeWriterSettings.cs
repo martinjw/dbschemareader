@@ -18,7 +18,7 @@ namespace DatabaseSchemaReader.CodeGen
             CodeTarget = CodeTarget.Poco;
             var namer = new Namer();
             Namer = namer;
-            CollectionNamer = namer;
+            //CollectionNamer = namer;
         }
 
         /// <summary>
@@ -33,13 +33,13 @@ namespace DatabaseSchemaReader.CodeGen
         /// <value>The code target.</value>
         public CodeTarget CodeTarget { get; set; }
 
-        /// <summary>
-        /// Gets or sets the collection namer.
-        /// </summary>
-        /// <value>
-        /// The collection namer.
-        /// </value>
-        public ICollectionNamer CollectionNamer { get; set; }
+        ///// <summary>
+        ///// Gets or sets the collection namer.
+        ///// </summary>
+        ///// <value>
+        ///// The collection namer.
+        ///// </value>
+        //public ICollectionNamer CollectionNamer { get; set; }
 
         /// <summary>
         /// Gets or sets the namer, which translates table and column names to classes and properties.
@@ -57,11 +57,11 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        internal string NameCollection(string name)
-        {
-            if (CollectionNamer == null) return _namer.NameCollection(name);
-            return CollectionNamer.NameCollection(name);
-        }
+        //internal string NameCollection(string name)
+        //{
+        //    if (CollectionNamer == null) return _namer.NameCollection(name);
+        //    return CollectionNamer.NameCollection(name);
+        //}
 
         /// <summary>
         /// Gets or sets the error message for the [Required] attribute. If null, none is written.

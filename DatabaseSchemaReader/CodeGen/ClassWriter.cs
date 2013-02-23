@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
@@ -192,12 +193,28 @@ namespace DatabaseSchemaReader.CodeGen
                     continue;
                 }
 
-                if (_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
-                    _cb.AppendLine("[Include]");
-                var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
-                var dataType = listType + foreignKey.NetName + ">";
-                _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
+                //the other table may have more than one fk pointing at this table
+                var fks = ForeignKeyChildren(foreignKey);
+                var manyFks = fks.Count > 1;
+                foreach (var fk in fks)
+                {
+                    var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKey, fk);
+                    var dataType = listType + foreignKey.NetName + ">";
+                    WriteForeignKeyChild(propertyName, dataType);
+                }
             }
+        }
+
+        private IList<DatabaseConstraint> ForeignKeyChildren(DatabaseTable foreignKeyChild)
+        {
+            return foreignKeyChild.ForeignKeys.Where(x => x.RefersToTable == _table.Name).ToList();
+        }
+
+        private void WriteForeignKeyChild(string propertyName, string dataType)
+        {
+            if (_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
+                _cb.AppendLine("[Include]");
+            _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
         }
 
         private void WriteManyToManyCollection(DatabaseTable foreignKey)
@@ -209,7 +226,7 @@ namespace DatabaseSchemaReader.CodeGen
                 Debug.WriteLine("Can't navigate the many to many relationship for " + _table.Name + " to " + foreignKey.Name);
                 return;
             }
-            var propertyName = _codeWriterSettings.NameCollection(target.NetName);
+            var propertyName = _codeWriterSettings.Namer.NameCollection(target.NetName);
             var dataType = "ICollection<" + target.NetName + ">";
             _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
 
@@ -223,7 +240,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 return;
             }
-            var propertyName = _codeWriterSettings.NameCollection(target.NetName);
+            var propertyName = _codeWriterSettings.Namer.NameCollection(target.NetName);
             var dataType = "List<" + target.NetName + ">";
             _cb.AppendLine(propertyName + " = new " + dataType + "();");
         }
@@ -244,9 +261,13 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         continue;
                     }
-                    var propertyName = _codeWriterSettings.NameCollection(foreignKey.NetName);
-                    var dataType = "List<" + foreignKey.NetName + ">";
-                    _cb.AppendLine(propertyName + " = new " + dataType + "();");
+                    var fks = ForeignKeyChildren(foreignKey);
+                    foreach (DatabaseConstraint fk in fks)
+                    {
+                        var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKey, fk);
+                        var dataType = "List<" + foreignKey.NetName + ">";
+                        _cb.AppendLine(propertyName + " = new " + dataType + "();");
+                    }
                 }
             }
             _cb.AppendLine("");

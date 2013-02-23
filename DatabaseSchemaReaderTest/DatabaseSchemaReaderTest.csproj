@@ -68,6 +68,7 @@
     <Compile Include="Codegen\CodeFirstContextWriterWithViewTest.cs" />
     <Compile Include="Codegen\ClassWriterCompositeKeyTest.cs" />
     <Compile Include="Codegen\CodeWriterBuildTest.cs" />
+    <Compile Include="Codegen\ClassWriterForeignKeyTest.cs" />
     <Compile Include="Codegen\NHibernateMappingWriterTest.cs" />
     <Compile Include="Codegen\RiaServicesTest.cs" />
     <Compile Include="Codegen\DataAnnotationWriterTest.cs" />

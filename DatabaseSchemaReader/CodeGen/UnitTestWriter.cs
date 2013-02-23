@@ -29,8 +29,8 @@ namespace DatabaseSchemaReader.CodeGen
 
         private string NameCollection(string name)
         {
-            if (_codeWriterSettings.CollectionNamer == null) return name + "Collection";
-            return _codeWriterSettings.CollectionNamer.NameCollection(name);
+            if (_codeWriterSettings.Namer == null) return name + "Collection";
+            return _codeWriterSettings.Namer.NameCollection(name);
         }
 
         public string Write()

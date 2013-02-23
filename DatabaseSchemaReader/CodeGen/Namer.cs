@@ -116,5 +116,15 @@ namespace DatabaseSchemaReader.CodeGen
             }
             return propertyName;
         }
+
+        public virtual string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey)
+        {
+            var fksToTarget = table.ForeignKeys.Where(x => x.RefersToTable == targetTable).ToList();
+            string name = table.NetName;
+            if (fksToTarget.Count > 1)
+                name = string.Join("", foreignKey.Columns.Select(x => table.FindColumn(x).NetName).ToArray());
+
+            return NameCollection(name);
+        }
     }
 }

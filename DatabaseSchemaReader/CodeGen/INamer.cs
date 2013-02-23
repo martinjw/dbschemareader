@@ -35,5 +35,14 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="foreignKey">The foreign key.</param>
         /// <returns></returns>
         string ForeignKeyName(DatabaseTable table, DatabaseConstraint foreignKey);
+
+        /// <summary>
+        /// Returns the name of an inverse foreign key property.
+        /// </summary>
+        /// <param name="targetTable">The target table.</param>
+        /// <param name="table">The table.</param>
+        /// <param name="foreignKey">The foreign key.</param>
+        /// <returns></returns>
+        string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey);
     }
 }

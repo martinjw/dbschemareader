@@ -140,7 +140,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var categoryTable = schema.FindTableByName("Categories");
 
-            var cw = new ClassWriter(categoryTable, new CodeWriterSettings { CollectionNamer = new PluralizingNamer() });
+            var cw = new ClassWriter(categoryTable, new CodeWriterSettings { Namer = new PluralizingNamer() });
 
             //act
             var txt = cw.Write();
