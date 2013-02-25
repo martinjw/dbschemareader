@@ -61,17 +61,17 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         {
             var foreignKeyTable = foreignKeyChild.Name;
             var childClass = foreignKeyChild.NetName;
-            var foreignKey = foreignKeyChild.ForeignKeys.FirstOrDefault(fk => fk.RefersToTable == _table.Name);
-            if (foreignKey == null) return; //corruption in our database
-            //we won't deal with composite keys
-            var fkColumn = foreignKey.Columns[0];
+            var fks = _table.InverseForeignKeys(foreignKeyChild);
+            if (!fks.Any()) return; //corruption in our database
 
             _classElement.Add(
                 new XComment(string.Format(CultureInfo.InvariantCulture, "Foreign key to {0} ({1})", foreignKeyTable, childClass)));
 
             if (_table.IsSharedPrimaryKey(foreignKeyChild))
             {
-                if (foreignKey.Columns.Count == 1)
+                var fk = fks.First();
+                if (fk == null) return;
+                if (fk.Columns.Count == 1)
                 {
                     var one2One = new XElement(_xmlns + "one-to-one");
                     one2One.SetAttributeValue("name", childClass);
@@ -83,27 +83,33 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 }
             }
 
-            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
-            var bag = new XElement(_xmlns + "bag");
-            bag.SetAttributeValue("name", propertyName);
-            //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");
-            bag.SetAttributeValue("table", SqlSafe(foreignKeyTable));
-            if (foreignKeyChild.SchemaOwner != null)
-                bag.SetAttributeValue("schema", SqlSafe(foreignKeyChild.SchemaOwner));
-            bag.SetAttributeValue("cascade", "all-delete-orphan");
-            //assume child always controls collection
-            bag.SetAttributeValue("inverse", "true");
+            foreach (var fk in fks)
+            {
+                var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
 
-            var key = new XElement(_xmlns + "key");
-            key.SetAttributeValue("column", SqlSafe(fkColumn));
-            key.SetAttributeValue("foreign-key", foreignKey.Name);
-            bag.Add(key);
+                var fkColumn = fk.Columns.FirstOrDefault();
 
-            var one2Many = new XElement(_xmlns + "one-to-many");
-            one2Many.SetAttributeValue("class", childClass);
-            bag.Add(one2Many);
+                var bag = new XElement(_xmlns + "bag");
+                bag.SetAttributeValue("name", propertyName);
+                //bag.SetAttributeValue("access", "nosetter.camelcase-underscore");
+                bag.SetAttributeValue("table", SqlSafe(foreignKeyTable));
+                if (foreignKeyChild.SchemaOwner != null)
+                    bag.SetAttributeValue("schema", SqlSafe(foreignKeyChild.SchemaOwner));
+                bag.SetAttributeValue("cascade", "all-delete-orphan");
+                //assume child always controls collection
+                bag.SetAttributeValue("inverse", "true");
 
-            _classElement.Add(bag);
+                var key = new XElement(_xmlns + "key");
+                key.SetAttributeValue("column", SqlSafe(fkColumn));
+                key.SetAttributeValue("foreign-key", fk.Name);
+                bag.Add(key);
+
+                var one2Many = new XElement(_xmlns + "one-to-many");
+                one2Many.SetAttributeValue("class", childClass);
+                bag.Add(one2Many);
+
+                _classElement.Add(bag);
+            }
         }
 
         private void WriteColumns()
@@ -277,8 +283,8 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 if (fk == null) return;
                 var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, fk);
                 gen.SetAttributeValue("class", "foreign");
-                gen.Add(new XElement(_xmlns + "param", 
-                    new XAttribute("name", "property"), 
+                gen.Add(new XElement(_xmlns + "param",
+                    new XAttribute("name", "property"),
                     propertyName));
                 var one2One = new XElement(_xmlns + "one-to-one");
                 one2One.SetAttributeValue("name", propertyName);

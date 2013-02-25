@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
@@ -194,8 +193,7 @@ namespace DatabaseSchemaReader.CodeGen
                 }
 
                 //the other table may have more than one fk pointing at this table
-                var fks = ForeignKeyChildren(foreignKey);
-                var manyFks = fks.Count > 1;
+                var fks = _table.InverseForeignKeys(foreignKey);
                 foreach (var fk in fks)
                 {
                     var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKey, fk);
@@ -205,10 +203,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        private IList<DatabaseConstraint> ForeignKeyChildren(DatabaseTable foreignKeyChild)
-        {
-            return foreignKeyChild.ForeignKeys.Where(x => x.RefersToTable == _table.Name).ToList();
-        }
+
 
         private void WriteForeignKeyChild(string propertyName, string dataType)
         {
@@ -261,7 +256,7 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         continue;
                     }
-                    var fks = ForeignKeyChildren(foreignKey);
+                    var fks = _table.InverseForeignKeys(foreignKey);
                     foreach (DatabaseConstraint fk in fks)
                     {
                         var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKey, fk);

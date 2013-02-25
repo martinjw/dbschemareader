@@ -277,16 +277,14 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         {
             var foreignKeyTable = foreignKeyChild.Name;
             var childClass = foreignKeyChild.NetName;
-            var foreignKey = foreignKeyChild.ForeignKeys.FirstOrDefault(fk => fk.RefersToTable == _table.Name);
-            if (foreignKey == null) return; //corruption in our database
-            //we won't deal with composite keys
-            var fkColumn = foreignKey.Columns[0];
+            var fks = _table.InverseForeignKeys(foreignKeyChild);
+            if (!fks.Any()) return; //corruption in our database
 
             _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
             if (_table.IsSharedPrimaryKey(foreignKeyChild))
             {
-                if (foreignKey.Columns.Count == 1)
+                var fk = fks.First();
+                if (fk.Columns.Count == 1)
                     _cb.AppendFormat("HasOne(x => x.{0}).Constrained();", childClass);
                 //_cb.AppendFormat("References(x => x.{0}).Column(\"{1}\").ForeignKey(\"{2}\");",
                 //      childClass, fkColumn, foreignKey.Name);
@@ -294,26 +292,33 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 return;
             }
 
-            var sb = new StringBuilder();
-            sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
-            //defaults to x_id
-
-            // KL: Only use .KeyColumn() if the foreign key is not composite
-            if (foreignKey.Columns.Count == 1)
+            foreach (var fk in fks)
             {
-                sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumn(\"{0}\")", fkColumn);
-            }
-            // If composite key, generate .KeyColumns(...) with array of keys
-            else
-            {
-                var cols = foreignKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
-                sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumns.Add(new string[] {{ {0} }})", String.Join(", ", cols));
-            }
-            sb.Append(".Inverse()");
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".ForeignKeyConstraintName(\"{0}\")", foreignKey.Name);
+                var sb = new StringBuilder();
+                var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
+                var fkColumn = fk.Columns.FirstOrDefault();
 
-            sb.Append(";");
-            _cb.AppendLine(sb.ToString());
+                sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
+                //defaults to x_id
+
+                // KL: Only use .KeyColumn() if the foreign key is not composite
+                if (fk.Columns.Count == 1)
+                {
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumn(\"{0}\")", fkColumn);
+                }
+                // If composite key, generate .KeyColumns(...) with array of keys
+                else
+                {
+                    var cols = fk.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumns.Add(new string[] {{ {0} }})",
+                                    String.Join(", ", cols));
+                }
+                sb.Append(".Inverse()");
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".ForeignKeyConstraintName(\"{0}\")", fk.Name);
+
+                sb.Append(";");
+                _cb.AppendLine(sb.ToString());
+            }
         }
     }
 }

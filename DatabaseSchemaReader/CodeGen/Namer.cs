@@ -117,6 +117,20 @@ namespace DatabaseSchemaReader.CodeGen
             return propertyName;
         }
 
+        /// <summary>
+        /// Returns the name of an inverse foreign key property. Uses <see cref="NameCollection"/>
+        /// For single fks, it's a collection using the name of the fk table.
+        /// For multiple fks, it's a collection using the name of the fk columns
+        /// </summary>
+        /// <param name="targetTable">The target table.</param>
+        /// <param name="table">The table.</param>
+        /// <param name="foreignKey">The foreign key.</param>
+        /// <returns>
+        /// Eg OrderLine has fk to Order. Order will have an ICollection&lt;OrderLine&gt; called "OrderLineCollection".
+        /// Multiple fk eg Order has Delivery Address and Billing Address. 
+        /// Address will have an ICollection&lt;Order&gt; called "DeliveryAddressCollection", 
+        /// and another ICollection&lt;Order&gt; called "BillingAddressCollection"
+        /// </returns>
         public virtual string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey)
         {
             var fksToTarget = table.ForeignKeys.Where(x => x.RefersToTable == targetTable).ToList();

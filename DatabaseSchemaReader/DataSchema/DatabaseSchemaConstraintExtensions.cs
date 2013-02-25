@@ -210,5 +210,16 @@ namespace DatabaseSchemaReader.DataSchema
 
             return databaseConstraint;
         }
+
+        /// <summary>
+        /// Finds the individual foreign key constraints for a foreing key child
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="foreignKeyChild">The foreign key child.</param>
+        /// <returns></returns>
+        public static IList<DatabaseConstraint> InverseForeignKeys(this DatabaseTable table, DatabaseTable foreignKeyChild)
+        {
+            return foreignKeyChild.ForeignKeys.Where(x => x.RefersToTable == table.Name).ToList();
+        }
     }
 }
