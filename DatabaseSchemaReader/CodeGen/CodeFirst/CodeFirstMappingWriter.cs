@@ -344,15 +344,15 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 return;
             }
 
-            _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
-            var propertyName = _codeWriterSettings.Namer.NameCollection(childClass);
+            var fks = _table.InverseForeignKeys(foreignKeyChild);
+            foreach (var fk in fks)
+            {
+                _cb.AppendFormat("//Foreign key to {0} ({1})", foreignKeyTable, childClass);
+                var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
+                //specify the opposite direction? Probably not needed
+                _cb.AppendFormat("HasMany(x => x.{0});", propertyName);
 
-            var sb = new StringBuilder();
-            sb.AppendFormat(CultureInfo.InvariantCulture, "HasMany(x => x.{0})", propertyName);
-            //specify the opposite direction? Probably not needed
-
-            sb.Append(";");
-            _cb.AppendLine(sb.ToString());
+            }
         }
 
         private void WriteManyToManyForeignKeyCollection(DatabaseTable foreignKeyChild)
