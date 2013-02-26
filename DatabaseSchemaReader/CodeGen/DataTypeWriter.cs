@@ -30,11 +30,14 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 if (CodeTarget == CodeTarget.PocoEntityCodeFirst)
                 {
-                    if ("geometry".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
+                    //spatial types for EF 5 supported by SQLServer and Oracle/Devart
+                    if ("geometry".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) ||
+                        "SDO_GEOMETRY".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
                     {
                         return "System.Data.Spatial.DbGeometry";
                     }
-                    if ("geography".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
+                    if ("geography".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) ||
+                        "SDO_GEOGRAPHY".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
                     {
                         return "System.Data.Spatial.DbGeography";
                     }
