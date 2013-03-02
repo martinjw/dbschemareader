@@ -150,7 +150,12 @@ namespace DatabaseSchemaReader.Data
         }
         #endregion
 
-        private string WriteInsert(DataRow row)
+        /// <summary>
+        /// Writes the insert statement for the specified data.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns></returns>
+        public string WriteInsert(DataRow row)
         {
             var values = new List<string>(_databaseTable.Columns.Count);
 
