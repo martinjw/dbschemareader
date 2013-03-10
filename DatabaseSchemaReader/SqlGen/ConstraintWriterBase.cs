@@ -9,16 +9,16 @@ namespace DatabaseSchemaReader.SqlGen
 {
     abstract class ConstraintWriterBase
     {
-        private readonly DatabaseTable _table;
+        protected readonly DatabaseTable Table;
 
         protected ConstraintWriterBase(DatabaseTable table)
         {
-            _table = table;
+            Table = table;
         }
 
         protected abstract ISqlFormatProvider SqlFormatProvider();
 
-        private string EscapeName(string name)
+        protected string EscapeName(string name)
         {
             return SqlFormatProvider().Escape(name);
         }
@@ -41,16 +41,16 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        public string WritePrimaryKey()
+        public virtual string WritePrimaryKey()
         {
-            if (_table.PrimaryKey == null) return null;
-            var columnList = GetColumnList(_table.PrimaryKey.Columns);
+            if (Table.PrimaryKey == null) return null;
+            var columnList = GetColumnList(Table.PrimaryKey.Columns);
 
-            var pkName = ConstraintName(_table.PrimaryKey.Name);
+            var pkName = ConstraintName(Table.PrimaryKey.Name);
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY ({2})",
-                                 TableName(_table),
+                                 TableName(Table),
                                  EscapeName(pkName),
                                  columnList) + SqlFormatProvider().LineEnding();
         }
@@ -58,7 +58,7 @@ namespace DatabaseSchemaReader.SqlGen
         public string WriteUniqueKeys()
         {
             var sb = new StringBuilder();
-            foreach (var uniqueKey in _table.UniqueKeys)
+            foreach (var uniqueKey in Table.UniqueKeys)
             {
                 sb.AppendLine(WriteUniqueKey(uniqueKey));
             }
@@ -77,7 +77,7 @@ namespace DatabaseSchemaReader.SqlGen
 
             return string.Format(CultureInfo.InvariantCulture,
                                  AddUniqueConstraintFormat,
-                                 TableName(_table),
+                                 TableName(Table),
                                  EscapeName(name),
                                  columnList) + SqlFormatProvider().LineEnding();
 
@@ -86,7 +86,7 @@ namespace DatabaseSchemaReader.SqlGen
         public string WriteCheckConstraints()
         {
             var sb = new StringBuilder();
-            foreach (var checkConstraint in _table.CheckConstraints)
+            foreach (var checkConstraint in Table.CheckConstraints)
             {
                 sb.AppendLine(WriteCheckConstraint(checkConstraint));
             }
@@ -122,7 +122,7 @@ namespace DatabaseSchemaReader.SqlGen
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} CHECK ({2})",
-                                 TableName(_table),
+                                 TableName(Table),
                                  EscapeName(name),
                                  expression) + SqlFormatProvider().LineEnding();
 
@@ -131,7 +131,7 @@ namespace DatabaseSchemaReader.SqlGen
         public string WriteForeignKeys()
         {
             var sb = new StringBuilder();
-            foreach (var foreignKey in _table.ForeignKeys)
+            foreach (var foreignKey in Table.ForeignKeys)
             {
                 sb.AppendLine(WriteForeignKey(foreignKey));
             }
@@ -142,7 +142,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             var foreignKeyTableName = ForeignKeyTableName(foreignKey);
 
-            var fkTablePks = foreignKey.ReferencedColumns(_table.DatabaseSchema);
+            var fkTablePks = foreignKey.ReferencedColumns(Table.DatabaseSchema);
             //if we can't find other table, we won't list the fk table primary key columns - it *should* be automatic
             //in practice, SQLServer/Oracle are ok but MySQL will error 
             var fkColumnList = fkTablePks == null ? string.Empty : " (" + GetColumnList(fkTablePks) + ")";
@@ -158,7 +158,7 @@ namespace DatabaseSchemaReader.SqlGen
                 // { CASCADE | NO ACTION | SET DEFAULT | SET NULL }
                 deleteUpdateRule += " ON UPDATE " + foreignKey.UpdateRule;
             }
-            if (_table.Name == foreignKeyTableName 
+            if (Table.Name == foreignKeyTableName 
                 && !string.IsNullOrEmpty(deleteUpdateRule)
                 && !IsSelfReferencingCascadeAllowed())
             {
@@ -169,7 +169,7 @@ namespace DatabaseSchemaReader.SqlGen
             //arguably we should fully qualify the refersToTable with its schema
             return string.Format(CultureInfo.InvariantCulture,
                                  "ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}{4}{5}",
-                                 TableName(_table),
+                                 TableName(Table),
                                  EscapeName(foreignKey.Name),
                                  GetColumnList(foreignKey.Columns),
                                  foreignKeyTableName,
@@ -185,7 +185,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         private string ForeignKeyTableName(DatabaseConstraint foreignKey)
         {
-            var foreignKeyTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
+            var foreignKeyTable = foreignKey.ReferencedTable(Table.DatabaseSchema);
 
             return (foreignKeyTable != null)
                                           ? TableName(foreignKeyTable)
@@ -208,7 +208,7 @@ namespace DatabaseSchemaReader.SqlGen
             return string.Empty;
         }
 
-        private string TableName(DatabaseTable databaseTable)
+        protected string TableName(DatabaseTable databaseTable)
         {
             return SchemaPrefix(databaseTable.SchemaOwner) + EscapeName(databaseTable.Name);
         }
@@ -222,7 +222,7 @@ namespace DatabaseSchemaReader.SqlGen
             return string.Empty;
         }
 
-        private string ConstraintName(string name)
+        protected string ConstraintName(string name)
         {
             if (string.IsNullOrEmpty(name)) return "CON";
             //when translating we may exceed limits
@@ -234,9 +234,9 @@ namespace DatabaseSchemaReader.SqlGen
             return name;
         }
 
-        private string GetColumnList(IEnumerable<string> columns)
+        protected string GetColumnList(IEnumerable<string> columns)
         {
-            var escapedColumnNames = columns.Select(column => EscapeName(column)).ToArray();
+            var escapedColumnNames = columns.Select(EscapeName).ToArray();
             return string.Join(", ", escapedColumnNames);
         }
     }
