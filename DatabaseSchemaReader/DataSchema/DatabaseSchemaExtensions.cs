@@ -20,7 +20,7 @@ namespace DatabaseSchemaReader.DataSchema
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName", "tableName must not be null");
 
             var table = databaseSchema.FindTableByName(tableName);
-            RemoveTable(databaseSchema,table);
+            RemoveTable(databaseSchema, table);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace DatabaseSchemaReader.DataSchema
             if (origin == null || destination == null) return false;
             var pk = origin.PrimaryKey;
             if (pk == null) return false;
-            var columns = pk.Columns.Select(origin.FindColumn);
+            var columns = pk.Columns.Select(x => origin.FindColumn(x));
             //the primary key of the origin is also a foreign key to this table
             var allFk = columns.All(c => c.ForeignKeyTableName == destination.Name);
             return allFk;

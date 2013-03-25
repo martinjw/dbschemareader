@@ -196,6 +196,7 @@
     <EmbeddedResource Include="Codegen\nhibernate-mapping.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Utilities\EF\CatalogV3.edmxv3" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -156,6 +156,7 @@
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\SchemaReaderFactory.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerCeSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseAsaSchemaReader.cs" />
@@ -200,6 +201,7 @@
     <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\EntityFrameworkImporter.cs" />
+    <Compile Include="Utilities\FactoryTools.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />
     <Compile Include="Utilities\TopologicalSorter.cs" />

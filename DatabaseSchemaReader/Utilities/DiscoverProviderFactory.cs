@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.Utilities
     public static class DiscoverProviderFactory
     {
         /// <summary>
-        /// Discovers the specified connection string. NO ERROR TRAPPING. Results wr
+        /// Discovers the specified connection string. NO ERROR TRAPPING.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         /// <param name="providerName">Name of the provider.</param>
