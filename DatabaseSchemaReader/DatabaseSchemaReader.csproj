@@ -152,6 +152,7 @@
     <Compile Include="Filters\Filter.cs" />
     <Compile Include="Filters\IFilter.cs" />
     <Compile Include="IDatabaseReader.cs" />
+    <Compile Include="ProviderSchemaReaders\SchemaReaderFactory.cs" />
     <Compile Include="ProviderSchemaReaders\VistaDbSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OleDbSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseAseSchemaReader.cs" />
@@ -203,6 +204,7 @@
     <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\EntityFrameworkImporter.cs" />
+    <Compile Include="Utilities\FactoryTools.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />
     <Compile Include="Utilities\TopologicalSorter.cs" />

@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using System.Globalization;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaReader
 {
@@ -28,20 +29,8 @@ namespace DatabaseSchemaReader
     ///</example>
     public class SchemaReader : IDisposable
     {
-        //#region public static methods
-        ///// <summary>
-        ///// List of all the valid Providers. Use the ProviderInvariantName to fill ProviderName property
-        ///// </summary>
-        ///// <returns></returns>
-        //public static DataTable Providers()
-        //{
-        //    return DbProviderFactories.GetFactoryClasses();
-        //}
-        //#endregion
-
         private DataTable _metadata;
         private SchemaRestrictions _restrictions;
-
 
         /// <summary>
         /// Constructor with connectionString and ProviderName
@@ -59,7 +48,7 @@ namespace DatabaseSchemaReader
             ConnectionString = connectionString;
             ProviderName = providerName;
             ProviderType = ProviderToSqlType.Convert(providerName);
-            Factory = DbProviderFactories.GetFactory(ProviderName);
+            Factory = FactoryTools.GetFactory(ProviderName);
         }
 
         #region Names of collections
@@ -114,7 +103,7 @@ namespace DatabaseSchemaReader
         /// <summary>
         /// Gets the DbProviderFactory.
         /// </summary>
-        protected internal DbProviderFactory Factory { get; private set; }
+        protected DbProviderFactory Factory { get; private set; }
 
         /// <summary>
         /// DataTable of all users

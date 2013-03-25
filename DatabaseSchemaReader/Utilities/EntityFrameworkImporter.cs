@@ -29,9 +29,9 @@ namespace DatabaseSchemaReader.Utilities
         //Also see the EF Database Generation Power Pack http://visualstudiogallery.msdn.microsoft.com/df3541c3-d833-4b65-b942-989e7ec74c87
         //This works quite well for migrations, but it's end-of-life now.
 
-        private readonly XNamespace _edmx = "http://schemas.microsoft.com/ado/2008/10/edmx";
-        private readonly XNamespace _schema = "http://schemas.microsoft.com/ado/2009/02/edm/ssdl";
+        private XNamespace _schema;
         private readonly XNamespace _store = "http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator";
+        private XNamespace _edmx;
 
         /// <summary>
         /// Reads the EDMX xml.
@@ -46,10 +46,29 @@ namespace DatabaseSchemaReader.Utilities
                 throw new ArgumentException(@"File does not exist", "edmxFilePath");
 
             var doc = XDocument.Load(edmxFilePath);
+            return ReadEdmx(doc);
+        }
 
-            var storage =
-                doc.Root.Element(_edmx + "Runtime").Element(_edmx + "StorageModels").Element(_schema + "Schema");
+        /// <summary>
+        /// Reads the edmx from an xml document
+        /// </summary>
+        /// <param name="edmx">The edmx.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">No edmx document</exception>
+        public DatabaseSchema ReadEdmx(XDocument edmx)
+        {
+            if (edmx == null)
+                throw new ArgumentNullException("edmx", "No edmx document");
 
+            var root = edmx.Root;
+            if (root == null)
+                throw new ArgumentException("No root element found", "edmx");
+            _edmx = root.GetNamespaceOfPrefix("edmx");
+
+            var storageModel =
+                root.Element(_edmx + "Runtime").Element(_edmx + "StorageModels");
+            var storage = storageModel.Descendants().First(x => x.Name.LocalName == "Schema");
+            _schema = storage.GetDefaultNamespace();
             return ReadEntityFramework(storage);
         }
 
@@ -67,6 +86,7 @@ namespace DatabaseSchemaReader.Utilities
 
 
             var doc = XDocument.Load(ssdlFilePath);
+            _edmx = doc.Root.GetNamespaceOfPrefix("edmx");
             return ReadSsdl(doc);
         }
 
@@ -79,8 +99,10 @@ namespace DatabaseSchemaReader.Utilities
         {
 
             var storage = ssdlDocument.Root;
-            if (storage.Name != _schema + "Schema")
+            _edmx = storage.GetNamespaceOfPrefix("edmx");
+            if (storage.Name.LocalName != "Schema")
                 throw new InvalidOperationException("SSDL file does not have expected structure");
+            _schema = storage.GetDefaultNamespace();
 
             return ReadEntityFramework(storage);
         }
@@ -233,7 +255,7 @@ namespace DatabaseSchemaReader.Utilities
                 maxLength = -1;
             }
             //timestamp is a varbinary(8) computed
-            if (type == "binary" && maxLength == 8 && (string) property.Attribute("StoreGeneratedPattern") == "Computed")
+            if (type == "binary" && maxLength == 8 && (string)property.Attribute("StoreGeneratedPattern") == "Computed")
             {
                 type = "timestamp";
                 maxLength = null;

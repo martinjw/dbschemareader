@@ -1,7 +1,7 @@
 ﻿using System;
 using DatabaseSchemaReader;
-#if !NUNIT
 using DatabaseSchemaReader.DataSchema;
+#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
 using NUnit.Framework;

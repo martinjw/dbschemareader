@@ -1,10 +1,7 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using DatabaseSchemaReader;
-using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,6 +19,34 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
     [TestClass]
     public class EntityImporterTest
     {
+        [TestMethod]
+        public void TestImporterV3()
+        {
+            //arrange
+
+            //we have a EF v5 edmx (v3) as an embedded resource (this project is only EF 4)
+            const string streamPath = "DatabaseSchemaReaderTest.Utilities.EF.CatalogV3.edmxv3";
+
+            var stream = Assembly.GetAssembly(GetType()).GetManifestResourceStream(streamPath);
+            if (stream == null) Assert.IsTrue(false, "Cannot access edmxv3 embedded resource");
+            var doc = XDocument.Load(XmlReader.Create(stream));
+
+            //load entity framework into DSR
+            var importer = new EntityFrameworkImporter();
+            var schema = importer.ReadEdmx(doc);
+            var schema2 = importer.ReadEdmx(doc);
+
+
+            //act
+            //use our comparer to create migration script
+            var comparer = new DatabaseSchemaReader.Compare.CompareSchemas(schema, schema2);
+            var sql = comparer.Execute();
+
+
+            //assert
+            Assert.IsTrue(string.IsNullOrEmpty(sql), "Should have no differences");
+        }
+
         [TestMethod]
         public void TestImporter()
         {

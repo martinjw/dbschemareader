@@ -158,7 +158,7 @@ namespace DatabaseSchemaReader.SqlGen
                 // { CASCADE | NO ACTION | SET DEFAULT | SET NULL }
                 deleteUpdateRule += " ON UPDATE " + foreignKey.UpdateRule;
             }
-            if (Table.Name == foreignKeyTableName 
+            if (Table.Name == foreignKeyTableName
                 && !string.IsNullOrEmpty(deleteUpdateRule)
                 && !IsSelfReferencingCascadeAllowed())
             {
@@ -236,7 +236,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected string GetColumnList(IEnumerable<string> columns)
         {
-            var escapedColumnNames = columns.Select(EscapeName).ToArray();
+            var escapedColumnNames = columns.Select(x => EscapeName(x)).ToArray();
             return string.Join(", ", escapedColumnNames);
         }
     }

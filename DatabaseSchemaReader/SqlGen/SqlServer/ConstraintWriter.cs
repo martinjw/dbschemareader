@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System;
+using DatabaseSchemaReader.DataSchema;
 using System.Globalization;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
@@ -21,22 +22,25 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
             return false;
         }
-		
-		public override string WritePrimaryKey()
+
+        public override string WritePrimaryKey()
         {
             if (Table.PrimaryKey == null) return null;
             var columnList = GetColumnList(Table.PrimaryKey.Columns);
 
             var pkName = ConstraintName(Table.PrimaryKey.Name);
-			string nonClustered = "";
-			if (Table.PrimaryKey.Columns.Count == 1 && Table.PrimaryKeyColumn.NetName.ToLower () == "guid")
-				nonClustered = "NON CLUSTERED ";
+            string nonClustered = "";
+            if (Table.PrimaryKey.Columns.Count == 1 &&
+                "guid".Equals(Table.PrimaryKeyColumn.NetName, StringComparison.OrdinalIgnoreCase))
+            {
+                nonClustered = "NON CLUSTERED ";
+            }
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY {2}({3})",
                                  TableName(Table),
                                  EscapeName(pkName),
-			                     nonClustered,
+                                 nonClustered,
                                  columnList) + SqlFormatProvider().LineEnding();
         }
 
