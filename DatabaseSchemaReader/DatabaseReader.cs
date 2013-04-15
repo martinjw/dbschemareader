@@ -164,6 +164,9 @@ namespace DatabaseSchemaReader
             DataTable ids = _schemaReader.IdentityColumns(null);
             DataTable computeds = _schemaReader.ComputedColumns(null);
 
+            var tableDescriptions = new TableDescriptionConverter(_schemaReader.TableDescription(null));
+            var columnDescriptions = new ColumnDescriptionConverter(_schemaReader.ColumnDescription(null));
+
             DataTable triggers = _schemaReader.Triggers(null);
             var triggerConverter = new TriggerConverter(triggers);
 
@@ -183,8 +186,12 @@ namespace DatabaseSchemaReader
             foreach (DatabaseTable table in tables)
             {
                 var tableName = table.Name;
+                table.Description = tableDescriptions.FindDescription(table.SchemaOwner, tableName);
+
                 var databaseColumns = columnLoader.Load(tableName);
                 table.Columns.AddRange(databaseColumns);
+
+                columnDescriptions.AddDescriptions(table);
 
                 var pkConstraints = constraintLoader.Load(tableName, ConstraintType.PrimaryKey);
                 PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);

@@ -295,5 +295,64 @@ WHERE
 
             }
         }
+
+        public override DataTable TableDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    SchemaOwner = s.name, 
+    TableName = o.name, 
+    TableDescription = p.value
+FROM sysobjects o
+INNER JOIN  sys.schemas s
+    ON s.schema_id = o.uid
+INNER JOIN sys.extended_properties p 
+    ON p.major_id = o.id
+    AND p.minor_id = 0
+    AND p.name = 'MS_Description'
+WHERE 
+    (o.name = @tableName OR @tableName IS NULL) AND 
+    (s.name = @schemaOwner OR @schemaOwner IS NULL) AND 
+    o.type= 'U' 
+ORDER BY s.name, o.name";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, TableDescriptionCollectionName, sqlCommand);
+            }
+        }
+
+        public override DataTable ColumnDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+	SchemaOwner = s.name, 
+	TableName = o.name,
+    ColumnName = c.name,
+	ColumnDescription = p.value
+FROM sysobjects o
+INNER JOIN syscolumns c
+	ON o.id = c.id
+INNER JOIN  sys.schemas s
+	ON s.schema_id = o.uid
+INNER JOIN sys.extended_properties p 
+    ON p.major_id = c.id
+    AND	p.minor_id = c.colid
+    AND	p.name = 'MS_Description'
+WHERE 
+    (o.name = @tableName OR @tableName IS NULL) AND 
+    (s.name = @schemaOwner OR @schemaOwner IS NULL) AND 
+o.type= 'U' 
+ORDER BY s.name, o.name";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
+            }
+        }
     }
 }
