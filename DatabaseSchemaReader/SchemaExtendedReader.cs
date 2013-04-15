@@ -18,6 +18,8 @@ namespace DatabaseSchemaReader
         public virtual string ProcedureSourceCollectionName { get { return "ProcedureSource"; } }
         public virtual string ViewColumnsCollectionName { get { return "ViewColumns"; } }
         public virtual string ComputedColumnsCollectionName { get { return "ComputedColumns"; } }
+        internal virtual string TableDescriptionCollectionName { get { return "TableDescriptions"; } }
+        internal virtual string ColumnDescriptionCollectionName { get { return "ColumnDescriptions"; } }
         #endregion
 
         /// <summary>
@@ -67,6 +69,11 @@ namespace DatabaseSchemaReader
             return ds;
         }
 
+        /// <summary>
+        /// Finds the column identities.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
         public virtual DataTable IdentityColumns(string tableName)
         {
             using (DbConnection connection = Factory.CreateConnection())
@@ -81,6 +88,28 @@ namespace DatabaseSchemaReader
         {
             //override this if provider has identity
             DataTable dt = CreateDataTable(IdentityColumnsCollectionName);
+            return dt;
+        }
+
+        /// <summary>
+        /// Finds the table descriptions.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        public virtual DataTable TableDescription(string tableName)
+        {
+            DataTable dt = CreateDataTable(TableDescriptionCollectionName);
+            return dt;
+        }
+
+        /// <summary>
+        /// Finds the column descriptions.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        public virtual DataTable ColumnDescription(string tableName)
+        {
+            DataTable dt = CreateDataTable(ColumnDescriptionCollectionName);
             return dt;
         }
 

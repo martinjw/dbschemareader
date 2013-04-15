@@ -121,6 +121,15 @@ namespace DatabaseSchemaReader.DataSchema
         /// The computed definition.
         /// </value>
         public string ComputedDefinition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>
+        /// The description.
+        /// </value>
+        public string Description { get; set; }
+
         #endregion
 
         #region Derived properties
