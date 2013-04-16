@@ -148,5 +148,48 @@ WHERE
 
             return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
+
+        public override DataTable TableDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    TABLE_SCHEMA AS 'SchemaOwner', 
+    TABLE_NAME AS 'TableName', 
+    TABLE_COMMENT AS 'TableDescription'
+FROM information_schema.tables
+WHERE 
+    TABLE_COMMENT IS NOT NULL AND
+    (TABLE_NAME = @tableName OR @tableName IS NULL) AND 
+    (TABLE_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, TableDescriptionCollectionName, sqlCommand);
+            }
+        }
+
+        public override DataTable ColumnDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    TABLE_SCHEMA AS 'SchemaOwner', 
+    TABLE_NAME AS 'TableName', 
+    COLUMN_NAME AS 'ColumnName',
+    COLUMN_COMMENT AS 'ColumnDescription'
+FROM information_schema.columns
+WHERE 
+    COLUMN_COMMENT IS NOT NULL AND
+    (TABLE_NAME = @tableName OR @tableName IS NULL) AND 
+    (TABLE_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
+            }
+        }
     }
 }

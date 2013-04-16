@@ -74,5 +74,47 @@ AND (tabschema = @schemaOwner OR @schemaOwner IS NULL)";
             return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
 
+        public override DataTable TableDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    TABSCHEMA AS 'SchemaOwner', 
+    TABNAME AS 'TableName', 
+    REMARKS AS 'TableDescription'
+FROM SYSCAT.TABLES
+WHERE 
+    REMARKS IS NOT NULL AND
+    (TABNAME = @tableName OR @tableName IS NULL) AND 
+    (TABSCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, TableDescriptionCollectionName, sqlCommand);
+            }
+        }
+
+        public override DataTable ColumnDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    TABSCHEMA AS 'SchemaOwner', 
+    TABNAME AS 'TableName', 
+    COLNAME AS 'ColumnName',
+    REMARKS AS 'ColumnDescription'
+FROM SYSCAT.COLUMNS
+WHERE 
+    REMARKS IS NOT NULL AND
+    (TABNAME = @tableName OR @tableName IS NULL) AND 
+    (TABSCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
+            }
+        }
     }
 }

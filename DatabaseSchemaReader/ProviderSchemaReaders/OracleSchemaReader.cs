@@ -365,5 +365,52 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
                 }
             }
         }
+
+        public override DataTable TableDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+	OWNER AS SchemaOwner, 
+	TABLE_NAME AS TableName,
+	COMMENTS AS TableDescription
+FROM ALL_TAB_COMMENTS
+WHERE
+    (TABLE_NAME = :tableName OR :tableName IS NULL) AND 
+    (OWNER = :schemaOwner OR :schemaOwner IS NULL) AND 
+    OWNER != 'SYS' AND
+    COMMENTS IS NOT NULL
+";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, TableDescriptionCollectionName, sqlCommand);
+            }
+        }
+
+        public override DataTable ColumnDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+	OWNER AS SchemaOwner, 
+	TABLE_NAME AS TableName,
+    COLUMN_NAME AS ColumnName,
+	COMMENTS AS ColumnDescription
+FROM ALL_COL_COMMENTS
+WHERE
+    (TABLE_NAME = :tableName OR :tableName IS NULL) AND 
+    (OWNER = :schemaOwner OR :schemaOwner IS NULL) AND 
+    OWNER != 'SYS' AND
+    COMMENTS IS NOT NULL
+";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
+            }
+        }
     }
 }
