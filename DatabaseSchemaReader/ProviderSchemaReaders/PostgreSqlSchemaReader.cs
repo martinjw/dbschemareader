@@ -267,5 +267,57 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
             return list;
         }
 
+        public override DataTable TableDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    ns.nspname AS 'SchemaOwner', 
+    c.relname AS 'TableName', 
+    description AS 'TableDescription'
+FROM pg_class c
+INNER JOIN pg_description d ON c.oid = d.classoid
+INNER JOIN pg_namespace ns ON c.relnamespace = ns.oid
+WHERE 
+    c.relkind = 'r' AND    
+    d.objsubid = 0 AND
+    (c.relname = @tableName OR @tableName IS NULL) AND 
+    (ns.nspname = @schemaOwner OR @schemaOwner IS NULL)";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, TableDescriptionCollectionName, sqlCommand);
+            }
+        }
+
+        public override DataTable ColumnDescription(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+    ns.nspname AS 'SchemaOwner', 
+    c.relname AS 'TableName', 
+    cols.column_name AS 'ColumnName',
+    description AS 'ColumnDescription'
+FROM information_schema.columns cols
+INNER JOIN pg_class c 
+    ON c.relname=cols.table_name
+INNER JOIN pg_description d 
+    ON c.oid = d.classoid
+    AND d.objsubid = cols.ordinal_position
+INNER JOIN pg_namespace ns 
+    ON c.relnamespace = ns.oid
+WHERE 
+    (cols.table_name = @tableName OR @tableName IS NULL) AND 
+    (ns.nspname = @schemaOwner OR @schemaOwner IS NULL)";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
+            }
+        }
+
     }
 }

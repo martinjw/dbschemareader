@@ -24,7 +24,7 @@ namespace DatabaseSchemaReader.Conversion
 
             const string schemaKey = "SchemaOwner";
             const string tableKey = "TableName";
-            const string descKey = "TableDescription";
+            const string descKey = "ColumnDescription";
             const string columnKey = "ColumnName";
 
             foreach (DataRow row in dataTable.Rows)
