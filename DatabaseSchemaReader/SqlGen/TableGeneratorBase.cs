@@ -35,7 +35,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         public bool IncludeSchema { get; set; }
 
-        public string Write()
+        public virtual string Write()
         {
             var sb = new StringBuilder();
 

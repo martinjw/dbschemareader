@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
@@ -12,6 +13,47 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         {
         }
 
+        public override string Write()
+        {
+            string desc = null;
+            if (!string.IsNullOrEmpty(Table.Description))
+            {
+                desc = AddTableDescription();
+            }
+            if (Table.Columns.Any(c => !string.IsNullOrEmpty(c.Description)))
+            {
+                desc = desc + AddColumnDescriptions();
+            }
+            return base.Write() + desc;
+        }
+
+        private string AddColumnDescriptions()
+        {
+            var sb = new StringBuilder();
+            var formatProvider = SqlFormatProvider();
+            var tableName = formatProvider.Escape(Table.SchemaOwner) + "." + formatProvider.Escape(Table.Name);
+            foreach (var column in Table.Columns.Where(c => !string.IsNullOrEmpty(c.Description)))
+            {
+                sb.Append("COMMENT ON COLUMN ");
+                sb.Append(tableName + "." + formatProvider.Escape(column.Name));
+                sb.Append(" IS '");
+                sb.Append(column.Description);
+                sb.AppendLine("'" + formatProvider.LineEnding());
+            }
+            return sb.ToString();
+        }
+
+        private string AddTableDescription()
+        {
+            var formatProvider = SqlFormatProvider();
+            var sb = new StringBuilder();
+            sb.Append("COMMENT ON TABLE ");
+            sb.Append(formatProvider.Escape(Table.SchemaOwner) + "." + formatProvider.Escape(Table.Name));
+            sb.Append(" IS '");
+            sb.Append(Table.Description);
+            sb.AppendLine("'" + formatProvider.LineEnding());
+            return sb.ToString();
+        }
 
         protected override string ConstraintWriter()
         {

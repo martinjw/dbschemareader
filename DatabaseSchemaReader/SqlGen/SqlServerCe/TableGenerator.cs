@@ -13,6 +13,16 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         {
             DataTypeWriter = new DataTypeWriter();
         }
+
+        protected override string AddTableDescription()
+        {
+            return null;
+        }
+        protected override string AddColumnDescriptions()
+        {
+            return null;
+        }
+
         protected override ConstraintWriter CreateConstraintWriter()
         {
             var constraintWriter = base.CreateConstraintWriter();

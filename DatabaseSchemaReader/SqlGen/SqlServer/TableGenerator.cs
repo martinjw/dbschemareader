@@ -22,6 +22,50 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             DataTypeWriter = new DataTypeWriter(originSqlType);
         }
 
+        public override string Write()
+        {
+            string desc = null;
+            if (!string.IsNullOrEmpty(Table.Description))
+            {
+                desc = AddTableDescription();
+            }
+            if (Table.Columns.Any(c => !string.IsNullOrEmpty(c.Description)))
+            {
+                desc = desc + AddColumnDescriptions();
+            }
+            return base.Write() + desc;
+        }
+
+        protected virtual string AddColumnDescriptions()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(SqlFormatProvider().RunStatements());
+            foreach (var column in Table.Columns.Where(c => !string.IsNullOrEmpty(c.Description)))
+            {
+                sb.AppendLine("EXEC sys.sp_addextendedproperty ");
+                sb.AppendLine("@name = N'MS_Description', ");
+                sb.AppendLine("@value = N'" + column.Description + "',");
+                sb.AppendLine("@level0type = N'Schema', @level0name = '" + Table.SchemaOwner + "',");
+                sb.AppendLine("@level1type = N'Table', @level1name = '" + Table.Name + "'");
+                sb.AppendLine("@level2type = N'Column', @level2name = '" + column.Name + "'");
+                sb.AppendLine(SqlFormatProvider().RunStatements());
+            }
+            return sb.ToString();
+        }
+
+        protected virtual string AddTableDescription()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(SqlFormatProvider().RunStatements());
+            sb.AppendLine("EXEC sys.sp_addextendedproperty ");
+            sb.AppendLine("@name = N'MS_Description', ");
+            sb.AppendLine("@value = N'" + Table.Description + "',");
+            sb.AppendLine("@level0type = N'Schema', @level0name = '" + Table.SchemaOwner + "',");
+            sb.AppendLine("@level1type = N'Table', @level1name = '" + Table.Name + "'");
+            sb.AppendLine(SqlFormatProvider().RunStatements());
+            return sb.ToString();
+        }
+
         protected override string ConstraintWriter()
         {
             var sb = new StringBuilder();
