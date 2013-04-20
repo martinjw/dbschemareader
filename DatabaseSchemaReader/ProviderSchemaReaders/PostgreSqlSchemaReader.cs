@@ -118,13 +118,21 @@ WHERE
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
-            const string sqlCommand = @"SELECT 
+            var version = ServerVersion(conn);
+            string timing = "CONDITION_TIMING";
+            var v = new Version(version);
+            if(v.Major >= 9 && v.Minor >= 1)
+            {
+                timing = "ACTION_TIMING";
+            }
+
+            var sqlCommand = @"SELECT 
   TRIGGER_SCHEMA AS OWNER,
   TRIGGER_NAME,
   EVENT_OBJECT_TABLE AS TABLE_NAME,
   ACTION_STATEMENT AS TRIGGER_BODY,
   EVENT_MANIPULATION AS TRIGGERING_EVENT,
-  CONDITION_TIMING AS TRIGGER_TYPE
+  " + timing + @" AS TRIGGER_TYPE
 FROM information_schema.Triggers
 WHERE 
 (EVENT_OBJECT_TABLE = :tableName OR :tableName IS NULL) AND 
@@ -270,12 +278,12 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
         public override DataTable TableDescription(string tableName)
         {
             const string sqlCommand = @"SELECT 
-    ns.nspname AS 'SchemaOwner', 
-    c.relname AS 'TableName', 
-    description AS 'TableDescription'
+    ns.nspname AS SchemaOwner, 
+    c.relname AS TableName, 
+    d.description AS TableDescription
 FROM pg_class c
-INNER JOIN pg_description d ON c.oid = d.classoid
 INNER JOIN pg_namespace ns ON c.relnamespace = ns.oid
+INNER JOIN pg_description d ON c.oid = d.objoid
 WHERE 
     c.relkind = 'r' AND    
     d.objsubid = 0 AND
@@ -294,18 +302,18 @@ WHERE
         public override DataTable ColumnDescription(string tableName)
         {
             const string sqlCommand = @"SELECT 
-    ns.nspname AS 'SchemaOwner', 
-    c.relname AS 'TableName', 
-    cols.column_name AS 'ColumnName',
-    description AS 'ColumnDescription'
+    ns.nspname AS SchemaOwner, 
+    c.relname AS TableName, 
+    cols.column_name AS ColumnName,
+    d.description AS ColumnDescription
 FROM information_schema.columns cols
 INNER JOIN pg_class c 
     ON c.relname=cols.table_name
-INNER JOIN pg_description d 
-    ON c.oid = d.classoid
-    AND d.objsubid = cols.ordinal_position
 INNER JOIN pg_namespace ns 
     ON c.relnamespace = ns.oid
+INNER JOIN pg_description d 
+    ON c.oid = d.objoid
+    AND d.objsubid = cols.ordinal_position
 WHERE 
     (cols.table_name = @tableName OR @tableName IS NULL) AND 
     (ns.nspname = @schemaOwner OR @schemaOwner IS NULL)";
