@@ -1,1 +1,1 @@
-%systemroot%\Microsoft.Net\Framework\v4.0.30319\MSBuild.exe build.proj /t:Release & pause
+%systemroot%\Microsoft.Net\Framework\v4.0.30319\MSBuild.exe build.proj /t:Release /fl /flp:Verbosity=normal & pause
