@@ -4,6 +4,7 @@
     <!-- properties that are used in this build file - referenced as $(PropertyName) -->
     <ProjectName>DatabaseSchemaReader</ProjectName>
 	<OutputPath>$(MSBuildProjectDirectory)\Bin\</OutputPath>
+	<ObjPath>$(MSBuildProjectDirectory)\obj\</ObjPath>
 	<CopyToSQLiteOutputPath>$(OutputPath)CopyToSQLite\</CopyToSQLiteOutputPath>
   </PropertyGroup>
   
@@ -13,7 +14,7 @@
     <Message Text="Building SchemaViewer in .net 3.5" />
     <RemoveDir Directories="$(OutputPath)"/>
     <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
-		Properties="Configuration=Release;OutputPath=$(OutputPath);IntermediateOutputPath=$(MSBuildProjectDirectory)\obj\Release\"/>
+		Properties="Configuration=Release;OutputPath=$(OutputPath);IntermediateOutputPath=$(ObjPath)Release\"/>
     <Message Text="SchemaViewer Built" />
 	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
   </Target>
@@ -21,11 +22,11 @@
   <Target Name="BuildViewer4">
     <Message Text="Building SchemaViewer in .net 4" />
 	<PropertyGroup>
-		<OutputPath4>$(OutputPath)v4\</OutputPath4>
+		<OutputPath4>$(OutputPath)net4\</OutputPath4>
 	</PropertyGroup>
     <RemoveDir Directories="$(OutputPath4)"/>
     <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
-		Properties="Configuration=Net4;OutputPath=$(OutputPath4);IntermediateOutputPath=$(MSBuildProjectDirectory)\obj\Net4\"/>
+		Properties="Configuration=Net4;OutputPath=$(OutputPath4);IntermediateOutputPath=$(ObjPath)Net4\"/>
     <Message Text="SchemaViewer Built" />
 	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath4)" />
   </Target>
@@ -33,11 +34,15 @@
   <Target Name="BuildCopyToSQLite">
     <Message Text="Building CopyToSQLite" />
     <MSBuild Projects="CopyToSQLite\CopyToSQLite.csproj" 
-		Properties="Configuration=Release;OutputPath=$(CopyToSQLiteOutputPath);IntermediateOutputPath=$(MSBuildProjectDirectory)\obj\Net4\"/>
+		Properties="Configuration=Release;OutputPath=$(CopyToSQLiteOutputPath);IntermediateOutputPath=$(ObjPath)Net4\"/>
     <Message Text="CopyToSQLite Built" />
   </Target>
-  
-  <Target Name="Release" DependsOnTargets="BuildViewer; BuildViewer4; BuildCopyToSQLite">
+   
+  <Target Name="CleanUp">
+    <RemoveDir Directories="$(ObjPath)"/>
+  </Target>
+ 
+  <Target Name="Release" DependsOnTargets="BuildViewer; BuildViewer4; BuildCopyToSQLite; CleanUp">
     <Message Text="Built All" />
   </Target>
   
