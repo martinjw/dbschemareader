@@ -83,5 +83,25 @@ namespace DatabaseSchemaReader.Data
             return ReadTable(databaseTable, connectionString, providerName);
         }
 
+        /// <summary>
+        /// Reads the table data and invokes the function for each INSERT statement. The databaseTable must have dataTypes (call DataReader.DataTypes()).
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="processRecord">The process record.</param>
+        public void ReadTable(DatabaseTable databaseTable, string connectionString, string providerName,
+                              Func<string, bool> processRecord)
+        {
+            var r = new Reader(databaseTable, connectionString, providerName);
+            var w = new InsertWriter(databaseTable, FindSqlType(providerName));
+            r.Read(record =>
+                       {
+                           var s = w.WriteInsert(record);
+                           return processRecord(s);
+                       });
+           
+        }
+
     }
 }

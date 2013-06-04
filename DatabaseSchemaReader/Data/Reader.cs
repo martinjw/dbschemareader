@@ -40,7 +40,7 @@ namespace DatabaseSchemaReader.Data
         }
 
         /// <summary>
-        /// Gets or sets the maximum number of records returned. Default is 1000.
+        /// Gets or sets the maximum number of records returned. Default is 1000, maximum is 10000.
         /// </summary>
         /// <value>The size of the page.</value>
         public int PageSize
@@ -61,10 +61,12 @@ namespace DatabaseSchemaReader.Data
         }
 
         /// <summary>
-        /// Reads first 200 rows of data from the table into a DataTable.
+        /// Reads first x rows of data from the table into a DataTable.
         /// </summary>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "We're generating the select SQL")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
+            "CA2100:Review SQL queries for security vulnerabilities", Justification = "We're generating the select SQL")
+        ]
         public DataTable Read()
         {
             var sqlType = FindSqlType();
@@ -100,6 +102,39 @@ namespace DatabaseSchemaReader.Data
                 }
             }
             return dt;
+        }
+
+        /// <summary>
+        /// Reads data from the table and invokes a function. if the function returns FALSE execution stops. PageSize is not honored.
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
+            "CA2100:Review SQL queries for security vulnerabilities", Justification = "We're generating the select SQL")]
+        public void Read(Func<IDataRecord, bool> processRecord)
+        {
+            if (processRecord == null) return;
+            var sqlType = FindSqlType();
+            var originSql = new SqlWriter(_databaseTable, sqlType);
+            var selectAll = originSql.SelectAllSql();
+
+            var dbFactory = DbProviderFactories.GetFactory(_providerName);
+            using (var con = dbFactory.CreateConnection())
+            {
+                con.ConnectionString = _connectionString;
+                using (var cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = selectAll;
+                    con.Open();
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.HasRows) return;
+                        while (dr.Read())
+                        {
+                            if (!processRecord(dr)) return;
+                        }
+                    }
+                }
+            }
         }
     }
 }
