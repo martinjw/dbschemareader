@@ -25,7 +25,28 @@ namespace DatabaseSchemaReader.Data
         private Converter _converter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InsertWriter"/> class.
+        /// Initializes a new instance of the <see cref="InsertWriter" /> class. The databaseTable must have dataTypes (call DataReader.DataTypes()). Use this with <see cref="InsertWriter.WriteInsert(IDataRecord)"/>
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="sqlType">Type of the SQL.</param>
+        /// <exception cref="System.ArgumentNullException">databaseTable</exception>
+        public InsertWriter(DatabaseTable databaseTable, SqlType sqlType)
+        {
+            if (databaseTable == null)
+                throw new ArgumentNullException("databaseTable");
+
+            _databaseTable = databaseTable;
+
+            PrepareTypes();
+            _sqlType = sqlType;
+            _sqlWriter = new SqlWriter(_databaseTable, sqlType);
+            _converter = new Converter(sqlType, _dateTypes);
+
+            PrepareTemplate();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InsertWriter"/> class.  Use this with <see cref="InsertWriter.WriteInsert(IDataRecord)"/>
         /// </summary>
         /// <param name="databaseTable">The databaseTable.</param>
         /// <param name="dataTable">The data table.</param>
@@ -39,10 +60,35 @@ namespace DatabaseSchemaReader.Data
             _dataTable = dataTable;
             _databaseTable = databaseTable;
 
-            PrepareTypes();
+            PrepareTypesDataTable();
         }
 
         private void PrepareTypes()
+        {
+            foreach (var databaseColumn in _databaseTable.Columns)
+            {
+                var key = databaseColumn.Name;
+                var dataType = databaseColumn.DataType;
+                if (dataType == null)
+                {
+                    _columnTypes.Add(key, typeof(object));
+                    continue;
+                }
+                var columnType = dataType.GetNetType();
+                _columnTypes.Add(key, columnType);
+                if(dataType.IsDateTime)
+                {
+                    //get the original database type (datetime2, date, time, timestamp etc)
+                    _dateTypes.Add(key, databaseColumn.DbDataType.ToUpperInvariant());
+                }
+                if (!IncludeBlobs && DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn))
+                {
+                    _nullColumns.Add(key);
+                }
+            }
+        }
+
+        private void PrepareTypesDataTable()
         {
             foreach (var databaseColumn in _databaseTable.Columns)
             {
@@ -93,6 +139,8 @@ namespace DatabaseSchemaReader.Data
         /// <returns></returns>
         public string Write(SqlType sqlType)
         {
+            if (_dataTable == null) return null; //wrong constructor used
+
             _sqlType = sqlType;
             _sqlWriter = new SqlWriter(_databaseTable, sqlType);
             _converter = new Converter(sqlType, _dateTypes);
@@ -172,6 +220,35 @@ namespace DatabaseSchemaReader.Data
                 var columnType = _columnTypes[databaseColumn.Name];
 
                 object data = row[databaseColumn.Name];
+                values.Add(_converter.Convert(columnType, data, databaseColumn.Name));
+            }
+
+            var value = string.Join(" ,", values.ToArray());
+            return string.Format(CultureInfo.InvariantCulture, _template, value);
+        }
+
+        /// <summary>
+        /// Writes the insert statement for the specified data.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <returns></returns>
+        public string WriteInsert(IDataRecord record)
+        {
+            var values = new List<string>(_databaseTable.Columns.Count);
+
+            foreach (var databaseColumn in _databaseTable.Columns)
+            {
+                if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
+
+                if (_nullColumns.Contains(databaseColumn.Name))
+                {
+                    values.Add("NULL");
+                    continue;
+                }
+
+                var columnType = _columnTypes[databaseColumn.Name];
+
+                object data = record[databaseColumn.Name];
                 values.Add(_converter.Convert(columnType, data, databaseColumn.Name));
             }
 
