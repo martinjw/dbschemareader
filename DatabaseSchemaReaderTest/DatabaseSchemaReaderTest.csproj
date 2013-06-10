@@ -69,12 +69,14 @@
     <Compile Include="Codegen\ClassWriterCompositeKeyTest.cs" />
     <Compile Include="Codegen\CodeWriterBuildTest.cs" />
     <Compile Include="Codegen\ClassWriterForeignKeyTest.cs" />
+    <Compile Include="Codegen\ClassWriterOneToOneTest.cs" />
+    <Compile Include="Codegen\ClassWriterTablePerTypeTest.cs" />
     <Compile Include="Codegen\NHibernateMappingWriterTest.cs" />
     <Compile Include="Codegen\RiaServicesTest.cs" />
     <Compile Include="Codegen\DataAnnotationWriterTest.cs" />
     <Compile Include="Codegen\DataTypeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
-    <Compile Include="Codegen\ClassWirterAssociationTableTest.cs" />
+    <Compile Include="Codegen\ClassWriterAssociationTableTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />
     <Compile Include="Compare\CompareProceduresTest.cs" />

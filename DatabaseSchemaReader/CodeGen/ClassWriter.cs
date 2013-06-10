@@ -15,6 +15,7 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly DataTypeWriter _dataTypeWriter = new DataTypeWriter();
         private DataAnnotationWriter _dataAnnotationWriter;
         private readonly CodeWriterSettings _codeWriterSettings;
+        private DatabaseTable _inheritanceTable;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
@@ -44,6 +45,8 @@ namespace DatabaseSchemaReader.CodeGen
             }
             _dataTypeWriter.CodeTarget = codeTarget;
 
+            _inheritanceTable = _table.FindInheritanceTable();
+
             WriteNamespaces();
 
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
@@ -58,13 +61,20 @@ namespace DatabaseSchemaReader.CodeGen
             else
             {
                 var tableOrView = _table is DatabaseView ? "view" : "table";
-                using (_cb.BeginNest("public class " + className, "Class representing " + _table.Name + " " + tableOrView))
+                var comment = "Class representing " + _table.Name + " " + tableOrView;
+                var classDefinition = "public class " + className;
+                if (_inheritanceTable != null)
+                {
+                    classDefinition += " : " + _inheritanceTable.NetName;
+                }
+
+                using (_cb.BeginNest(classDefinition, comment))
                 {
                     WriteClassMembers(className);
                 }
             }
 
-            if (_table.HasCompositeKey)
+            if (_table.HasCompositeKey && _inheritanceTable == null)
             {
                 WriteCompositeKeyClass(className);
             }
@@ -101,6 +111,34 @@ namespace DatabaseSchemaReader.CodeGen
                 InitializeCollectionsInConstructor(className);
             }
 
+            if (_inheritanceTable == null)
+                WritePrimaryKey(className);
+
+            foreach (var column in _table.Columns)
+            {
+                if (column.IsPrimaryKey) continue;
+                if (column.IsForeignKey) continue;
+                WriteColumn(column);
+            }
+
+            foreach (var foreignKey in _table.ForeignKeys)
+            {
+                WriteForeignKey(foreignKey);
+            }
+
+            WriteForeignKeyCollections();
+
+            if (!_table.HasCompositeKey && 
+                _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
+                _inheritanceTable == null)
+            {
+                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
+                overrider.AddOverrides();
+            }
+        }
+
+        private void WritePrimaryKey(string className)
+        {
             if (_table.HasCompositeKey)
             {
                 if (!IsEntityFramework())
@@ -123,26 +161,6 @@ namespace DatabaseSchemaReader.CodeGen
                 //could be a view or have no primary key
                 if (column != null)
                     WriteColumn(column);
-            }
-
-            foreach (var column in _table.Columns)
-            {
-                if (column.IsPrimaryKey) continue;
-                if (column.IsForeignKey) continue;
-                WriteColumn(column);
-            }
-
-            foreach (var foreignKey in _table.ForeignKeys)
-            {
-                WriteForeignKey(foreignKey);
-            }
-
-            WriteForeignKeyCollections();
-
-            if (!_table.HasCompositeKey && _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices)
-            {
-                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
-                overrider.AddOverrides();
             }
         }
 
@@ -178,6 +196,9 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var listType = "IList<";
             if (IsEntityFramework()) listType = "ICollection<";
+            var hasTablePerTypeInheritance =
+                (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
+
             foreach (var foreignKey in _table.ForeignKeyChildren)
             {
                 if (foreignKey.IsManyToManyTable() && IsCodeFirst())
@@ -187,6 +208,8 @@ namespace DatabaseSchemaReader.CodeGen
                 }
                 if (_table.IsSharedPrimaryKey(foreignKey))
                 {
+                    if (hasTablePerTypeInheritance)
+                        continue;
                     //type and property name are the same
                     _cb.AppendAutomaticProperty(foreignKey.NetName, foreignKey.NetName, true);
                     continue;
@@ -276,6 +299,8 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
             var propertyName = column.NetName;
+            //in case teh netName hasn't been set
+            if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
             // KL: Ensures that property name doesn't match class name
             if (propertyName == column.Table.NetName)
             {
@@ -318,6 +343,9 @@ namespace DatabaseSchemaReader.CodeGen
         {
             // get the reference table
             var refTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
+
+            //we inherit from it instead (problem with self-joins)
+            if (Equals(refTable, _inheritanceTable)) return;
 
             if (refTable == null)
             {
