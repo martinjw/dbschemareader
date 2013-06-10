@@ -145,7 +145,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="destination">The destination table (principal).</param>
         /// <param name="origin">The origin table (dependent, has foreign key relationship to principal).</param>
         /// <returns>
-        ///   <c>true</c> if [is one to one] [the specified destination]; otherwise, <c>false</c>.
+        ///   <c>true</c> if this table's primary key is also a foreign key; otherwise, <c>false</c>.
         /// </returns>
         public static bool IsSharedPrimaryKey(this DatabaseTable destination, DatabaseTable origin)
         {
@@ -156,6 +156,31 @@ namespace DatabaseSchemaReader.DataSchema
             //the primary key of the origin is also a foreign key to this table
             var allFk = columns.All(c => c.ForeignKeyTableName == destination.Name);
             return allFk;
+        }
+
+        /// <summary>
+        /// Finds the table that this inherits from (shared primary key)
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <returns></returns>
+        public static DatabaseTable FindInheritanceTable(this DatabaseTable table)
+        {
+            if (table == null) return null;
+            if (table.PrimaryKeyColumn != null &&
+                table.Columns.Where(c => c.IsPrimaryKey).All(c => c.IsForeignKey))
+            {
+                //all the primary keys are foreign keys.
+                var fkTable = table.PrimaryKeyColumn.ForeignKeyTable;
+                if (fkTable != null)
+                {
+                    var count = fkTable.ForeignKeyChildren.Count(childTable => fkTable.IsSharedPrimaryKey(childTable));
+                    if (count > 1)
+                    {
+                        return fkTable;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

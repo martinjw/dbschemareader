@@ -14,6 +14,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         private readonly CodeWriterSettings _codeWriterSettings;
         private readonly MappingNamer _mappingNamer;
         private readonly ClassBuilder _cb;
+        private DatabaseTable _inheritanceTable;
 
         public CodeFirstMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
@@ -36,6 +37,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
         public string Write()
         {
+
             _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
             if (_table.PrimaryKeyColumn != null && !_table.PrimaryKeyColumn.IsIdentity)
             {
@@ -45,6 +47,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             _cb.AppendLine("using System.Data.Entity.ModelConfiguration;");
 
             MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
+
+            _inheritanceTable = _table.FindInheritanceTable();
 
             using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace + ".Mapping"))
             {
@@ -58,14 +62,26 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
                         _cb.AppendLine("// Properties");
                         WriteColumns();
+
                         foreach (var foreignKey in _table.ForeignKeys)
                         {
+                            //we inherit from it instead (problem with self-joins)
+                            if (Equals(foreignKey.ReferencedTable(_table.DatabaseSchema), _inheritanceTable))
+                                continue;
+
                             WriteForeignKey(foreignKey);
                         }
 
                         _cb.AppendLine("// Navigation properties");
+
+                        var hasTablePerTypeInheritance =
+                            (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
+
                         foreach (var foreignKeyChild in _table.ForeignKeyChildren)
                         {
+                            if (hasTablePerTypeInheritance && _table.IsSharedPrimaryKey(foreignKeyChild))
+                                continue;
+
                             WriteForeignKeyCollection(foreignKeyChild);
                         }
                     }
@@ -114,6 +130,18 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
 
             var idColumn = _table.PrimaryKeyColumn;
+
+
+            if (_inheritanceTable != null)
+            {
+                //already mapped by inheritance, but point out that EF TPT can't cope
+                if (idColumn.Name != _inheritanceTable.PrimaryKeyColumn.Name)
+                {
+                    _cb.AppendLine("// In TPT, primary key columns must be named identically!");
+                }
+                return;
+            }
+
             //in case PrepareSchemaNames.Prepare(schema) not done
             var netName = idColumn.NetName ?? idColumn.Name;
 

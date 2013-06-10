@@ -21,7 +21,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (column != null)
             {
                 //if it's a foreign key (CategoryId)
-                if (column.IsForeignKey && name.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+                if (column.IsForeignKey && name.EndsWith("Id", StringComparison.OrdinalIgnoreCase) && name.Length > 2)
                 {
                     //remove the "Id" - it's just a "Category"
                     name = name.Substring(0, name.Length - 2);
