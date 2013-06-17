@@ -49,12 +49,43 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             AddPrimaryKey();
             WriteColumns();
 
+            var hasTablePerTypeInheritance =
+                (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
+
             foreach (var foreignKeyChild in _table.ForeignKeyChildren)
             {
+                if (hasTablePerTypeInheritance && _table.IsSharedPrimaryKey(foreignKeyChild))
+                {
+                    WriteJoinedSubClass(foreignKeyChild);
+                    continue;
+                }
+
                 WriteForeignKeyCollection(foreignKeyChild);
             }
 
             return _doc.ToString();
+        }
+
+        private void WriteJoinedSubClass(DatabaseTable foreignKeyChild)
+        {
+            var joinedSubClass = new XElement(_xmlns + "joined-subclass");
+            joinedSubClass.SetAttributeValue("name", foreignKeyChild.NetName);
+            joinedSubClass.SetAttributeValue("table", foreignKeyChild.Name);
+            var key = new XElement(_xmlns + "key");
+            key.SetAttributeValue("column", foreignKeyChild.PrimaryKeyColumn.Name);
+            joinedSubClass.Add(key);
+            foreach (var column in foreignKeyChild.Columns.Where(x => !x.IsPrimaryKey))
+            {
+                if (column.IsForeignKey)
+                {
+                    var many2One = CreateForeignKey(column);
+                    joinedSubClass.Add(many2One);
+                    continue;
+                }
+                var property = CreateColumn(column);
+                joinedSubClass.Add(property);
+            }
+            _classElement.Add(joinedSubClass);
         }
 
         private void WriteForeignKeyCollection(DatabaseTable foreignKeyChild)
@@ -155,7 +186,8 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         {
             if (column.IsForeignKey)
             {
-                WriteForeignKey(column);
+                var many2One = CreateForeignKey(column);
+                _classElement.Add(many2One);
                 return;
             }
 
@@ -201,7 +233,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             return property;
         }
 
-        private void WriteForeignKey(DatabaseColumn column)
+        private XElement CreateForeignKey(DatabaseColumn column)
         {
             var propertyName = column.NetName;
             var dataType = column.ForeignKeyTable.NetName;
@@ -214,7 +246,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             property.SetAttributeValue("class", dataType);
             //bad idea unless you expect the database to be inconsistent
             //property.SetAttributeValue("not-found", "ignore");
-            _classElement.Add(property);
+            return property;
         }
 
         private void AddPrimaryKey()

@@ -12,6 +12,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
         private readonly CodeWriterSettings _codeWriterSettings;
         private readonly MappingNamer _mappingNamer;
         private readonly ClassBuilder _cb;
+        private DatabaseTable _inheritanceTable;
 
         public FluentMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
@@ -38,9 +39,14 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
             MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
 
+            var hasTablePerTypeInheritance =
+                (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
+            _inheritanceTable = _table.FindInheritanceTable();
+            var classMap = (_inheritanceTable != null) ? "SubclassMap" : "ClassMap";
+
             using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace + ".Mapping"))
             {
-                using (_cb.BeginNest("public class " + MappingClassName + " : ClassMap<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
+                using (_cb.BeginNest("public class " + MappingClassName + " : " + classMap + "<" + _table.NetName + ">", "Class mapping to " + _table.Name + " table"))
                 {
                     using (_cb.BeginNest("public " + MappingClassName + "()", "Constructor"))
                     {
@@ -51,11 +57,14 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                             _cb.AppendFormat("Table(\"{0}\");", name);
                         }
 
-                        AddPrimaryKey();
+                            AddPrimaryKey();
                         WriteColumns();
 
                         foreach (var foreignKeyChild in _table.ForeignKeyChildren)
                         {
+                            if (hasTablePerTypeInheritance && _table.IsSharedPrimaryKey(foreignKeyChild))
+                                continue;
+
                             WriteForeignKeyCollection(foreignKeyChild);
                         }
                     }
@@ -84,6 +93,12 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             }
 
             var idColumn = _table.PrimaryKeyColumn;
+
+            if (_inheritanceTable != null)
+            {
+                _cb.AppendLine("KeyColumn(\"" + idColumn.Name + "\");");
+                return;
+            }
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "Id(x => x.{0})", idColumn.NetName);
@@ -131,6 +146,14 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
         private void AddCompositePrimaryKey()
         {
+            if (_inheritanceTable != null)
+            {
+                foreach (var col in _table.PrimaryKey.Columns)
+                {
+                    _cb.AppendLine("KeyColumn(\"" + col + "\");");
+                }
+                return;
+            }
 
             var sb = new StringBuilder();
             //our convention is always to generate a key class with property name Key
@@ -172,6 +195,9 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             // KL: Writing foreign key separately
             foreach (var fKey in _table.ForeignKeys)
             {
+                if (Equals(fKey.ReferencedTable(_table.DatabaseSchema), _inheritanceTable))
+                    continue;
+
                 WriteForeignKey(fKey);
             }
         }
