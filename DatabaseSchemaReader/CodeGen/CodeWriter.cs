@@ -238,6 +238,8 @@ namespace DatabaseSchemaReader.CodeGen
                     pw.AddClass(@"Mapping\" + fileName);
                     break;
                 case CodeTarget.PocoNHibernateHbm:
+                    //TPT subclasses are mapped in base class
+                    if (table.FindInheritanceTable() != null) return;
                     var mw = new MappingWriter(table, _codeWriterSettings);
                     var txt = mw.Write();
 

@@ -30,6 +30,9 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 if (CodeTarget == CodeTarget.PocoEntityCodeFirst)
                 {
+                    //TODO: for EF 6 these will be System.Data.Entity.Spatial.Db*
+                    //Change after EF 6 RTM for next DSR release
+
                     //spatial types for EF 5 supported by SQLServer and Oracle/Devart
                     if ("geometry".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) ||
                         "SDO_GEOMETRY".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase))
