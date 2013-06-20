@@ -42,6 +42,14 @@ namespace DatabaseSchemaReader.Conversion
                 //the length unless it's an OleDb blob or clob
                 if (!string.IsNullOrEmpty(columnsKeyMap.LengthKey))
                     column.Length = GetNullableInt(row[columnsKeyMap.LengthKey]);
+                if (!string.IsNullOrEmpty(columnsKeyMap.DataLengthKey))
+                {
+                    //oracle only
+                    var dataLength = GetNullableInt(row[columnsKeyMap.DataLengthKey]);
+                    //column length already set for char/varchar. For other data types, get data length
+                    if (column.Length < 1) 
+                        column.Length = dataLength;
+                }
                 if (!string.IsNullOrEmpty(columnsKeyMap.PrecisionKey))
                     column.Precision = GetNullableInt(row[columnsKeyMap.PrecisionKey]);
                 if (!string.IsNullOrEmpty(columnsKeyMap.ScaleKey))

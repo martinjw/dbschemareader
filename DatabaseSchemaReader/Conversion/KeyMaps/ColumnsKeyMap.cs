@@ -25,6 +25,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = "precision";
             if (!dt.Columns.Contains(ScaleKey)) ScaleKey = "scale";
             if (!dt.Columns.Contains(DateTimePrecision)) DateTimePrecision = null;
+            if (dt.Columns.Contains("DATALENGTH")) DataLengthKey = "DATALENGTH";
             //sqlite
             AutoIncrementKey = "AUTOINCREMENT";
             PrimaryKeyKey = "PRIMARY_KEY";
@@ -98,5 +99,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
         public string Key { get; private set; }
 
         public string DatatypeKey { get; private set; }
+
+        public string DataLengthKey { get; private set; }
     }
 }
