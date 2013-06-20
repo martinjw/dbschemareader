@@ -327,6 +327,9 @@ namespace DatabaseSchemaViewer
                 var create = new ToolStripMenuItem("CREATE TABLEs to clipboard");
                 create.Click += (s, ea) => new SqlTasks(sqlType).BuildAllTableDdl(schema);
                 menu.Items.Add(create);
+                var deletes = new ToolStripMenuItem("DELETE all table data (in logical order) to clipboard");
+                deletes.Click += (s, ea) => new SqlTasks(sqlType).DeleteAllData(schema);
+                menu.Items.Add(deletes);
             }
             else if (view != null)
             {
@@ -471,6 +474,10 @@ namespace DatabaseSchemaViewer
             var code = new ToolStripMenuItem("C# class to clipboard");
             code.Click += (s, ea) => new SqlTasks(sqlType).BuildClass(table);
             menu.Items.Add(code);
+
+            var data = new ToolStripMenuItem("INSERT (first 100 rows) to clipboard");
+            data.Click += (s, ea) => new SqlTasks(sqlType).GetData(table, ConnectionString.Text.Trim(), (string)DataProviders.SelectedItem);
+            menu.Items.Add(data);
         }
 
         private SqlType FindSqlType()
