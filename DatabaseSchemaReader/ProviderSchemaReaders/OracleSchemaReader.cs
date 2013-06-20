@@ -80,6 +80,7 @@ ORDER BY cons.table_name, cons.constraint_name";
   COLUMN_ID      AS ID,
   DATA_TYPE      AS DataType,
   CHAR_LENGTH    AS LENGTH,
+  DATA_LENGTH    AS DATALENGTH,
   DATA_PRECISION AS PRECISION,
   DATA_SCALE     AS Scale,
   NULLABLE       AS Nullable,
