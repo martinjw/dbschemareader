@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.CodeGen.Procedures;
+using DatabaseSchemaReader.Data;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
+using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaViewer
 {
@@ -30,6 +34,47 @@ namespace DatabaseSchemaViewer
             try
             {
                 var txt = tg.Write();
+                Clipboard.SetText(txt, TextDataFormat.UnicodeText);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+            }
+        }
+
+        public void DeleteAllData(DatabaseSchema databaseSchema)
+        {
+            try
+            {
+                var orderedTables = SchemaTablesSorter.TopologicalSort(databaseSchema).Reverse();
+                var sb = new StringBuilder();
+                sb.AppendLine("-- delete data from all tables in safe order");
+                foreach (var databaseTable in orderedTables)
+                {
+                    if (databaseTable.ForeignKeyChildren.Contains(databaseTable))
+                    {
+                        sb.AppendLine("-- WARNING: " + databaseTable.Name + " has SELF-JOIN");
+                    }
+                    var sqlWriter = new SqlWriter(databaseTable, _sqlType);
+                    sb.AppendLine("DELETE FROM " + sqlWriter.EscapedTableName);
+                }
+                Clipboard.SetText(sb.ToString(), TextDataFormat.UnicodeText);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+            }
+        }
+
+        public void GetData(DatabaseTable databaseTable, string connectionString, string providerName)
+        {
+            try
+            {
+                var sw = new ScriptWriter();
+                sw.IncludeBlobs = false;
+                sw.IncludeIdentity = true;
+                sw.PageSize = 100;
+                var txt = sw.ReadTable(databaseTable, connectionString, providerName);
                 Clipboard.SetText(txt, TextDataFormat.UnicodeText);
             }
             catch (Exception exception)
