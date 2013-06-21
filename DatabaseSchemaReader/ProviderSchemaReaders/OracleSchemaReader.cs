@@ -277,7 +277,7 @@ ORDER BY OWNER, NAME, TYPE, LINE";
             if (Version(connection) < 11)
             {
                 //only supported in 11g+
-                return base.ComputedColumns(tableName);
+                return base.ComputedColumns(tableName, connection);
             }
             const string sqlCommand = @"SELECT 
 OWNER,
