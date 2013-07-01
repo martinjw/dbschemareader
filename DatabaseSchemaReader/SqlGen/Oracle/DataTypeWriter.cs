@@ -208,7 +208,9 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             if (dataType == "NUMBER")
             {
                 if (!precision.HasValue)
+                {
                     sql = "NUMBER";
+                }
                 else
                 {
                     var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
@@ -258,6 +260,10 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 sql = dataType;
                 if (!string.IsNullOrEmpty(defaultValue))
                     sql += " DEFAULT " + AddQuotedDefault(defaultValue);
+            }
+            if (column.IsComputed)
+            {
+                sql = "GENERATED ALWAYS AS (" + column.ComputedDefinition + ") VIRTUAL";
             }
 
             if (string.IsNullOrEmpty(sql))

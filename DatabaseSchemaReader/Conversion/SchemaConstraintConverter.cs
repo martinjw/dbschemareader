@@ -148,10 +148,10 @@ namespace DatabaseSchemaReader.Conversion
         {
             foreach (DataRow row in dt.Rows)
             {
-                var tableName = row["TableName"].ToString();
+                var tableName = row["TABLENAME"].ToString();
                 if (!tableName.Equals(table.Name, StringComparison.OrdinalIgnoreCase))
                     continue;
-                var colName = row["ColumnName"].ToString();
+                var colName = row["COLUMNNAME"].ToString();
                 var col = table.FindColumn(colName);
                 if (col != null)
                 {
