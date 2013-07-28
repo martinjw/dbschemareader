@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class ComparePackages
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public ComparePackages(StringBuilder sb, ComparisonWriter writer)
+        public ComparePackages(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
-        public void Execute(IEnumerable<DatabasePackage> basePackages, IEnumerable<DatabasePackage> comparePackages)
+        public void Execute(ICollection<DatabasePackage> basePackages, ICollection<DatabasePackage> comparePackages)
         {
             bool first = false;
 
@@ -27,15 +27,18 @@ namespace DatabaseSchemaReader.Compare
                 var schema = package.SchemaOwner;
                 var match = basePackages.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match != null) continue;
+                var script = string.Empty;
                 if (!first)
                 {
                     first = true;
-                    //CREATE PACKAGE cannot be combined with other statements in a batch, so be preceeded by and terminate with a  "/"
-                    if (_sb.Length > 0) _sb.AppendLine(_writer.RunStatements());
+                    //CREATE PACKAGE cannot be combined with other statements in a batch, 
+                    //so be preceeded by and terminate with a  "/"
+                    if (_results.Count > 0) script += _writer.RunStatements() + Environment.NewLine;
                 }
 
-                _sb.AppendLine("-- NEW PACKAGE " + package.Name);
-                _sb.AppendLine(_writer.AddPackage(package));
+                script += "-- NEW PACKAGE " + package.Name + Environment.NewLine +
+                    _writer.AddPackage(package);
+                CreateResult(ResultType.Add, name, script);
             }
 
             //find dropped and existing packages
@@ -46,25 +49,40 @@ namespace DatabaseSchemaReader.Compare
                 var match = comparePackages.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    _sb.AppendLine("-- DROP PACKAGE " + package.Name);
-                    _sb.AppendLine(_writer.DropPackage(package));
+                    CreateResult(ResultType.Delete, name, "-- DROP PACKAGE " + package.Name + Environment.NewLine +
+                        _writer.DropPackage(package));
                     continue;
                 }
 
                 if (package.Body == match.Body && package.Definition == match.Definition) continue;
 
+                var script = string.Empty;
                 if (!first)
                 {
                     first = true;
-                    //CREATE PACKAGE cannot be combined with other statements in a batch, so be preceeded by and terminate with a  "/"
-                    if (_sb.Length > 0) _sb.AppendLine(_writer.RunStatements());
+                    //CREATE PACKAGE cannot be combined with other statements in a batch, 
+                    //so be preceeded by and terminate with a  "/"
+                    if (_results.Count > 0) script += _writer.RunStatements() + Environment.NewLine;
                 }
 
                 //different package
-                _sb.AppendLine("-- ALTER PACKAGE " + package.Name);
+                script += "-- ALTER PACKAGE " + package.Name + Environment.NewLine;
                 //we rely on CREATE OR REPLACE here (no drop!)
-                _sb.AppendLine(_writer.AddPackage(match));
+                script += _writer.AddPackage(match);
+                CreateResult(ResultType.Delete, name, script);
             }
+        }
+
+        private void CreateResult(ResultType resultType, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.Package,
+                    ResultType = resultType,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
         }
     }
 }

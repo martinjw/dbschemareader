@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class CompareSequences
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public CompareSequences(StringBuilder sb, ComparisonWriter writer)
+        public CompareSequences(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
@@ -25,8 +25,8 @@ namespace DatabaseSchemaReader.Compare
                 var schema = sequence.SchemaOwner;
                 var match = baseSequences.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match != null) continue;
-                _sb.AppendLine("-- NEW SEQUENCE " + sequence.Name);
-                _sb.AppendLine(_writer.AddSequence(sequence));
+                CreateResult(ResultType.Add, name, "-- NEW SEQUENCE " + sequence.Name + Environment.NewLine +
+                    _writer.AddSequence(sequence));
             }
 
             //find dropped and existing sequence
@@ -37,13 +37,25 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareSequences.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    _sb.AppendLine("-- DROP SEQUENCE " + sequence.Name);
-                    _sb.AppendLine(_writer.DropSequence(sequence));
-                    continue;
+                    CreateResult(ResultType.Delete, name, "-- DROP SEQUENCE " + sequence.Name + Environment.NewLine +
+                       _writer.DropSequence(sequence));
                 }
 
                 //we could alter the sequence, but it's rare you'd ever want to do this
             }
+        }
+
+
+        private void CreateResult(ResultType resultType, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.Sequence,
+                    ResultType = resultType,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System.Linq;
-using DatabaseSchemaReader;
 using DatabaseSchemaReader.Compare;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else

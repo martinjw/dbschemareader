@@ -1,17 +1,18 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class CompareIndexes
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public CompareIndexes(StringBuilder sb, ComparisonWriter writer)
+        public CompareIndexes(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
@@ -21,20 +22,21 @@ namespace DatabaseSchemaReader.Compare
             var secondIndexes = compareTable.Indexes;
             foreach (var index in firstIndexes)
             {
-                if(index.IsUniqueKeyIndex(databaseTable)) continue;
+                if (index.IsUniqueKeyIndex(databaseTable)) continue;
 
                 var indexName = index.Name;
                 var match = secondIndexes.FirstOrDefault(c => c.Name == indexName);
                 if (match == null)
                 {
-                    _sb.AppendLine(_writer.DropIndex(databaseTable, index));
+                    CreateResult(ResultType.Delete, databaseTable.Name, indexName,
+                        _writer.DropIndex(databaseTable, index));
                     continue;
                 }
                 if (!ColumnsEqual(index, match) || (index.IndexType != match.IndexType))
                 {
-                    _sb.AppendLine(_writer.DropIndex(databaseTable, index));
-                    _sb.AppendLine(_writer.AddIndex(databaseTable, match));
-                    continue;
+                    CreateResult(ResultType.Add, databaseTable.Name, indexName,
+                       _writer.DropIndex(databaseTable, index) + Environment.NewLine +
+                       _writer.AddIndex(databaseTable, match));
                 }
             }
 
@@ -46,7 +48,8 @@ namespace DatabaseSchemaReader.Compare
                 var firstConstraint = firstIndexes.FirstOrDefault(c => c.Name == indexName);
                 if (firstConstraint == null)
                 {
-                    _sb.AppendLine(_writer.AddIndex(databaseTable, index));
+                    CreateResult(ResultType.Add, databaseTable.Name, indexName,
+                        _writer.AddIndex(databaseTable, index));
                 }
             }
         }
@@ -56,11 +59,24 @@ namespace DatabaseSchemaReader.Compare
             if (first.Columns == null && second.Columns == null) return true; //same, both null
             if (first.Columns == null || second.Columns == null) return false; //one is null, they are different
             //the two sequences have the same names
-            var columnNames1 = first.Columns.OrderBy(c=> c.Ordinal).Select(c => c.Name);
+            var columnNames1 = first.Columns.OrderBy(c => c.Ordinal).Select(c => c.Name);
             var columnNames2 = second.Columns.OrderBy(c => c.Ordinal).Select(c => c.Name);
 
             return columnNames1.SequenceEqual(columnNames2);
         }
 
+
+        private void CreateResult(ResultType resultType, string tableName, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.Index,
+                    ResultType = resultType,
+                    TableName = tableName,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
+        }
     }
 }

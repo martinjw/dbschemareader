@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class CompareTables
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public CompareTables(StringBuilder sb, ComparisonWriter writer)
+        public CompareTables(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
@@ -27,8 +27,9 @@ namespace DatabaseSchemaReader.Compare
                 var schema = databaseTable.SchemaOwner;
                 var match = baseTables.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match != null) continue;
-                _sb.AppendLine("-- NEW TABLE " + databaseTable.Name);
-                _sb.AppendLine(_writer.AddTable(databaseTable));
+                var script = "-- NEW TABLE " + databaseTable.Name + Environment.NewLine +
+                    _writer.AddTable(databaseTable);
+                CreateResult(ResultType.Add, name, script);
                 newTables.Add(databaseTable);
             }
 
@@ -41,25 +42,25 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareTables.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    _sb.AppendLine(_writer.DropTable(databaseTable));
+                    CreateResult(ResultType.Delete, name, _writer.DropTable(databaseTable));
                     continue;
                 }
                 //table may or may not have been changed
 
                 //add, alter and delete columns
-                var compareColumns = new CompareColumns(_sb, _writer);
+                var compareColumns = new CompareColumns(_results, _writer);
                 compareColumns.Execute(databaseTable, match);
 
                 //add, alter and delete constraints
-                var compareConstraints = new CompareConstraints(_sb, _writer);
+                var compareConstraints = new CompareConstraints(_results, _writer);
                 compareConstraints.Execute(databaseTable, match);
 
                 //indexes
-                var compareIndexes = new CompareIndexes(_sb, _writer);
+                var compareIndexes = new CompareIndexes(_results, _writer);
                 compareIndexes.Execute(databaseTable, match);
 
                 //triggers
-                var compareTriggers = new CompareTriggers(_sb, _writer);
+                var compareTriggers = new CompareTriggers(_results, _writer);
                 compareTriggers.Execute(databaseTable, match);
             }
 
@@ -69,14 +70,39 @@ namespace DatabaseSchemaReader.Compare
             {
                 foreach (var foreignKey in databaseTable.ForeignKeys)
                 {
-                    _sb.AppendLine(_writer.AddConstraint(databaseTable, foreignKey));
+                    var result = new CompareResult
+                    {
+                        SchemaObjectType = SchemaObjectType.Constraint,
+                        ResultType = ResultType.Add,
+                        Name = foreignKey.Name,
+                        Script = _writer.AddConstraint(databaseTable, foreignKey)
+                    };
+                    _results.Add(result);
                 }
                 foreach (var trigger in databaseTable.Triggers)
                 {
-                    _sb.AppendLine(_writer.AddTrigger(databaseTable, trigger));
+                    var result = new CompareResult
+                    {
+                        SchemaObjectType = SchemaObjectType.Trigger,
+                        ResultType = ResultType.Add,
+                        Name = trigger.Name,
+                        Script = _writer.AddTrigger(databaseTable, trigger)
+                    };
+                    _results.Add(result);
                 }
             }
         }
 
+        private void CreateResult(ResultType resultType, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.Table,
+                    ResultType = resultType,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
+        }
     }
 }

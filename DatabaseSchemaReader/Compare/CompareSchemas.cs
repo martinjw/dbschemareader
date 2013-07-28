@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
@@ -52,30 +53,47 @@ namespace DatabaseSchemaReader.Compare
         {
             var sb = new StringBuilder();
 
-            var compareTables = new CompareTables(sb, _writer);
+            var results = ExecuteResult();
+            foreach (var compareResult in results)
+            {
+                sb.AppendLine(compareResult.Script);
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Run the comparison and returns a <see cref="CompareResult"/>.
+        /// </summary>
+        /// <returns></returns>
+        public IList<CompareResult> ExecuteResult()
+        {
+            var list = new List<CompareResult>();
+
+            var compareTables = new CompareTables(list, _writer);
             //make sure they are in topological order- if 2 tables are added, the first must not have a foreign key to the second...
             var comparedTables = SchemaTablesSorter.TopologicalSort(_compareSchema);
             compareTables.Execute(_baseSchema.Tables, comparedTables);
 
             //compare sequences
-            var compareSequences = new CompareSequences(sb, _writer);
+            var compareSequences = new CompareSequences(list, _writer);
             compareSequences.Execute(_baseSchema.Sequences, _compareSchema.Sequences);
 
             //compare views
-            var compareViews = new CompareViews(sb, _writer);
+            var compareViews = new CompareViews(list, _writer);
             compareViews.Execute(_baseSchema.Views, _compareSchema.Views);
 
             //compare stored procedures and functions
-            var compareProcedures = new CompareProcedures(sb, _writer);
-            compareProcedures.Execute(_baseSchema.StoredProcedures,_compareSchema.StoredProcedures);
-            var compareFunctions = new CompareFunctions(sb, _writer);
+            var compareProcedures = new CompareProcedures(list, _writer);
+            compareProcedures.Execute(_baseSchema.StoredProcedures, _compareSchema.StoredProcedures);
+            var compareFunctions = new CompareFunctions(list, _writer);
             compareFunctions.Execute(_baseSchema.Functions, _compareSchema.Functions);
 
             //compare packages
-            var comparePackages = new ComparePackages(sb, _writer);
+            var comparePackages = new ComparePackages(list, _writer);
             comparePackages.Execute(_baseSchema.Packages, _compareSchema.Packages);
 
-            return sb.ToString();
+            return list;
         }
     }
 }
