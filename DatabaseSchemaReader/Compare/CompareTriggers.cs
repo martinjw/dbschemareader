@@ -1,17 +1,18 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class CompareTriggers
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public CompareTriggers(StringBuilder sb, ComparisonWriter writer)
+        public CompareTriggers(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
@@ -25,13 +26,17 @@ namespace DatabaseSchemaReader.Compare
                 var match = secondTriggers.FirstOrDefault(c => c.Name == indexName);
                 if (match == null)
                 {
-                    _sb.AppendLine(_writer.DropTrigger(databaseTable, trigger));
+                    CreateResult(ResultType.Delete, databaseTable.Name, indexName, 
+                        _writer.DropTrigger(databaseTable, trigger));
                     continue;
                 }
-                if (trigger.TriggerBody != match.TriggerBody || trigger.TriggerType != match.TriggerType || trigger.TriggerEvent != match.TriggerEvent)
+                if (trigger.TriggerBody != match.TriggerBody || 
+                    trigger.TriggerType != match.TriggerType || 
+                    trigger.TriggerEvent != match.TriggerEvent)
                 {
-                    _sb.AppendLine(_writer.DropTrigger(databaseTable, trigger));
-                    _sb.AppendLine(_writer.AddTrigger(databaseTable, match));
+                    CreateResult(ResultType.Change, databaseTable.Name, indexName,
+                        _writer.DropTrigger(databaseTable, trigger) + Environment.NewLine +
+                        _writer.AddTrigger(databaseTable, match));
                 }
             }
 
@@ -41,9 +46,23 @@ namespace DatabaseSchemaReader.Compare
                 var firstConstraint = firstTriggers.FirstOrDefault(c => c.Name == indexName);
                 if (firstConstraint == null)
                 {
-                    _sb.AppendLine(_writer.AddTrigger(databaseTable, trigger));
+                    CreateResult(ResultType.Add, databaseTable.Name, indexName, 
+                        _writer.AddTrigger(databaseTable, trigger));
                 }
             }
+        }
+
+        private void CreateResult(ResultType resultType, string tableName, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.Trigger,
+                    ResultType = resultType,
+                    TableName = tableName,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
         }
     }
 }

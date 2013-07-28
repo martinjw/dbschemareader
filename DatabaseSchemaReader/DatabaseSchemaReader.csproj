@@ -20,7 +20,7 @@
     </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-   <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
@@ -31,7 +31,7 @@
     <DocumentationFile>bin\Debug\DatabaseSchemaReader.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-   <DebugType>pdbonly</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -92,6 +92,7 @@
     <Compile Include="CodeGen\Procedures\SprocWriter.cs" />
     <Compile Include="CodeGen\UnitTestWriter.cs" />
     <Compile Include="Compare\CompareColumns.cs" />
+    <Compile Include="Compare\CompareResult.cs" />
     <Compile Include="Compare\CompareTables.cs" />
     <Compile Include="Compare\CompareSchemas.cs" />
     <Compile Include="Compare\ComparisonWriter.cs" />
@@ -103,7 +104,9 @@
     <Compile Include="Compare\ComparePackages.cs" />
     <Compile Include="Compare\CompareTriggers.cs" />
     <Compile Include="Compare\CompareFunctions.cs" />
+    <Compile Include="Compare\ResultType.cs" />
     <Compile Include="Compare\SanitizeSql.cs" />
+    <Compile Include="Compare\SchemaObjectType.cs" />
     <Compile Include="Conversion\ColumnConverter.cs" />
     <Compile Include="Conversion\ColumnDescriptionConverter.cs" />
     <Compile Include="Conversion\ForeignKeyColumnConverter.cs" />

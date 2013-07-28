@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using DatabaseSchemaReader.Compare;
 using DatabaseSchemaReader.DataSchema;
@@ -22,7 +23,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenProceduresIdentical()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareProcedures(sb, writer);
 
@@ -31,7 +32,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseProcedures, compareProcedures);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(string.IsNullOrEmpty(result));
@@ -41,7 +42,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenProcedureDropped()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareProcedures(sb, writer);
 
@@ -50,7 +51,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseProcedures, compareProcedures);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("DROP PROCEDURE"));
@@ -60,7 +61,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenProcedureAdded()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareProcedures(sb, writer);
 
@@ -69,7 +70,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseProcedures, compareProcedures);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("CREATE PROCEDURE"));
@@ -80,7 +81,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WheProcedureChanged()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareProcedures(sb, writer);
 
@@ -92,7 +93,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseProcedures, compareProcedures);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("DROP PROCEDURE"));
@@ -105,7 +106,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WheProcedureChangedInverse()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareProcedures(sb, writer);
 
@@ -117,7 +118,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseProcedures, compareProcedures);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("DROP PROCEDURE"));

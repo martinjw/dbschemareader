@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class CompareProcedures
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public CompareProcedures(StringBuilder sb, ComparisonWriter writer)
+        public CompareProcedures(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
-        public void Execute(IEnumerable<DatabaseStoredProcedure> baseProcedures, IEnumerable<DatabaseStoredProcedure> compareProcedures)
+        public void Execute(ICollection<DatabaseStoredProcedure> baseProcedures, ICollection<DatabaseStoredProcedure> compareProcedures)
         {
             bool first = false;
 
@@ -27,14 +27,17 @@ namespace DatabaseSchemaReader.Compare
                 var schema = procedure.SchemaOwner;
                 var match = baseProcedures.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match != null) continue;
+                var script = string.Empty;
                 if (!first)
                 {
                     first = true;
-                    //CREATE PROCEDURE cannot be combined with other statements in a batch, so be preceeded by and terminate with a "GO" (sqlServer) or "/" (Oracle)
-                    if (_sb.Length > 0) _sb.AppendLine(_writer.RunStatements());
+                    //CREATE PROCEDURE cannot be combined with other statements in a batch, 
+                    //so be preceeded by and terminate with a "GO" (sqlServer) or "/" (Oracle)
+                    if (_results.Count > 0) script+=_writer.RunStatements() + Environment.NewLine;
                 }
-                _sb.AppendLine("-- NEW STORED PROCEDURE " + procedure.Name);
-                _sb.AppendLine(_writer.AddProcedure(procedure));
+                script+="-- NEW STORED PROCEDURE " + procedure.Name + Environment.NewLine +
+                    _writer.AddProcedure(procedure);
+                CreateResult(ResultType.Add, name, script);
             }
 
             //find dropped and existing sprocs
@@ -45,8 +48,9 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareProcedures.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    _sb.AppendLine("-- DROP STORED PROCEDURE " + procedure.Name);
-                    _sb.AppendLine(_writer.DropProcedure(procedure));
+                    CreateResult(ResultType.Delete, name,
+                                 "-- DROP STORED PROCEDURE " + procedure.Name + Environment.NewLine +
+                                 _writer.DropProcedure(procedure));
                     continue;
                 }
                 //sproc may or may not have been changed
@@ -56,10 +60,24 @@ namespace DatabaseSchemaReader.Compare
                 if (_writer.CompareProcedure(procedure.Sql, match.Sql)) continue;
 
                 //in Oracle could be a CREATE OR REPLACE
-                _sb.AppendLine("-- ALTER STORED PROCEDURE " + procedure.Name);
-                _sb.AppendLine(_writer.DropProcedure(procedure));
-                _sb.AppendLine(_writer.AddProcedure(match));
+                CreateResult(ResultType.Change, name, 
+                    "-- ALTER STORED PROCEDURE " + procedure.Name + Environment.NewLine +
+                    _writer.DropProcedure(procedure) + Environment.NewLine +
+                    _writer.AddProcedure(match));
             }
+        }
+
+
+        private void CreateResult(ResultType resultType, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.StoredProcedure,
+                    ResultType = resultType,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using DatabaseSchemaReader.Compare;
 using DatabaseSchemaReader.DataSchema;
@@ -22,7 +23,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenViewsIdentical()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
@@ -31,7 +32,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseViews, compareViews);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(string.IsNullOrEmpty(result));
@@ -41,7 +42,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenViewDropped()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
@@ -50,7 +51,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseViews, compareViews);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("DROP VIEW"));
@@ -60,7 +61,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenViewAdded()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
@@ -69,7 +70,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseViews, compareViews);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("CREATE VIEW"));
@@ -80,7 +81,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenViewChanged()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
@@ -92,7 +93,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseViews, compareViews);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("DROP VIEW"));
@@ -104,7 +105,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenViewChangedInverse()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
@@ -116,7 +117,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //act
             target.Execute(baseViews, compareViews);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
             Assert.IsTrue(result.Contains("DROP VIEW"));
@@ -134,7 +135,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenViewsIdenticalWithDifferentFormatSql()
         {
             //arrange
-            var sb = new StringBuilder();
+            var sb = new List<CompareResult>();
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
@@ -155,7 +156,7 @@ WHERE (((Products.Discontinued)=0))";
 
             //act
             target.Execute(baseViews, compareViews);
-            var result = sb.ToString();
+            var result = string.Join(Environment.NewLine, sb.Select(x=>x.Script).ToArray());
 
             //assert
             Assert.IsTrue(string.IsNullOrEmpty(result));

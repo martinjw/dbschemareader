@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
     class CompareFunctions
     {
-        private readonly StringBuilder _sb;
+        private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
 
-        public CompareFunctions(StringBuilder sb, ComparisonWriter writer)
+        public CompareFunctions(IList<CompareResult> results, ComparisonWriter writer)
         {
-            _sb = sb;
+            _results = results;
             _writer = writer;
         }
 
-        public void Execute(IEnumerable<DatabaseFunction> baseFunctions, IEnumerable<DatabaseFunction> compareFunctions)
+        public void Execute(ICollection<DatabaseFunction> baseFunctions, ICollection<DatabaseFunction> compareFunctions)
         {
             bool first = false;
 
@@ -27,14 +27,17 @@ namespace DatabaseSchemaReader.Compare
                 var schema = function.SchemaOwner;
                 var match = baseFunctions.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match != null) continue;
+                var script = string.Empty;
                 if (!first)
                 {
                     first = true;
-                    //CREATE FUNCTION cannot be combined with other statements in a batch, so be preceeded by and terminate with a "GO" (sqlServer) or "/" (Oracle)
-                    if (_sb.Length > 0) _sb.AppendLine(_writer.RunStatements());
+                    //CREATE FUNCTION cannot be combined with other statements in a batch, 
+                    //so be preceeded by and terminate with a "GO" (sqlServer) or "/" (Oracle)
+                    if (_results.Count > 0) script+=_writer.RunStatements() + Environment.NewLine;
                 }
-                _sb.AppendLine("-- NEW FUNCTION " + function.Name);
-                _sb.AppendLine(_writer.AddFunction(function));
+                script+="-- NEW FUNCTION " + function.Name + Environment.NewLine +
+                    _writer.AddFunction(function);
+                CreateResult(ResultType.Add, name, script);
             }
 
             //find dropped and existing functions
@@ -45,8 +48,8 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareFunctions.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    _sb.AppendLine("-- DROP FUNCTION " + function.Name);
-                    _sb.AppendLine(_writer.DropFunction(function));
+                    CreateResult(ResultType.Delete, name, "-- DROP FUNCTION " + function.Name + Environment.NewLine +
+                        _writer.DropFunction(function));
                     continue;
                 }
                 //functions may or may not have been changed
@@ -56,10 +59,23 @@ namespace DatabaseSchemaReader.Compare
                 if (_writer.CompareProcedure(function.Sql, match.Sql)) continue;
 
                 //in Oracle could be a CREATE OR REPLACE
-                _sb.AppendLine("-- ALTER FUNCTION " + function.Name);
-                _sb.AppendLine(_writer.DropFunction(function));
-                _sb.AppendLine(_writer.AddFunction(match));
+                CreateResult(ResultType.Change, name, "-- ALTER FUNCTION " + function.Name + Environment.NewLine +
+                    _writer.DropFunction(function) + Environment.NewLine +
+                    _writer.AddFunction(match));
             }
+        }
+
+
+        private void CreateResult(ResultType resultType, string name, string script)
+        {
+            var result = new CompareResult
+                {
+                    SchemaObjectType = SchemaObjectType.Function,
+                    ResultType = resultType,
+                    Name = name,
+                    Script = script
+                };
+            _results.Add(result);
         }
     }
 }

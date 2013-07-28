@@ -77,6 +77,8 @@
     <Compile Include="Codegen\DataTypeWriterTest.cs" />
     <Compile Include="Codegen\NameFixerTest.cs" />
     <Compile Include="Codegen\ClassWriterAssociationTableTest.cs" />
+    <Compile Include="Compare\CompareResultFindTest.cs" />
+    <Compile Include="Compare\CompareSchemaResultsTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />
     <Compile Include="Compare\CompareProceduresTest.cs" />
