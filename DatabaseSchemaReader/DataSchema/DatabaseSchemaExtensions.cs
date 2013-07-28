@@ -93,6 +93,31 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Adds the index.
         /// </summary>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="indexName">Name of the index.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">databaseColumn;databaseColumn must not be null</exception>
+        public static DatabaseColumn AddIndex(this DatabaseColumn databaseColumn, string indexName)
+        {
+            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            var databaseTable = databaseColumn.Table;
+            if (databaseTable == null) throw new ArgumentException("databaseColumn has no table");
+
+            var index = new DatabaseIndex
+            {
+                Name = indexName,
+                TableName = databaseTable.Name,
+                SchemaOwner = databaseTable.SchemaOwner,
+                IndexType = "NONCLUSTERED"
+            };
+            index.Columns.Add(databaseColumn);
+            databaseTable.AddIndex(index);
+            return databaseColumn;
+        }
+
+        /// <summary>
+        /// Adds the index.
+        /// </summary>
         /// <param name="databaseTable">The database table.</param>
         /// <param name="indexName">Name of the index.</param>
         /// <param name="columns">The columns.</param>

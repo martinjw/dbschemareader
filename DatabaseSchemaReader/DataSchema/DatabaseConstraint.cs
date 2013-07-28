@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a constraint (of <see cref="ConstraintType"/> such as primary key, foreign key...) that is attached to <see cref="Columns"/> of a table with name <see cref="TableName"/>
     /// </summary>
     [Serializable]
-    public partial class DatabaseConstraint
+    public partial class DatabaseConstraint : NamedObject
     {
         #region Fields
         //backing fields
@@ -24,14 +24,6 @@ namespace DatabaseSchemaReader.DataSchema
         {
             _columns = new List<string>();
         }
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the parent table.
