@@ -37,7 +37,7 @@ namespace DatabaseSchemaReader.Compare
                 }
                 script+="-- NEW FUNCTION " + function.Name + Environment.NewLine +
                     _writer.AddFunction(function);
-                CreateResult(ResultType.Add, name, script);
+                CreateResult(ResultType.Add, function, script);
             }
 
             //find dropped and existing functions
@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareFunctions.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, name, "-- DROP FUNCTION " + function.Name + Environment.NewLine +
+                    CreateResult(ResultType.Delete, function, "-- DROP FUNCTION " + function.Name + Environment.NewLine +
                         _writer.DropFunction(function));
                     continue;
                 }
@@ -59,20 +59,21 @@ namespace DatabaseSchemaReader.Compare
                 if (_writer.CompareProcedure(function.Sql, match.Sql)) continue;
 
                 //in Oracle could be a CREATE OR REPLACE
-                CreateResult(ResultType.Change, name, "-- ALTER FUNCTION " + function.Name + Environment.NewLine +
+                CreateResult(ResultType.Change, function, "-- ALTER FUNCTION " + function.Name + Environment.NewLine +
                     _writer.DropFunction(function) + Environment.NewLine +
                     _writer.AddFunction(match));
             }
         }
 
 
-        private void CreateResult(ResultType resultType, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseFunction function, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Function,
                     ResultType = resultType,
-                    Name = name,
+                    Name = function.Name,
+                    SchemaOwner = function.SchemaOwner,
                     Script = script
                 };
             _results.Add(result);

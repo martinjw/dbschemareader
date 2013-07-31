@@ -26,7 +26,7 @@ namespace DatabaseSchemaReader.Compare
                 if (match != null) continue;
                 var script = "-- ADDED TABLE " + column.TableName + " COLUMN " + name + Environment.NewLine +
                  _writer.AddColumn(compareTable, column);
-                CreateResult(ResultType.Add, baseTable.Name, name, script);
+                CreateResult(ResultType.Add, baseTable, name, script);
             }
 
             //find dropped and existing columns
@@ -36,7 +36,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareTable.Columns.FirstOrDefault(t => t.Name == name);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, baseTable.Name, name,
+                    CreateResult(ResultType.Delete, baseTable, name,
                         _writer.DropColumn(baseTable, column));
                     continue;
                 }
@@ -53,19 +53,20 @@ namespace DatabaseSchemaReader.Compare
                     continue; //the same, no action
                 }
 
-                CreateResult(ResultType.Change, baseTable.Name, name,
+                CreateResult(ResultType.Change, baseTable, name,
                     _writer.AlterColumn(baseTable, match, column));
             }
         }
 
 
-        private void CreateResult(ResultType resultType, string tableName, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Column,
                     ResultType = resultType,
-                    TableName = tableName,
+                    TableName = table.Name,
+                    SchemaOwner = table.SchemaOwner,
                     Name = name,
                     Script = script
                 };

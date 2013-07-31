@@ -27,8 +27,8 @@ namespace DatabaseSchemaReader.Compare
 
 
         private void Compare(DatabaseTable databaseTable,
-            IEnumerable<DatabaseConstraint> firstConstraints,
-            IEnumerable<DatabaseConstraint> secondConstraints)
+            ICollection<DatabaseConstraint> firstConstraints,
+            ICollection<DatabaseConstraint> secondConstraints)
         {
             foreach (var constraint in firstConstraints)
             {
@@ -36,13 +36,13 @@ namespace DatabaseSchemaReader.Compare
                 var matchConstraint = secondConstraints.FirstOrDefault(c => c.Name == constraintName);
                 if (matchConstraint == null)
                 {
-                    CreateResult(ResultType.Delete, databaseTable.Name, constraintName,
+                    CreateResult(ResultType.Delete, databaseTable, constraintName,
                         _writer.DropConstraint(databaseTable, constraint));
                     continue;
                 }
                 if (!ConstraintColumnsEqual(constraint, matchConstraint))
                 {
-                    CreateResult(ResultType.Change, databaseTable.Name, constraintName,
+                    CreateResult(ResultType.Change, databaseTable, constraintName,
                         _writer.DropConstraint(databaseTable, constraint) + Environment.NewLine +
                         _writer.AddConstraint(databaseTable, matchConstraint));
                     continue;
@@ -50,7 +50,7 @@ namespace DatabaseSchemaReader.Compare
                 if (constraint.ConstraintType == ConstraintType.Check &&
                     constraint.Expression != matchConstraint.Expression)
                 {
-                    CreateResult(ResultType.Change, databaseTable.Name, constraintName,
+                    CreateResult(ResultType.Change, databaseTable, constraintName,
                         _writer.DropConstraint(databaseTable, constraint) + Environment.NewLine +
                         _writer.AddConstraint(databaseTable, matchConstraint));
                 }
@@ -58,7 +58,7 @@ namespace DatabaseSchemaReader.Compare
                     constraint.RefersToTable != matchConstraint.RefersToTable)
                 {
                     //unlikely a foreign key will change the fk table without changing name
-                    CreateResult(ResultType.Change, databaseTable.Name, constraintName,
+                    CreateResult(ResultType.Change, databaseTable, constraintName,
                        _writer.DropConstraint(databaseTable, constraint) + Environment.NewLine +
                        _writer.AddConstraint(databaseTable, matchConstraint));
                 }
@@ -71,7 +71,7 @@ namespace DatabaseSchemaReader.Compare
                 var firstConstraint = firstConstraints.FirstOrDefault(c => c.Name == constraintName);
                 if (firstConstraint == null)
                 {
-                    CreateResult(ResultType.Add, databaseTable.Name, constraintName,
+                    CreateResult(ResultType.Add, databaseTable, constraintName,
                         _writer.AddConstraint(databaseTable, constraint));
                 }
             }
@@ -88,19 +88,19 @@ namespace DatabaseSchemaReader.Compare
             if (databaseTable.PrimaryKey == null)
             {
                 //forgot to put pk on it
-                CreateResult(ResultType.Add, databaseTable.Name, match.PrimaryKey.Name,
+                CreateResult(ResultType.Add, databaseTable, match.PrimaryKey.Name,
                     _writer.AddConstraint(databaseTable, match.PrimaryKey));
             }
             else if (match.PrimaryKey == null)
             {
                 //why oh why would you want to drop the primary key?
-                CreateResult(ResultType.Change, databaseTable.Name, databaseTable.PrimaryKey.Name,
+                CreateResult(ResultType.Change, databaseTable, databaseTable.PrimaryKey.Name,
                     _writer.DropConstraint(databaseTable, databaseTable.PrimaryKey) + Environment.NewLine +
                     "-- NB: " + databaseTable.Name + " has no primary key!");
             }
             else if (!ConstraintColumnsEqual(databaseTable.PrimaryKey, match.PrimaryKey))
             {
-                CreateResult(ResultType.Change, databaseTable.Name, databaseTable.PrimaryKey.Name,
+                CreateResult(ResultType.Change, databaseTable, databaseTable.PrimaryKey.Name,
                     _writer.DropConstraint(databaseTable, databaseTable.PrimaryKey) + Environment.NewLine +
                     _writer.AddConstraint(databaseTable, match.PrimaryKey));
             }
@@ -114,13 +114,14 @@ namespace DatabaseSchemaReader.Compare
         }
 
 
-        private void CreateResult(ResultType resultType, string tableName, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Constraint,
                     ResultType = resultType,
-                    TableName = tableName,
+                    TableName = table.Name,
+                    SchemaOwner = table.SchemaOwner,
                     Name = name,
                     Script = script
                 };

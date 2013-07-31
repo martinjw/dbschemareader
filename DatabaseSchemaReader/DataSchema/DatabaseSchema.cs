@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// </summary>
     /// <remarks>
     /// When initially populated, many of the objects (tables, stored procedures) are not linked.
-    /// Use <see cref="DatabaseSchemaFixer.UpdateReferences"/> to link things up
+    /// Use <see cref="DatabaseSchemaFixer.UpdateReferences" /> to link things up
     /// </remarks>
     [Serializable]
     public partial class DatabaseSchema
@@ -166,7 +166,19 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public DatabaseTable FindTableByName(string name)
         {
-            return Tables.Find(delegate(DatabaseTable t2) { return t2.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+            return Tables.Find(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Finds a table by name and schema
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="schema">The schema.</param>
+        /// <returns></returns>
+        public DatabaseTable FindTableByName(string name, string schema)
+        {
+            return Tables.Find(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(t.SchemaOwner, schema, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

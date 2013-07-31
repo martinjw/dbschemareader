@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.Compare
                 if (match != null) continue;
                 var script = "-- NEW TABLE " + databaseTable.Name + Environment.NewLine +
                     _writer.AddTable(databaseTable);
-                CreateResult(ResultType.Add, name, script);
+                CreateResult(ResultType.Add, databaseTable, script);
                 newTables.Add(databaseTable);
             }
 
@@ -42,7 +42,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareTables.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, name, _writer.DropTable(databaseTable));
+                    CreateResult(ResultType.Delete, databaseTable, _writer.DropTable(databaseTable));
                     continue;
                 }
                 //table may or may not have been changed
@@ -74,6 +74,8 @@ namespace DatabaseSchemaReader.Compare
                     {
                         SchemaObjectType = SchemaObjectType.Constraint,
                         ResultType = ResultType.Add,
+                        SchemaOwner = databaseTable.SchemaOwner,
+                        TableName = databaseTable.Name,
                         Name = foreignKey.Name,
                         Script = _writer.AddConstraint(databaseTable, foreignKey)
                     };
@@ -86,6 +88,8 @@ namespace DatabaseSchemaReader.Compare
                         SchemaObjectType = SchemaObjectType.Trigger,
                         ResultType = ResultType.Add,
                         Name = trigger.Name,
+                        SchemaOwner = databaseTable.SchemaOwner,
+                        TableName = databaseTable.Name,
                         Script = _writer.AddTrigger(databaseTable, trigger)
                     };
                     _results.Add(result);
@@ -93,13 +97,14 @@ namespace DatabaseSchemaReader.Compare
             }
         }
 
-        private void CreateResult(ResultType resultType, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseTable table, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Table,
                     ResultType = resultType,
-                    Name = name,
+                    Name = table.Name,
+                    SchemaOwner = table.SchemaOwner,
                     Script = script
                 };
             _results.Add(result);

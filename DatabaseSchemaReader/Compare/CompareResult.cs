@@ -36,6 +36,15 @@ namespace DatabaseSchemaReader.Compare
         /// The name of the table.
         /// </value>
         public string TableName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the schema owner.
+        /// </summary>
+        /// <value>
+        /// The schema owner.
+        /// </value>
+        public string SchemaOwner { get; set; }
+
         /// <summary>
         /// Gets or sets the SQL script.
         /// </summary>
@@ -63,16 +72,17 @@ namespace DatabaseSchemaReader.Compare
             switch (SchemaObjectType)
             {
                 case SchemaObjectType.Table:
-                    return databaseSchema.FindTableByName(Name);
+                    return databaseSchema.FindTableByName(Name, SchemaOwner);
                 case SchemaObjectType.View:
-                    return databaseSchema.Views.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                    return databaseSchema.Views.Find(v => Name.Equals(v.Name, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(v.SchemaOwner, SchemaOwner, StringComparison.OrdinalIgnoreCase));
                 case SchemaObjectType.Column:
                     if (string.IsNullOrEmpty(TableName)) throw new InvalidOperationException("TableName required");
-                    table = databaseSchema.FindTableByName(TableName);
+                    table = databaseSchema.FindTableByName(TableName, SchemaOwner);
                     return table.FindColumn(Name);
                 case SchemaObjectType.Constraint:
                     if (string.IsNullOrEmpty(TableName)) throw new InvalidOperationException("TableName required");
-                    table = databaseSchema.FindTableByName(TableName);
+                    table = databaseSchema.FindTableByName(TableName, SchemaOwner);
                     if (table.PrimaryKey != null && table.PrimaryKey.Name == Name) return table.PrimaryKey;
                     var constraint = table.ForeignKeys.FindByName(Name);
                     if (constraint != null) return constraint;
@@ -84,20 +94,24 @@ namespace DatabaseSchemaReader.Compare
                     return null;
                 case SchemaObjectType.Index:
                     if (string.IsNullOrEmpty(TableName)) throw new InvalidOperationException("TableName required");
-                    table = databaseSchema.FindTableByName(TableName);
+                    table = databaseSchema.FindTableByName(TableName, SchemaOwner);
                     return table.Indexes.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
                 case SchemaObjectType.Trigger:
                     if (string.IsNullOrEmpty(TableName)) throw new InvalidOperationException("TableName required");
-                    table = databaseSchema.FindTableByName(TableName);
+                    table = databaseSchema.FindTableByName(TableName, SchemaOwner);
                     return table.Triggers.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
                 case SchemaObjectType.StoredProcedure:
-                    return databaseSchema.StoredProcedures.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                    return databaseSchema.StoredProcedures.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.SchemaOwner, SchemaOwner, StringComparison.OrdinalIgnoreCase));
                 case SchemaObjectType.Function:
-                    return databaseSchema.Functions.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                    return databaseSchema.Functions.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.SchemaOwner, SchemaOwner, StringComparison.OrdinalIgnoreCase));
                 case SchemaObjectType.Sequence:
-                    return databaseSchema.Sequences.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                    return databaseSchema.Sequences.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.SchemaOwner, SchemaOwner, StringComparison.OrdinalIgnoreCase));
                 case SchemaObjectType.Package:
-                    return databaseSchema.Packages.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                    return databaseSchema.Packages.Find(x => Name.Equals(x.Name, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.SchemaOwner, SchemaOwner, StringComparison.OrdinalIgnoreCase));
                 default:
                     throw new ArgumentOutOfRangeException();
             }

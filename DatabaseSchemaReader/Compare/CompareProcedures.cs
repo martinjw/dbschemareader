@@ -37,7 +37,7 @@ namespace DatabaseSchemaReader.Compare
                 }
                 script+="-- NEW STORED PROCEDURE " + procedure.Name + Environment.NewLine +
                     _writer.AddProcedure(procedure);
-                CreateResult(ResultType.Add, name, script);
+                CreateResult(ResultType.Add, procedure, script);
             }
 
             //find dropped and existing sprocs
@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareProcedures.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, name,
+                    CreateResult(ResultType.Delete, procedure,
                                  "-- DROP STORED PROCEDURE " + procedure.Name + Environment.NewLine +
                                  _writer.DropProcedure(procedure));
                     continue;
@@ -60,7 +60,7 @@ namespace DatabaseSchemaReader.Compare
                 if (_writer.CompareProcedure(procedure.Sql, match.Sql)) continue;
 
                 //in Oracle could be a CREATE OR REPLACE
-                CreateResult(ResultType.Change, name, 
+                CreateResult(ResultType.Change, procedure, 
                     "-- ALTER STORED PROCEDURE " + procedure.Name + Environment.NewLine +
                     _writer.DropProcedure(procedure) + Environment.NewLine +
                     _writer.AddProcedure(match));
@@ -68,13 +68,14 @@ namespace DatabaseSchemaReader.Compare
         }
 
 
-        private void CreateResult(ResultType resultType, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseStoredProcedure storedProcedure, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.StoredProcedure,
                     ResultType = resultType,
-                    Name = name,
+                    Name = storedProcedure.Name,
+                    SchemaOwner = storedProcedure.SchemaOwner,
                     Script = script
                 };
             _results.Add(result);

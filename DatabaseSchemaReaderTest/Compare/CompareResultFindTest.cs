@@ -16,6 +16,8 @@ namespace DatabaseSchemaReaderTest.Compare
     [TestClass]
     public class CompareResultFindTest
     {
+        private const string Schema = "dbo";
+
         [TestMethod]
         public void FindTable()
         {
@@ -24,6 +26,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
                 {
                     Name = "Orders",
+                    SchemaOwner = Schema,
                     SchemaObjectType = SchemaObjectType.Table
                 };
 
@@ -42,6 +45,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 TableName = "Orders",
+                SchemaOwner = Schema,
                 Name = "Name",
                 SchemaObjectType = SchemaObjectType.Column
             };
@@ -61,6 +65,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 TableName = "Orders",
+                SchemaOwner = Schema,
                 Name = "PK_Orders",
                 SchemaObjectType = SchemaObjectType.Constraint
             };
@@ -80,6 +85,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 TableName = "Orders",
+                SchemaOwner = Schema,
                 Name = "UK_NAME",
                 SchemaObjectType = SchemaObjectType.Constraint
             };
@@ -99,6 +105,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 TableName = "Order_Line",
+                SchemaOwner = Schema,
                 Name = "FK_OrderLine_Orders",
                 SchemaObjectType = SchemaObjectType.Constraint
             };
@@ -119,6 +126,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 TableName = "Orders",
+                SchemaOwner = Schema,
                 Name = "IDX_Desc",
                 SchemaObjectType = SchemaObjectType.Index
             };
@@ -139,6 +147,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 TableName = "Orders",
+                SchemaOwner = Schema,
                 Name = "MyTrigger",
                 SchemaObjectType = SchemaObjectType.Trigger
             };
@@ -159,6 +168,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 Name = "MySproc",
+                SchemaOwner = Schema,
                 SchemaObjectType = SchemaObjectType.StoredProcedure
             };
 
@@ -177,6 +187,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 Name = "MyFunction",
+                SchemaOwner = Schema,
                 SchemaObjectType = SchemaObjectType.Function
             };
 
@@ -195,6 +206,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 Name = "MyPackage",
+                SchemaOwner = Schema,
                 SchemaObjectType = SchemaObjectType.Package
             };
 
@@ -213,6 +225,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 Name = "MyView",
+                SchemaOwner = Schema,
                 SchemaObjectType = SchemaObjectType.View
             };
 
@@ -231,6 +244,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var result = new CompareResult
             {
                 Name = "MySequence",
+                SchemaOwner = Schema,
                 SchemaObjectType = SchemaObjectType.Sequence
             };
 
@@ -250,18 +264,30 @@ namespace DatabaseSchemaReaderTest.Compare
                   .AddColumn<string>("Name").AddUniqueKey("UK_NAME")
                   .AddColumn<string>("Desc").AddIndex("IDX_Desc")
                   .Table;
+            orders.SchemaOwner = Schema;
             orders.Triggers.Add(new DatabaseTrigger { Name = "MyTrigger" });
 
-            schema.AddTable("Order_Line")
+            var lines = schema.AddTable("Order_Line")
                   .AddColumn<int>("Id").AddPrimaryKey("PK_OrderLine")
                   .AddColumn<int>("Price")
-                  .AddColumn<int>("Order_Id").AddForeignKey("FK_OrderLine_Orders", "Orders");
+                  .AddColumn<int>("Order_Id").AddForeignKey("FK_OrderLine_Orders", "Orders")
+                  .Table;
+            lines.SchemaOwner = Schema;
 
-            schema.StoredProcedures.Add(new DatabaseStoredProcedure { Name = "MySproc" });
-            schema.Functions.Add(new DatabaseFunction { Name = "MyFunction" });
-            schema.Packages.Add(new DatabasePackage { Name = "MyPackage" });
-            schema.Views.Add(new DatabaseView { Name = "MyView" });
-            schema.Sequences.Add(new DatabaseSequence { Name = "MySequence" });
+            schema.StoredProcedures.Add(new DatabaseStoredProcedure { Name = "MySproc", SchemaOwner = Schema });
+            schema.Functions.Add(new DatabaseFunction { Name = "MyFunction", SchemaOwner = Schema });
+            schema.Packages.Add(new DatabasePackage { Name = "MyPackage", SchemaOwner = Schema });
+            schema.Views.Add(new DatabaseView { Name = "MyView", SchemaOwner = Schema });
+            schema.Sequences.Add(new DatabaseSequence { Name = "MySequence", SchemaOwner = Schema });
+
+            //table with same name under different schema
+            var orders2 = schema.AddTable("Orders")
+              .AddColumn<int>("Id").AddPrimaryKey("PK_Orders")
+              .AddColumn<string>("Name").AddUniqueKey("UK_NAME")
+              .AddColumn<string>("Desc").AddIndex("IDX_Desc")
+              .Table;
+            orders2.SchemaOwner = Schema + "2";
+
 
             return schema;
         }
