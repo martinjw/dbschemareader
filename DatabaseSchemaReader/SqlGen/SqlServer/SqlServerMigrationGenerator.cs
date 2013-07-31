@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System.Globalization;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
@@ -48,6 +49,15 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 return base.RenameTable(databaseTable, originalTableName);
             var name = SchemaPrefix(databaseTable.SchemaOwner) + Escape(originalTableName);
             return "sp_rename '" + name + "', '" + Escape(databaseTable.Name) + "';";
+        }
+
+        public override string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        {
+            //no schema on index name, only on table
+            return string.Format(CultureInfo.InvariantCulture,
+                "DROP INDEX {0} ON {1};",
+                Escape(index.Name),
+                TableName(databaseTable));
         }
     }
 }

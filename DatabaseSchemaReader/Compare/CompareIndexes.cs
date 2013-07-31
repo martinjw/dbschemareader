@@ -28,13 +28,13 @@ namespace DatabaseSchemaReader.Compare
                 var match = secondIndexes.FirstOrDefault(c => c.Name == indexName);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, databaseTable.Name, indexName,
+                    CreateResult(ResultType.Delete, databaseTable, indexName,
                         _writer.DropIndex(databaseTable, index));
                     continue;
                 }
                 if (!ColumnsEqual(index, match) || (index.IndexType != match.IndexType))
                 {
-                    CreateResult(ResultType.Add, databaseTable.Name, indexName,
+                    CreateResult(ResultType.Add, databaseTable, indexName,
                        _writer.DropIndex(databaseTable, index) + Environment.NewLine +
                        _writer.AddIndex(databaseTable, match));
                 }
@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.Compare
                 var firstConstraint = firstIndexes.FirstOrDefault(c => c.Name == indexName);
                 if (firstConstraint == null)
                 {
-                    CreateResult(ResultType.Add, databaseTable.Name, indexName,
+                    CreateResult(ResultType.Add, databaseTable, indexName,
                         _writer.AddIndex(databaseTable, index));
                 }
             }
@@ -66,13 +66,14 @@ namespace DatabaseSchemaReader.Compare
         }
 
 
-        private void CreateResult(ResultType resultType, string tableName, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Index,
                     ResultType = resultType,
-                    TableName = tableName,
+                    TableName = table.Name,
+                    SchemaOwner = table.SchemaOwner,
                     Name = name,
                     Script = script
                 };

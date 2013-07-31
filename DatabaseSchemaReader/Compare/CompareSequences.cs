@@ -16,7 +16,7 @@ namespace DatabaseSchemaReader.Compare
             _writer = writer;
         }
 
-        public void Execute(IEnumerable<DatabaseSequence> baseSequences, IEnumerable<DatabaseSequence> compareSequences)
+        public void Execute(ICollection<DatabaseSequence> baseSequences, ICollection<DatabaseSequence> compareSequences)
         {
             //find new sequences (in compare, but not in base)
             foreach (var sequence in compareSequences)
@@ -25,7 +25,7 @@ namespace DatabaseSchemaReader.Compare
                 var schema = sequence.SchemaOwner;
                 var match = baseSequences.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match != null) continue;
-                CreateResult(ResultType.Add, name, "-- NEW SEQUENCE " + sequence.Name + Environment.NewLine +
+                CreateResult(ResultType.Add, sequence, "-- NEW SEQUENCE " + sequence.Name + Environment.NewLine +
                     _writer.AddSequence(sequence));
             }
 
@@ -37,7 +37,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareSequences.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, name, "-- DROP SEQUENCE " + sequence.Name + Environment.NewLine +
+                    CreateResult(ResultType.Delete, sequence, "-- DROP SEQUENCE " + sequence.Name + Environment.NewLine +
                        _writer.DropSequence(sequence));
                 }
 
@@ -46,13 +46,14 @@ namespace DatabaseSchemaReader.Compare
         }
 
 
-        private void CreateResult(ResultType resultType, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseSequence sequence, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Sequence,
                     ResultType = resultType,
-                    Name = name,
+                    Name = sequence.Name,
+                    SchemaOwner = sequence.SchemaOwner,
                     Script = script
                 };
             _results.Add(result);

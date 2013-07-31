@@ -38,7 +38,7 @@ namespace DatabaseSchemaReader.Compare
 
                 script += "-- NEW PACKAGE " + package.Name + Environment.NewLine +
                     _writer.AddPackage(package);
-                CreateResult(ResultType.Add, name, script);
+                CreateResult(ResultType.Add, package, script);
             }
 
             //find dropped and existing packages
@@ -49,7 +49,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = comparePackages.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, name, "-- DROP PACKAGE " + package.Name + Environment.NewLine +
+                    CreateResult(ResultType.Delete, package, "-- DROP PACKAGE " + package.Name + Environment.NewLine +
                         _writer.DropPackage(package));
                     continue;
                 }
@@ -69,17 +69,18 @@ namespace DatabaseSchemaReader.Compare
                 script += "-- ALTER PACKAGE " + package.Name + Environment.NewLine;
                 //we rely on CREATE OR REPLACE here (no drop!)
                 script += _writer.AddPackage(match);
-                CreateResult(ResultType.Delete, name, script);
+                CreateResult(ResultType.Delete, package, script);
             }
         }
 
-        private void CreateResult(ResultType resultType, string name, string script)
+        private void CreateResult(ResultType resultType, DatabasePackage package, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Package,
                     ResultType = resultType,
-                    Name = name,
+                    Name = package.Name,
+                    SchemaOwner = package.SchemaOwner,
                     Script = script
                 };
             _results.Add(result);

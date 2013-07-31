@@ -36,7 +36,7 @@ namespace DatabaseSchemaReader.Compare
                 }
                 script += "-- NEW VIEW " + view.Name + Environment.NewLine +
                  _writer.AddView(view);
-                CreateResult(ResultType.Add, name, script);
+                CreateResult(ResultType.Add, view, script);
             }
 
             //find dropped and existing views
@@ -47,7 +47,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = compareViews.FirstOrDefault(t => t.Name == name && t.SchemaOwner == schema);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, name,
+                    CreateResult(ResultType.Delete, view,
                         "-- DROP VIEW " + view.Name + Environment.NewLine +
                         _writer.DropView(view));
                     continue;
@@ -63,17 +63,18 @@ namespace DatabaseSchemaReader.Compare
                 var script = "-- ALTER VIEW " + view.Name + Environment.NewLine +
                     _writer.DropView(view) + Environment.NewLine +
                     _writer.AddView(match);
-                CreateResult(ResultType.Change, name, script);
+                CreateResult(ResultType.Change, view, script);
             }
         }
 
-        private void CreateResult(ResultType resultType, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseView view, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.View,
                     ResultType = resultType,
-                    Name = name,
+                    Name = view.Name,
+                    SchemaOwner = view.SchemaOwner,
                     Script = script
                 };
             _results.Add(result);

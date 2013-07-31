@@ -26,7 +26,7 @@ namespace DatabaseSchemaReader.Compare
                 var match = secondTriggers.FirstOrDefault(c => c.Name == indexName);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, databaseTable.Name, indexName, 
+                    CreateResult(ResultType.Delete, databaseTable, indexName, 
                         _writer.DropTrigger(databaseTable, trigger));
                     continue;
                 }
@@ -34,7 +34,7 @@ namespace DatabaseSchemaReader.Compare
                     trigger.TriggerType != match.TriggerType || 
                     trigger.TriggerEvent != match.TriggerEvent)
                 {
-                    CreateResult(ResultType.Change, databaseTable.Name, indexName,
+                    CreateResult(ResultType.Change, databaseTable, indexName,
                         _writer.DropTrigger(databaseTable, trigger) + Environment.NewLine +
                         _writer.AddTrigger(databaseTable, match));
                 }
@@ -46,19 +46,20 @@ namespace DatabaseSchemaReader.Compare
                 var firstConstraint = firstTriggers.FirstOrDefault(c => c.Name == indexName);
                 if (firstConstraint == null)
                 {
-                    CreateResult(ResultType.Add, databaseTable.Name, indexName, 
+                    CreateResult(ResultType.Add, databaseTable, indexName, 
                         _writer.AddTrigger(databaseTable, trigger));
                 }
             }
         }
 
-        private void CreateResult(ResultType resultType, string tableName, string name, string script)
+        private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
                 {
                     SchemaObjectType = SchemaObjectType.Trigger,
                     ResultType = resultType,
-                    TableName = tableName,
+                    TableName = table.Name,
+                    SchemaOwner = table.SchemaOwner,
                     Name = name,
                     Script = script
                 };
