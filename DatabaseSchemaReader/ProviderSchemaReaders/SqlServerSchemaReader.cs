@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
@@ -214,7 +215,17 @@ ORDER BY o.type;";
                         AddDbParameter("schemaOwner", Owner));
                     da.SelectCommand.Parameters.Add(
                         AddDbParameter("name", name));
-                    da.Fill(dt);
+                    try
+                    {
+                        da.Fill(dt);
+                    }
+                    catch (DbException exception)
+                    {
+                        //1. Security does not allow access
+                        //2. OBJECT_SCHEMA_NAME is only available from SQLServer 2005 SP2
+                        Trace.TraceError("Handled: " + exception);
+                        //continue without the source
+                    }
 
                     return dt;
                 }

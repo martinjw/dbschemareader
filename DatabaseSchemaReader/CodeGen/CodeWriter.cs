@@ -219,13 +219,23 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 case CodeTarget.PocoNHibernateFluent:
                     pw.AddNHibernateReference();
+                    WritePackagesConfig(directory, pw, PackagesWriter.WriteFluentNHibernateNet4());
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
                 case CodeTarget.PocoRiaServices:
                     pw.AddEntityFrameworkReference();
                     pw.UpgradeTo2010(); //you can only use 2010
+                    WritePackagesConfig(directory, pw, PackagesWriter.WriteEntityFrameworkNet4());
                     break;
             }
+        }
+
+        private void WritePackagesConfig(FileSystemInfo directory, ProjectWriter pw, string xml)
+        {
+            pw.AddPackagesConfig();
+            File.WriteAllText(
+                Path.Combine(directory.FullName, "packages.config"),
+                xml);
         }
 
         private void WriteMapping(DatabaseTable table, ProjectWriter pw)
