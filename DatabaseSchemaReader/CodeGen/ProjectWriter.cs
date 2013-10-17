@@ -88,7 +88,7 @@ namespace DatabaseSchemaReader.CodeGen
             var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "FluentNHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\FluentNHibernate.1.3.0.733\lib\FluentNHibernate.dll"));
 
             reference.AddAfterSelf(element);
-            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\NHibernate.3.3.2.4000\lib\Net35\NHibernate.dll"));
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll"));
             reference.AddAfterSelf(element);
 
             element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"), new XElement(_xmlns + "HintPath", @"..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll"));
@@ -101,11 +101,18 @@ namespace DatabaseSchemaReader.CodeGen
             var reference = FindSystemDataReference();
             var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework"), 
                 new XElement(_xmlns + "SpecificVersion", "False"),
-                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll"));
+                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.6.0.1\lib\net40\EntityFramework.dll"));
             reference.AddAfterSelf(element);
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include", "System.Data.Entity")));
+        }
+
+        public void AddPackagesConfig()
+        {
+            var compile = new XElement(_xmlns + "None",
+                new XAttribute("Include", "packages.config"));
+            _itemGroup.Add(compile);
         }
 
         public void UpgradeTo2010()
