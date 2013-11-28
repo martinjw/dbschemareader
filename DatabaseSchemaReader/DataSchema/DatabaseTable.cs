@@ -60,7 +60,7 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
+        void OnDeserializedMethod(StreamingContext context)
         {
             _readOnlyForeignKeys = new ReadOnlyCollection<DatabaseConstraint>(_foreignKeys);
             _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);

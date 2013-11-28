@@ -43,7 +43,6 @@ namespace DatabaseSchemaReader.Utilities
                         }
                     }
                 }
-                connection.Close();
             }
         }
     }
