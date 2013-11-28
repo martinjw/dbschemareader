@@ -30,9 +30,8 @@ namespace DatabaseSchemaReader
         /// <param name="connectionString">The connection string.</param>
         /// <param name="providerName">Name of the provider.</param>
         public DatabaseReader(string connectionString, string providerName)
+            : this(new DatabaseSchema(connectionString, providerName))
         {
-            _schemaReader = SchemaReaderFactory.Create(connectionString, providerName);
-            _db = new DatabaseSchema(connectionString, providerName);
         }
 
         /// <summary>
@@ -53,10 +52,19 @@ namespace DatabaseSchemaReader
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="owner">The schema owner.</param>
         public DatabaseReader(string connectionString, string providerName, string owner)
-            : this(connectionString, providerName)
+            : this(new DatabaseSchema(connectionString, providerName) { Owner = owner})
         {
-            _schemaReader.Owner = owner;
-            _db.Owner = owner;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class using an existing <see cref="DatabaseSchema"/>.
+        /// </summary>
+        /// <param name="databaseSchema">The database schema. Can be a subclassed version.</param>
+        public DatabaseReader(DatabaseSchema databaseSchema)
+        {
+            _schemaReader = SchemaReaderFactory.Create(databaseSchema.ConnectionString, databaseSchema.Provider);
+            _schemaReader.Owner = databaseSchema.Owner;
+            _db = databaseSchema;
         }
 
         /// <summary>
