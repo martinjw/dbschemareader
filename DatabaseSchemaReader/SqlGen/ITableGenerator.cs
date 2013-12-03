@@ -14,6 +14,15 @@ namespace DatabaseSchemaReader.SqlGen
         bool IncludeSchema { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to include default values while writing column definitions
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if include default values; otherwise, <c>false</c>.
+        /// </value>
+        bool IncludeDefaultValues { get; set; }
+
+
+        /// <summary>
         /// Writes the DDL.
         /// </summary>
         /// <returns></returns>

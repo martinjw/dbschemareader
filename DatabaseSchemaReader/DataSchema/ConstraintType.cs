@@ -20,6 +20,10 @@
         /// <summary>
         /// 
         /// </summary>
-        Check
+        Check,
+        /// <summary>
+        /// Default constraints (SQLServer)
+        /// </summary>
+        Default
     }
 }

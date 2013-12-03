@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 using System.Globalization;
 
@@ -42,6 +43,17 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                                  EscapeName(pkName),
                                  nonClustered,
                                  columnList) + SqlFormatProvider().LineEnding();
+        }
+
+        protected override string WriteDefaultConstraint(DatabaseConstraint constraint)
+        {
+            var column = EscapeName(constraint.Columns.FirstOrDefault());
+            return string.Format(CultureInfo.InvariantCulture,
+                                 @"ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}",
+                                 TableName(Table),
+                                 EscapeName(constraint.Name),
+                                 constraint.Expression,
+                                 column) + SqlFormatProvider().LineEnding();
         }
 
         #endregion

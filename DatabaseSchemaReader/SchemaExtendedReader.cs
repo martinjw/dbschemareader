@@ -20,6 +20,7 @@ namespace DatabaseSchemaReader
         public virtual string ComputedColumnsCollectionName { get { return "ComputedColumns"; } }
         internal virtual string TableDescriptionCollectionName { get { return "TableDescriptions"; } }
         internal virtual string ColumnDescriptionCollectionName { get { return "ColumnDescriptions"; } }
+        internal virtual string DefaultConstraintCollectionName { get { return "DefaultConstraints"; } }
         #endregion
 
         /// <summary>
@@ -200,6 +201,11 @@ namespace DatabaseSchemaReader
         protected virtual string ServerVersion(DbConnection connection)
         {
             return connection.ServerVersion;
+        }
+
+        public virtual DataTable DefaultConstraints(string tableName)
+        {
+            return CreateDataTable(DefaultConstraintCollectionName);
         }
 
         #region protected helpers

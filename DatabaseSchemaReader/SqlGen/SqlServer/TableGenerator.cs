@@ -153,7 +153,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (sql == "BIT") _hasBit = true;
 
             var defaultValue = string.Empty;
-            if (!string.IsNullOrEmpty(column.DefaultValue))
+            if (!string.IsNullOrEmpty(column.DefaultValue) && IncludeDefaultValues)
             {
                 var value = FixDefaultValue(column.DefaultValue);
                 if (_hasBit)

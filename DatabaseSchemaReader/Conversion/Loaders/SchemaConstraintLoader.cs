@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion.Loaders
@@ -15,6 +16,7 @@ namespace DatabaseSchemaReader.Conversion.Loaders
         private readonly ForeignKeyColumnConverter _fkColumnConverter;
         private readonly SchemaConstraintConverter _ukConverter;
         private readonly SchemaConstraintConverter _ckConverter;
+        private readonly SchemaConstraintConverter _dfConverter;
 
         private readonly bool _noPks;
         private readonly bool _noFks;
@@ -42,6 +44,9 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             _ukConverter = new SchemaConstraintConverter(uks, ConstraintType.UniqueKey);
             var cks = _sr.CheckConstraints(null);
             _ckConverter = new SchemaConstraintConverter(cks, ConstraintType.Check);
+
+            var dfs = _sr.DefaultConstraints(null);
+            _dfConverter = new SchemaConstraintConverter(dfs, ConstraintType.Default);
         }
 
         private IList<DatabaseConstraint> PrimaryKeys(string tableName)
@@ -93,6 +98,9 @@ namespace DatabaseSchemaReader.Conversion.Loaders
 
                 case ConstraintType.Check:
                     return _ckConverter.Constraints(tableName);
+
+                case ConstraintType.Default:
+                    return _dfConverter.Constraints(tableName);
 
                 default:
                     throw new ArgumentOutOfRangeException("constraintType");

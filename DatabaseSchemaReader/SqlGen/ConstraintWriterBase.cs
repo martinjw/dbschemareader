@@ -204,8 +204,15 @@ namespace DatabaseSchemaReader.SqlGen
                     return WriteForeignKey(constraint);
                 case ConstraintType.Check:
                     return WriteCheckConstraint(constraint);
+                case ConstraintType.Default:
+                    return WriteDefaultConstraint(constraint);
             }
             return string.Empty;
+        }
+
+        protected virtual string WriteDefaultConstraint(DatabaseConstraint constraint)
+        {
+            return null;
         }
 
         protected string TableName(DatabaseTable databaseTable)

@@ -56,10 +56,15 @@ namespace DatabaseSchemaReader.Conversion
                     constraint.TableName = row[constraintKeyMap.TableKey].ToString();
                     constraint.ConstraintType = constraintType;
                     list.Add(constraint);
-                    if (constraintType == ConstraintType.Check && constraintKeyMap.ExpressionKey != null)
+                    if ((constraintType == ConstraintType.Check || constraintType == ConstraintType.Default)
+                        && constraintKeyMap.ExpressionKey != null)
                     {
                         constraint.Expression = row[constraintKeyMap.ExpressionKey].ToString();
-                        continue;
+                        if (constraintType == ConstraintType.Check)
+                        {
+                            //check constraint doesn't explicitly reference columns
+                            continue;
+                        }
                     }
                     constraint.RefersToConstraint = AddRefersToConstraint(row, constraintKeyMap.RefersToKey);
                     if (!string.IsNullOrEmpty(constraintKeyMap.RefersToTableKey))

@@ -39,6 +39,11 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly List<DatabaseTrigger> _triggers;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseTable> _foreignKeyChildren;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly List<DatabaseConstraint> _defaultConstraints;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
+        private ReadOnlyCollection<DatabaseConstraint> _readOnlyDefaultConstraints;
         #endregion
 
         /// <summary>
@@ -57,6 +62,8 @@ namespace DatabaseSchemaReader.DataSchema
             _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);
             _checkConstraints = new List<DatabaseConstraint>();
             _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
+            _defaultConstraints = new List<DatabaseConstraint>();
+            _readOnlyDefaultConstraints = new ReadOnlyCollection<DatabaseConstraint>(_defaultConstraints);
         }
 
         [OnDeserialized]
@@ -65,6 +72,7 @@ namespace DatabaseSchemaReader.DataSchema
             _readOnlyForeignKeys = new ReadOnlyCollection<DatabaseConstraint>(_foreignKeys);
             _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);
             _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
+            _readOnlyDefaultConstraints = new ReadOnlyCollection<DatabaseConstraint>(_defaultConstraints);
         }
 
         /// <summary>
@@ -152,6 +160,17 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
+        /// Gets the default constraints.
+        /// </summary>
+        /// <value>
+        /// The default constraints.
+        /// </value>
+        public ReadOnlyCollection<DatabaseConstraint> DefaultConstraints
+        {
+            get { return _readOnlyDefaultConstraints; }
+        }
+
+        /// <summary>
         /// Adds the constraints of any type (primary key, foreign key, unique key, check)
         /// </summary>
         /// <param name="constraints">The constraints.</param>
@@ -182,6 +201,9 @@ namespace DatabaseSchemaReader.DataSchema
                     break;
                 case ConstraintType.Check:
                     _checkConstraints.Add(con);
+                    break;
+                case ConstraintType.Default:
+                    _defaultConstraints.Add(con);
                     break;
             }
             AddConstraintColumns(con);
