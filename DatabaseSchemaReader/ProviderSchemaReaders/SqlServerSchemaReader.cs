@@ -365,5 +365,35 @@ ORDER BY s.name, o.name";
                 return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
             }
         }
+
+        public override DataTable DefaultConstraints(string tableName)
+        {
+            const string sqlCommand = @"SELECT 
+	s.name AS SCHEMA_NAME, 
+	o.name AS TABLE_NAME,
+    c.name AS COLUMN_NAME,
+	d.name AS CONSTRAINT_NAME,
+	d.[definition] AS EXPRESSION
+FROM sys.[default_constraints] d
+INNER JOIN sys.objects o
+    ON o.object_id = d.parent_object_id
+INNER JOIN sys.columns c
+	ON c.default_object_id = d.object_id
+INNER JOIN  sys.schemas s
+	ON s.schema_id = o.schema_id
+WHERE 
+    (o.name = @tableName OR @tableName IS NULL) AND 
+    (s.name = @schemaOwner OR @schemaOwner IS NULL) AND 
+o.type= 'U' 
+ORDER BY s.name, o.name";
+
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                return CommandForTable(tableName, connection, DefaultConstraintCollectionName, sqlCommand);
+            }
+        }
     }
 }

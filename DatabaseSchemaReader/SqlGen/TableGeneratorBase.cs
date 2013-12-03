@@ -15,6 +15,7 @@ namespace DatabaseSchemaReader.SqlGen
             Table = table;
             TableName = table.Name;
             IncludeSchema = true;
+            IncludeDefaultValues = true;
         }
 
         protected abstract ISqlFormatProvider SqlFormatProvider();
@@ -34,6 +35,8 @@ namespace DatabaseSchemaReader.SqlGen
         }
 
         public bool IncludeSchema { get; set; }
+
+        public bool IncludeDefaultValues { get; set; }
 
         public virtual string Write()
         {

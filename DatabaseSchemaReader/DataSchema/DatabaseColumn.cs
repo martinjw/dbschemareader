@@ -236,6 +236,15 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
+        /// Shallow clones this instance.
+        /// </summary>
+        /// <returns></returns>
+        public DatabaseColumn Clone()
+        {
+            return (DatabaseColumn)MemberwiseClone();
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>

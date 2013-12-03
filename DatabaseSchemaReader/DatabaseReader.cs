@@ -52,7 +52,7 @@ namespace DatabaseSchemaReader
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="owner">The schema owner.</param>
         public DatabaseReader(string connectionString, string providerName, string owner)
-            : this(new DatabaseSchema(connectionString, providerName) { Owner = owner})
+            : this(new DatabaseSchema(connectionString, providerName) { Owner = owner })
         {
         }
 
@@ -209,6 +209,7 @@ namespace DatabaseSchemaReader
 
                 table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.UniqueKey));
                 table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.Check));
+                table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.Default));
 
                 indexLoader.AddIndexes(table);
 

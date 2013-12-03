@@ -209,6 +209,10 @@ namespace DatabaseSchemaViewer
             {
                 AddConstraint(constraintRoot, checkConstraint);
             }
+            foreach (var defaultConstraint in table.DefaultConstraints)
+            {
+                AddConstraint(constraintRoot, defaultConstraint);
+            }
         }
 
         private static void AddConstraint(TreeNode constraintRoot, DatabaseConstraint constraint)
@@ -218,6 +222,10 @@ namespace DatabaseSchemaViewer
             node.ToolTipText = RightClickToScript;
             constraintRoot.Nodes.Add(node);
             if (constraint.ConstraintType == ConstraintType.Check)
+            {
+                node.ToolTipText = constraint.Expression;
+            }
+            else if (constraint.ConstraintType == ConstraintType.Default)
             {
                 node.ToolTipText = constraint.Expression;
             }
@@ -277,7 +285,7 @@ namespace DatabaseSchemaViewer
             if (column.IsIdentity)
             {
                 sb.Append(" Identity");
-                if(column.IsNonTrivialIdentity())
+                if (column.IsNonTrivialIdentity())
                 {
                     sb.Append('(');
                     sb.Append(column.IdentitySeed);

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1114FF99-4A7A-4369-9C38-18FCECF773A3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -122,6 +122,7 @@
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddForeignKey.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddIndex.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterColumn.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterDefault.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationCreateTable.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropColumn.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropIndex.cs" />

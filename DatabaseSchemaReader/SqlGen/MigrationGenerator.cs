@@ -81,12 +81,20 @@ namespace DatabaseSchemaReader.SqlGen
             get { return "ALTER TABLE {0} MODIFY {1};"; }
         }
         protected virtual bool SupportsAlterColumn { get { return true; } }
+        /// <summary>
+        /// Sql Server cannot change default values in ALTER COLUMN statements (they are constraints)
+        /// </summary>
+        protected virtual bool AlterColumnIncludeDefaultValue { get { return true; } }
 
-        public string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
+        public virtual string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
+            if (!AlterColumnIncludeDefaultValue)
+            {
+                tableGenerator.IncludeDefaultValues = false;
+            }
             var columnDefinition = tableGenerator.WriteColumn(databaseColumn).Trim();
-            string originalDefinition = null;
+            var originalDefinition = "?";
             if (originalColumn != null)
             {
                 originalDefinition = tableGenerator.WriteColumn(originalColumn).Trim();
@@ -102,7 +110,7 @@ namespace DatabaseSchemaReader.SqlGen
             }
 
             //add a nice comment
-            string comment = string.Format(CultureInfo.InvariantCulture,
+            var comment = string.Format(CultureInfo.InvariantCulture,
                 "-- {0} from {1} to {2}",
                 databaseTable.Name,
                 originalDefinition,
