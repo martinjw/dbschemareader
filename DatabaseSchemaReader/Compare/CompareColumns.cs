@@ -43,7 +43,7 @@ namespace DatabaseSchemaReader.Compare
 
                 //has column changed?
 
-                if (column.DbDataType == match.DbDataType &&
+                if (string.Equals(column.DbDataType, match.DbDataType, StringComparison.OrdinalIgnoreCase) &&
                     column.Length == match.Length &&
                     column.Precision == match.Precision &&
                     column.Scale == match.Scale &&
