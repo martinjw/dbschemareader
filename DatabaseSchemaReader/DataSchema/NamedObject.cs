@@ -18,6 +18,14 @@ namespace DatabaseSchemaReader.DataSchema
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the tag.
+        /// </summary>
+        /// <value>
+        /// The tag.
+        /// </value>
+        public object Tag { get; set; }
+
+        /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
         /// </summary>
         /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
