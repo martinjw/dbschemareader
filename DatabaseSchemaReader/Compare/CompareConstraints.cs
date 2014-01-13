@@ -102,7 +102,7 @@ namespace DatabaseSchemaReader.Compare
             {
                 CreateResult(ResultType.Change, databaseTable, databaseTable.PrimaryKey.Name,
                     _writer.DropConstraint(databaseTable, databaseTable.PrimaryKey) + Environment.NewLine +
-                    _writer.AddConstraint(databaseTable, match.PrimaryKey));
+                    _writer.AddConstraint(match, match.PrimaryKey));
             }
         }
 

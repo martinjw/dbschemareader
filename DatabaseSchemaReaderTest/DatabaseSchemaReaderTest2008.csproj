@@ -70,6 +70,7 @@
     <Compile Include="Compare\CompareResultFindTest.cs" />
     <Compile Include="Compare\CompareSchemaResultsTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
+    <Compile Include="Compare\CompareTablesTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />
     <Compile Include="Compare\CompareProceduresTest.cs" />
     <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
