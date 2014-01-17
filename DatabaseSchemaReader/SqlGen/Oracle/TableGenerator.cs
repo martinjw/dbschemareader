@@ -109,6 +109,8 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         protected override string NonNativeAutoIncrementWriter()
         {
             //SQLServer table with IDENTITY- let's create the Oracle equivalent
+
+            //UNLESS it's ORACLE 12c
             return new AutoIncrementWriter(Table).Write();
         }
 

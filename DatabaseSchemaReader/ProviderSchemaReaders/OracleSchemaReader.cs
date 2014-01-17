@@ -19,7 +19,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         private int? _version;
 
         /// <summary>
-        /// Parse out the server version (9, 10 or 11, hopefully)
+        /// Parse out the server version (9, 10, 11 or 12, hopefully)
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <returns></returns>
@@ -205,9 +205,31 @@ ORDER BY cols.table_name, cols.position";
             return sqlCommand;
         }
 
-        public override DataTable IdentityColumns(string tableName)
+        //Oracle 12c+ has identity. We can no longer avoid opening the connection as we must check the version
+        //public override DataTable IdentityColumns(string tableName)
+        //{
+        //    return CreateDataTable(IdentityColumnsCollectionName);
+        //}
+
+        protected override DataTable IdentityColumns(string tableName, DbConnection connection)
         {
-            return CreateDataTable(IdentityColumnsCollectionName);
+            if (Version(connection) < 12)
+            {
+                return CreateDataTable(IdentityColumnsCollectionName);
+            }
+            const string sqlCommand = @"SELECT 
+OWNER AS SchemaOwner,
+TABLE_NAME AS TABLENAME, 
+COLUMN_NAME AS COLUMNNAME, 
+GENERATION_TYPE,
+IDENTITY_OPTIONS
+FROM all_tab_identity_cols
+WHERE 
+(TABLE_NAME = :tableName OR :tableName IS NULL) AND 
+(OWNER = :schemaOwner OR :schemaOwner IS NULL) 
+ORDER BY TABLE_NAME, COLUMN_NAME";
+
+            return CommandForTable(tableName, connection, IdentityColumnsCollectionName, sqlCommand);
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)

@@ -172,7 +172,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             {
                 column.IsIdentity = true;
             }
-            if (column.IsIdentity) sql += " IDENTITY(" + column.IdentitySeed + "," + column.IdentityIncrement + ")";
+            if (column.IsIdentity)
+            {
+                var id = column.IdentityDefinition ?? new DatabaseColumnIdentity();
+                sql += " IDENTITY(" + id.IdentitySeed + "," + id.IdentityIncrement + ")";
+            }
             if (column.IsPrimaryKey)
                 sql += " NOT NULL";
             else
