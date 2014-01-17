@@ -12,15 +12,6 @@ namespace DatabaseSchemaReader.DataSchema
 
         #endregion
 
-        /// <summary>
-        /// Initialize optional properties to default values for a DatabaseColumn
-        /// </summary>
-        public DatabaseColumn()
-        {
-            IdentitySeed = 1;
-            IdentityIncrement = 1;
-        }
-
         #region Basic Properties
 
         /// <summary>
@@ -105,14 +96,39 @@ namespace DatabaseSchemaReader.DataSchema
         public string TableName { get; set; }
 
         /// <summary>
-        /// Gets or sets the seed value for an identity column (or equivalent)
+        /// Do not use. Initialize <see cref="IdentityDefinition"/> and access <see cref="DatabaseColumnIdentity.IdentitySeed"/>
         /// </summary>
-        public long IdentitySeed { get; set; }
+        [Obsolete("Access via IdentityDefinition")]
+        public long IdentitySeed
+        {
+            get { return (IdentityDefinition == null) ? 1 : IdentityDefinition.IdentitySeed; }
+            set
+            {
+                if (IdentityDefinition == null) IdentityDefinition = new DatabaseColumnIdentity();
+                IdentityDefinition.IdentitySeed = value;
+            }
+        }
 
         /// <summary>
-        /// Gets or sets the identity increment for an identity column (or equivalent)
+        /// Do not use. Initialize <see cref="IdentityDefinition"/> and access <see cref="DatabaseColumnIdentity.IdentityIncrement"/>
         /// </summary>
-        public long IdentityIncrement { get; set; }
+        [Obsolete("Access via IdentityDefinition")]
+        public long IdentityIncrement
+        {
+            get { return (IdentityDefinition == null) ? 1 : IdentityDefinition.IdentityIncrement; }
+            set
+            {
+                if (IdentityDefinition == null) IdentityDefinition = new DatabaseColumnIdentity();
+                IdentityDefinition.IdentityIncrement = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the identity definition (if this is an Identity column). 
+        /// Null if this is not an identity column (<see cref="IsIdentity"/> is false), 
+        /// or the database uses another method of autonumbering (<see cref="DefaultValue"/> or sequences).
+        /// </summary>
+        public DatabaseColumnIdentity IdentityDefinition { get; set; }
 
         /// <summary>
         /// Gets or sets the "computed" (or "virtual") definition.
@@ -148,6 +164,9 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// 	<c>true</c> if this instance is identity; otherwise, <c>false</c>.
         /// </value>
+        /// <remarks>
+        /// If the database supports true Identity autonumbering, there should be more details in <see cref="IdentityDefinition"/>. If this is an equivalent (e.g. using sequences), then <see cref="IdentityDefinition"/> will be null.
+        /// </remarks>
         public bool IsIdentity { get; set; }
 
         /// <summary>
@@ -226,14 +245,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public bool IsComputed { get { return !string.IsNullOrEmpty(ComputedDefinition); } }
 
-        /// <summary>
-        /// Get non-triviality of an identity column
-        /// </summary>
-        /// <returns>True if the identity sequence does not start at 1 and increment by 1.</returns>
-        public bool IsNonTrivialIdentity()
-        {
-            return IdentitySeed != 1 || IdentityIncrement != 1;
-        }
+
 
         /// <summary>
         /// Shallow clones this instance.
@@ -254,8 +266,7 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return Name + " (" + DbDataType + ")"
                 + (IsPrimaryKey ? " PK" : "")
-                + (IsIdentity ? " Identity" : "")
-                + (IsNonTrivialIdentity() ? "(" + IdentitySeed + "," + IdentityIncrement + ")" : "");
+                + (IsIdentity ? " Identity" : "");
         }
 
         #endregion

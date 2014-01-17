@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Globalization;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
@@ -215,6 +216,24 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 {
                     var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
                     sql = "NUMBER (" + precision + writeScale + ")";
+                }
+                if (column.IdentityDefinition != null)
+                {
+                    //Oracle 12c- this can be set. 
+                    //For Oracle 11, IsIdentity can be set (by recognizing a sequence), but the definition won't be set.
+                    //these must be NUMBER of some sort or it's invalid
+                    sql += "GENERATED ";
+                    if (column.IdentityDefinition.IdentityByDefault)
+                        sql += "BY DEFAULT ";
+                    sql += "AS IDENTITY";
+                    if (column.IdentityDefinition.IsNonTrivialIdentity())
+                    {
+                        sql += string.Format(CultureInfo.InvariantCulture, " (START WITH {0} INCREMENT BY {1})",
+                            column.IdentityDefinition.IdentitySeed,
+                            column.IdentityDefinition.IdentityIncrement);
+                    }
+                    //no other options should be done
+                    return sql;
                 }
                 if (!string.IsNullOrEmpty(defaultValue))
                     sql += " DEFAULT " + defaultValue;

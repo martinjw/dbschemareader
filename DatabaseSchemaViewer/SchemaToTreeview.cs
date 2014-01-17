@@ -285,12 +285,12 @@ namespace DatabaseSchemaViewer
             if (column.IsIdentity)
             {
                 sb.Append(" Identity");
-                if (column.IsNonTrivialIdentity())
+                if (column.IdentityDefinition != null && column.IdentityDefinition.IsNonTrivialIdentity())
                 {
                     sb.Append('(');
-                    sb.Append(column.IdentitySeed);
+                    sb.Append(column.IdentityDefinition.IdentitySeed);
                     sb.Append(',');
-                    sb.Append(column.IdentityIncrement);
+                    sb.Append(column.IdentityDefinition.IdentityIncrement);
                     sb.Append(')');
                 }
             }

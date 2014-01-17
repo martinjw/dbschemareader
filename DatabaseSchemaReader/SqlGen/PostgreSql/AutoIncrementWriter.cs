@@ -19,11 +19,11 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         public string Write()
         {
-            if(!_table.HasIdentityColumn)
+            if (!_table.HasIdentityColumn)
                 return String.Empty;
 
             var sb = new StringBuilder();
-            foreach (DatabaseColumn column in _table.Columns.FindAll(x => x.IsNonTrivialIdentity()))
+            foreach (DatabaseColumn column in _table.Columns.FindAll(x => x.IdentityDefinition != null && x.IdentityDefinition.IsNonTrivialIdentity()))
             {
                 sb.AppendLine("-- sequence for " + _table.Name + "." + column.Name);
                 sb.AppendLine(WriteSequence(column));
@@ -41,12 +41,12 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         {
             const string sequence = @"CREATE SEQUENCE ""{0}"" MINVALUE {1} START {1} INCREMENT {2};
 ALTER TABLE ""{3}"" ALTER COLUMN ""{4}"" SET DEFAULT nextval('""{0}""');";
-
+            var id = column.IdentityDefinition;
             return string.Format(CultureInfo.InvariantCulture,
                 sequence,
                 GetSequenceName(column),
-                column.IdentitySeed,
-                column.IdentityIncrement,
+                id.IdentitySeed,
+                id.IdentityIncrement,
                 column.TableName,
                 column.Name
                 );

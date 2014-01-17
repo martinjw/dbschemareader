@@ -93,6 +93,7 @@
     <Compile Include="DataSchema\ExtensionsTest.cs" />
     <Compile Include="DataSchema\ForeignKeyTests.cs" />
     <Compile Include="DataSchema\ManyToManyExtensionsTest.cs" />
+    <Compile Include="DataSchema\Oracle12IdentityConversionTest.cs" />
     <Compile Include="DataSchema\RemoveTableTest.cs" />
     <Compile Include="IntegrationTests\Access.cs" />
     <Compile Include="IntegrationTests\VistaDb.cs" />

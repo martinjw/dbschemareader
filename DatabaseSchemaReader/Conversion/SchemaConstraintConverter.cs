@@ -130,6 +130,8 @@ namespace DatabaseSchemaReader.Conversion
         {
             bool hasSeedInfo = dt.Columns.Contains("IdentitySeed");
             bool hasIncrementInfo = dt.Columns.Contains("IdentityIncrement");
+            bool hasIdentityOptions = dt.Columns.Contains("IDENTITY_OPTIONS");
+            bool hasGeneratedType = dt.Columns.Contains("GENERATION_TYPE");
             foreach (DataRow row in dt.Rows)
             {
                 string tableName = row["TableName"].ToString();
@@ -140,13 +142,59 @@ namespace DatabaseSchemaReader.Conversion
                 if (col != null)
                 {
                     col.IsIdentity = true;
+                    col.IdentityDefinition = new DatabaseColumnIdentity();
                     if (hasSeedInfo)
-                        col.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
+                        col.IdentityDefinition.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
                     if (hasIncrementInfo)
-                        col.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
+                        col.IdentityDefinition.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
+                    if (hasIdentityOptions)
+                    {
+                        var options = row["IDENTITY_OPTIONS"].ToString();
+                        ParseIdentityOptions(col.IdentityDefinition, options);
+                    }
+                    if (hasGeneratedType)
+                    {
+                        if (string.Equals(row["GENERATION_TYPE"].ToString(), "BY DEFAULT",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            col.IdentityDefinition.IdentityByDefault = true;
+                        }
+                    }
                     //col.IsPrimaryKey = true;
                 }
             }
+        }
+
+        private static void ParseIdentityOptions(DatabaseColumnIdentity identityDefinition, string options)
+        {
+            //START WITH: 1, INCREMENT BY: 1, MAX_VALUE: 9999999999999999999999999999, MIN_VALUE: 1, CYCLE_FLAG: N, CACHE_SIZE: 20, ORDER_FLAG: N
+            //defensive in case format changes
+            if (string.IsNullOrEmpty(options)) return;
+
+            var number = ExtractBetween(options, "START WITH: ", ',');
+            if (string.IsNullOrEmpty(number)) return;
+            long seed;
+            if (long.TryParse(number, out seed))
+            {
+                identityDefinition.IdentitySeed = seed;
+            }
+
+            number = ExtractBetween(options, "INCREMENT BY: ", ',');
+            if (string.IsNullOrEmpty(number)) return;
+            if (long.TryParse(number, out seed))
+            {
+                identityDefinition.IdentityIncrement = seed;
+            }
+
+        }
+
+        private static string ExtractBetween(string haystack, string prefix, char suffix)
+        {
+            var start = haystack.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
+            if (start == -1) return null;
+            start = start + prefix.Length;
+            var end = haystack.IndexOf(suffix, start);
+            return haystack.Substring(start, end - start);
         }
 
         public static void AddComputed(DataTable dt, DatabaseTable table)

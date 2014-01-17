@@ -129,10 +129,11 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
             if (column.IsIdentity)
             {
+                var id = column.IdentityDefinition ?? new DatabaseColumnIdentity();
                 bool isLong = column.DataType != null && column.DataType.GetNetType() == typeof(long);
                 // Non trivial identities are hooked to a sequence up by AutoIncrementWriter.
                 // Newer postgres versions require specifying UNIQUE explicitly.
-                if (column.IsNonTrivialIdentity())
+                if (id.IsNonTrivialIdentity())
                     sql = (isLong ? " BIGINT" : " INT") + " NOT NULL UNIQUE";
                 else
                     sql = isLong ? " BIGSERIAL" : " SERIAL";
