@@ -224,7 +224,7 @@ namespace DatabaseSchemaReader.SqlGen
             DatabaseColumn rowVersionColumn = null;
             foreach (var column in Table.Columns)
             {
-                if (column.IsIdentity) //don't insert identity
+                if (column.IsAutoNumber) //don't insert identity
                 {
                     identityColumn = column;
                     continue;

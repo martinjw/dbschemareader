@@ -106,7 +106,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             {
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".Column(\"{0}\")", idColumn.Name);
             }
-            if (idColumn.IsIdentity)
+            if (idColumn.IsAutoNumber)
             {
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".GeneratedBy.Identity()");
                 //other GeneratedBy values (Guid, Assigned) are left to defaults

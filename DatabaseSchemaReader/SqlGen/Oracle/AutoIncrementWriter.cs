@@ -21,13 +21,13 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public string Write()
         {
-            if (!_table.HasIdentityColumn) return null;
+            if (!_table.HasAutoNumberColumn) return null;
 
             var txt = WriteExistingTrigger();
             if (txt != null) return txt;
 
 
-            var identityColumn = _table.Columns.First(x => x.IsIdentity).Name;
+            var identityColumn = _table.Columns.First(x => x.IsAutoNumber).Name;
 
             string sequenceName = _table.Name + "_SEQUENCE";
             int i = 0;

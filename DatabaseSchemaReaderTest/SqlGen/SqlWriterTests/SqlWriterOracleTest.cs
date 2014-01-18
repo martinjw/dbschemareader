@@ -108,7 +108,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
                         {
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
-                            if (column.IsIdentity)
+                            if (column.IsAutoNumber)
                             {
                                 //we could be using sequences here
                                 par.Direction = ParameterDirection.Output;

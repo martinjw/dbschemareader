@@ -268,7 +268,7 @@ namespace DatabaseSchemaReader.Utilities
             column.Scale = scale;
             column.Nullable = nullable;
 
-            if (storeGeneratedPattern == "Identity") column.IsIdentity = true;
+            if (storeGeneratedPattern == "Identity") column.IsAutoNumber = true;
 
             FixColumn(column);
 

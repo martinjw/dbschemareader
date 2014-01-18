@@ -141,7 +141,7 @@ namespace DatabaseSchemaReader.Conversion
                 var col = table.FindColumn(colName);
                 if (col != null)
                 {
-                    col.IsIdentity = true;
+                    col.IsAutoNumber = true;
                     col.IdentityDefinition = new DatabaseColumnIdentity();
                     if (hasSeedInfo)
                         col.IdentityDefinition.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());

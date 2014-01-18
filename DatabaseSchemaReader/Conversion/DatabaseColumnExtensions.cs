@@ -41,7 +41,7 @@ namespace DatabaseSchemaReader.Conversion
             table.Columns.Add("IsPrimaryKey", typeof(Boolean));
             table.Columns.Add("IsForeignKey", typeof(Boolean));
             table.Columns.Add("IsUniqueKey", typeof(Boolean));
-            table.Columns.Add("IsIdentity", typeof(Boolean));
+            table.Columns.Add("IsAutoNumber", typeof(Boolean));
             table.Columns.Add("IsIndexed", typeof(Boolean));
             foreach (DatabaseColumn item in list)
             {
@@ -57,7 +57,7 @@ namespace DatabaseSchemaReader.Conversion
                 row["IsPrimaryKey"] = item.IsPrimaryKey;
                 row["IsForeignKey"] = item.IsForeignKey;
                 row["IsUniqueKey"] = item.IsUniqueKey;
-                row["IsIdentity"] = item.IsIdentity;
+                row["IsAutoNumber"] = item.IsAutoNumber;
                 row["IsIndexed"] = item.IsIndexed;
                 table.Rows.Add(row);
             }

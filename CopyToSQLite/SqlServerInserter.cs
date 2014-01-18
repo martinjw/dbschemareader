@@ -15,7 +15,7 @@ namespace CopyToSQLite
             : base(connection, insertSql)
         {
             _table = table;
-            if (_table.HasIdentityColumn)
+            if (_table.HasAutoNumberColumn)
             {
                 _hasIdentity = true;
                 SetIdentityInsertOn();
@@ -90,7 +90,7 @@ namespace CopyToSQLite
         private void ResetIdentity()
         {
             //equal to DBCC CHECKIDENT (tableName)
-            var identityColumn = _table.Columns.First(c => c.IsIdentity).Name;
+            var identityColumn = _table.Columns.First(c => c.IsAutoNumber).Name;
 
             var command = Connection.CreateCommand();
             command.CommandText = string.Format(CultureInfo.InvariantCulture,

@@ -142,7 +142,7 @@ namespace DatabaseSchemaReader.Data
         private void PrepareIdentityInsert(StringBuilder sb)
         {
             if (!IncludeIdentity || (_sqlType != SqlType.SqlServer && _sqlType != SqlType.SqlServerCe) ||
-                !_databaseTable.HasIdentityColumn) return;
+                !_databaseTable.HasAutoNumberColumn) return;
 
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "SET IDENTITY_INSERT {0} ON", _sqlWriter.EscapedTableName));
             sb.AppendLine("GO");
@@ -152,7 +152,7 @@ namespace DatabaseSchemaReader.Data
         {
             if (!IncludeIdentity) return;
             if (_sqlType != SqlType.SqlServer && _sqlType != SqlType.SqlServerCe) return;
-            if (!_databaseTable.HasIdentityColumn) return;
+            if (!_databaseTable.HasAutoNumberColumn) return;
 
             var tableName = _sqlWriter.EscapedTableName;
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "SET IDENTITY_INSERT {0} OFF", tableName));
@@ -163,7 +163,7 @@ namespace DatabaseSchemaReader.Data
             }
             else //SqlServer CE
             {
-                var identityColumn = _databaseTable.Columns.First(c => c.IsIdentity).Name;
+                var identityColumn = _databaseTable.Columns.First(c => c.IsAutoNumber).Name;
                 sb.AppendLine("DECLARE @MAX int;");
                 sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
                                             "SELECT @MAX = MAX([{0}])+1 FROM {1};", identityColumn, tableName));
@@ -180,7 +180,7 @@ namespace DatabaseSchemaReader.Data
 
             foreach (var databaseColumn in _databaseTable.Columns)
             {
-                if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
+                if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
 
                 if (_nullColumns.Contains(databaseColumn.Name))
                 {
@@ -204,7 +204,7 @@ namespace DatabaseSchemaReader.Data
 
             foreach (var databaseColumn in _databaseTable.Columns)
             {
-                if (databaseColumn.IsIdentity) continue;
+                if (databaseColumn.IsAutoNumber) continue;
                 if(!_dataTable.Columns.Contains(databaseColumn.Name)) continue;
                 if(!IncludeAllFieldsInUpdate && row[databaseColumn.Name].Equals(row[databaseColumn.Name, DataRowVersion.Original])) continue;
 
@@ -269,7 +269,7 @@ namespace DatabaseSchemaReader.Data
             var cols = new List<string>();
             foreach (var databaseColumn in _databaseTable.Columns)
             {
-                if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
+                if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
                 cols.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name));
             }
 
@@ -283,7 +283,7 @@ namespace DatabaseSchemaReader.Data
             if(!IncludeAllFieldsInWhereClause)
                 foreach (var databaseColumn in _databaseTable.Columns)
                 {
-                    if ((databaseColumn.IsPrimaryKey || databaseColumn.IsIdentity) && _dataTable.Columns.Contains(databaseColumn.Name))
+                    if ((databaseColumn.IsPrimaryKey || databaseColumn.IsAutoNumber) && _dataTable.Columns.Contains(databaseColumn.Name))
                     {
                         pk.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name));
                         unescapedPk.Add(databaseColumn.Name);

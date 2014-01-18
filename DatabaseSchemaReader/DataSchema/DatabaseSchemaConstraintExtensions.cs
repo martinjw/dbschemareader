@@ -63,12 +63,12 @@ namespace DatabaseSchemaReader.DataSchema
         {
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             var table = databaseColumn.Table;
-            if (table.HasIdentityColumn && !databaseColumn.IsIdentity)
+            if (table.HasAutoNumberColumn && !databaseColumn.IsAutoNumber)
             {
-                var existingIdentity = table.Columns.First(x => x.IsIdentity);
-                existingIdentity.IsIdentity = false;
+                var existingIdentity = table.Columns.First(x => x.IsAutoNumber);
+                existingIdentity.IsAutoNumber = false;
             }
-            databaseColumn.IsIdentity = true;
+            databaseColumn.IsAutoNumber = true;
             if (string.IsNullOrEmpty(databaseColumn.DbDataType))
                 databaseColumn.DbDataType = "INT";
             return databaseColumn;

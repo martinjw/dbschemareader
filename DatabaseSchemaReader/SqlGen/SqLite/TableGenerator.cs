@@ -26,7 +26,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             if (column.IsPrimaryKey && (Table.PrimaryKey == null || Table.PrimaryKey.Columns.Count == 1))
             {
                 type += " PRIMARY KEY";
-                if (column.IsIdentity) type += " AUTOINCREMENT";
+                if (column.IsAutoNumber) type += " AUTOINCREMENT";
             }
             if (!column.Nullable) type += " NOT NULL";
             //if there's a default value, and it's not a guid generator

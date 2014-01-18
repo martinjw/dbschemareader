@@ -125,7 +125,7 @@ namespace DatabaseSchemaReader.DataSchema
 
         /// <summary>
         /// Gets or sets the identity definition (if this is an Identity column). 
-        /// Null if this is not an identity column (<see cref="IsIdentity"/> is false), 
+        /// Null if this is not an identity column (<see cref="IsAutoNumber"/> is false), 
         /// or the database uses another method of autonumbering (<see cref="DefaultValue"/> or sequences).
         /// </summary>
         public DatabaseColumnIdentity IdentityDefinition { get; set; }
@@ -159,15 +159,21 @@ namespace DatabaseSchemaReader.DataSchema
         public bool IsForeignKey { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is an identity column (or equivalent)
+        /// Gets or sets a value indicating whether this column is an autonumber column (identity or equivalent)
         /// </summary>
         /// <value>
-        /// 	<c>true</c> if this instance is identity; otherwise, <c>false</c>.
+        /// 	<c>true</c> if this column is autonumber; otherwise, <c>false</c>.
         /// </value>
         /// <remarks>
         /// If the database supports true Identity autonumbering, there should be more details in <see cref="IdentityDefinition"/>. If this is an equivalent (e.g. using sequences), then <see cref="IdentityDefinition"/> will be null.
         /// </remarks>
-        public bool IsIdentity { get; set; }
+        public bool IsAutoNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this column is an identity column (or equivalent)
+        /// </summary>
+        [Obsolete("Use IsAutoNumber")]
+        public bool IsIdentity { get { return IsAutoNumber; } set { IsAutoNumber = value; } }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is indexed.
@@ -266,7 +272,7 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return Name + " (" + DbDataType + ")"
                 + (IsPrimaryKey ? " PK" : "")
-                + (IsIdentity ? " Identity" : "");
+                + (IsAutoNumber ? " Identity" : "");
         }
 
         #endregion

@@ -109,7 +109,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
                         {
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
-                            if (column.IsIdentity)
+                            if (column.IsAutoNumber)
                             {
                                 //get the name of the identity parameter
                                 identityParameterName = par.ParameterName;

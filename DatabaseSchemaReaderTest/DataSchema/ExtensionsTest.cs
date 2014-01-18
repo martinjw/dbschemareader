@@ -53,7 +53,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
             Assert.IsNotNull(cats.PrimaryKey);
             Assert.IsNotNull(cats.PrimaryKeyColumn);
             var pk = cats.PrimaryKeyColumn;
-            Assert.IsTrue(pk.IsIdentity);
+            Assert.IsTrue(pk.IsAutoNumber);
             Assert.AreEqual(1, cats.ForeignKeyChildren.Count);
 
 

@@ -127,7 +127,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             var sql = DataTypeWriter.WriteDataType(column);
             if (sql == "BIT") _hasBit = true;
 
-            if (column.IsIdentity)
+            if (column.IsAutoNumber)
             {
                 var id = column.IdentityDefinition ?? new DatabaseColumnIdentity();
                 bool isLong = column.DataType != null && column.DataType.GetNetType() == typeof(long);

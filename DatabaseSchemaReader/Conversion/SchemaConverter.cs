@@ -168,7 +168,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (!string.IsNullOrEmpty(columnsKeyMap.PrimaryKeyKey) && (bool)row[columnsKeyMap.PrimaryKeyKey])
                     column.IsPrimaryKey = true;
                 if (!string.IsNullOrEmpty(columnsKeyMap.AutoIncrementKey) && (bool)row[columnsKeyMap.AutoIncrementKey])
-                    column.IsIdentity = true;
+                    column.IsAutoNumber = true;
                 if (!string.IsNullOrEmpty(columnsKeyMap.UniqueKey) && CastToBoolean(row, columnsKeyMap.UniqueKey))
                     column.IsUniqueKey = true;
 

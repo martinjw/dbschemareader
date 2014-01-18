@@ -146,7 +146,7 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("var entity = new " + entity.NetName + "();");
                 foreach (var column in entity.Columns)
                 {
-                    if (column.IsIdentity) continue;
+                    if (column.IsAutoNumber) continue;
                     if (column.DataType == null) continue;
                     var name = column.NetName;
                     //we can't parse check constraints, so this may go wrong
