@@ -79,7 +79,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //arrange
             var table = new DatabaseTable();
             table.Name = "Categories";
-            table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsIdentity = true });
+            table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsAutoNumber = true });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
             var dt = new DataTable { Locale = CultureInfo.InvariantCulture };
@@ -105,7 +105,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //arrange
             var table = new DatabaseTable();
             table.Name = "Categories";
-            table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsIdentity = true });
+            table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsAutoNumber = true });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
             var dt = new DataTable { Locale = CultureInfo.InvariantCulture };
@@ -134,7 +134,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //arrange
             var table = new DatabaseTable();
             table.Name = "Categories";
-            table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsIdentity = true });
+            table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsAutoNumber = true });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
             var dt = new DataTable { Locale = CultureInfo.InvariantCulture };

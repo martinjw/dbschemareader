@@ -39,7 +39,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         {
 
             _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
-            if (_table.PrimaryKeyColumn != null && !_table.PrimaryKeyColumn.IsIdentity)
+            if (_table.PrimaryKeyColumn != null && !_table.PrimaryKeyColumn.IsAutoNumber)
             {
                 //in EF v5 DatabaseGeneratedOption is in DataAnnotations.Schema
                 _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
@@ -211,7 +211,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             {
                 //let's comment it to make it explicit
                 _cb.AppendLine("//  " + propertyName + " is primary key" +
-                    ((column.IsIdentity) ? " (identity)" : ""));
+                    ((column.IsAutoNumber) ? " (identity)" : ""));
             }
 
             sb.AppendFormat(CultureInfo.InvariantCulture, "Property(x => x.{0})", propertyName);
@@ -219,7 +219,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             {
                 sb.AppendFormat(CultureInfo.InvariantCulture, ".HasColumnName(\"{0}\")", column.Name);
             }
-            if (column.IsPrimaryKey && !column.IsIdentity)
+            if (column.IsPrimaryKey && !column.IsAutoNumber)
             {
                 //assumed to be identity by default
                 sb.AppendFormat(CultureInfo.InvariantCulture,

@@ -223,7 +223,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
                 var defaultValue = databaseColumn.DefaultValue;
                 if (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("nextval('", StringComparison.OrdinalIgnoreCase))
                 {
-                    databaseColumn.IsIdentity = true;
+                    databaseColumn.IsAutoNumber = true;
                     databaseColumn.IsPrimaryKey = true;
                 }
                 //if defaultValue looks like the nextval from a sequence, it's a pk

@@ -322,7 +322,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public DatabaseColumn FindColumn(string name)
         {
-            return Columns.Find(delegate(DatabaseColumn col) { return col.Name.Equals(name, StringComparison.OrdinalIgnoreCase); });
+            return Columns.Find(col => col.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -341,17 +341,26 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
+        /// Gets a value indicating whether this table has an autonumber column (identity or equivalent).
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this table has an autonumber column; otherwise, <c>false</c>.
+        /// </value>
+        public bool HasAutoNumberColumn
+        {
+            get { return Columns.Any(x => x.IsAutoNumber); }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this instance has an identity column.
         /// </summary>
         /// <value>
         /// 	<c>true</c> if this instance has an identity column; otherwise, <c>false</c>.
         /// </value>
+        [Obsolete("Use HasAutoNumberColumn")]
         public bool HasIdentityColumn
         {
-            get
-            {
-                return Columns.Any(x => x.IsIdentity);
-            }
+            get { return HasAutoNumberColumn; }
         }
 
 

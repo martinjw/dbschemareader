@@ -41,8 +41,8 @@ namespace DatabaseSchemaReaderTest.DataSchema
             var id = table.FindColumn("ID");
 
             //assert
-            Assert.IsTrue(table.HasIdentityColumn);
-            Assert.IsTrue(id.IsIdentity);
+            Assert.IsTrue(table.HasAutoNumberColumn);
+            Assert.IsTrue(id.IsAutoNumber);
             Assert.AreEqual(1, id.IdentityDefinition.IdentitySeed);
             Assert.AreEqual(1, id.IdentityDefinition.IdentityIncrement);
             Assert.IsTrue(id.IdentityDefinition.IdentityByDefault);

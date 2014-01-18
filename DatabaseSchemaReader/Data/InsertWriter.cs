@@ -165,7 +165,7 @@ namespace DatabaseSchemaReader.Data
         private void PrepareIdentityInsert(StringBuilder sb)
         {
             if (!IncludeIdentity || (_sqlType != SqlType.SqlServer && _sqlType != SqlType.SqlServerCe) ||
-                !_databaseTable.HasIdentityColumn) return;
+                !_databaseTable.HasAutoNumberColumn) return;
 
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "SET IDENTITY_INSERT {0} ON", _sqlWriter.EscapedTableName));
             sb.AppendLine("GO");
@@ -175,7 +175,7 @@ namespace DatabaseSchemaReader.Data
         {
             if (!IncludeIdentity) return;
             if (_sqlType != SqlType.SqlServer && _sqlType != SqlType.SqlServerCe) return;
-            if (!_databaseTable.HasIdentityColumn) return;
+            if (!_databaseTable.HasAutoNumberColumn) return;
 
             var tableName = _sqlWriter.EscapedTableName;
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "SET IDENTITY_INSERT {0} OFF", tableName));
@@ -186,7 +186,7 @@ namespace DatabaseSchemaReader.Data
             }
             else //SqlServer CE
             {
-                var identityColumn = _databaseTable.Columns.First(c => c.IsIdentity).Name;
+                var identityColumn = _databaseTable.Columns.First(c => c.IsAutoNumber).Name;
                 sb.AppendLine("GO");
                 sb.AppendLine("DECLARE @MAX int;");
                 sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
@@ -209,7 +209,7 @@ namespace DatabaseSchemaReader.Data
 
             foreach (var databaseColumn in _databaseTable.Columns)
             {
-                if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
+                if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
 
                 if (_nullColumns.Contains(databaseColumn.Name))
                 {
@@ -238,7 +238,7 @@ namespace DatabaseSchemaReader.Data
 
             foreach (var databaseColumn in _databaseTable.Columns)
             {
-                if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
+                if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
 
                 if (_nullColumns.Contains(databaseColumn.Name))
                 {
@@ -280,7 +280,7 @@ namespace DatabaseSchemaReader.Data
             var cols = new List<string>();
             foreach (var databaseColumn in _databaseTable.Columns)
             {
-                if (!IncludeIdentity && databaseColumn.IsIdentity) continue;
+                if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
                 cols.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name));
             }
 

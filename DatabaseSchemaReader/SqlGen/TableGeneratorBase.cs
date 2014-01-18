@@ -58,7 +58,7 @@ namespace DatabaseSchemaReader.SqlGen
 
             sb.AppendLine(ConstraintWriter());
 
-            if (Table.HasIdentityColumn)
+            if (Table.HasAutoNumberColumn)
             {
                 //If no native identity/autoincrement, add it
                 sb.AppendLine(NonNativeAutoIncrementWriter());

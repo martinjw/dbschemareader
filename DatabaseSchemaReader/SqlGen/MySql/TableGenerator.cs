@@ -43,7 +43,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             }
 
             //MySql auto-increments MUST BE primary key
-            if (column.IsIdentity) type += " AUTO_INCREMENT PRIMARY KEY";
+            if (column.IsAutoNumber) type += " AUTO_INCREMENT PRIMARY KEY";
             else if (column.IsPrimaryKey && Table.PrimaryKey.Columns.Count == 1)
                 type += " PRIMARY KEY";
 

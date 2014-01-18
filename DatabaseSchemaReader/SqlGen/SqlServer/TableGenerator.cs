@@ -170,9 +170,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))
             {
-                column.IsIdentity = true;
+                column.IsAutoNumber = true;
             }
-            if (column.IsIdentity)
+            if (column.IsAutoNumber)
             {
                 var id = column.IdentityDefinition ?? new DatabaseColumnIdentity();
                 sql += " IDENTITY(" + id.IdentitySeed + "," + id.IdentityIncrement + ")";

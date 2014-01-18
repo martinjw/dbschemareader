@@ -282,7 +282,7 @@ namespace DatabaseSchemaViewer
             {
                 sb.Append(" PK");
             }
-            if (column.IsIdentity)
+            if (column.IsAutoNumber)
             {
                 sb.Append(" Identity");
                 if (column.IdentityDefinition != null && column.IdentityDefinition.IsNonTrivialIdentity())

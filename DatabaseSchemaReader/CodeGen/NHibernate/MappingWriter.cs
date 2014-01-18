@@ -281,13 +281,13 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
             if (dataType.IsString) id.SetAttributeValue("length", idColumn.Length.ToString());
             else if (dataType.IsNumeric) id.SetAttributeValue("unsaved-value", "0");
             ////using most common "_myId" format
-            //if (idColumn.IsIdentity)
+            //if (idColumn.IsAutoNumber)
             //{
             //    id.SetAttributeValue("access", "nosetter.camelcase-underscore");
             //}
 
             var gen = new XElement(_xmlns + "generator");
-            if (idColumn.IsIdentity)
+            if (idColumn.IsAutoNumber)
             {
                 gen.SetAttributeValue("class", "native");
             }

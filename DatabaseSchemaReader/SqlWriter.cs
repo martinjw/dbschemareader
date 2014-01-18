@@ -161,7 +161,7 @@ namespace DatabaseSchemaReader
             foreach (var column in _table.Columns)
             {
                 //also not SqlServer timestamp
-                if (!column.IsIdentity && !column.IsTimestamp() && !column.IsComputed)
+                if (!column.IsAutoNumber && !column.IsTimestamp() && !column.IsComputed)
                     list.Add(column.Name);
             }
             return list.ToArray();
@@ -622,7 +622,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
             sb.Append(" ");
             sb.AppendLine(String.Join(joinString, values));
             sb.Append(")");
-            if (_table.HasIdentityColumn)
+            if (_table.HasAutoNumberColumn)
             {
                 string identityParameter = FindIdentityParameter();
                 if (_sqlType == SqlType.Oracle && useOutputParameter)
@@ -707,7 +707,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         {
             return _table.Columns.Find(delegate(DatabaseColumn col)
                     {
-                        return col.IsIdentity;
+                        return col.IsAutoNumber;
                     });
         }
 

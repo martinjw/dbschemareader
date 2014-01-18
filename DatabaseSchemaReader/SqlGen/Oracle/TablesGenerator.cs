@@ -34,7 +34,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             sb.AppendLine();
             foreach (var table in Schema.Tables)
             {
-                if (table.HasIdentityColumn)
+                if (table.HasAutoNumberColumn)
                 {
                     sb.AppendLine("-- DROP SEQUENCE " + table.Name + "_SEQUENCE;");
                 }

@@ -19,7 +19,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         public string Write()
         {
-            if (!_table.HasIdentityColumn)
+            if (!_table.HasAutoNumberColumn)
                 return String.Empty;
 
             var sb = new StringBuilder();

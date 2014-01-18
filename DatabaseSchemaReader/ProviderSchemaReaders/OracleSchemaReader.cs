@@ -383,7 +383,7 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
                 var body = databaseTrigger.TriggerBody;
                 if (regex.IsMatch(body))
                 {
-                    pk.IsIdentity = true;
+                    pk.IsAutoNumber = true;
                     return;
                 }
             }

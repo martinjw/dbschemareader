@@ -220,7 +220,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 if (column.IdentityDefinition != null)
                 {
                     //Oracle 12c- this can be set. 
-                    //For Oracle 11, IsIdentity can be set (by recognizing a sequence), but the definition won't be set.
+                    //For Oracle 11, IsAutoNumber can be set (by recognizing a sequence), but the definition won't be set.
                     //these must be NUMBER of some sort or it's invalid
                     sql += "GENERATED ";
                     if (column.IdentityDefinition.IdentityByDefault)

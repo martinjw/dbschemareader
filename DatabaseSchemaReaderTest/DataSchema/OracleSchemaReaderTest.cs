@@ -31,7 +31,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
             osr.PostProcessing(dt);
 
             //assert
-            Assert.IsFalse(dt.HasIdentityColumn);
+            Assert.IsFalse(dt.HasAutoNumberColumn);
 
         }
 
@@ -55,7 +55,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
             osr.PostProcessing(dt);
 
             //assert
-            Assert.IsTrue(dt.HasIdentityColumn);
+            Assert.IsTrue(dt.HasAutoNumberColumn);
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ END;"
             osr.PostProcessing(dt);
 
             //assert
-            Assert.IsTrue(dt.HasIdentityColumn);
+            Assert.IsTrue(dt.HasAutoNumberColumn);
         }
     }
 }

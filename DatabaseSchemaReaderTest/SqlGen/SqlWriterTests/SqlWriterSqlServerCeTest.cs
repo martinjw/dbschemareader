@@ -149,7 +149,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
                         cmd.Transaction = transaction;
                         foreach (var column in table.Columns)
                         {
-                            if (column.IsIdentity)
+                            if (column.IsAutoNumber)
                                 continue;
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
