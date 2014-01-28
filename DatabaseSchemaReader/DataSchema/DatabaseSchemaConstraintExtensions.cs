@@ -67,8 +67,10 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 var existingIdentity = table.Columns.First(x => x.IsAutoNumber);
                 existingIdentity.IsAutoNumber = false;
+                existingIdentity.IdentityDefinition = null;
             }
             databaseColumn.IsAutoNumber = true;
+            databaseColumn.IdentityDefinition = new DatabaseColumnIdentity();
             if (string.IsNullOrEmpty(databaseColumn.DbDataType))
                 databaseColumn.DbDataType = "INT";
             return databaseColumn;
