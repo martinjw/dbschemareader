@@ -163,22 +163,25 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                     if (value.Equals("Yes", StringComparison.OrdinalIgnoreCase)) value = "1";
                 }
 
-                const string defaultConstraint = "DEFAULT ";
                 //strings should already have the single quotes in place
-                defaultValue = defaultConstraint + value;
+                defaultValue = "DEFAULT " + value;
             }
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))
             {
                 column.IsAutoNumber = true;
+                column.IdentityDefinition = new DatabaseColumnIdentity();
             }
-            if (column.IsAutoNumber)
+            if (column.IdentityDefinition != null)
             {
-                var id = column.IdentityDefinition ?? new DatabaseColumnIdentity();
+                var id = column.IdentityDefinition;
                 sql += " IDENTITY(" + id.IdentitySeed + "," + id.IdentityIncrement + ")";
             }
             if (column.IsPrimaryKey)
+            {
                 sql += " NOT NULL";
+                if (!string.IsNullOrEmpty(defaultValue)) sql += " " + defaultValue;
+            }
             else
                 sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + " " + defaultValue;
             return sql;

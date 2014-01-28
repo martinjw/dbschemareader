@@ -217,12 +217,19 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
                     sql = "NUMBER (" + precision + writeScale + ")";
                 }
+                if (!column.Nullable) sql += " NOT NULL";
                 if (column.IdentityDefinition != null)
                 {
+                    if (column.DatabaseSchema == null ||
+                        column.DatabaseSchema.Provider.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) == -1)
+                    {
+                        //this doesn't look like oracle, so we're converting.
+                        return sql;
+                    }
                     //Oracle 12c- this can be set. 
                     //For Oracle 11, IsAutoNumber can be set (by recognizing a sequence), but the definition won't be set.
                     //these must be NUMBER of some sort or it's invalid
-                    sql += "GENERATED ";
+                    sql += " GENERATED ";
                     if (column.IdentityDefinition.IdentityByDefault)
                         sql += "BY DEFAULT ";
                     sql += "AS IDENTITY";
@@ -237,6 +244,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 }
                 if (!string.IsNullOrEmpty(defaultValue))
                     sql += " DEFAULT " + defaultValue;
+                return sql;
             }
             if (dataType == "REAL")
             {

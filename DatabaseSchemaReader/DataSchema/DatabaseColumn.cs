@@ -272,7 +272,7 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return Name + " (" + DbDataType + ")"
                 + (IsPrimaryKey ? " PK" : "")
-                + (IsAutoNumber ? " Identity" : "");
+                + (IsAutoNumber ? " AutoNumber" : "");
         }
 
         #endregion

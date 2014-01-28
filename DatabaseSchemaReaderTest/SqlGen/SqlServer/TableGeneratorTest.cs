@@ -17,7 +17,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
     public class TableGeneratorTest
     {
         [TestMethod]
-        public void TestTable()
+        public void TestSqlServerTableWithComputedColumn()
         {
             //arrange
             var schema = new DatabaseSchema(null, SqlType.SqlServer);
@@ -34,8 +34,44 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             var ddl = tableGen.Write();
 
             //assert
-            Assert.IsTrue(ddl.Contains("[Id] INT IDENTITY(1,1)  NOT NULL"));
             Assert.IsTrue(ddl.Contains("[ComputedAge] AS (Age - Period)"));
+        }
+
+        [TestMethod]
+        public void TestSqlServerTableWithIdentity()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.SqlServer);
+            var table = schema.AddTable("Test")
+                  .AddColumn<int>("Id").AddIdentity()
+                  .AddColumn<string>("Name").AddLength(200)
+                  .Table;
+            var tableGen = new TableGenerator(table);
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("[Id] INT IDENTITY(1,1)  NOT NULL"));
+        }
+
+        [TestMethod]
+        public void TestSqlServerTableWithSequenceAutoNumber()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.SqlServer);
+            var table = schema.AddTable("Test");
+            var id = table.AddColumn<int>("Id").AddPrimaryKey();
+            id.DefaultValue = "NEXT VALUE FOR [MySequence]";
+            id.IsAutoNumber = true; //but id.IdentityDefinition == null
+            table.AddColumn<string>("Name").AddLength(200);
+            var tableGen = new TableGenerator(table);
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("[Id] INT NOT NULL DEFAULT NEXT VALUE FOR [MySequence]"));
         }
 
     }

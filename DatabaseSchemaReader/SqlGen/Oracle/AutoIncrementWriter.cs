@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
 {
@@ -26,8 +27,21 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             var txt = WriteExistingTrigger();
             if (txt != null) return txt;
 
-
-            var identityColumn = _table.Columns.First(x => x.IsAutoNumber).Name;
+            var autoNumberColumn = _table.Columns.First(x => x.IsAutoNumber);
+            if (autoNumberColumn.IdentityDefinition != null)
+            {
+                if (_table.DatabaseSchema != null &&
+                    _table.DatabaseSchema.Provider.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1)
+                {
+                    //this is an Oracle schema with identity, so assume it's Oracle 12+ identity
+                    return null;
+                }
+            }
+            if (OracleSchemaReader.LooksLikeAutoNumberDefaults(autoNumberColumn.DefaultValue))
+            {
+                return null;
+            }
+            var identityColumn = autoNumberColumn.Name;
 
             string sequenceName = _table.Name + "_SEQUENCE";
             int i = 0;
@@ -61,7 +75,8 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         private string WriteExistingTrigger()
         {
             //does it already have a trigger which sets the sequence? In which case, note it...
-            var pk = _table.PrimaryKeyColumn;
+            var pk = _table.PrimaryKeyColumn ?? _table.Columns.Find(x => x.IsAutoNumber);
+            if (pk == null) return null;
             var pattern = ".NEXTVAL\\s+?INTO\\s+?:NEW.\"?" + pk.Name;
             var regex = new Regex(pattern, RegexOptions.IgnoreCase);
             foreach (var databaseTrigger in _table.Triggers)

@@ -284,14 +284,22 @@ namespace DatabaseSchemaViewer
             }
             if (column.IsAutoNumber)
             {
-                sb.Append(" Identity");
-                if (column.IdentityDefinition != null && column.IdentityDefinition.IsNonTrivialIdentity())
+                //identity or autonumber
+                if (column.IdentityDefinition != null)
                 {
-                    sb.Append('(');
-                    sb.Append(column.IdentityDefinition.IdentitySeed);
-                    sb.Append(',');
-                    sb.Append(column.IdentityDefinition.IdentityIncrement);
-                    sb.Append(')');
+                    sb.Append(" Identity");
+                    if (column.IdentityDefinition.IsNonTrivialIdentity())
+                    {
+                        sb.Append('(');
+                        sb.Append(column.IdentityDefinition.IdentitySeed);
+                        sb.Append(',');
+                        sb.Append(column.IdentityDefinition.IdentityIncrement);
+                        sb.Append(')');
+                    }
+                }
+                else
+                {
+                    sb.Append(" AutoNumber");
                 }
             }
             if (column.IsForeignKey)
