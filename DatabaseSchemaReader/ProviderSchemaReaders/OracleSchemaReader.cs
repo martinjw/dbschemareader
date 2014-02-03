@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
@@ -380,27 +381,21 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
                 pk.IsAutoNumber = true;
                 return;
             }
-            var triggers = databaseTable.Triggers;
-            if (triggers.Count == 0) return;
-            //the trigger body will look something like "SELECT MYSEQ.NEXTVAL INTO :NEW.ID FROM DUAL;"
-            var pattern = ".NEXTVAL\\s+?INTO\\s+?:NEW.\"?" + pk.Name;
-            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            foreach (var databaseTrigger in triggers)
-            {
-                var body = databaseTrigger.TriggerBody;
-                if (regex.IsMatch(body))
-                {
-                    pk.IsAutoNumber = true;
-                    return;
-                }
-            }
+            var match = OracleSequenceTrigger.FindTrigger(databaseTable);
+            if (match != null) pk.IsAutoNumber = true;
         }
 
+        /// <summary>
+        /// Does the column default value look like a sequence allocation ("mysequence.NextVal")?
+        /// </summary>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
         public static bool LooksLikeAutoNumberDefaults(string defaultValue)
         {
             if (string.IsNullOrEmpty(defaultValue)) return false;
-            return defaultValue.EndsWith(".NEXTVAL", StringComparison.OrdinalIgnoreCase) ||
-                defaultValue.EndsWith(".CURRVAL", StringComparison.OrdinalIgnoreCase);
+            //simple cases only. If the sequence.nextval is cast/converted, 
+            return defaultValue.IndexOf(".NEXTVAL", StringComparison.OrdinalIgnoreCase) != -1 ||
+                defaultValue.IndexOf(".CURRVAL", StringComparison.OrdinalIgnoreCase) != -1;
         }
 
         public override DataTable TableDescription(string tableName)
