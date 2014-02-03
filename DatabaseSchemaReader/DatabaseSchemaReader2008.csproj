@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C5936AA-BA13-451A-A67C-F7B567FF535B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -161,6 +161,7 @@
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OleDbSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\OracleSequenceTrigger.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SchemaReaderFactory.cs" />

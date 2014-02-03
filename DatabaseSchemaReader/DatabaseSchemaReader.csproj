@@ -169,6 +169,7 @@
     <Compile Include="Filters\Filter.cs" />
     <Compile Include="Filters\IFilter.cs" />
     <Compile Include="IDatabaseReader.cs" />
+    <Compile Include="ProviderSchemaReaders\OracleSequenceTrigger.cs" />
     <Compile Include="ProviderSchemaReaders\SchemaReaderFactory.cs" />
     <Compile Include="ProviderSchemaReaders\VistaDbSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OleDbSchemaReader.cs" />
