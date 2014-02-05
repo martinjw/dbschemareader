@@ -124,6 +124,7 @@
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddColumn.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddForeignKey.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddIndex.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddPrimaryKey.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterColumn.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterDefault.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationCreateTable.cs" />

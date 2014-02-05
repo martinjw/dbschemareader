@@ -128,6 +128,7 @@
     <Compile Include="SqlGen\InsertWriterTests\DateConverterTest.cs" />
     <Compile Include="SqlGen\InsertWriterTests\InsertWriterTest.cs" />
     <Compile Include="SqlGen\InsertWriterTests\ScriptWriterTest.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddPrimaryKey.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterDefault.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationRenameTable.cs" />
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationRenameColumn.cs" />
