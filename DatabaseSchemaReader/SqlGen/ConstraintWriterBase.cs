@@ -44,9 +44,14 @@ namespace DatabaseSchemaReader.SqlGen
         public virtual string WritePrimaryKey()
         {
             if (Table.PrimaryKey == null) return null;
-            var columnList = GetColumnList(Table.PrimaryKey.Columns);
+            return WritePrimaryKey(Table.PrimaryKey);
+        }
+        public virtual string WritePrimaryKey(DatabaseConstraint constraint)
+        {
+            if (constraint == null) return null;
+            var columnList = GetColumnList(constraint.Columns);
 
-            var pkName = ConstraintName(Table.PrimaryKey.Name);
+            var pkName = ConstraintName(constraint.Name);
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY ({2})",
@@ -197,7 +202,7 @@ namespace DatabaseSchemaReader.SqlGen
             switch (constraint.ConstraintType)
             {
                 case ConstraintType.PrimaryKey:
-                    return WritePrimaryKey();
+                    return WritePrimaryKey(constraint);
                 case ConstraintType.UniqueKey:
                     return WriteUniqueKey(constraint);
                 case ConstraintType.ForeignKey:

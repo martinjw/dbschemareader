@@ -24,17 +24,30 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return false;
         }
 
-        public override string WritePrimaryKey()
+        public override string WritePrimaryKey(DatabaseConstraint constraint)
         {
-            if (Table.PrimaryKey == null) return null;
-            var columnList = GetColumnList(Table.PrimaryKey.Columns);
+            if (constraint == null) return null;
+            var columnList = GetColumnList(constraint.Columns);
 
-            var pkName = ConstraintName(Table.PrimaryKey.Name);
-            string nonClustered = "";
-            if (Table.PrimaryKey.Columns.Count == 1 &&
-                "guid".Equals(Table.PrimaryKeyColumn.NetName, StringComparison.OrdinalIgnoreCase))
+            var pkName = ConstraintName(constraint.Name);
+            var nonClustered = "";
+            if (constraint.Columns.Count == 1)
             {
-                nonClustered = "NON CLUSTERED ";
+                //UNIQUEIDENTIFIERs should have NON CLUSTERED indexes
+                var colName = constraint.Columns[0];
+                var col = Table.FindColumn(colName);
+                if (col != null)
+                {
+                    colName = col.NetName;
+                    if (string.Equals(col.DbDataType, "UNIQUEIDENTIFIER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        nonClustered = "NONCLUSTERED ";
+                    }
+                }
+                if ("guid".Equals(colName, StringComparison.OrdinalIgnoreCase))
+                {
+                    nonClustered = "NONCLUSTERED ";
+                }
             }
 
             return string.Format(CultureInfo.InvariantCulture,
