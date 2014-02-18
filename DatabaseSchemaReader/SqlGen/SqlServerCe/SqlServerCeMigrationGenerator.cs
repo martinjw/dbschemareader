@@ -15,7 +15,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         }
         protected override string AlterColumnFormat
         {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
+            get { return "ALTER TABLE {0} ALTER COLUMN {1}"; }
         }
         public override string AddFunction(DatabaseFunction databaseFunction)
         {
@@ -38,7 +38,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         {
             //no "ON table" syntax
             return string.Format(CultureInfo.InvariantCulture,
-                "DROP INDEX {0}.{1};",
+                "DROP INDEX {0}.{1}",
                 databaseTable.Name,
                 Escape(index.Name));
         }

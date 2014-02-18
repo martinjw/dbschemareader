@@ -143,6 +143,8 @@
     <Compile Include="SqlGen\Oracle\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
+    <Compile Include="SqlGen\SqlServerCe\AllTablesGeneratorTest.cs" />
+    <Compile Include="SqlGen\SqlServerCe\TableGeneratorTest.cs" />
     <Compile Include="SqlGen\SqlServer\AccessCheckConstraintTest.cs" />
     <Compile Include="SqlGen\SqlServer\AccessConversionTest.cs" />
     <Compile Include="SqlGen\SqlServer\DataTypesTest.cs" />

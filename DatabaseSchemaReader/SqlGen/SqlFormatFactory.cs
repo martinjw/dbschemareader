@@ -18,6 +18,8 @@ namespace DatabaseSchemaReader.SqlGen
                     return new PostgreSql.SqlFormatProvider();
                 case SqlType.Db2:
                     return new Db2.SqlFormatProvider();
+                case SqlType.SqlServerCe:
+                    return new SqlServerCe.SqlServerCeFormatProvider();
                 default:
                     return new SqlServer.SqlFormatProvider();
             }

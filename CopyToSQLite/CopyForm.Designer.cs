@@ -33,6 +33,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.ConnectionString = new System.Windows.Forms.TextBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ReadSchema = new System.Windows.Forms.Button();
             this.SchemaOwner = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -48,7 +49,6 @@
             this.TargetGroupBox = new System.Windows.Forms.GroupBox();
             this.SqlServerCE4Radio = new System.Windows.Forms.RadioButton();
             this.SQLLiteRadio = new System.Windows.Forms.RadioButton();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.TargetGroupBox.SuspendLayout();
@@ -94,6 +94,11 @@
             this.ConnectionString.TabIndex = 4;
             this.ConnectionString.Text = global::CopyToSQLite.Properties.Settings.Default.ConnectionString;
             this.ConnectionString.Validating += new System.ComponentModel.CancelEventHandler(this.ConnectionStringValidating);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // ReadSchema
             // 
@@ -226,6 +231,7 @@
             this.SqlServerCE4Radio.TabIndex = 1;
             this.SqlServerCE4Radio.Text = "SqlServer CE 4";
             this.SqlServerCE4Radio.UseVisualStyleBackColor = true;
+            this.SqlServerCE4Radio.CheckedChanged += new System.EventHandler(this.SqlServerCe4RadioCheckedChanged);
             // 
             // SQLLiteRadio
             // 
@@ -238,11 +244,7 @@
             this.SQLLiteRadio.TabStop = true;
             this.SQLLiteRadio.Text = "SQLite";
             this.SQLLiteRadio.UseVisualStyleBackColor = true;
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.SQLLiteRadio.CheckedChanged += new System.EventHandler(this.SqlLiteRadioCheckedChanged);
             // 
             // CopyForm
             // 

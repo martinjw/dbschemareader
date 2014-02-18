@@ -12,5 +12,15 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         {
             return new TableGenerator(table);
         }
+
+        protected override ConstraintWriterBase LoadConstraintWriter(DatabaseTable table)
+        {
+            return new ConstraintWriter(table);
+        }
+
+        protected override ISqlFormatProvider SqlFormatProvider()
+        {
+            return new SqlServerCeFormatProvider();
+        }
     }
 }

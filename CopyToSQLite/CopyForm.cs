@@ -34,7 +34,7 @@ namespace CopyToSQLite
                 WriteToFileLabel.Text = WriteToFileLabel.Text.Replace("SQLite", "SQLite or SqlServer CE 4");
                 TargetGroupBox.Visible = true;
             }
-       }
+        }
 
         private void Form1Load(object sender, EventArgs e)
         {
@@ -87,6 +87,23 @@ namespace CopyToSQLite
             AllowDrop = true;
             DragEnter += FormDragEnter;
             DragDrop += FormDragDrop;
+
+            var path = txtFilePath.Text.Trim();
+            if (string.IsNullOrEmpty(path))
+            {
+                txtFilePath.Text = @"C:\Temp\sql.db";
+                return;
+            }
+            var dir = Path.GetDirectoryName(path);
+            if (dir == null || !Directory.Exists(dir))
+            {
+                txtFilePath.Text = Path.Combine(Path.GetTempPath(), "sql.db");
+                return;
+            }
+            if (File.Exists(path))
+            {
+                txtFilePath.Text = Path.Combine(dir, Path.GetFileNameWithoutExtension(path) + "_1" + Path.GetExtension(path));
+            }
         }
 
         private void FormDragDrop(object sender, DragEventArgs e)
@@ -313,5 +330,27 @@ namespace CopyToSQLite
             Properties.Settings.Default.Save();
         }
 
+        private void SqlServerCe4RadioCheckedChanged(object sender, EventArgs e)
+        {
+            ChangeExtension(".db", ".sdf");
+        }
+
+        private void SqlLiteRadioCheckedChanged(object sender, EventArgs e)
+        {
+            ChangeExtension(".sdf", ".db");
+        }
+
+        private void ChangeExtension(string @from, string to)
+        {
+            var filePath = txtFilePath.Text.Trim();
+            if (string.IsNullOrEmpty(filePath)) return;
+            var dir = Path.GetDirectoryName(filePath);
+            if (dir == null) return;
+            if (Path.GetExtension(filePath).Equals(@from, StringComparison.OrdinalIgnoreCase))
+            {
+                filePath = Path.Combine(dir, Path.GetFileNameWithoutExtension(filePath) + to);
+                txtFilePath.Text = filePath;
+            }
+        }
     }
 }
