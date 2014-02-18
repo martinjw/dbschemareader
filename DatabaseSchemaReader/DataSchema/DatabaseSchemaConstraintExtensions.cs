@@ -88,6 +88,10 @@ namespace DatabaseSchemaReader.DataSchema
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             if (string.IsNullOrEmpty(foreignTableName)) throw new ArgumentNullException("foreignTableName", "foreignTableName must not be null");
             var table = databaseColumn.Table;
+            if (string.IsNullOrEmpty(foreignKeyName)) //no fk name, so we'll invent one (it may be too long e.g. for Oracle)
+            {
+                foreignKeyName = "FK_" + table.Name + "_" + foreignTableName;
+            }
             var foreignKey = new DatabaseConstraint
             {
                 ConstraintType = ConstraintType.ForeignKey,

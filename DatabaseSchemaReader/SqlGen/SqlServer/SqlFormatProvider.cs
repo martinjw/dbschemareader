@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return "[" + name + "]";
         }
 
-        public string LineEnding()
+        public virtual string LineEnding()
         {
             return ";";
         }

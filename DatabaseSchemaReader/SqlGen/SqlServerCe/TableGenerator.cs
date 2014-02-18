@@ -14,6 +14,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
             DataTypeWriter = new DataTypeWriter();
         }
 
+        protected override ISqlFormatProvider SqlFormatProvider()
+        {
+            return new SqlServerCeFormatProvider();
+        }
+
         protected override string AddTableDescription()
         {
             return null;
@@ -23,13 +28,21 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
             return null;
         }
 
-        protected override ConstraintWriter CreateConstraintWriter()
+        protected override ConstraintWriterBase CreateConstraintWriter()
         {
-            var constraintWriter = base.CreateConstraintWriter();
             //check constraints don't seem to be included so ignore them all
-            constraintWriter.CheckConstraintExcluder = check => true;
+            var constraintWriter = new ConstraintWriter(Table)
+                                   {
+                                       IncludeSchema = IncludeSchema,
+                                       CheckConstraintExcluder = check => true
+                                   };
             return constraintWriter;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether supports "next value for [sequence]" (SQLServer 2012+). 
+        /// </summary>
+        protected override bool SupportsNextValueForSequence { get { return false; } }
 
         protected override IMigrationGenerator CreateMigrationGenerator()
         {

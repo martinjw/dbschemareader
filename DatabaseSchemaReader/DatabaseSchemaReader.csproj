@@ -212,6 +212,8 @@
     <Compile Include="SqlGen\SqlFormatFactory.cs" />
     <Compile Include="SqlGen\SqLite\SqLiteDataTypeMapper.cs" />
     <Compile Include="SqlGen\SqLite\SQLiteMigrationGenerator.cs" />
+    <Compile Include="SqlGen\SqlServerCe\ConstraintWriter.cs" />
+    <Compile Include="SqlGen\SqlServerCe\SqlServerCeFormatProvider.cs" />
     <Compile Include="SqlGen\SqlServerCe\SqlServerCeDataTypeMapper.cs" />
     <Compile Include="SqlGen\SqlServerCe\SqlServerCeMigrationGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\SqlServerMigrationGenerator.cs" />

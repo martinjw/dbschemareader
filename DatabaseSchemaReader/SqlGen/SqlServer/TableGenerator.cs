@@ -94,7 +94,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
             return expression;
         }
-        protected virtual ConstraintWriter CreateConstraintWriter()
+        protected virtual ConstraintWriterBase CreateConstraintWriter()
         {
             return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema };
         }
@@ -162,9 +162,16 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                     if (value.Equals("No", StringComparison.OrdinalIgnoreCase)) value = "0";
                     if (value.Equals("Yes", StringComparison.OrdinalIgnoreCase)) value = "1";
                 }
-
+                if (value.StartsWith("(NEXT VALUE FOR ", StringComparison.OrdinalIgnoreCase) && !SupportsNextValueForSequence)
+                {
+                    //SQLServer 2012 "NEXT VALUE FOR [Sequence]". Allow it to be turned back to identity.
+                    column.IsAutoNumber = true;
+                    column.IdentityDefinition = new DatabaseColumnIdentity();
+                    value = null;
+                }
                 //strings should already have the single quotes in place
-                defaultValue = "DEFAULT " + value;
+                if (!string.IsNullOrEmpty(value))
+                    defaultValue = "DEFAULT " + value;
             }
 
             if (DataTypeWriter.LooksLikeOracleIdentityColumn(Table, column))
@@ -187,6 +194,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return sql;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether supports "next value for [sequence]" (SQLServer 2012+). Not publicly changeable here, yet...
+        /// </summary>
+        protected virtual bool SupportsNextValueForSequence { get { return true; } }
+
         private static string FixDefaultValue(string defaultValue)
         {
             if (SqlTranslator.IsGuidGenerator(defaultValue) && !"newsequentialid()".Equals(defaultValue, StringComparison.OrdinalIgnoreCase))
@@ -195,15 +207,6 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
             return SqlTranslator.Fix(defaultValue);
         }
-
-        //private static bool IsStringColumn(DatabaseColumn column)
-        //{
-        //    var dataType = column.DbDataType.ToUpperInvariant();
-        //    var isString = (dataType == "NVARCHAR2" || dataType == "VARCHAR2" || dataType == "CHAR");
-        //    var dt = column.DataType;
-        //    if (dt != null && dt.IsString) isString = true;
-        //    return isString;
-        //}
 
         protected override string NonNativeAutoIncrementWriter()
         {
