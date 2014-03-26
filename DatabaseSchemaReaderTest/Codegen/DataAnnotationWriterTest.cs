@@ -1,4 +1,6 @@
-﻿using DatabaseSchemaReader.CodeGen;
+﻿using System;
+using System.Linq;
+using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -328,6 +330,134 @@ namespace DatabaseSchemaReaderTest.Codegen
 
             //assert
             Assert.AreEqual("[Range(typeof(decimal), \"0\", \"9999\", ErrorMessage=\"Name must be less than 9999\")]", result);
+        }
+
+
+
+        [TestMethod]
+        public void TestIndex()
+        {
+            //arrange
+            var settings = new CodeWriterSettings();
+            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
+            settings.WriteCodeFirstIndexAttribute = true;
+
+            var classBuilder = new ClassBuilder();
+            var table = new DatabaseTable { Name = "Test" };
+            var nameColumn = table.AddColumn<int>("Id").AddPrimaryKey()
+                .AddColumn<string>("Name").AddNullable().AddIndex("IX_NAME");
+
+
+            var target = new DataAnnotationWriter(true, settings);
+
+            //act
+            target.Write(classBuilder, nameColumn);
+            var result = classBuilder.ToString().Trim(); //ignore lines
+
+            //assert
+            Assert.AreEqual("[Index(\"IX_NAME\")]", result);
+        }
+
+
+        [TestMethod]
+        public void TestIndexUnique()
+        {
+            //arrange
+            var settings = new CodeWriterSettings();
+            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
+            settings.WriteCodeFirstIndexAttribute = true;
+
+            var classBuilder = new ClassBuilder();
+            var table = new DatabaseTable { Name = "Test" };
+            var nameColumn = table.AddColumn<int>("Id").AddPrimaryKey()
+                .AddColumn<string>("Name").AddNullable().AddIndex("IX_NAME");
+            table.Indexes.First().IsUnique = true;
+
+            var target = new DataAnnotationWriter(true, settings);
+
+            //act
+            target.Write(classBuilder, nameColumn);
+            var result = classBuilder.ToString().Trim(); //ignore lines
+
+            //assert
+            Assert.AreEqual("[Index(\"IX_NAME\", IsUnique = true)]", result);
+        }
+
+        [TestMethod]
+        public void TestIndexMultiColumn()
+        {
+            //arrange
+            var settings = new CodeWriterSettings();
+            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
+            settings.WriteCodeFirstIndexAttribute = true;
+
+            var classBuilder = new ClassBuilder();
+            var table = new DatabaseTable { Name = "Test" };
+            var nameColumn = table.AddColumn<int>("Id").AddPrimaryKey()
+                .AddColumn<string>("Category").AddNullable().AddIndex("IX_NAME")
+                .AddColumn<string>("Name").AddNullable().AddIndex("IX_NAME")
+                ;
+
+            var target = new DataAnnotationWriter(true, settings);
+
+            //act
+            target.Write(classBuilder, nameColumn);
+            var result = classBuilder.ToString().Trim(); //ignore lines
+
+            //assert
+            Assert.AreEqual("[Index(\"IX_NAME\", 2)]", result);
+        }
+
+        [TestMethod]
+        public void TestIndexMultiColumnUnique()
+        {
+            //arrange
+            var settings = new CodeWriterSettings();
+            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
+            settings.WriteCodeFirstIndexAttribute = true;
+
+            var classBuilder = new ClassBuilder();
+            var table = new DatabaseTable { Name = "Test" };
+            var nameColumn = table.AddColumn<int>("Id").AddPrimaryKey()
+                .AddColumn<string>("Category").AddNullable().AddIndex("IX_NAME")
+                .AddColumn<string>("Name").AddNullable().AddIndex("IX_NAME")
+                ;
+            table.Indexes.First().IsUnique = true;
+
+            var target = new DataAnnotationWriter(true, settings);
+
+            //act
+            target.Write(classBuilder, nameColumn);
+            var result = classBuilder.ToString().Trim(); //ignore lines
+
+            //assert
+            Assert.AreEqual("[Index(\"IX_NAME\", 2, IsUnique = true)]", result);
+        }
+
+        [TestMethod]
+        public void TestIndexNotNeededForPrimaryKey()
+        {
+            //arrange
+            var settings = new CodeWriterSettings();
+            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
+            settings.WriteCodeFirstIndexAttribute = true;
+
+            var classBuilder = new ClassBuilder();
+            var table = new DatabaseTable { Name = "Test" };
+            table.AddColumn<int>("Id").AddPrimaryKey().AddIndex("PK_TEST")
+                .AddColumn<string>("Category").AddNullable()
+                .AddColumn<string>("Name").AddNullable().AddIndex("IX_NAME")
+                ;
+            var idColumn = table.PrimaryKeyColumn;
+
+            var target = new DataAnnotationWriter(true, settings);
+
+            //act
+            target.Write(classBuilder, idColumn);
+            var result = classBuilder.ToString().Trim(); //ignore lines
+
+            //assert
+            Assert.IsTrue(result.IndexOf("[Index", StringComparison.OrdinalIgnoreCase) == -1, "Should be just[Key]");
         }
     }
 }

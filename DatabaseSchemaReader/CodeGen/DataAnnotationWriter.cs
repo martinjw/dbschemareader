@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
@@ -42,6 +44,14 @@ namespace DatabaseSchemaReader.CodeGen
             if (column.IsForeignKey)
                 return;
 
+            if (column.IsIndexed &&
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst &&
+                _codeWriterSettings.WriteCodeFirstIndexAttribute &&
+                column.Table != null)
+            {
+                WriteIndex(cb, column);
+            }
+
             var dt = column.DataType;
             if (dt == null)
             {
@@ -72,6 +82,39 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
+        }
+
+        private static void WriteIndex(ClassBuilder cb, DatabaseColumn column)
+        {
+            //EF 6.1 [Index]
+            var table = column.Table;
+            //find all the indexes that contain this column
+            var indexes = table.Indexes.FindAll(x => x.Columns.Contains(column));
+            var pk = table.PrimaryKey;
+            foreach (var index in indexes)
+            {
+                if (pk != null && pk.Columns.SequenceEqual(index.Columns.Select(c => c.Name)))
+                {
+                    //this is the primary key index
+                    continue;
+                }
+                var sb = new StringBuilder();
+                sb.Append("[Index(\"" + index.Name + "\"");
+                var multiColumn = index.Columns.Count > 1;
+                if (multiColumn)
+                {
+                    var position = index.Columns.FindIndex(x => Equals(x, column)) + 1;
+                    sb.Append(", " + position);
+                }
+
+                if (index.IsUnique)
+                {
+                    //[Index("IdAndRating", 2, IsUnique = true)]
+                    sb.Append(", IsUnique = true");
+                }
+                sb.Append(")]");
+                cb.AppendLine(sb.ToString());
+            }
         }
 
         private void WriteDecimalRange(ClassBuilder cb, int max)

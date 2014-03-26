@@ -45,6 +45,7 @@ namespace DatabaseSchemaViewer
             settings.WriteUnitTest = Properties.Settings.Default.CodeGenWriteUnitTest;
             settings.WriteProjectFile = Properties.Settings.Default.CodeGenWriteProjectFile;
             settings.IncludeViews = Properties.Settings.Default.CodeGenIncludeViews;
+            settings.WriteCodeFirstIndexAttribute = Properties.Settings.Default.CodeGenWriteIndexAttribute;
             var cw = new CodeWriter(_databaseSchema, settings);
             try
             {

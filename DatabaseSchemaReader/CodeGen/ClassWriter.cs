@@ -128,7 +128,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteForeignKeyCollections();
 
-            if (!_table.HasCompositeKey && 
+            if (!_table.HasCompositeKey &&
                 _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
                 _inheritanceTable == null)
             {
@@ -190,6 +190,13 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("using System.Collections.Generic;");
             }
             _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+            if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst &&
+                _codeWriterSettings.WriteCodeFirstIndexAttribute &&
+                _table.Indexes.Count > 0)
+            {
+                //Index attribute
+                _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            }
         }
 
         private void WriteForeignKeyCollections()

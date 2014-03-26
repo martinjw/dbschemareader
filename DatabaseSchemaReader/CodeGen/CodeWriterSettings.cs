@@ -141,5 +141,13 @@ namespace DatabaseSchemaReader.CodeGen
         /// </summary>
         /// <value><c>true</c> if include views; otherwise, <c>false</c>.</value>
         public bool IncludeViews { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether properties may include the Code First index attribute.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if properties are written with the index attribute; otherwise, <c>false</c>.
+        /// </value>
+        public bool WriteCodeFirstIndexAttribute { get; set; }
     }
 }

@@ -60,7 +60,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (directory == null)
                 throw new ArgumentNullException("directory");
             if (!directory.Exists)
-                throw new InvalidOperationException("Directory does not exist");
+                throw new InvalidOperationException("Directory does not exist: " + directory.FullName);
 
             var pw = new ProjectWriter(_codeWriterSettings.Namespace);
 
