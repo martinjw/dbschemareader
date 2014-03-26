@@ -68,15 +68,15 @@ namespace DatabaseSchemaReader.CodeGen
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data.Oracle.Entity, Version=7.5.179.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data.Oracle.Entity, Version=8.2.103.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data.Oracle, Version=7.5.179.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data.Oracle, Version=8.2.103.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data, Version=5.0.638.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data, Version=5.0.895.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             _hasOracle = true;
         }
 
@@ -85,13 +85,19 @@ namespace DatabaseSchemaReader.CodeGen
             //the hintpaths are for a hypothetical nuget folder
 
             var reference = FindSystemDataReference();
-            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "FluentNHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\FluentNHibernate.1.3.0.733\lib\FluentNHibernate.dll"));
+            var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "FluentNHibernate"),
+                new XElement(_xmlns + "SpecificVersion", "false"),
+                new XElement(_xmlns + "HintPath", @"..\packages\FluentNHibernate.1.4.0.0\lib\net35\FluentNHibernate.dll"));
 
             reference.AddAfterSelf(element);
-            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"), new XElement(_xmlns + "HintPath", @"..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll"));
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"),
+                new XElement(_xmlns + "SpecificVersion", "false"),
+                new XElement(_xmlns + "HintPath", @"..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll"));
             reference.AddAfterSelf(element);
 
-            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"), new XElement(_xmlns + "HintPath", @"..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll"));
+            element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"),
+                new XElement(_xmlns + "SpecificVersion", "false"),
+                new XElement(_xmlns + "HintPath", @"..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll"));
             reference.AddAfterSelf(element);
         }
 
@@ -101,7 +107,7 @@ namespace DatabaseSchemaReader.CodeGen
             var reference = FindSystemDataReference();
             var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework"),
                 new XElement(_xmlns + "SpecificVersion", "False"),
-                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.6.0.2\lib\net40\EntityFramework.dll"));
+                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.6.1.0\lib\net40\EntityFramework.dll"));
             reference.AddAfterSelf(element);
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",

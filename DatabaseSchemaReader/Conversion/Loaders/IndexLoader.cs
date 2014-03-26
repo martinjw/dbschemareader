@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion.Loaders
@@ -33,6 +34,7 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             {
                 var indexes = _indexConverter.Indexes(tableName);
                 table.Indexes.AddRange(indexes);
+                MarkIndexedColumns(table, indexes);
                 return;
             }
             //what about indexes but no indexcolumns?
@@ -43,7 +45,21 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             }
 
             var converter = new IndexConverter(_sr.Indexes(tableName), _sr.IndexColumns(tableName));
-            table.Indexes.AddRange(converter.Indexes(tableName));
+            var indices = converter.Indexes(tableName);
+            table.Indexes.AddRange(indices);
+            MarkIndexedColumns(table, indices);
+        }
+
+        private static void MarkIndexedColumns(DatabaseTable table, IEnumerable<DatabaseIndex> indexes)
+        {
+            foreach (var index in indexes)
+            {
+                foreach (var column in index.Columns)
+                {
+                    var tableColumn = table.FindColumn(column.Name);
+                    if (tableColumn != null) tableColumn.IsIndexed = true;
+                }
+            }
         }
     }
 }

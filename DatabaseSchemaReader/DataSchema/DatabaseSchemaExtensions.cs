@@ -91,7 +91,7 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
-        /// Adds the index.
+        /// Adds the index with the specified name. If the index with the same name exists, add the column to the index.
         /// </summary>
         /// <param name="databaseColumn">The database column.</param>
         /// <param name="indexName">Name of the index.</param>
@@ -103,15 +103,20 @@ namespace DatabaseSchemaReader.DataSchema
             var databaseTable = databaseColumn.Table;
             if (databaseTable == null) throw new ArgumentException("databaseColumn has no table");
 
-            var index = new DatabaseIndex
+            var index = databaseTable.Indexes.Find(x => Equals(x.Name, indexName));
+            if (index == null)
             {
-                Name = indexName,
-                TableName = databaseTable.Name,
-                SchemaOwner = databaseTable.SchemaOwner,
-                IndexType = "NONCLUSTERED"
-            };
+                index = new DatabaseIndex
+                   {
+                       Name = indexName,
+                       TableName = databaseTable.Name,
+                       SchemaOwner = databaseTable.SchemaOwner,
+                       IndexType = "NONCLUSTERED"
+                   };
+                databaseTable.AddIndex(index);
+            }
             index.Columns.Add(databaseColumn);
-            databaseTable.AddIndex(index);
+            databaseColumn.IsIndexed = true;
             return databaseColumn;
         }
 
