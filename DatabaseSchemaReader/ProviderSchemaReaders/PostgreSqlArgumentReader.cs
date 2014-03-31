@@ -193,7 +193,13 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
             {
                 var value = sa[index];
                 if (!string.IsNullOrEmpty(value))
-                    result[index] = Convert.ToInt64(value, CultureInfo.InvariantCulture);
+                {
+                    long l;
+                    if (long.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out l))
+                    {
+                        result[index] = l;
+                    }
+                }
             }
             return result;
         }
