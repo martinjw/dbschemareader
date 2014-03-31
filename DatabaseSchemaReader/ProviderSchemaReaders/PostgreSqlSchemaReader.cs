@@ -120,8 +120,15 @@ WHERE
         {
             var version = ServerVersion(conn);
             string timing = "CONDITION_TIMING";
+            if (version.IndexOf(',') != -1)
+            {
+                //Devart shows an unparseable string
+                //PostgreSQL 9.3.4, compiled by Visual C++ build 1600, 64-bit 
+                version = version.Substring(0, version.IndexOf(','))
+                    .Replace("PostgreSQL ", "");
+            }
             var v = new Version(version);
-            if(v.Major >= 9 && v.Minor >= 1)
+            if (v.Major >= 9 && v.Minor >= 1)
             {
                 timing = "ACTION_TIMING";
             }
@@ -180,7 +187,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
             }
         }
 
-        protected override  DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
+        protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             var argReader = new PostgreSqlArgumentReader(Factory, Owner);
             var dt = argReader.StoredProcedureArguments(storedProcedureName, connection);

@@ -221,7 +221,14 @@ namespace DatabaseSchemaReader
                 da.SelectCommand.CommandText = sqlCommand;
                 AddTableNameSchemaParameters(da.SelectCommand, tableName);
 
-                da.Fill(dt);
+                try
+                {
+                    da.Fill(dt);
+                }
+                catch (DbException e)
+                {
+                    Console.WriteLine(e);
+                }
                 return dt;
             }
         }
