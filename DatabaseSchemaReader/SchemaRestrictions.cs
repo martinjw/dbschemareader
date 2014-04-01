@@ -133,13 +133,26 @@ namespace DatabaseSchemaReader
             {
                 //SqlLite provider doesn't support this
                 //recreate it- the first is always 
-                var collections = connection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
-                _restrictions = new DataTable("Restrictions");
-                _restrictions.Locale = CultureInfo.InvariantCulture;
-                _restrictions.Columns.Add("CollectionName", typeof(string));
-                _restrictions.Columns.Add("RestrictionNumber", typeof(int));
-                _restrictions.Columns.Add("RestrictionName", typeof(string));
+                CreateRestrictions(connection);
+            }
+            catch (NullReferenceException)
+            {
+                //NpgSql error
+                CreateRestrictions(connection);
+            }
+        }
 
+        private void CreateRestrictions(DbConnection connection)
+        {
+            _restrictions = new DataTable("Restrictions");
+            _restrictions.Locale = CultureInfo.InvariantCulture;
+            _restrictions.Columns.Add("CollectionName", typeof(string));
+            _restrictions.Columns.Add("RestrictionNumber", typeof(int));
+            _restrictions.Columns.Add("RestrictionName", typeof(string));
+
+            try
+            {
+                var collections = connection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
                 foreach (DataRow row in collections.Rows)
                 {
                     //every collections has catalog/ owner/ table restrictions
@@ -147,6 +160,10 @@ namespace DatabaseSchemaReader
                     _restrictions.Rows.Add(row["CollectionName"].ToString(), 1, "NA");
                     _restrictions.Rows.Add(row["CollectionName"].ToString(), 2, "TABLE");
                 }
+            }
+            catch (NullReferenceException)
+            {
+                Console.WriteLine("Could not load metadataCollections"); //NpgSql again
             }
         }
 
@@ -158,7 +175,7 @@ namespace DatabaseSchemaReader
         /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
-            if(_restrictions != null)
+            if (_restrictions != null)
             {
                 _restrictions.Dispose();
                 _restrictions = null;

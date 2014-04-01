@@ -605,7 +605,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable StoredProcedures(DbConnection connection)
         {
-             string collectionName = ProceduresCollectionName;
+            string collectionName = ProceduresCollectionName;
             if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
             return connection.GetSchema(collectionName, restrictions);
@@ -739,7 +739,18 @@ namespace DatabaseSchemaReader
 
         private static DataTable MetadataCollections(DbConnection connection)
         {
-            return connection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
+            try
+            {
+                return connection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
+            }
+            catch (Exception e)
+            {
+                //some versions of NpgSql may throw a NullReferenceException
+                Console.WriteLine(e);
+                var metadataCollections = CreateDataTable("Metadata");
+                metadataCollections.Columns.Add("CollectionName", typeof(string));
+                return metadataCollections;
+            }
         }
 
         /// <summary>
