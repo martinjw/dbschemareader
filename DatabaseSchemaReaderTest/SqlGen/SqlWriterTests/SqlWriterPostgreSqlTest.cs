@@ -48,7 +48,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             var dbReader = new DatabaseReader(ConnectionString, ProviderName);
             dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _table = dbReader.Table("city"); //this hits database for columns and constraints
+            _table = dbReader.Table("country"); //this hits database for columns and constraints
             return _table;
         }
 
@@ -115,6 +115,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
                     {
                         cmd.CommandText = sql;
                         cmd.Transaction = transaction;
+                        //need to set cmd.UnpreparedExecute =true as Protocol 3 doesn't support multiple commands
+                        var unpreparedExecute = cmd.GetType().GetProperty("UnpreparedExecute");
+                        if (unpreparedExecute != null) unpreparedExecute.SetValue(cmd, true, null);
+
                         foreach (var column in table.Columns)
                         {
                             if (column.IsAutoNumber) continue;
