@@ -309,6 +309,9 @@ namespace DatabaseSchemaReader
 
                 if (ds.Tables.Contains(_schemaReader.IdentityColumnsCollectionName))
                     SchemaConstraintConverter.AddIdentity(ds.Tables[_schemaReader.IdentityColumnsCollectionName], table);
+
+                _schemaReader.PostProcessing(table);
+
             }
 
             if (DatabaseSchema.DataTypes.Count > 0)

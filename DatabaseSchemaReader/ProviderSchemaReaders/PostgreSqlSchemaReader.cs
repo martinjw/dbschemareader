@@ -294,8 +294,8 @@ INNER JOIN pg_description d ON c.oid = d.objoid
 WHERE 
     c.relkind = 'r' AND    
     d.objsubid = 0 AND
-    (c.relname = @tableName OR @tableName IS NULL) AND 
-    (ns.nspname = @schemaOwner OR @schemaOwner IS NULL)";
+    (c.relname = :tableName OR :tableName IS NULL) AND 
+    (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)";
 
             using (DbConnection connection = Factory.CreateConnection())
             {
@@ -322,8 +322,8 @@ INNER JOIN pg_description d
     ON c.oid = d.objoid
     AND d.objsubid = cols.ordinal_position
 WHERE 
-    (cols.table_name = @tableName OR @tableName IS NULL) AND 
-    (ns.nspname = @schemaOwner OR @schemaOwner IS NULL)";
+    (cols.table_name = :tableName OR :tableName IS NULL) AND 
+    (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)";
 
             using (DbConnection connection = Factory.CreateConnection())
             {
