@@ -50,6 +50,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             //in MySQL, different constraints for different tables can have the same name (eg Primary)
             const string sqlCommand =
                 @"SELECT DISTINCT
+cons.constraint_schema,
 cons.constraint_name, 
 keycolumns.table_name, 
 column_name, 

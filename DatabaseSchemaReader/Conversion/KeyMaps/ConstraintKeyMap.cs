@@ -9,6 +9,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
         {
             //all same, my custom sql
             Key = "CONSTRAINT_NAME";
+            SchemaKey = "CONSTRAINT_SCHEMA";
             TableKey = "TABLE_NAME";
             ColumnKey = "COLUMN_NAME";
             OrdinalKey = "ORDINAL_POSITION";
@@ -42,6 +43,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(RefersToTableKey)) RefersToTableKey = "PK_TABLE_NAME";
             if (!dt.Columns.Contains(RefersToKey)) RefersToKey = "PK_NAME";
 
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = null;
             if (!dt.Columns.Contains(RefersToKey)) RefersToKey = null;
             if (!dt.Columns.Contains(RefersToTableKey)) RefersToTableKey = null;
             if (!dt.Columns.Contains(DeleteRuleKey)) DeleteRuleKey = null;
@@ -96,6 +98,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
         public string OrdinalKey { get; private set; }
 
         public string TableKey { get; private set; }
+
+        public string SchemaKey { get; private set; }
 
         public string Key { get; private set; }
     }

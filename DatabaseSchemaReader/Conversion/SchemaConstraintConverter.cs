@@ -20,9 +20,12 @@ namespace DatabaseSchemaReader.Conversion
         {
             return _constraints;
         }
-        public List<DatabaseConstraint> Constraints(string tableName)
+        public List<DatabaseConstraint> Constraints(string tableName, string schemaName)
         {
-            return _constraints.Where(x => x.TableName.Equals(tableName)).ToList();
+            //match by table name and (nullable) schema
+            return _constraints.Where(x =>
+                string.Equals(x.TableName, tableName) &&
+                string.Equals(x.SchemaOwner, schemaName)).ToList();
         }
 
         /// <summary>
@@ -43,17 +46,24 @@ namespace DatabaseSchemaReader.Conversion
                 string name = null;
                 DatabaseConstraint constraint = null;
                 var nameKey = constraintKeyMap.Key;
+                var constraintTableName = row[constraintKeyMap.TableKey].ToString();
+                string schemaName = null;
+                if (!string.IsNullOrEmpty(constraintKeyMap.SchemaKey))
+                {
+                    schemaName = row[constraintKeyMap.SchemaKey].ToString();
+                }
                 if (!string.IsNullOrEmpty(nameKey))
                 {
                     name = row[nameKey].ToString();
-                    constraint = FindConstraint(list, name);
+                    constraint = FindConstraint(list, name, constraintTableName, schemaName);
                 }
                 //constraints may be on multiple columns, each as sep row.
                 if (constraint == null)
                 {
                     constraint = new DatabaseConstraint(); //it's a new constraint
                     constraint.Name = name;
-                    constraint.TableName = row[constraintKeyMap.TableKey].ToString();
+                    constraint.TableName = constraintTableName;
+                    constraint.SchemaOwner = schemaName;
                     constraint.ConstraintType = constraintType;
                     list.Add(constraint);
                     if ((constraintType == ConstraintType.Check || constraintType == ConstraintType.Default)
@@ -87,9 +97,9 @@ namespace DatabaseSchemaReader.Conversion
                 dt.DefaultView.RowFilter = "[" + tableKey + "] = '" + tableName + "'";
         }
 
-        private static DatabaseConstraint FindConstraint(List<DatabaseConstraint> list, string name)
+        private static DatabaseConstraint FindConstraint(List<DatabaseConstraint> list, string name, string constraintTableName, string schemaName)
         {
-            return list.Find(delegate(DatabaseConstraint f) { return f.Name == name; });
+            return list.Find(delegate(DatabaseConstraint f) { return f.Name == name && f.TableName == constraintTableName && f.SchemaOwner == schemaName; });
         }
 
         private static string AddRefersToConstraint(DataRowView row, string refersToKey)

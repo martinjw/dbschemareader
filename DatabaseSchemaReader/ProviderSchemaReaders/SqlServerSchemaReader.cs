@@ -35,6 +35,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             //information_schema.check_constraints doesn't have table, so we join to table constraints
             const string sqlCommand = @"SELECT 
 cons.constraint_name, 
+cons.constraint_schema,
 cons.table_name, 
 cons2.check_clause AS Expression
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
@@ -89,6 +90,7 @@ ORDER BY cons.table_name, cons.constraint_name";
         private static string GetKeySql()
         {
             const string sqlCommand = @"SELECT DISTINCT
+cons.constraint_schema,
 cons.constraint_name, 
 keycolumns.table_name, 
 column_name, 
@@ -340,15 +342,15 @@ ORDER BY s.name, o.name";
         public override DataTable ColumnDescription(string tableName)
         {
             const string sqlCommand = @"SELECT 
-	SchemaOwner = s.name, 
-	TableName = o.name,
+    SchemaOwner = s.name, 
+    TableName = o.name,
     ColumnName = c.name,
-	ColumnDescription = p.value
+    ColumnDescription = p.value
 FROM sysobjects o
 INNER JOIN syscolumns c
-	ON o.id = c.id
+    ON o.id = c.id
 INNER JOIN  sys.schemas s
-	ON s.schema_id = o.uid
+    ON s.schema_id = o.uid
 INNER JOIN sys.extended_properties p 
     ON p.major_id = c.id
     AND	p.minor_id = c.colid
@@ -371,18 +373,18 @@ ORDER BY s.name, o.name";
         public override DataTable DefaultConstraints(string tableName)
         {
             const string sqlCommand = @"SELECT 
-	s.name AS SCHEMA_NAME, 
-	o.name AS TABLE_NAME,
+    s.name AS SCHEMA_NAME, 
+    o.name AS TABLE_NAME,
     c.name AS COLUMN_NAME,
-	d.name AS CONSTRAINT_NAME,
-	d.[definition] AS EXPRESSION
+    d.name AS CONSTRAINT_NAME,
+    d.[definition] AS EXPRESSION
 FROM sys.[default_constraints] d
 INNER JOIN sys.objects o
     ON o.object_id = d.parent_object_id
 INNER JOIN sys.columns c
-	ON c.default_object_id = d.object_id
+    ON c.default_object_id = d.object_id
 INNER JOIN  sys.schemas s
-	ON s.schema_id = o.schema_id
+    ON s.schema_id = o.schema_id
 WHERE 
     (o.name = @tableName OR @tableName IS NULL) AND 
     (s.name = @schemaOwner OR @schemaOwner IS NULL) AND 
