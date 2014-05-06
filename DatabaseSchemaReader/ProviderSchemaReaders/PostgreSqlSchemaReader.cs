@@ -42,6 +42,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             //information_schema.check_constraints doesn't have table, so we join to table constraints
             const string sqlCommand = @"SELECT 
 cons.constraint_name, 
+cons.constraint_catalog AS constraint_schema,
 cons.table_name, 
 cons2.check_clause AS Expression
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
@@ -85,6 +86,7 @@ ORDER BY cons.table_name, cons.constraint_name";
             const string sqlCommand =
                 @"SELECT DISTINCT
 cons.constraint_name, 
+cons.constraint_schema,
 keycolumns.table_name, 
 column_name, 
 ordinal_position, 

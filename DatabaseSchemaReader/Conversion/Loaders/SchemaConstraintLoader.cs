@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion.Loaders
@@ -49,12 +48,12 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             _dfConverter = new SchemaConstraintConverter(dfs, ConstraintType.Default);
         }
 
-        private IList<DatabaseConstraint> PrimaryKeys(string tableName)
+        private IList<DatabaseConstraint> PrimaryKeys(string tableName, string schemaName)
         {
             if (!_noPks)
             {
                 //we have preloaded
-                return _pkConverter.Constraints(tableName);
+                return _pkConverter.Constraints(tableName, schemaName);
             }
             var constraints = _sr.PrimaryKeys(tableName);
             var converter = new SchemaConstraintConverter(constraints, ConstraintType.PrimaryKey);
@@ -62,13 +61,13 @@ namespace DatabaseSchemaReader.Conversion.Loaders
         }
 
 
-        private IList<DatabaseConstraint> ForeignKeys(string tableName)
+        private IList<DatabaseConstraint> ForeignKeys(string tableName, string schemaName)
         {
             IList<DatabaseConstraint> fks;
             if (!_noFks)
             {
                 //we have preloaded
-                fks = _fkConverter.Constraints(tableName);
+                fks = _fkConverter.Constraints(tableName, schemaName);
                 _fkColumnConverter.AddForeignKeyColumns(fks);
                 return fks;
             }
@@ -81,26 +80,26 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             return fks;
         }
 
-        public IList<DatabaseConstraint> Load(string tableName, ConstraintType constraintType)
+        public IList<DatabaseConstraint> Load(string tableName, string schemaName, ConstraintType constraintType)
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName", "must have tableName");
 
             switch (constraintType)
             {
                 case ConstraintType.PrimaryKey:
-                    return PrimaryKeys(tableName);
+                    return PrimaryKeys(tableName, schemaName);
 
                 case ConstraintType.ForeignKey:
-                    return ForeignKeys(tableName);
+                    return ForeignKeys(tableName, schemaName);
 
                 case ConstraintType.UniqueKey:
-                    return _ukConverter.Constraints(tableName);
+                    return _ukConverter.Constraints(tableName, schemaName);
 
                 case ConstraintType.Check:
-                    return _ckConverter.Constraints(tableName);
+                    return _ckConverter.Constraints(tableName, schemaName);
 
                 case ConstraintType.Default:
-                    return _dfConverter.Constraints(tableName);
+                    return _dfConverter.Constraints(tableName, schemaName);
 
                 default:
                     throw new ArgumentOutOfRangeException("constraintType");

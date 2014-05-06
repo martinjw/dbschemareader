@@ -57,6 +57,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             //TO_LOB can only be used on create table as select, xml fails on < in there... 
             const string sqlCommand = @"SELECT 
 cons.constraint_name, 
+cons.owner AS constraint_schema,
 cons.table_name,
 cons.search_condition AS Expression
 FROM all_constraints cons
@@ -184,7 +185,8 @@ AND OBJECT_TYPE  = 'FUNCTION'";
         private static string GetKeySql()
         {
             //Oracle doesn't have INFORMATION_SCHEMA
-            const string sqlCommand = @"SELECT cols.constraint_name, 
+            const string sqlCommand = @"SELECT cols.constraint_name,
+cols.owner AS constraint_schema, 
 cols.table_name, 
 cols.column_name, 
 cols.position AS ordinal_position, 
@@ -401,9 +403,9 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
         public override DataTable TableDescription(string tableName)
         {
             const string sqlCommand = @"SELECT 
-	OWNER AS SchemaOwner, 
-	TABLE_NAME AS TableName,
-	COMMENTS AS TableDescription
+    OWNER AS SchemaOwner, 
+    TABLE_NAME AS TableName,
+    COMMENTS AS TableDescription
 FROM ALL_TAB_COMMENTS
 WHERE
     (TABLE_NAME = :tableName OR :tableName IS NULL) AND 
@@ -424,10 +426,10 @@ WHERE
         public override DataTable ColumnDescription(string tableName)
         {
             const string sqlCommand = @"SELECT 
-	OWNER AS SchemaOwner, 
-	TABLE_NAME AS TableName,
+    OWNER AS SchemaOwner, 
+    TABLE_NAME AS TableName,
     COLUMN_NAME AS ColumnName,
-	COMMENTS AS ColumnDescription
+    COMMENTS AS ColumnDescription
 FROM ALL_COL_COMMENTS
 WHERE
     (TABLE_NAME = :tableName OR :tableName IS NULL) AND 

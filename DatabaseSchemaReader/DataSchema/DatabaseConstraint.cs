@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a constraint (of <see cref="ConstraintType"/> such as primary key, foreign key...) that is attached to <see cref="Columns"/> of a table with name <see cref="TableName"/>
     /// </summary>
     [Serializable]
-    public partial class DatabaseConstraint : NamedObject
+    public partial class DatabaseConstraint : NamedSchemaObject
     {
         #region Fields
         //backing fields
@@ -103,7 +103,7 @@ namespace DatabaseSchemaReader.DataSchema
                  .FirstOrDefault(table =>
                      //or the RefersToConstraint is it's primary key
                      (table.PrimaryKey != null &&
-                     //one or the other may not have a name
+                         //one or the other may not have a name
                      string.Equals(table.PrimaryKey.Name, RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
 
             return refTable;
@@ -143,7 +143,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </returns>
         public override string ToString()
         {
-            return (Name ?? ConstraintType.ToString()) + 
+            return (Name ?? ConstraintType.ToString()) +
                 " on " + TableName;
         }
 

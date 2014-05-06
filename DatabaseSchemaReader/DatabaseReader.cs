@@ -194,6 +194,7 @@ namespace DatabaseSchemaReader
             foreach (DatabaseTable table in tables)
             {
                 var tableName = table.Name;
+                var schemaName = table.SchemaOwner;
                 table.Description = tableDescriptions.FindDescription(table.SchemaOwner, tableName);
 
                 var databaseColumns = columnLoader.Load(tableName);
@@ -201,15 +202,15 @@ namespace DatabaseSchemaReader
 
                 columnDescriptions.AddDescriptions(table);
 
-                var pkConstraints = constraintLoader.Load(tableName, ConstraintType.PrimaryKey);
+                var pkConstraints = constraintLoader.Load(tableName, schemaName, ConstraintType.PrimaryKey);
                 PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
 
-                var fks = constraintLoader.Load(tableName, ConstraintType.ForeignKey);
+                var fks = constraintLoader.Load(tableName, schemaName, ConstraintType.ForeignKey);
                 table.AddConstraints(fks);
 
-                table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.UniqueKey));
-                table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.Check));
-                table.AddConstraints(constraintLoader.Load(tableName, ConstraintType.Default));
+                table.AddConstraints(constraintLoader.Load(tableName, schemaName, ConstraintType.UniqueKey));
+                table.AddConstraints(constraintLoader.Load(tableName, schemaName, ConstraintType.Check));
+                table.AddConstraints(constraintLoader.Load(tableName, schemaName, ConstraintType.Default));
 
                 indexLoader.AddIndexes(table);
 
