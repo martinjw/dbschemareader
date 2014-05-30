@@ -45,6 +45,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(LengthKey)) LengthKey = null;
             if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = null;
             if (!dt.Columns.Contains(ScaleKey)) ScaleKey = null;
+            //mysql
+            if (dt.Columns.Contains("COLUMN_TYPE")) DatatypeKey = "COLUMN_TYPE";
 
 
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = null; //not in Oracle catalog
