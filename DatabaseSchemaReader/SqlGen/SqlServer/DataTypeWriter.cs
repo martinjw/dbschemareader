@@ -40,7 +40,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
-            var dataType = column.DbDataType.ToUpperInvariant();
+            var dataType = column.DbDataTypeStandard();
+
             int providerType = -1;
             if (column.DataType != null)
                 providerType = column.DataType.ProviderDbType;

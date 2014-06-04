@@ -20,10 +20,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
-            var dataType = column.DbDataType.ToUpperInvariant();
-            var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
-            if (brace != -1) //timestamp(6)
-                dataType = dataType.Substring(0, brace);
+            var dataType = column.DbDataTypeStandard();
             int providerType = GetProviderType(column);
             var length = column.Length;
 
@@ -42,7 +39,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
-            var dataType = column.DbDataType.ToUpperInvariant();
+            var dataType = column.DbDataTypeStandard();
             int providerType = GetProviderType(column);
 
             var precision = column.Precision;
@@ -125,7 +122,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
             var sql = string.Empty;
 
-            var dataType = column.DbDataType.ToUpperInvariant();
+            var dataType = column.DbDataTypeStandard();
             var precision = column.Precision;
             var scale = column.Scale;
             var length = column.Length;

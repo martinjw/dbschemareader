@@ -29,11 +29,31 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
-            var orders = schema.FindTableByName("country");
-            Assert.AreEqual(3, orders.Columns.Count);
+            var country = schema.FindTableByName("country");
+            Assert.AreEqual(3, country.Columns.Count);
 
             var table = dbReader.Table("city");
             Assert.AreEqual(4, table.Columns.Count);
+        }
+
+        [TestMethod]
+        public void MySqlUnsignedIntegersTest()
+        {
+            const string providername = "MySql.Data.MySqlClient";
+            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            var schema = dbReader.ReadAll();
+
+
+            var country = schema.FindTableByName("country");
+
+            var pk = country.PrimaryKeyColumn;
+            Assert.IsNotNull(pk, "Primary key constraints should be loaded");
+            Assert.AreEqual(pk.DbDataType, "smallint(5) unsigned");
+            Assert.AreEqual(pk.DataType.TypeName, "SMALLINT");
+
         }
     }
 }

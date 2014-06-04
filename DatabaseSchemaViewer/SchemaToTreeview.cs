@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -256,7 +257,9 @@ namespace DatabaseSchemaViewer
             sb.Append(column.Name);
             sb.Append(" ");
             sb.Append(column.DbDataType);
-            if (column.DataType != null)
+            //it may already have length/precision-scale
+            var brace = column.DbDataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
+            if (column.DataType != null && brace == -1)
             {
                 if (column.DataType.IsString && !column.DataType.IsStringClob)
                 {

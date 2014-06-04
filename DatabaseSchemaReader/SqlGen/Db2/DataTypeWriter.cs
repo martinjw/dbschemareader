@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
-            var dataType = column.DbDataType.ToUpperInvariant();
+            var dataType = column.DbDataTypeStandard();
 
             dataType = OtherDatabaseTypesToDb2(dataType, column);
 

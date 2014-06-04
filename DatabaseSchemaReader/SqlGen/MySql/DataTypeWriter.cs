@@ -14,6 +14,9 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
+            //we don't do column.DbDataTypeStandard() as native types will have length/precision-scale
+            //and also ints will have the UNSIGNED marker
+            //These types will fall through unchanged.
             var dataType = column.DbDataType.ToUpperInvariant();
             //int providerType = -1;
             //if (column.DataType != null)
@@ -26,7 +29,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             //oracle to MySql translation
             if (dataType == "NUMBER")
                 dataType = DataTypeConverter.OracleNumberConversion(precision, scale);
-            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && 
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) &&
                 DataTypeConverter.IsSqlServerTimestamp(dataType, column))
             {
                 dataType = "TINYBLOB"; //there's no equivalent really
@@ -78,7 +81,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
                 dataType == "BINARY" ||
                 dataType == "VARBINARY")
             {
-   
+
                 dataType = dataType + " (" + length + ")";
             }
 

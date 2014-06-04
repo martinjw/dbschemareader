@@ -26,7 +26,8 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                     return "REAL";
             }
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
-            var dataType = column.DbDataType.ToUpperInvariant();
+            var dataType = column.DbDataTypeStandard();
+
             if (dataType == "IMAGE" || dataType.IndexOf("BINARY", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 return "BLOB";
