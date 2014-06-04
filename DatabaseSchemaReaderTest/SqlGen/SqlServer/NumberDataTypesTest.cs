@@ -50,10 +50,36 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
         }
 
         [TestMethod]
+        public void TestMySqlInteger()
+        {
+            //arrange
+            _column.DbDataType = "int(10) unsigned";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("INT", result);
+        }
+
+        [TestMethod]
         public void TestSmallInt()
         {
             //arrange
             _column.DbDataType = "SMALLINT";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("SMALLINT", result);
+        }
+
+        [TestMethod]
+        public void TestMySqlSmallInt()
+        {
+            //arrange
+            _column.DbDataType = "smallint(5) unsigned";
 
             //act
             var result = _typeWriter.WriteDataType(_column);

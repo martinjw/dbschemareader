@@ -71,6 +71,20 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
         }
 
         [TestMethod]
+        public void TestMySqlStringVarChar()
+        {
+            //arrange
+            _column.DbDataType = "varchar(5)";
+            _column.Length = 5;
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("VARCHAR (5)", result); //NB we've changed to unicode here
+        }
+
+        [TestMethod]
         public void TestStringVarChar2()
         {
             //arrange

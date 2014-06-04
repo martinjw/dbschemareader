@@ -41,6 +41,19 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
         }
 
         [TestMethod]
+        public void TestMySqlInteger()
+        {
+            //arrange
+            _column.DbDataType = "int(9) unsigned";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("NUMBER (9)", result);
+        }
+
+        [TestMethod]
         public void TestSmallInt()
         {
             //arrange

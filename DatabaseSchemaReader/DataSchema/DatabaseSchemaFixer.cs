@@ -184,6 +184,13 @@ namespace DatabaseSchemaReader.DataSchema
             DataType dt;
             if (dataTypes.TryGetValue(dbDataType, out dt)) return dt;
 
+            var brace = dbDataType.IndexOf('(');
+            if (brace > 1)
+            {
+                dbDataType = dbDataType.Substring(0, brace).ToUpperInvariant();
+                if (dataTypes.TryGetValue(dbDataType, out dt)) return dt;
+            }
+
             //TIMESTAMP(9) from Oracle == Timestamp
             dt = dataTypes.Values.FirstOrDefault(dataType => dbDataType.StartsWith(dataType.TypeName, StringComparison.OrdinalIgnoreCase));
 

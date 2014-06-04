@@ -33,6 +33,19 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
         }
 
         [TestMethod]
+        public void TestUnsignedInteger()
+        {
+            //arrange
+            _column.DbDataType = "int(10) unsigned";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("INT(10) UNSIGNED", result); //just uppercased
+        }
+
+        [TestMethod]
         public void TestSmallInt()
         {
             //arrange

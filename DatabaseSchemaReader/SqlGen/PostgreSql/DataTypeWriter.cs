@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         {
             if (column == null) return string.Empty;
             if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
-            var dataType = column.DbDataType.ToUpperInvariant();
+            var dataType = column.DbDataTypeStandard();
 
             dataType = OtherDatabaseTypesToPostgreSql(dataType, column);
 
@@ -54,30 +54,30 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 return "VARCHAR";
             }
 
-                //numeric types
+            //numeric types
             if (dataType == "INT") return "INTEGER";
             if (dataType == "INT4") return "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
-                //else if (dataType == "SERIAL") return "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
-                //else if (dataType == "BIGSERIAL") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
+            //else if (dataType == "SERIAL") return "INTEGER"; //this is a PostgreSql alias, we'll use standard SQL
+            //else if (dataType == "BIGSERIAL") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
             if (dataType == "INT8") return "BIGINT"; //this is a PostgreSql alias, we'll use standard SQL
             if (dataType == "INT2") return "SMALLINT"; //this is a PostgreSql alias, we'll use standard SQL
             if (dataType == "TINYINT") return "SMALLINT"; //this is a MsSql alias, we'll use standard SQL
             if (dataType == "NUMBER")
                 return DataTypeConverter.OracleNumberConversion(column.Precision, column.Scale);
 
-                //float and real
+            //float and real
             if (dataType == "FLOAT4") return "REAL"; //this is a PostgreSql alias, we'll use standard SQL
             if (dataType == "FLOAT") return "DOUBLE PRECISION";
 
-                //date times
-                //SqlServer Timestamp is a binary
+            //date times
+            //SqlServer Timestamp is a binary
             if (DataTypeConverter.IsSqlServerTimestamp(dataType, column))
                 return "BYTEA"; //this is just a byte array- functionally you should redesign the table and perhaps use the system extension columns
 
             if (DataTypeConverter.IsDateTime(dataType))
                 return "TIMESTAMP";
 
-                //bytes
+            //bytes
             if (DataTypeConverter.IsBlob(dataType, column))
                 return "OID";//blobs become object ids
             if (DataTypeConverter.IsBinary(dataType))
@@ -85,10 +85,10 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 return "BYTEA";
             }
 
-                //there is a native BIT(n) type in Postgresql, but in conversion we probably mean boolean.
+            //there is a native BIT(n) type in Postgresql, but in conversion we probably mean boolean.
             if (dataType == "BIT" && !column.Length.HasValue) return "BOOLEAN";
 
-                //other types
+            //other types
             if (dataType == "XMLTYPE") return "XML";
             if (dataType == "UNIQUEIDENTIFIER") return "UUID";
             return dataType;
