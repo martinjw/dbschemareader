@@ -24,6 +24,9 @@ namespace DatabaseSchemaReader.DataSchema
             var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
             if (brace != -1) //timestamp(6)
                 dataType = dataType.Substring(0, brace);
+            var space = dataType.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
+            if (space > 1)
+                dataType = dataType.Substring(0, space);
             return dataType;
         }
     }

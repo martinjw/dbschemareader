@@ -27,6 +27,7 @@ namespace DatabaseSchemaReader.Conversion
         private void ConvertDataTable()
         {
             var columnsKeyMap = new ColumnsKeyMap(ColumnsDataTable);
+            var hasIsUnsigned = !string.IsNullOrEmpty(columnsKeyMap.IsUnsignedKey);
 
             foreach (DataRowView row in ColumnsDataTable.DefaultView)
             {
@@ -37,6 +38,8 @@ namespace DatabaseSchemaReader.Conversion
                     column.Ordinal = Convert.ToInt32(row[columnsKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
                 if (!string.IsNullOrEmpty(columnsKeyMap.DatatypeKey))
                     column.DbDataType = row[columnsKeyMap.DatatypeKey].ToString();
+                if (hasIsUnsigned && CastToBoolean(row, columnsKeyMap.IsUnsignedKey))
+                    column.DbDataType += " unsigned";
 
                 AddNullability(row, columnsKeyMap.NullableKey, column);
                 //the length unless it's an OleDb blob or clob
@@ -47,7 +50,7 @@ namespace DatabaseSchemaReader.Conversion
                     //oracle only
                     var dataLength = GetNullableInt(row[columnsKeyMap.DataLengthKey]);
                     //column length already set for char/varchar. For other data types, get data length
-                    if (column.Length < 1) 
+                    if (column.Length < 1)
                         column.Length = dataLength;
                 }
                 if (!string.IsNullOrEmpty(columnsKeyMap.PrecisionKey))
@@ -103,7 +106,12 @@ namespace DatabaseSchemaReader.Conversion
 
         private static bool CastToBoolean(DataRowView row, string key)
         {
-            string nullable = row[key].ToString();
+            var value = row[key];
+            if (value is bool) //SqlLite has a true boolean
+            {
+                return (bool)value;
+            }
+            var nullable = value.ToString();
             //could be Y, YES, N, NO, true, false.
             if (nullable.StartsWith("Y", StringComparison.OrdinalIgnoreCase) || nullable.StartsWith("T", StringComparison.OrdinalIgnoreCase)) //Y or YES
                 return true;
@@ -111,8 +119,7 @@ namespace DatabaseSchemaReader.Conversion
                 return false;
             if (nullable == "0") return false;
             if (nullable == "1") return true;
-            //sqlite has a boolean type
-            return ((bool)row[key]);
+            return false;
         }
 
         private static void AddNullability(DataRowView row, string nullableKey, DatabaseColumn column)
