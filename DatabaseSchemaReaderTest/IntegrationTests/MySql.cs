@@ -55,5 +55,23 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual(pk.DataType.TypeName, "SMALLINT");
 
         }
+
+        [TestMethod]
+        public void MySqlViaDevartTest()
+        {
+            const string providername = "Devart.Data.MySql";
+            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;";
+            ProviderChecker.Check(providername, connectionString);
+
+            DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
+            var dbReader = new DatabaseReader(connectionString, providername);
+            dbReader.Owner = "sakila";
+            var schema = dbReader.ReadAll();
+            var country = schema.FindTableByName("country");
+            Assert.AreEqual(3, country.Columns.Count);
+
+            var table = dbReader.Table("city");
+            Assert.AreEqual(4, table.Columns.Count);
+        }
     }
 }

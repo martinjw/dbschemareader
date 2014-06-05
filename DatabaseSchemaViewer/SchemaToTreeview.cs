@@ -256,25 +256,45 @@ namespace DatabaseSchemaViewer
             var sb = new StringBuilder();
             sb.Append(column.Name);
             sb.Append(" ");
-            sb.Append(column.DbDataType);
+
             //it may already have length/precision-scale
-            var brace = column.DbDataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
-            if (column.DataType != null && brace == -1)
+            var dbDataType = column.DbDataType;
+            var brace = dbDataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
+            if (brace != -1)
             {
-                if (column.DataType.IsString && !column.DataType.IsStringClob)
+                sb.Append(dbDataType);
+            }
+            else
+            {
+                var space = dbDataType.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
+                var unsigned = false;
+                if (space > 1)
                 {
-                    sb.Append("(");
-                    var length = column.Length.GetValueOrDefault();
-                    sb.Append(length != -1 ? length.ToString(CultureInfo.InvariantCulture) : "MAX");
-                    sb.Append(")");
+                    unsigned = dbDataType.IndexOf("unsigned", StringComparison.OrdinalIgnoreCase) != -1;
+                    dbDataType = dbDataType.Substring(0, space);
                 }
-                else if (column.DataType.IsNumeric && !column.DataType.IsInt)
+                sb.Append(dbDataType);
+                if (column.DataType != null)
                 {
-                    sb.Append("(");
-                    sb.Append(column.Precision);
-                    sb.Append(",");
-                    sb.Append(column.Scale);
-                    sb.Append(")");
+                    if (column.DataType.IsString && !column.DataType.IsStringClob && column.Length != 0)
+                    {
+                        sb.Append("(");
+                        var length = column.Length.GetValueOrDefault();
+                        sb.Append(length != -1 ? length.ToString(CultureInfo.InvariantCulture) : "MAX");
+                        sb.Append(")");
+                    }
+                    else if (column.DataType.IsNumeric && !column.DataType.IsInt)
+                    {
+                        sb.Append("(");
+                        sb.Append(column.Precision);
+                        sb.Append(",");
+                        sb.Append(column.Scale);
+                        sb.Append(")");
+                    }
+                    if (unsigned)
+                    {
+                        sb.Append(" UNSIGNED");
+                    }
                 }
             }
             if (!column.Nullable)

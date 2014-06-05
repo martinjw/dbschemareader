@@ -47,6 +47,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(ScaleKey)) ScaleKey = null;
             //mysql
             if (dt.Columns.Contains("COLUMN_TYPE")) DatatypeKey = "COLUMN_TYPE";
+            if (dt.Columns.Contains("IsUnsigned")) IsUnsignedKey = "IsUnsigned";
 
 
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = null; //not in Oracle catalog
@@ -103,5 +104,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
         public string DatatypeKey { get; private set; }
 
         public string DataLengthKey { get; private set; }
+
+        public string IsUnsignedKey { get; set; }
     }
 }

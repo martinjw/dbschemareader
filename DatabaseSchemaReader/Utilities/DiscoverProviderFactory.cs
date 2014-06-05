@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 
 namespace DatabaseSchemaReader.Utilities
 {
@@ -15,12 +16,12 @@ namespace DatabaseSchemaReader.Utilities
         public static void Discover(string connectionString, string providerName)
         {
 
-            var factory = System.Data.Common.DbProviderFactories.GetFactory(providerName);
+            var factory = DbProviderFactories.GetFactory(providerName);
             using (var connection = factory.CreateConnection())
             {
                 connection.ConnectionString = connectionString;
                 connection.Open();
-                string metaDataCollections = System.Data.Common.DbMetaDataCollectionNames.MetaDataCollections;
+                string metaDataCollections = DbMetaDataCollectionNames.MetaDataCollections;
                 var dt = connection.GetSchema(metaDataCollections);
                 foreach (System.Data.DataRow row in dt.Rows)
                 {
@@ -38,8 +39,15 @@ namespace DatabaseSchemaReader.Utilities
                         }
                         catch (NotImplementedException)
                         {
-                            
-                                Console.WriteLine("\t" + collectionName + " not implemented");
+                            Console.WriteLine("\t" + collectionName + " not implemented");
+                        }
+                        catch (DbException exception)
+                        {
+                            Console.WriteLine("\t" + collectionName + " database exception (often permissions): " + exception);
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine("\t" + collectionName + " errors (may require restrictions) " + exception);
                         }
                     }
                 }
