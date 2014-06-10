@@ -257,46 +257,8 @@ namespace DatabaseSchemaViewer
             sb.Append(column.Name);
             sb.Append(" ");
 
-            //it may already have length/precision-scale
-            var dbDataType = column.DbDataType;
-            var brace = dbDataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
-            if (brace != -1)
-            {
-                sb.Append(dbDataType);
-            }
-            else
-            {
-                var space = dbDataType.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
-                var unsigned = false;
-                if (space > 1)
-                {
-                    unsigned = dbDataType.IndexOf("unsigned", StringComparison.OrdinalIgnoreCase) != -1;
-                    dbDataType = dbDataType.Substring(0, space);
-                }
-                sb.Append(dbDataType);
-                if (column.DataType != null)
-                {
-                    if (column.DataType.IsString && !column.DataType.IsStringClob && column.Length != 0)
-                    {
-                        sb.Append("(");
-                        var length = column.Length.GetValueOrDefault();
-                        sb.Append(length != -1 ? length.ToString(CultureInfo.InvariantCulture) : "MAX");
-                        sb.Append(")");
-                    }
-                    else if (column.DataType.IsNumeric && !column.DataType.IsInt)
-                    {
-                        sb.Append("(");
-                        sb.Append(column.Precision);
-                        sb.Append(",");
-                        sb.Append(column.Scale);
-                        sb.Append(")");
-                    }
-                    if (unsigned)
-                    {
-                        sb.Append(" UNSIGNED");
-                    }
-                }
-            }
+            sb.Append(column.DataTypeDefinition());
+
             if (!column.Nullable)
             {
                 sb.Append(" NOT NULL");

@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Globalization;
+using System.Text;
 
 namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
-    /// Internal helper methods for columns
+    /// Helper methods for columns
     /// </summary>
-    internal static class DatabaseColumnExtensions
+    public static class DatabaseColumnExtensions
     {
         /// <summary>
         /// Returns the DbDataType in a standard format (uppercased, any braces removed).
@@ -24,10 +26,67 @@ namespace DatabaseSchemaReader.DataSchema
             var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
             if (brace != -1) //timestamp(6)
                 dataType = dataType.Substring(0, brace);
-            var space = dataType.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
+            //also clean off MySql's unsigned indicator
+            var space = dataType.IndexOf(" unsigned", StringComparison.OrdinalIgnoreCase);
             if (space > 1)
                 dataType = dataType.Substring(0, space);
             return dataType;
+        }
+
+        /// <summary>
+        /// Data type definition (suitable for DDL).
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns>The full datatype specification (including length, precision/scale as applicable)</returns>
+        /// <remarks>
+        /// Uses column.DbDataType and column.DataType.
+        /// When writing full DDL, use the SqlGen DataTypeWriters.
+        /// </remarks>
+        public static string DataTypeDefinition(this DatabaseColumn column)
+        {
+            if (column == null) return null;
+            var sb = new StringBuilder();
+            var dbDataType = column.DbDataType ?? string.Empty;
+            var brace = dbDataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
+            if (brace != -1)
+            {
+                sb.Append(dbDataType);
+            }
+            else
+            {
+                var space = dbDataType.IndexOf(" ", StringComparison.OrdinalIgnoreCase);
+                var unsigned = false;
+                if (space > 1)
+                {
+                    unsigned = dbDataType.IndexOf("unsigned", StringComparison.OrdinalIgnoreCase) != -1;
+                    dbDataType = dbDataType.Substring(0, space);
+                }
+                sb.Append(dbDataType);
+                var dataType = column.DataType;
+                if (dataType != null)
+                {
+                    if (dataType.IsString && !dataType.IsStringClob && column.Length != 0)
+                    {
+                        sb.Append("(");
+                        var length = column.Length.GetValueOrDefault();
+                        sb.Append(length != -1 ? length.ToString(CultureInfo.InvariantCulture) : "MAX");
+                        sb.Append(")");
+                    }
+                    else if (dataType.IsNumeric && !dataType.IsInt)
+                    {
+                        sb.Append("(");
+                        sb.Append(column.Precision);
+                        sb.Append(",");
+                        sb.Append(column.Scale);
+                        sb.Append(")");
+                    }
+                    if (unsigned)
+                    {
+                        sb.Append(" UNSIGNED");
+                    }
+                }
+            }
+            return sb.ToString();
         }
     }
 }
