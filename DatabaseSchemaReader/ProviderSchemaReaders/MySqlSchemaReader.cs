@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
@@ -22,11 +23,23 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
          * 
          */
 
+        private string FixDevartParameters(string sqlCommand)
+        {
+            if (ProviderName.IndexOf("Devart", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                //Devart needs colon prefix if parameter names are not prefixed
+                //If you use @prefix, the parameter names must be prefixed
+                sqlCommand = sqlCommand.Replace("@", ":");
+            }
+            return sqlCommand;
+        }
+
         protected DataTable FindKeys(string tableName, string constraintType, DbConnection conn)
         {
             DataTable dt = CreateDataTable(constraintType);
 
             string sqlCommand = GetKeySql();
+            sqlCommand = FixDevartParameters(sqlCommand);
 
             //create a dataadaptor and fill it
             using (DbDataAdapter da = Factory.CreateDataAdapter())
@@ -45,6 +58,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                 return dt;
             }
         }
+
+
         private static string GetKeySql()
         {
             //in MySQL, different constraints for different tables can have the same name (eg Primary)
@@ -96,7 +111,9 @@ WHERE EXTRA = 'auto_increment' AND
 (TABLE_NAME = @tableName OR @tableName IS NULL) AND 
 (TABLE_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, conn, IdentityColumnsCollectionName, sqlCommand);
+            return CommandForTable(tableName, conn,
+                IdentityColumnsCollectionName,
+                FixDevartParameters(sqlCommand));
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
@@ -147,7 +164,9 @@ WHERE
 (EVENT_OBJECT_TABLE = @tableName OR @tableName IS NULL) AND 
 (TRIGGER_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
 
-            return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
+            return CommandForTable(tableName, conn,
+                TriggersCollectionName,
+                FixDevartParameters(sqlCommand));
         }
 
         public override DataTable TableDescription(string tableName)
@@ -167,7 +186,9 @@ WHERE
                 connection.ConnectionString = ConnectionString;
                 connection.Open();
 
-                return CommandForTable(tableName, connection, TableDescriptionCollectionName, sqlCommand);
+                return CommandForTable(tableName, connection,
+                    TableDescriptionCollectionName,
+                    FixDevartParameters(sqlCommand));
             }
         }
 
@@ -189,7 +210,9 @@ WHERE
                 connection.ConnectionString = ConnectionString;
                 connection.Open();
 
-                return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
+                return CommandForTable(tableName, connection,
+                    ColumnDescriptionCollectionName,
+                    FixDevartParameters(sqlCommand));
             }
         }
     }

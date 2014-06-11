@@ -31,6 +31,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var schema = dbReader.ReadAll();
             var country = schema.FindTableByName("country");
             Assert.AreEqual(3, country.Columns.Count);
+            Assert.IsNotNull(country.PrimaryKeyColumn);
 
             var table = dbReader.Table("city");
             Assert.AreEqual(4, table.Columns.Count);
@@ -69,6 +70,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var schema = dbReader.ReadAll();
             var country = schema.FindTableByName("country");
             Assert.AreEqual(3, country.Columns.Count);
+            Assert.IsNotNull(country.PrimaryKeyColumn);
 
             var table = dbReader.Table("city");
             Assert.AreEqual(4, table.Columns.Count);
