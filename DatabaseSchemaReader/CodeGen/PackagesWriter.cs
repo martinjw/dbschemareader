@@ -6,7 +6,7 @@
         {
             return @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""EntityFramework"" version=""6.1.0"" targetFramework=""net40"" />
+  <package id=""EntityFramework"" version=""6.1.1"" targetFramework=""net40"" />
 </packages>";
         }
 
