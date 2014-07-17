@@ -299,7 +299,7 @@ namespace DatabaseSchemaReader.Conversion
             if (inoutKey == null) return;
             string inout = row[inoutKey].ToString();
             if (inout.Contains("IN")) argument.In = true;
-            else if (inout.Contains("OUT")) argument.Out = true;
+            if (inout.Contains("OUT")) argument.Out = true;
         }
 
         private static DatabaseArgument AddArgumentToList(List<DatabaseArgument> list, string argName)
