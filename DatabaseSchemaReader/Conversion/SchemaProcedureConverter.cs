@@ -299,6 +299,7 @@ namespace DatabaseSchemaReader.Conversion
             if (inoutKey == null) return;
             string inout = row[inoutKey].ToString();
             if (inout.Contains("IN")) argument.In = true;
+            //can be INOUT
             if (inout.Contains("OUT")) argument.Out = true;
         }
 
