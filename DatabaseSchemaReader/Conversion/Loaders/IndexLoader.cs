@@ -32,7 +32,7 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             var tableName = table.Name;
             if (!_noIndexes && !_noIndexColumns)
             {
-                var indexes = _indexConverter.Indexes(tableName);
+                var indexes = _indexConverter.Indexes(tableName, table.SchemaOwner);
                 table.Indexes.AddRange(indexes);
                 MarkIndexedColumns(table, indexes);
                 return;
@@ -45,7 +45,7 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             }
 
             var converter = new IndexConverter(_sr.Indexes(tableName), _sr.IndexColumns(tableName));
-            var indices = converter.Indexes(tableName);
+            var indices = converter.Indexes(tableName, table.SchemaOwner);
             table.Indexes.AddRange(indices);
             MarkIndexedColumns(table, indices);
         }

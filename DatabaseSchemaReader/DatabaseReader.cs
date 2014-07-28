@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Linq;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.Conversion.Loaders;
 using DatabaseSchemaReader.DataSchema;
@@ -197,7 +198,7 @@ namespace DatabaseSchemaReader
                 var schemaName = table.SchemaOwner;
                 table.Description = tableDescriptions.FindDescription(table.SchemaOwner, tableName);
 
-                var databaseColumns = columnLoader.Load(tableName);
+                var databaseColumns = columnLoader.Load(tableName, schemaName);
                 table.Columns.AddRange(databaseColumns);
 
                 columnDescriptions.AddDescriptions(table);
@@ -249,7 +250,7 @@ namespace DatabaseSchemaReader
             var columnLoader = new ViewColumnLoader(_schemaReader);
             foreach (DatabaseView v in views)
             {
-                v.Columns.AddRange(columnLoader.Load(v.Name));
+                v.Columns.AddRange(columnLoader.Load(v.Name, v.SchemaOwner));
             }
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
@@ -264,24 +265,38 @@ namespace DatabaseSchemaReader
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
 
+            var schemaOwner = _schemaReader.Owner;
             DatabaseTable table;
             using (DataSet ds = _schemaReader.Table(tableName))
             {
                 if (ds == null) return null;
                 if (ds.Tables.Count == 0) return null;
 
-                table = DatabaseSchema.FindTableByName(tableName);
+                table = DatabaseSchema.FindTableByName(tableName, schemaOwner);
                 if (table == null)
                 {
                     table = new DatabaseTable();
                     DatabaseSchema.Tables.Add(table);
                 }
                 table.Name = tableName;
-                table.SchemaOwner = _schemaReader.Owner;
+                table.SchemaOwner = schemaOwner;
                 //columns must be done first as it is updated by the others
                 table.Columns.Clear();
                 var columnConverter = new ColumnConverter(ds.Tables[_schemaReader.ColumnsCollectionName]);
-                table.Columns.AddRange(columnConverter.Columns());
+                var databaseColumns = columnConverter.Columns(tableName, schemaOwner).ToList();
+                if (!databaseColumns.Any())
+                {
+                    //need to define the schema
+                    databaseColumns = columnConverter.Columns().ToList();
+                    var first = databaseColumns.FirstOrDefault();
+                    if (first != null)
+                    {
+                        //take the schema of the first we find
+                        table.SchemaOwner = schemaOwner = first.SchemaOwner;
+                    }
+                    databaseColumns = columnConverter.Columns(tableName, schemaOwner).ToList();
+                }
+                table.Columns.AddRange(databaseColumns);
                 if (ds.Tables.Contains(_schemaReader.PrimaryKeysCollectionName))
                 {
                     var converter = new SchemaConstraintConverter(ds.Tables[_schemaReader.PrimaryKeysCollectionName], ConstraintType.PrimaryKey);
@@ -306,7 +321,7 @@ namespace DatabaseSchemaReader
                 }
 
                 var indexConverter = new IndexConverter(ds.Tables[_schemaReader.IndexColumnsCollectionName], null);
-                table.Indexes.AddRange(indexConverter.Indexes(tableName));
+                table.Indexes.AddRange(indexConverter.Indexes(tableName, schemaOwner));
 
                 if (ds.Tables.Contains(_schemaReader.IdentityColumnsCollectionName))
                     SchemaConstraintConverter.AddIdentity(ds.Tables[_schemaReader.IdentityColumnsCollectionName], table);

@@ -22,9 +22,10 @@ namespace DatabaseSchemaReader.Conversion
             ConvertIndexes(indexColumns, indexes);
         }
 
-        public IEnumerable<DatabaseIndex> Indexes(string tableName)
+        public IEnumerable<DatabaseIndex> Indexes(string tableName, string schemaName)
         {
-            return _indexes.Where(i => i.TableName == tableName);
+            return _indexes.Where(i => string.Equals(i.TableName, tableName, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(i.SchemaOwner, schemaName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static void ConvertIndexes(DataTable dt, ICollection<DatabaseIndex> indexes)

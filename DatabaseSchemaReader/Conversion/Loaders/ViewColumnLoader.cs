@@ -24,9 +24,10 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             _columnConverter = new ViewColumnConverter(cols);
         }
 
-        public IEnumerable<DatabaseColumn> Load(string viewName)
+        public IEnumerable<DatabaseColumn> Load(string viewName, string schemaName)
         {
             if (string.IsNullOrEmpty(viewName)) throw new ArgumentNullException("viewName", "must have viewName");
+            //schemaName may be null
 
             if (_noColumns)
             {
@@ -35,7 +36,7 @@ namespace DatabaseSchemaReader.Conversion.Loaders
                 _columnConverter = new ViewColumnConverter(cols);
             }
 
-            return _columnConverter.Columns(viewName);
+            return _columnConverter.Columns(viewName, schemaName);
         }
     }
 }
