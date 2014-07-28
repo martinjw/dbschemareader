@@ -6,12 +6,8 @@ namespace DatabaseSchemaReader.DataSchema
     /// A column in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseColumn : NamedObject
+    public partial class DatabaseColumn : NamedSchemaObject
     {
-        #region Fields
-
-        #endregion
-
         #region Basic Properties
 
         /// <summary>

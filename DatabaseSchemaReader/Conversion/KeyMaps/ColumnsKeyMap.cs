@@ -9,6 +9,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             //sql server
             Key = "column_name";
             TableKey = "table_name";
+            SchemaKey = "table_schema";
             OrdinalKey = "ordinal_position";
             DatatypeKey = "data_type";
             NullableKey = "is_nullable";
@@ -26,6 +27,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(ScaleKey)) ScaleKey = "scale";
             if (!dt.Columns.Contains(DateTimePrecision)) DateTimePrecision = null;
             if (dt.Columns.Contains("DATALENGTH")) DataLengthKey = "DATALENGTH";
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "owner";
             //sqlite
             AutoIncrementKey = "AUTOINCREMENT";
             PrimaryKeyKey = "PRIMARY_KEY";
@@ -48,6 +50,9 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             //mysql
             if (dt.Columns.Contains("COLUMN_TYPE")) DatatypeKey = "COLUMN_TYPE";
             if (dt.Columns.Contains("IsUnsigned")) IsUnsignedKey = "IsUnsigned";
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "TABLE_SCHEMA";
+            //Devart.Data.MySQL
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "DATABASE";
 
 
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = null; //not in Oracle catalog
@@ -56,7 +61,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(UniqueKey)) UniqueKey = null;
             if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = null;
             if (!dt.Columns.Contains(DatatypeKey)) DatatypeKey = null;
-
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = null;
         }
 
         private void CheckDb2(DataTable dt)
@@ -75,6 +80,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(DatatypeKey)) DatatypeKey = "typename";
             if (!dt.Columns.Contains(UniqueKey)) UniqueKey = "isunique";
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = "defaultvalue";
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "schema";
         }
 
         public string DefaultKey { get; private set; }
@@ -106,5 +112,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
         public string DataLengthKey { get; private set; }
 
         public string IsUnsignedKey { get; set; }
+
+        public string SchemaKey { get; set; }
     }
 }

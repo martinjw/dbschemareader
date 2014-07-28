@@ -34,6 +34,10 @@ namespace DatabaseSchemaReader.Conversion
                 var column = new DatabaseColumn();
                 column.Name = row[columnsKeyMap.Key].ToString();
                 column.TableName = row[columnsKeyMap.TableKey].ToString();
+
+                if (!string.IsNullOrEmpty(columnsKeyMap.SchemaKey))
+                    column.SchemaOwner = row[columnsKeyMap.SchemaKey].ToString();
+
                 if (!string.IsNullOrEmpty(columnsKeyMap.OrdinalKey))
                     column.Ordinal = Convert.ToInt32(row[columnsKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
                 if (!string.IsNullOrEmpty(columnsKeyMap.DatatypeKey))
@@ -80,11 +84,12 @@ namespace DatabaseSchemaReader.Conversion
         /// <summary>
         /// Converts the "Columns" DataTable into <see cref="DatabaseColumn"/> objects for a specified table
         /// </summary>
-        public IEnumerable<DatabaseColumn> Columns(string tableName)
+        public IEnumerable<DatabaseColumn> Columns(string tableName, string schemaName)
         {
             if (_list.Count == 0) ConvertDataTable();
 
-            return _list.Where(x => x.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase));
+            return _list.Where(x => string.Equals(x.TableName, tableName, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(x.SchemaOwner, schemaName, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
