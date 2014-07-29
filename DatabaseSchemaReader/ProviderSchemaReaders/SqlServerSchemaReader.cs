@@ -238,24 +238,27 @@ ORDER BY o.type;";
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
-            const string sqlCommand = @"SELECT SCHEMA_NAME(o1.uid) AS 'OWNER', 
-o1.NAME AS 'TRIGGER_NAME',
-o2.NAME AS 'TABLE_NAME',
-c.TEXT AS 'TRIGGER_BODY',
-CASE
-    WHEN OBJECTPROPERTY(o1.id, 'ExecIsInsertTrigger') = 1 THEN 'INSERT'
-    WHEN OBJECTPROPERTY(o1.id, 'ExecIsUpdateTrigger') = 1 THEN 'UPDATE'
-    WHEN OBJECTPROPERTY(o1.id, 'ExecIsDeleteTrigger') = 1 THEN 'DELETE'
-END 'TRIGGERING_EVENT',
-CASE WHEN OBJECTPROPERTY(o1.id, 'ExecIsInsteadOfTrigger') = 1
-    THEN 'INSTEAD OF' ELSE 'AFTER'
-END 'TRIGGER_TYPE'
+            //thanks to jamesholwell https://dbschemareader.codeplex.com/workitem/1432
+            const string sqlCommand = @"SELECT SCHEMA_NAME(o1.uid) AS 'OWNER',
+    o1.NAME AS 'TRIGGER_NAME',
+    o2.NAME AS 'TABLE_NAME',
+    c.definition AS 'TRIGGER_BODY',
+    CASE 
+        WHEN OBJECTPROPERTY(o1.id, 'ExecIsInsertTrigger') = 1 THEN 'INSERT'
+        WHEN OBJECTPROPERTY(o1.id, 'ExecIsUpdateTrigger') = 1 THEN 'UPDATE'
+        WHEN OBJECTPROPERTY(o1.id, 'ExecIsDeleteTrigger') = 1 THEN 'DELETE'
+    END 'TRIGGERING_EVENT',
+    CASE 
+        WHEN OBJECTPROPERTY(o1.id, 'ExecIsInsteadOfTrigger') = 1
+            THEN 'INSTEAD OF' ELSE 'AFTER'
+        END 'TRIGGER_TYPE'
 FROM sysobjects o1
-INNER JOIN sysobjects o2 ON o1.parent_obj = o2.id
-INNER JOIN syscomments c ON o1.id = c.id
-WHERE o1.XTYPE = 'TR' AND 
-(o1.NAME = @tableName OR @tableName IS NULL) AND 
-(SCHEMA_NAME(o1.uid) = @schemaOwner OR @schemaOwner IS NULL)";
+    INNER JOIN sysobjects o2 ON o1.parent_obj = o2.id
+    INNER JOIN sys.all_sql_modules c on o1.id = c.object_id
+WHERE
+    o1.XTYPE = 'TR'
+    AND (o2.NAME = @tableName OR @tableName IS NULL)
+    AND (SCHEMA_NAME(o1.uid) = @schemaOwner OR @schemaOwner IS NULL)";
 
             return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
