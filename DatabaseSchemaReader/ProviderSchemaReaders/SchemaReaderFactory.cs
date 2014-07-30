@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
@@ -22,7 +19,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                     schemaReader = new OracleSchemaReader(connectionString, providerName);
                     break;
                 case SqlType.SqlServer:
-                    schemaReader = new SqlServerSchemaReader(connectionString, providerName);
+                    schemaReader = new SqlAzureOrSqlServerSchemaReader(connectionString, providerName);
                     break;
                 case SqlType.SqlServerCe:
                     schemaReader = new SqlServerCeSchemaReader(connectionString, providerName);
@@ -81,7 +78,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                     schemaReader = new OracleSchemaReader(connectionString, "System.Data.OracleClient");
                     break;
                 case SqlType.SqlServer:
-                    schemaReader = new SqlServerSchemaReader(connectionString, "System.Data.SqlClient");
+                    schemaReader = new SqlAzureOrSqlServerSchemaReader(connectionString, "System.Data.SqlClient");
                     break;
                 case SqlType.SqlServerCe:
                     schemaReader = new SqlServerCeSchemaReader(connectionString, "System.Data.SqlServerCe.4.0");
