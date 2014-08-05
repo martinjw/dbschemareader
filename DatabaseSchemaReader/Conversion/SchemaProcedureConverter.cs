@@ -175,6 +175,11 @@ namespace DatabaseSchemaReader.Conversion
                         sproc.SchemaOwner = owner;
                         sproc.Package = package;
                     }
+                    else
+                    {
+                        //clear any existing arguments before we add them
+                        sproc.Arguments.Clear();
+                    }
                     sproc.Arguments.AddRange(args);
                 }
             }
