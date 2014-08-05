@@ -194,5 +194,19 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsNull(sproc);
         }
 
+        [TestMethod]
+        public void DublicatedArgumentsDemo()
+        {
+            var dbReader = TestHelper.GetNorthwindReader();
+            var procedures = dbReader.AllStoredProcedures();
+
+            var proc = procedures.First(x => x.Name == "CustOrderHist");
+            var argsNumber = proc.Arguments.Count();
+
+            dbReader.AllStoredProcedures();
+            Assert.AreEqual(argsNumber,
+                            proc.Arguments.Count(),
+                            "Number of args changed");
+        }
     }
 }
