@@ -15,6 +15,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             OrdinalKey = "ORDINAL_POSITION";
             RefersToKey = "UNIQUE_CONSTRAINT_NAME";
             RefersToTableKey = "FK_TABLE";
+            RefersToSchemaKey = "FK_SCHEMA";
             ExpressionKey = "EXPRESSION";
             DeleteRuleKey = "DELETE_RULE";
             UpdateRuleKey = "UPDATE_RULE";
@@ -53,6 +54,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = null;
             if (!dt.Columns.Contains(ExpressionKey)) ExpressionKey = null;
             if (!dt.Columns.Contains(Key)) Key = null;
+            if (!dt.Columns.Contains(RefersToSchemaKey)) RefersToSchemaKey = null;
         }
 
         private void CheckSqLite(DataTable dt)
@@ -84,6 +86,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
         }
 
         public string RefersToTableKey { get; private set; }
+
+        public string RefersToSchemaKey { get; private set; }
 
         public string RefersToKey { get; private set; }
 

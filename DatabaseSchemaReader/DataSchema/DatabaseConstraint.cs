@@ -50,6 +50,14 @@ namespace DatabaseSchemaReader.DataSchema
         public string RefersToTable { get; set; }
 
         /// <summary>
+        /// If this is a foreign key constraint, gets or sets the foreign key schema. Use <see cref="ReferencedTable"/> to get the foreign key table.
+        /// </summary>
+        /// <value>
+        /// The refers to schema.
+        /// </value>
+        public string RefersToSchema { get; set; }
+
+        /// <summary>
         /// Gets or sets the delete rule. When a row is deleted from a parent table, the DeleteRule determines what will happen in the columns of the child table (or tables). If the rule is set to Cascade, child rows will be deleted. Other options are SET NULL, SET DEFAULT and NO ACTION.
         /// </summary>
         /// <value>
@@ -96,7 +104,9 @@ namespace DatabaseSchemaReader.DataSchema
             var refTable = schema.Tables
                 .FirstOrDefault(table =>
                     //the string RefersToTable is the same
-                     table.Name.Equals(RefersToTable, StringComparison.OrdinalIgnoreCase));
+                     string.Equals(table.Name, RefersToTable, StringComparison.OrdinalIgnoreCase)
+                         //if we have a schema name, must match too
+                     && (string.IsNullOrEmpty(RefersToSchema) || string.Equals(table.SchemaOwner, RefersToSchema, StringComparison.OrdinalIgnoreCase)));
 
             //if not found, look for the constraint name
             if (refTable == null) refTable = schema.Tables

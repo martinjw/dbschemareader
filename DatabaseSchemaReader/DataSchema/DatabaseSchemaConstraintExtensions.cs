@@ -225,7 +225,9 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static IList<DatabaseConstraint> InverseForeignKeys(this DatabaseTable table, DatabaseTable foreignKeyChild)
         {
-            return foreignKeyChild.ForeignKeys.Where(x => x.RefersToTable == table.Name).ToList();
+            return foreignKeyChild.ForeignKeys.Where(constraint => constraint.RefersToTable == table.Name
+                     && (string.IsNullOrEmpty(constraint.RefersToSchema) || string.Equals(table.SchemaOwner, constraint.RefersToSchema, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
         }
     }
 }
