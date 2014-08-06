@@ -78,7 +78,12 @@ namespace DatabaseSchemaReader.Conversion
                     }
                     constraint.RefersToConstraint = AddRefersToConstraint(row, constraintKeyMap.RefersToKey);
                     if (!string.IsNullOrEmpty(constraintKeyMap.RefersToTableKey))
+                    {
+                        //foreign key to table/schema
                         constraint.RefersToTable = row[constraintKeyMap.RefersToTableKey].ToString();
+                        if (!string.IsNullOrEmpty(constraintKeyMap.RefersToSchemaKey))
+                            constraint.RefersToSchema = row[constraintKeyMap.RefersToSchemaKey].ToString();
+                    }
                     constraint.DeleteRule = AddDeleteUpdateRule(row, constraintKeyMap.DeleteRuleKey);
                     constraint.UpdateRule = AddDeleteUpdateRule(row, constraintKeyMap.UpdateRuleKey);
                 }

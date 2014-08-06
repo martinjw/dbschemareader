@@ -118,6 +118,7 @@ column_name,
 ordinal_position, 
 refs.unique_constraint_name, 
 cons2.table_name AS fk_table,
+cons2.table_schema AS fk_schema,
 refs.delete_rule AS delete_rule,
 refs.update_rule AS update_rule
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
@@ -431,23 +432,23 @@ ORDER BY s.name, o.name";
                 return base.Indexes(tableName, connection);
             //SqlServer 2008 uses EXEC sys.sp_indexes_managed @Catalog, @Owner, @Table, @Name
             const string sqlCommand = @"select
-	s.name AS constraint_schema,
-	si.name AS constraint_name,
-	st.name AS table_schema,
-	t.name AS table_name,
-	si.name AS index_name,
-	si.type_desc AS type_desc,
-	si.is_unique AS isunique,
-	si.is_unique_constraint AS is_unique_constraint
+    s.name AS constraint_schema,
+    si.name AS constraint_name,
+    st.name AS table_schema,
+    t.name AS table_name,
+    si.name AS index_name,
+    si.type_desc AS type_desc,
+    si.is_unique AS isunique,
+    si.is_unique_constraint AS is_unique_constraint
 from
-	sys.indexes si
-	INNER JOIN sys.objects o ON o.object_id = si.object_id
+    sys.indexes si
+    INNER JOIN sys.objects o ON o.object_id = si.object_id
     INNER JOIN sys.tables t ON si.object_id = t.object_id 
-	INNER JOIN  sys.schemas s  ON s.schema_id = o.schema_id
-	INNER JOIN  sys.schemas st  ON st.schema_id = t.schema_id
+    INNER JOIN  sys.schemas s  ON s.schema_id = o.schema_id
+    INNER JOIN  sys.schemas st  ON st.schema_id = t.schema_id
 where
-	(st.name = @schemaOwner or (@schemaOwner is null)) and 
-	(t.name = @tableName or (@tableName is null))
+    (st.name = @schemaOwner or (@schemaOwner is null)) and 
+    (t.name = @tableName or (@tableName is null))
 order by t.name, si.name ";
             return CommandForTable(tableName, connection, IndexesCollectionName, sqlCommand);
         }
