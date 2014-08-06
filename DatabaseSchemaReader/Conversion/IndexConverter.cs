@@ -100,7 +100,11 @@ namespace DatabaseSchemaReader.Conversion
             if (o == DBNull.Value) return false;
             if (o is string)
             {
-                return (o.Equals(trueText));
+                var value = o.ToString();
+                if (value.StartsWith("Y", StringComparison.OrdinalIgnoreCase) ||
+                    value.StartsWith("T", StringComparison.OrdinalIgnoreCase)) //Y or YES or True
+                    return true;
+                return (value.Equals(trueText));
             }
             return (bool)o;
         }

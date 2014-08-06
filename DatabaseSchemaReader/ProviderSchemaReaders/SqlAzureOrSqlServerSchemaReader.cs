@@ -51,17 +51,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
                         conn.ConnectionString = ConnectionString;
                         conn.Open();
-                        //an open connection contains a server version
-                        //SqlServer 2014 = 12.00.2000
-                        //SqlAzure (as of 201407 it's SqlServer 2012) = 11.0.9216.62
-                        //SqlServer 2012 SP2 = 11.0.5058.0
-                        //SqlServer 2008 R2 SP2 = 10.50.4000.0
-                        //2005 = 9.00.5000.00 , 2000 = 8.00.2039
-                        int serverVersion;
-                        if (!int.TryParse(conn.ServerVersion.Substring(0, 2), out serverVersion))
-                        {
-                            serverVersion = 9; //SqlServer 2005
-                        }
+                        var serverVersion = SqlServerVersion(conn);
+
                         if (serverVersion < 11) //before SqlServer 2012, there was no cloud edition
                         {
                             _isAzureSqlDatabase = false;

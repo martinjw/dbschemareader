@@ -13,6 +13,27 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
         }
 
+        /// <summary>
+        /// returns the SqlServer version (10 is SqlServer 2008). 
+        /// </summary>
+        /// <param name="connection">The connection (must be OPEN).</param>
+        /// <returns>9 is SqlServer 2005, 10 is SqlServer 2008, 11 is SqlServer 2012, 12 is SqlServer 2014</returns>
+        public int SqlServerVersion(DbConnection connection)
+        {
+            //an open connection contains a server version
+            //SqlServer 2014 = 12.00.2000
+            //SqlAzure (as of 201407 it's SqlServer 2012) = 11.0.9216.62
+            //SqlServer 2012 SP2 = 11.0.5058.0
+            //SqlServer 2008 R2 SP2 = 10.50.4000.0
+            //2005 = 9.00.5000.00 , 2000 = 8.00.2039
+            int serverVersion;
+            var version = connection.ServerVersion;
+            if (string.IsNullOrEmpty(version) || !int.TryParse(version.Substring(0, 2), out serverVersion))
+            {
+                serverVersion = 9; //SqlServer 2005
+            }
+            return serverVersion;
+        }
 
         public override DataTable CheckConstraints(string tableName)
         {
@@ -401,6 +422,34 @@ ORDER BY s.name, o.name";
 
                 return CommandForTable(tableName, connection, DefaultConstraintCollectionName, sqlCommand);
             }
+        }
+
+        protected override DataTable Indexes(string tableName, DbConnection connection)
+        {
+            var serverVersion = SqlServerVersion(connection);
+            if (serverVersion < 10)
+                return base.Indexes(tableName, connection);
+            //SqlServer 2008 uses EXEC sys.sp_indexes_managed @Catalog, @Owner, @Table, @Name
+            const string sqlCommand = @"select
+	s.name AS constraint_schema,
+	si.name AS constraint_name,
+	st.name AS table_schema,
+	t.name AS table_name,
+	si.name AS index_name,
+	si.type_desc AS type_desc,
+	si.is_unique AS isunique,
+	si.is_unique_constraint AS is_unique_constraint
+from
+	sys.indexes si
+	INNER JOIN sys.objects o ON o.object_id = si.object_id
+    INNER JOIN sys.tables t ON si.object_id = t.object_id 
+	INNER JOIN  sys.schemas s  ON s.schema_id = o.schema_id
+	INNER JOIN  sys.schemas st  ON st.schema_id = t.schema_id
+where
+	(st.name = @schemaOwner or (@schemaOwner is null)) and 
+	(t.name = @tableName or (@tableName is null))
+order by t.name, si.name ";
+            return CommandForTable(tableName, connection, IndexesCollectionName, sqlCommand);
         }
 
         public override void PostProcessing(DatabaseTable databaseTable)

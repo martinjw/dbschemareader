@@ -33,7 +33,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "SCHEMA";
             if (!dt.Columns.Contains(TableKey)) TableKey = "TABLE";
             if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = "POSITION";
-            if (!dt.Columns.Contains(ColumnKey)) ColumnKey = "NAME";
+            if (!dt.Columns.Contains(ColumnKey) && Key != "NAME") ColumnKey = "NAME";
             //devart.data.postgresql
             if (!dt.Columns.Contains(Key)) Key = "indexname";
             //sqlite
