@@ -20,6 +20,7 @@ namespace DatabaseSchemaReader.Conversion
                 table.PrimaryKey.Name = "PRIMARY";
                 table.PrimaryKey.Columns.AddRange(table.Columns.Where(c => c.IsPrimaryKey).Select(c => c.Name));
                 table.PrimaryKey.RefersToTable = table.Name;
+                table.PrimaryKey.RefersToSchema = table.SchemaOwner;
             }
         }
     }

@@ -36,7 +36,8 @@ namespace DatabaseSchemaReader.DataSchema
 
             foreach (var foreignKeyChild in table.ForeignKeyChildren)
             {
-                var deleteKeys = foreignKeyChild.ForeignKeys.Where(x => x.RefersToTable == table.Name).ToList();
+                var deleteKeys = foreignKeyChild.ForeignKeys
+                    .Where(x => x.RefersToTable == table.Name && x.RefersToSchema == table.SchemaOwner).ToList();
                 foreach (var fk in deleteKeys)
                 {
                     foreignKeyChild.RemoveForeignKey(fk);
