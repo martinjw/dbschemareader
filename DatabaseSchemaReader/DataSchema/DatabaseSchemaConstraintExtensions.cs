@@ -83,7 +83,29 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="foreignKeyName">Name of the foreign key.</param>
         /// <param name="foreignTableName">Name of the foreign table.</param>
         /// <returns></returns>
-        public static DatabaseColumn AddForeignKey(this DatabaseColumn databaseColumn, string foreignKeyName, string foreignTableName)
+        public static DatabaseColumn AddForeignKey(this DatabaseColumn databaseColumn,
+            string foreignKeyName,
+            string foreignTableName)
+        {
+            return AddForeignKey(databaseColumn, foreignKeyName, foreignTableName, null);
+        }
+        /// <summary>
+        /// Adds a foreign key with a single column
+        /// </summary>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="foreignKeyName">Name of the foreign key.</param>
+        /// <param name="foreignTableName">Name of the foreign table.</param>
+        /// <param name="foreignTableSchemaOwner">The foreign table schema owner.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// databaseColumn;databaseColumn must not be null
+        /// or
+        /// foreignTableName;foreignTableName must not be null
+        /// </exception>
+        public static DatabaseColumn AddForeignKey(this DatabaseColumn databaseColumn,
+            string foreignKeyName,
+            string foreignTableName,
+            string foreignTableSchemaOwner)
         {
             if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
             if (string.IsNullOrEmpty(foreignTableName)) throw new ArgumentNullException("foreignTableName", "foreignTableName must not be null");
@@ -97,14 +119,24 @@ namespace DatabaseSchemaReader.DataSchema
                 ConstraintType = ConstraintType.ForeignKey,
                 Name = foreignKeyName,
                 TableName = table.Name,
-                RefersToTable = foreignTableName
+                RefersToTable = foreignTableName,
+                RefersToSchema = foreignTableSchemaOwner,
             };
             foreignKey.Columns.Add(databaseColumn.Name);
             table.AddConstraint(foreignKey);
             databaseColumn.IsForeignKey = true;
 
             //add the inverse relationship
-            var fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);
+            DatabaseTable fkTable;
+            if (string.IsNullOrEmpty(foreignTableSchemaOwner))
+            {
+                fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);
+            }
+            else
+            {
+                fkTable = table.DatabaseSchema.FindTableByName(foreignTableName, foreignTableSchemaOwner);
+
+            }
             if (fkTable != null && !fkTable.ForeignKeyChildren.Contains(table))
             {
                 fkTable.ForeignKeyChildren.Add(table);
@@ -140,7 +172,7 @@ namespace DatabaseSchemaReader.DataSchema
             if (foreignTable == null) throw new ArgumentNullException("foreignTable", "foreignTable must not be null");
             var table = databaseColumn.Table;
             var fkTable = foreignTable(table.DatabaseSchema.Tables);
-            return databaseColumn.AddForeignKey(foreignKeyName, fkTable.Name);
+            return databaseColumn.AddForeignKey(foreignKeyName, fkTable.Name, fkTable.SchemaOwner);
         }
 
         /// <summary>

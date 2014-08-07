@@ -452,7 +452,8 @@ namespace DatabaseSchemaReader.SqlGen
             //drop foreign keys that refer to me
             foreach (var foreignKeyChild in databaseTable.ForeignKeyChildren)
             {
-                foreach (var foreignKey in foreignKeyChild.ForeignKeys.Where(fk => fk.RefersToTable == databaseTable.Name))
+                foreach (var foreignKey in foreignKeyChild.ForeignKeys
+                    .Where(fk => fk.RefersToTable == databaseTable.Name && fk.RefersToSchema == databaseTable.SchemaOwner))
                 {
                     //table may have been dropped before, so check it exists
                     sb.AppendLine(IfConstraintExists(foreignKeyChild, foreignKey.Name));

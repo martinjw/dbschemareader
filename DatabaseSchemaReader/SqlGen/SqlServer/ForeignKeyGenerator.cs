@@ -65,8 +65,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             sb.AppendLine("ALTER TABLE [" + table.Name + "]");
             var cols = string.Join(", ", foreignKey.Columns.ToArray());
             var referencedTableName = foreignKey.RefersToTable;
+            var referencedSchemaName = foreignKey.RefersToSchema;
             //find the referenced table's primary key
-            var refTable = _schema.Tables.Find(t => t.Name == referencedTableName);
+            var refTable = _schema.Tables.Find(t => t.Name == referencedTableName && t.SchemaOwner == referencedSchemaName);
             var refPrimaryKey = refTable.PrimaryKey;
             var refcols = string.Join(", ", refPrimaryKey.Columns.ToArray());
 
