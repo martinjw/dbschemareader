@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System.Collections.Generic;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -7,13 +8,16 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static void Prepare(DatabaseSchema schema, INamer namer)
         {
-            //no check for duplicate names
+            //now with simple check for duplicate names
+            var tableNames = new List<string>();
             //if NetNames are already set, they are not overridden
 
             foreach (var table in schema.Tables)
             {
                 if (string.IsNullOrEmpty(table.NetName))
                     table.NetName = namer.Name(table);
+                FixDuplicateName(tableNames, table);
+                tableNames.Add(table.NetName);
                 foreach (var column in table.Columns)
                 {
                     Prepare(column, namer);
@@ -23,6 +27,8 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 if (string.IsNullOrEmpty(view.NetName))
                     view.NetName = namer.Name(view);
+                FixDuplicateName(tableNames, view);
+                tableNames.Add(view.NetName);
                 foreach (var column in view.Columns)
                 {
                     Prepare(column, namer);
@@ -39,6 +45,30 @@ namespace DatabaseSchemaReader.CodeGen
                 foreach (var sproc in package.StoredProcedures)
                 {
                     PrepareStoredProcedureNames(sproc, namer);
+                }
+            }
+        }
+
+        private static void FixDuplicateName(ICollection<string> tableNames, DatabaseTable table)
+        {
+            var netName = table.NetName;
+            if (!tableNames.Contains(netName)) return;
+            //first we try to add the schema as a prefix (eg DboCategory).
+            var schemaOwner = NameFixer.ToPascalCase(table.SchemaOwner);
+            var name = schemaOwner + netName;
+            if (!tableNames.Contains(name))
+            {
+                table.NetName = name;
+                return;
+            }
+            //let's try suffixes- just count up to 100, and if we find a free one, use it
+            for (var i = 0; i < 100; i++)
+            {
+                name = netName + "1";
+                if (!tableNames.Contains(name))
+                {
+                    table.NetName = name;
+                    return;
                 }
             }
         }
