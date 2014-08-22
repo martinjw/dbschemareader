@@ -62,7 +62,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (!directory.Exists)
                 throw new InvalidOperationException("Directory does not exist: " + directory.FullName);
 
-            var pw = new ProjectWriter(_codeWriterSettings.Namespace);
+            var pw = CreateProjectWriter();
 
             InitMappingProjects(directory, pw);
             _mappingNamer = new MappingNamer();
@@ -117,6 +117,21 @@ namespace DatabaseSchemaReader.CodeGen
                 WriteUnitTest(directory.FullName, contextName);
 
             WriteProjectFile(directory, pw);
+        }
+
+        /// <summary>
+        /// Creates the project writer, using either 2008 or 2010 format.
+        /// </summary>
+        /// <returns></returns>
+        private ProjectWriter CreateProjectWriter()
+        {
+            var pw = new ProjectWriter(_codeWriterSettings.Namespace);
+            var vs2010 = _codeWriterSettings.WriteProjectFile;
+            var vs2008 = _codeWriterSettings.WriteProjectFileNet35;
+            if (IsCodeFirst()) vs2010 = true;
+            //you can specify 2008 AND 2010.
+            if (vs2010 && !vs2008) pw.UpgradeTo2010();
+            return pw;
         }
 
         private static string WriteClassFile(DirectoryInfo directory, string className, string txt)
@@ -219,7 +234,10 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 case CodeTarget.PocoNHibernateFluent:
                     pw.AddNHibernateReference();
-                    WritePackagesConfig(directory, pw, PackagesWriter.WriteFluentNHibernateNet4());
+                    var packs = _codeWriterSettings.WriteProjectFileNet35 ?
+                            PackagesWriter.WriteFluentNHibernateNet35() :
+                            PackagesWriter.WriteFluentNHibernateNet4();
+                    WritePackagesConfig(directory, pw, packs);
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
                 case CodeTarget.PocoRiaServices:

@@ -12,6 +12,7 @@ namespace DatabaseSchemaReader.CodeGen
         private readonly XDocument _document;
         private readonly XContainer _itemGroup;
         private bool _hasOracle;
+        private bool _is2010;
 
         public ProjectWriter(string @namespace)
         {
@@ -68,15 +69,15 @@ namespace DatabaseSchemaReader.CodeGen
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data.Oracle.Entity, Version=8.2.103.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data.Oracle.Entity, Version=8.4.171.6, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data.Oracle, Version=8.2.103.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data.Oracle, Version=8.4.171.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data, Version=5.0.895.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data, Version=5.0.963.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             _hasOracle = true;
         }
 
@@ -92,12 +93,16 @@ namespace DatabaseSchemaReader.CodeGen
             reference.AddAfterSelf(element);
             element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"),
                 new XElement(_xmlns + "SpecificVersion", "false"),
-                new XElement(_xmlns + "HintPath", @"..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll"));
+                new XElement(_xmlns + "HintPath", (_is2010 ?
+                    @"..\packages\NHibernate.4.0.0.4000\lib\Net40\NHibernate.dll" :
+                    @"..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll")));
             reference.AddAfterSelf(element);
 
             element = new XElement(_xmlns + "Reference", new XAttribute("Include", "Iesi.Collections"),
                 new XElement(_xmlns + "SpecificVersion", "false"),
-                new XElement(_xmlns + "HintPath", @"..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll"));
+                new XElement(_xmlns + "HintPath", (_is2010 ?
+                    @"..\packages\Iesi.Collections.4.0.0.4000\lib\Net40\Iesi.Collections.dll" :
+                    @"..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll")));
             reference.AddAfterSelf(element);
         }
 
@@ -127,6 +132,7 @@ namespace DatabaseSchemaReader.CodeGen
             projectElement.SetAttributeValue("ToolsVersion", "4.0");
             var target = projectElement.Descendants(_xmlns + "TargetFrameworkVersion").First();
             target.SetValue("v4.0");
+            _is2010 = true;
         }
 
         public string Write()
