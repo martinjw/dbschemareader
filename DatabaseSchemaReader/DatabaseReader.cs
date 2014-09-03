@@ -319,6 +319,10 @@ namespace DatabaseSchemaReader
                     var converter = new SchemaConstraintConverter(ds.Tables[_schemaReader.UniqueKeysCollectionName], ConstraintType.UniqueKey);
                     table.AddConstraints(converter.Constraints());
                 }
+                if (ds.Tables.Contains(_schemaReader.ComputedColumnsCollectionName))
+                {
+                    SchemaConstraintConverter.AddComputed(ds.Tables[_schemaReader.ComputedColumnsCollectionName], table);
+                }
 
                 var indexConverter = new IndexConverter(ds.Tables[_schemaReader.IndexColumnsCollectionName], null);
                 table.Indexes.AddRange(indexConverter.Indexes(tableName, schemaOwner));
