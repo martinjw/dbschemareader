@@ -44,6 +44,10 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(RefersToTableKey)) RefersToTableKey = "PK_TABLE_NAME";
             if (!dt.Columns.Contains(RefersToKey)) RefersToKey = "PK_NAME";
 
+            //oldedb schema. Thanks to safepage.
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "TABLE_SCHEMA";
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "PK_TABLE_SCHEMA";
+
             if (!dt.Columns.Contains(SchemaKey)) SchemaKey = null;
             if (!dt.Columns.Contains(RefersToKey)) RefersToKey = null;
             if (!dt.Columns.Contains(RefersToTableKey)) RefersToTableKey = null;
