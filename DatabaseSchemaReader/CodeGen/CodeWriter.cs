@@ -328,7 +328,13 @@ namespace DatabaseSchemaReader.CodeGen
             var path = Path.Combine(directoryPath, fileName);
             File.WriteAllText(path, txt);
             pw.AddClass(procedures + @"\" + fileName);
-            if (sw.RequiresOracleReference) pw.AddOracleReference();
+            if (sw.RequiresOracleReference)
+            {
+                if (sw.RequiresDevartOracleReference)
+                    pw.AddDevartOracleReference();
+                else
+                    pw.AddOracleReference();
+            }
 
             if (sw.HasResultClass)
             {

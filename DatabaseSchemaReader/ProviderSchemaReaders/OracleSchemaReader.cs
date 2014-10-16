@@ -338,6 +338,44 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )";
             return CommandForTable(tableName, conn, TriggersCollectionName, sqlCommand);
         }
 
+        protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
+        {
+            //for latest Devart (8.4.254.0, possibly some earlier versions) 
+            //the GetSchema for ALL_ARGUMENTS doesn't get package parameters unless specified
+            //Devart.Data.Oracle.a4, method m 
+            if (connection.GetType().FullName.StartsWith("Devart", StringComparison.OrdinalIgnoreCase))
+            {
+                //don't filter by package. This is approximately the same as System.Data.OracleClient
+                const string sqlCommand = @"SELECT 
+    OWNER, PACKAGE_NAME, OBJECT_NAME, ARGUMENT_NAME, POSITION, SEQUENCE, DEFAULT_VALUE, DEFAULT_LENGTH, 
+    IN_OUT, DATA_LENGTH, DATA_PRECISION, DATA_SCALE , DATA_TYPE 
+FROM ALL_ARGUMENTS 
+WHERE 
+    (OWNER= :schemaOwner OR :schemaOwner is null) AND 
+    (OBJECT_NAME = :PROCEDURENAME OR :PROCEDURENAME is null)";
+                var dt = CreateDataTable("Arguments");
+                using (DbDataAdapter da = Factory.CreateDataAdapter())
+                {
+                    using (DbCommand cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = sqlCommand;
+
+                        EnsureOracleBindByName(cmd);
+
+                        cmd.Parameters.Add(
+                            AddDbParameter("schemaOwner", Owner));
+                        cmd.Parameters.Add(
+                            AddDbParameter("PROCEDURENAME", storedProcedureName));
+                        da.SelectCommand = cmd;
+
+                        da.Fill(dt);
+                    }
+                }
+                return dt;
+            }
+            return base.StoredProcedureArguments(storedProcedureName, connection);
+        }
+
 
         protected override DataTable CommandForTable(string tableName, DbConnection conn, string collectionName, string sqlCommand)
         {

@@ -26,7 +26,7 @@
 <packages>
   <package id=""FluentNHibernate"" version=""1.4.0.0"" targetFramework=""net40"" />
   <package id=""Iesi.Collections"" version=""4.0.0.4000"" targetFramework=""net40"" />
-  <package id=""NHibernate"" version=""4.0.0.4000"" targetFramework=""net40"" />
+  <package id=""NHibernate"" version=""4.0.1.4000"" targetFramework=""net40"" />
 </packages>";
         }
     }
