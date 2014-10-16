@@ -42,6 +42,10 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
         {
             get { return _logic.HasRefCursors; }
         }
+        public bool RequiresDevartOracleReference
+        {
+            get { return _logic.HasRefCursors && _logic.IsDevart; }
+        }
 
         public string Write()
         {
@@ -116,7 +120,10 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             if (_logic.HasRefCursors)
             {
                 //could also be ODP, Devart etc.
-                _cb.AppendLine("using System.Data.OracleClient; //contains a Ref Cursor");
+                if (_logic.IsDevart)
+                    _cb.AppendLine("using Devart.Data.Oracle; //contains a Ref Cursor");
+                else
+                    _cb.AppendLine("using System.Data.OracleClient; //contains a Ref Cursor");
             }
             _cb.AppendLine("using System.Diagnostics;");
         }
@@ -145,6 +152,11 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
                 var fullName = _storedProcedure.FullName;
                 _cb.AppendLine("cmd.CommandText = @\"" + fullName + "\";");
                 _cb.AppendLine("cmd.CommandType = CommandType.StoredProcedure;");
+                if (_logic.IsDevart)
+                {
+                    _cb.AppendLine("//Performance. Consider adding DescribeStoredProcedures=false to connection string");
+                    _cb.AppendLine("((OracleCommand)cmd).ImplicitRefCursors = false;");
+                }
 
                 foreach (var argument in _storedProcedure.Arguments)
                 {
@@ -348,7 +360,10 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             // you may need DbType on output parameters
             if (isRefCursor)
             {
-                _cb.AppendLine(pName + ".OracleType = OracleType.Cursor;");
+                if (_logic.IsDevart)
+                    _cb.AppendLine(pName + ".OracleDbType = OracleDbType.Cursor;");
+                else
+                    _cb.AppendLine(pName + ".OracleType = OracleType.Cursor;");
                 return;
             }
             var dt = argument.DataType;

@@ -63,6 +63,17 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             get { return !HasOutputParameters && _storedProcedure.ResultSets.Count == 1; }
         }
 
+        public bool IsDevart
+        {
+            get
+            {
+                var databaseSchema = _storedProcedure.DatabaseSchema;
+                if (databaseSchema == null) return false;
+
+                return databaseSchema.Provider.StartsWith("Devart", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         public bool HasRefCursors
         {
             get { return _storedProcedure.Arguments.Any(argument => string.Equals("REF CURSOR", argument.DatabaseDataType, StringComparison.OrdinalIgnoreCase)); }

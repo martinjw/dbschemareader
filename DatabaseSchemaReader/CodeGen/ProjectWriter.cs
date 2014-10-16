@@ -69,15 +69,15 @@ namespace DatabaseSchemaReader.CodeGen
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data.Oracle.Entity, Version=8.4.171.6, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data.Oracle.Entity, Version=8.4.264.6, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data.Oracle, Version=8.4.171.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data.Oracle, Version=8.4.264.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
                             new XAttribute("Include",
-                                "Devart.Data, Version=5.0.963.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
+                                "Devart.Data, Version=5.0.1056.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL")));
             _hasOracle = true;
         }
 
@@ -94,7 +94,7 @@ namespace DatabaseSchemaReader.CodeGen
             element = new XElement(_xmlns + "Reference", new XAttribute("Include", "NHibernate"),
                 new XElement(_xmlns + "SpecificVersion", "false"),
                 new XElement(_xmlns + "HintPath", (_is2010 ?
-                    @"..\packages\NHibernate.4.0.0.4000\lib\Net40\NHibernate.dll" :
+                    @"..\packages\NHibernate.4.0.1.4000\lib\Net40\NHibernate.dll" :
                     @"..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll")));
             reference.AddAfterSelf(element);
 
