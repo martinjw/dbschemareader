@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -8,6 +10,14 @@ namespace DatabaseSchemaReader.DataSchema
     [Serializable]
     public partial class DatabaseColumn : NamedSchemaObject
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseColumn"/> class.
+        /// </summary>
+        public DatabaseColumn()
+        {
+            ForeignKeyTableNames = new List<string>();
+        }
+
         #region Basic Properties
 
         /// <summary>
@@ -20,12 +30,25 @@ namespace DatabaseSchemaReader.DataSchema
         public string DbDataType { get; set; }
 
         /// <summary>
-        /// If <see cref="IsForeignKey"/> is true, gets or sets the name of the foreign key table. <see cref="ForeignKeyTable"/> may contain the actual table.
+        /// If <see cref="IsForeignKey"/> is true, gets or sets the name of the foreign key table. <see cref="ForeignKeyTable"/> may contain the actual table. If you have composite keys, consider <see cref="ForeignKeyTableNames"/> instead.
         /// </summary>
         /// <value>
         /// The name of the foreign key table.
         /// </value>
-        public string ForeignKeyTableName { get; set; }
+        public string ForeignKeyTableName
+        {
+            get { return ForeignKeyTableNames.FirstOrDefault(); }
+            set { ForeignKeyTableNames.Add(value); }
+        }
+
+
+        /// <summary>
+        /// If <see cref="IsForeignKey"/> is true, gets or sets the foreign key table names. If you have no composite keys, <see cref="ForeignKeyTableName" /> is sufficient.
+        /// </summary>
+        /// <value>
+        /// The names of the foreign key table.
+        /// </value>
+        public IList<string> ForeignKeyTableNames { get; private set; }
 
         /// <summary>
         /// Gets or sets the length if this is string (VARCHAR) or character (CHAR) type data. In SQLServer, a length of -1 indicates VARCHAR(MAX).

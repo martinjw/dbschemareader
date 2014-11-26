@@ -78,6 +78,7 @@
     <Compile Include="Conversion\SchemaProcedureConverterTest.cs" />
     <Compile Include="DatabaseReaderTest.cs" />
     <Compile Include="DataSchema\CanSerializeTest.cs" />
+    <Compile Include="DataSchema\CompositeKeyTest.cs" />
     <Compile Include="DataSchema\ForeignKeyTests.cs" />
     <Compile Include="DataSchema\ManyToManyExtensionsTest.cs" />
     <Compile Include="DataSchema\DatabaseConstraintTest.cs" />

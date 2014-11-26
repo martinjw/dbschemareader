@@ -28,11 +28,15 @@ namespace DatabaseSchemaReader.DataSchema
                     c.DatabaseSchema = databaseSchema;
                     c.Table = table;
                     //foreign keys
-                    if (string.IsNullOrEmpty(c.ForeignKeyTableName)) return;
-                    DatabaseTable fkTable = databaseSchema.FindTableByName(c.ForeignKeyTableName);
-                    c.ForeignKeyTable = fkTable;
-                    if (fkTable != null && !fkTable.ForeignKeyChildren.Contains(table))
-                        fkTable.ForeignKeyChildren.Add(table);
+                    //if (string.IsNullOrEmpty(c.ForeignKeyTableName)) return;
+                    if (c.ForeignKeyTableNames.Count == 0) return;
+                    foreach (var fkTableName in c.ForeignKeyTableNames)
+                    {
+                        DatabaseTable fkTable = databaseSchema.FindTableByName(fkTableName);
+                        c.ForeignKeyTable = fkTable;
+                        if (fkTable != null && !fkTable.ForeignKeyChildren.Contains(table))
+                            fkTable.ForeignKeyChildren.Add(table);
+                    }
                 });
             });
             //update schema
