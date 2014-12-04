@@ -13,6 +13,20 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
         }
 
+        protected override DataTable IdentityColumns(string tableName, DbConnection connection)
+        {
+            //thanks to dnparsons
+            const string sqlCommand = @"SELECT
+            table_schema AS SchemaOwner,
+            table_name AS TableName,
+            column_name AS ColumnName,
+            1 AS IdentitySeed,
+            1 AS IdentityIncrement
+            from VistaDBColumnSchema() where is_identity = true";
+
+            return CommandForTable(tableName, connection, IdentityColumnsCollectionName, sqlCommand);
+        }
+
         public override DataTable ViewColumns(string viewName)
         {
             using (DbConnection connection = Factory.CreateConnection())
