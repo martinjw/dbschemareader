@@ -20,7 +20,8 @@ namespace DatabaseSchemaReader.Conversion
 
         public IEnumerable<DatabaseTrigger> Triggers(string tableName)
         {
-            return _triggers.Where(x => x.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase));
+            //#1526 possible null exception on trigger.TableName
+            return _triggers.Where(x => string.Equals(x.TableName, tableName, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

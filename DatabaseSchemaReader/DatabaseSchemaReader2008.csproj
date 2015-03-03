@@ -156,6 +156,7 @@
     <Compile Include="Filters\Exclusions.cs" />
     <Compile Include="Filters\Filter.cs" />
     <Compile Include="Filters\IFilter.cs" />
+    <Compile Include="Filters\PrefixFilter.cs" />
     <Compile Include="IDatabaseReader.cs" />
     <Compile Include="ProviderSchemaReaders\Db2SchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\IngresSchemaReader.cs" />

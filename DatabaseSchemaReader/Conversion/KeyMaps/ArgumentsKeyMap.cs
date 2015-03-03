@@ -29,6 +29,9 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!arguments.Columns.Contains(PrecisionKey)) PrecisionKey = "DATA_PRECISION";
             if (!arguments.Columns.Contains(ScaleKey)) ScaleKey = "DATA_SCALE";
 
+            //odbc
+            if (!arguments.Columns.Contains(OwnerKey)) OwnerKey = "PROCEDURE_SCHEM";
+
             //Devart.Data.Oracle
             CheckDevart(arguments);
 
