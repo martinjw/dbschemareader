@@ -1,4 +1,6 @@
-﻿using DatabaseSchemaReader;
+﻿using System.Runtime.Remoting.Messaging;
+using DatabaseSchemaReader;
+using DatabaseSchemaReader.Filters;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -33,6 +35,13 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
+            //exclude a lot of system sprocs that get picked up. This speeds us up massively.
+            dbReader.Exclusions.StoredProcedureFilter = new PrefixFilter("APEX", "ANY", "AGGR", "AQ$", "BLAST",
+                "CTX", "DBMS", "DM_", "DBU", "DEVELOP", "DICT", "DIV", "DIU", "DRI", "DRV", "HTF",
+                "FTP", "FUNCSTATS", "HS$", "HH", "HTML", "HTP", "HTTP", "KUP", "LCR", "MVAGG",
+                "ODC", "ODM", "OGC", "OLAP", "ORA", "OUTLN", "OWA", "PLIT", "PRIVAT", "PRVT",
+                "RE$", "SCHEDULER$", "SDO", "SERVER_", "SQL_", "ST_", "STANDARD", "SYS_", "TBLAST", "TFM", "TRANSFORM_",
+                "URI", "UTL_", "WPG_", "WPIUTL", "WRI$", "WWV", "XDB", "XML");
             dbReader.Owner = "HR";
             var schema = dbReader.ReadAll();
             var employees = schema.FindTableByName("EMPLOYEES");

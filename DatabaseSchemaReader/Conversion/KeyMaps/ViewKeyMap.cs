@@ -25,6 +25,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "SCHEMA";
             //Devart.Data.MySQL
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "DATABASE";
+            //ODBC
+            if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "TABLE_SCHEM";
 
             if (!dt.Columns.Contains(TypeKey)) TypeKey = null;
         }

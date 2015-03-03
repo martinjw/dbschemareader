@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader;
+using DatabaseSchemaReader.Filters;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -20,6 +21,23 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class SqlServerNorthwind
     {
+
+        [TestMethod]
+        public void ReadNorthwindUsingOdbc()
+        {
+            //you'll get much more information from System.Data.SqlClient
+            const string providername = "System.Data.Odbc";
+            const string connectionString = @"Driver={SQL Server};Server=.\SQLEXPRESS;Database=Northwind;Trusted_Connection=Yes;";
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername) { Owner = "dbo" };
+            //this is slow because it pulls in sp_ stored procedures and system views.
+            dbReader.Exclusions.StoredProcedureFilter = new PrefixFilter("sp_", "fn_", "dm_", "xp_");
+            var schema = dbReader.ReadAll();
+
+            Assert.IsTrue(schema.Tables.Count > 0);
+        }
+
 
         [TestMethod]
         public void ReadNorthwindProducts()
@@ -128,6 +146,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
                 Assert.IsNotNull(sql, "ProcedureSource should also fill in the view source");
             }
         }
+
 
         [TestMethod]
         public void ReadNorthwindProductsWithCodeGen()
