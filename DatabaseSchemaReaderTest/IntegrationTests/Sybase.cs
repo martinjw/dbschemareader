@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -19,7 +20,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     public class Sybase
     {
 
-        [TestMethod]
+        [TestMethod, TestCategory("Sybase")]
         public void SybaseAseTest()
         {
             //using pubs3 with default sa account with Ase Developer Edition 15 on localhost (had to use IP address to get it to connect)
@@ -36,7 +37,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsTrue(schema.Tables.Count > 0);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Sybase")]
         public void SybaseAnyWhereTest()
         {
             const string providername = "iAnyWhere.Data.SQLAnyWhere";
@@ -52,7 +53,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsTrue(schema.Tables.Count > 0);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Sybase")]
         public void SybaseUltraLiteTest()
         {
             const string providername = "iAnyWhere.Data.UltraLite";

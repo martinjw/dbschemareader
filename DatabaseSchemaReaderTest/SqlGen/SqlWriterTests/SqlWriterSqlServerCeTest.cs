@@ -16,6 +16,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -59,7 +60,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             return _categoriesTable;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServerCe")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -70,7 +71,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServerCe")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -80,7 +81,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServerCe")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -125,7 +126,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServerCe")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange

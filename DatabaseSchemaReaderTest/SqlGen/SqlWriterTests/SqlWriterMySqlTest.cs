@@ -13,6 +13,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -49,7 +50,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             return _categoriesTable;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -60,7 +61,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -70,7 +71,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -80,7 +81,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -90,7 +91,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange
@@ -114,12 +115,12 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
                         cmd.Transaction = transaction;
                         foreach (var column in table.Columns)
                         {
-                            if(column.IsAutoNumber) continue;
+                            if (column.IsAutoNumber) continue;
                             var par = cmd.CreateParameter();
                             par.ParameterName = writer.ParameterName(column.Name);
 
-                                object value = DummyDataCreator.CreateData(column);
-                                par.Value = value ?? DBNull.Value;
+                            object value = DummyDataCreator.CreateData(column);
+                            par.Value = value ?? DBNull.Value;
                             cmd.Parameters.Add(par);
                         }
                         identity = Convert.ToInt32(cmd.ExecuteScalar());

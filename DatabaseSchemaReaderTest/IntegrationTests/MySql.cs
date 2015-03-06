@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -20,7 +21,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class MySql
     {
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void MySqlTest()
         {
             const string providername = "MySql.Data.MySqlClient";
@@ -37,7 +38,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual(4, table.Columns.Count);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void MySqlUnsignedIntegersTest()
         {
             const string providername = "MySql.Data.MySqlClient";
@@ -57,7 +58,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
 
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void MySqlViaDevartTest()
         {
             const string providername = "Devart.Data.MySql";

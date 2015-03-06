@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.ProviderSchemaReaders
@@ -23,7 +24,7 @@ namespace DatabaseSchemaReaderTest.ProviderSchemaReaders
         /// <summary>
         /// Test whether IsAzureSqlDatabase is correctly set to true when connecting to an SQL Database instance on Azure 
         /// </summary>
-        [TestMethod]
+        [TestMethod, TestCategory("SqlAzure")]
         public void DetectsSqlAzure()
         {
             const string providername = "System.Data.SqlClient";
@@ -39,11 +40,11 @@ namespace DatabaseSchemaReaderTest.ProviderSchemaReaders
         /// <summary>
         /// Test whether IsAzureSqlDatabase is correctly set to false when connecting to regular SQL Server
         /// </summary>
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void DetectsSqlServer()
         {
             const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
+            var connectionString = ConnectionStrings.Northwind;
             ProviderChecker.Check(providername, connectionString);
             var target = new SqlAzureOrSqlServerSchemaReader(connectionString, providername);
 

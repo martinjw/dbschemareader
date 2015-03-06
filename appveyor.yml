@@ -1,0 +1,43 @@
+#appveyor build. Validated at https://ci.appveyor.com/tools/validate-yaml
+configuration: Release
+
+# enable service required for build/tests
+services:
+  - mssql2012sp1        # start SQL Server 2012 SP1 Express
+  - mssql2008r2sp2      # start SQL Server 2008 R2 SP2 Express
+  - mysql               # start MySQL 5.6 service
+  - postgresql          # start PostgreSQL 9.3 service
+
+install:
+  #so we can use msql.exe and psql.exe
+- SET PATH=C:\Program Files\MySql\MySQL Server 5.6\bin;C:\Program Files\PostgreSQL\9.3\bin;%PATH%
+
+#Server=(local)\SQL2008R2SP2;Database=master;User ID=sa;Password=Password12!
+#Server=(local)\SQL2012SP1;Database=master;User ID=sa;Password=Password12!
+
+before_test:
+  - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_database_northwind.sql"
+  - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -d "NorthwindDsr" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_schema_northwind.sql"
+test:
+  categories:
+    except:
+      - Access # could be done
+      - Cache
+      - DataDirect.Oracle
+      - DataDirect.SqlServer
+      - DB2
+      - Devart.Oracle
+      - Devart.Postgresql
+      - Devart.SqlServer
+      - Firebird
+      - Ingres
+      - MySql # could be done
+      - Oracle
+      - Postgresql # could be done
+      - SqlAzure
+      - SQLite # could be done
+      - SqlServer.AdventureWorks
+      - SqlServer.Odbc # could be done
+      - SqlServerCe # could be done
+      - Sybase
+      - VistaDb

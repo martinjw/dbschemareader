@@ -42,7 +42,7 @@ namespace DatabaseSchemaReaderTest
         public static DatabaseReader GetNorthwindReader()
         {
             const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
+            var connectionString = ConnectionStrings.Northwind;
             ProviderChecker.Check(providername, connectionString);
 
             var northwindReader = new DatabaseReader(connectionString, providername);

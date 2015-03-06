@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations
@@ -19,8 +20,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
         private const string ProviderName = "System.Data.SQLite";
         private const string DatabaseFile = @"C:\Data\northwind.db";
         private const string ConnectionString = "Data Source=" + DatabaseFile;
- 
-        [TestMethod]
+
+        [TestMethod, TestCategory("SQLite")]
         public void TestMigration()
         {
             //arrange

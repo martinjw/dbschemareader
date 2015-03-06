@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Globalization;
-using DatabaseSchemaReader;
 using DatabaseSchemaReader.Data;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReaderTest.IntegrationTests;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -14,6 +12,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
@@ -156,7 +155,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
 
 
         const string Providername = "System.Data.SqlClient";
-        const string ConnectionString = ConnectionStrings.Northwind;
+        readonly string ConnectionString = ConnectionStrings.Northwind;
 
 
         [TestMethod]

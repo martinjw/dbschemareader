@@ -34,3 +34,36 @@ There are also tests using other ADO providers:
 * Oracle's ODP (http://www.oracle.com/technetwork/topics/dotnet/index-085163.html), which is free. 
 * Devart (http://www.devart.com/dotconnect/oracle/overview1.html) has free Oracle, SqlServer, MySql, PostgreSql and SQLite providers as well as licensed ones. I've tested both free and professional Oracle drivers; they are identical for this functionality.
 * DataDirect (http://web.datadirect.com/products/net/index.html) has some trial providers
+
+# AppVeyor
+Integration tests for databases apart from SqlServer are identified by TestCategoryAttribute.
+
+DatabaseScripts contains initialization for Northwind for SqlServer. Include the following in appveyor.yml:
+services:
+  - mssql2012sp1        # start SQL Server 2012 SP1 Express (or any other SqlServer)
+before_test:
+  - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_database_northwind.sql"
+  - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -d "NorthwindDsr" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_schema_northwind.sql"
+test:
+  categories:
+    except:
+      - Access # could be done
+      - Cache
+      - DataDirect.Oracle
+      - DataDirect.SqlServer
+      - DB2
+      - Devart.Oracle
+      - Devart.Postgresql
+      - Devart.SqlServer
+      - Firebird
+      - Ingres
+      - MySql # could be done
+      - Oracle
+      - Postgresql # could be done
+      - SqlAzure
+      - SQLite # could be done
+      - SqlServer.AdventureWorks
+      - SqlServer.Odbc # could be done
+      - SqlServerCe # could be done
+      - Sybase
+      - VistaDb

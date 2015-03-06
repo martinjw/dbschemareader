@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -18,7 +19,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class IntersystemsCache
     {
-        [TestMethod]
+        [TestMethod, TestCategory("Cache")]
         public void CacheTest()
         {
             //  <system.data>

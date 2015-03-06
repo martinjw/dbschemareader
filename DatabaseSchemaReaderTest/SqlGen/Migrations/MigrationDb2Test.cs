@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations
@@ -19,7 +20,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
         const string ProviderName = "IBM.Data.DB2";
         const string ConnectionString = @"Server=localhost:50000;UID=db2admin;pwd=db2;Database=Sample";
 
-        [TestMethod]
+        [TestMethod, TestCategory("DB2")]
         public void TestMigration()
         {
 

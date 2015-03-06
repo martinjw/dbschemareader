@@ -1,5 +1,4 @@
-﻿using System.Runtime.Remoting.Messaging;
-using DatabaseSchemaReader;
+﻿using DatabaseSchemaReader;
 using DatabaseSchemaReader.Filters;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -27,7 +27,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     {
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void OleDb()
         {
             const string providername = "System.Data.OleDb";
@@ -52,7 +52,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void Oracle()
         {
             const string providername = "System.Data.OracleClient";
@@ -69,7 +69,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual(11, table.Columns.Count);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void SqlServer()
         {
             const string providername = "System.Data.SqlClient";

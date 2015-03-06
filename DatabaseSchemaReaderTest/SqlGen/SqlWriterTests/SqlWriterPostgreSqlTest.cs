@@ -13,6 +13,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -52,7 +53,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             return _table;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadTable();
@@ -63,7 +64,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadTable();
@@ -73,7 +74,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadTable();
@@ -83,7 +84,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadTable();
@@ -93,7 +94,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange

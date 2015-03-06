@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -24,7 +25,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         private const string ProviderName = "System.Data.SqlServerCe.4.0";
         private const string FilePath = @"C:\Data\northwind.sdf";
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServerCe")]
         public void SqlServerCe4Test()
         {
             if (!File.Exists(FilePath))
