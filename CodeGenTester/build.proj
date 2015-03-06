@@ -8,10 +8,12 @@
   
   <!-- targets -->
    
-  <Target Name="Run" DependsOnTargets="Build; Execute">
+  <Target Name="Run" DependsOnTargets="RestorePackages; Build; Execute">
     <Message Text="Done" />
   </Target>
-  
+  <Target Name="RestorePackages">
+    <Exec Command="&quot;..\tools\NuGet.exe&quot; restore &quot;CodeGen.TestRunner.sln&quot;" />
+  </Target>
   <Target Name="Build">
 	<Copy SourceFiles="..\bin\DatabaseSchemaReader.dll" DestinationFolder="$(OutputPath)" />
     <Message Text="Building CodeGenTester" />

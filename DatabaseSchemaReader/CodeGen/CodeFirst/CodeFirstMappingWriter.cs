@@ -38,13 +38,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         public string Write()
         {
 
-            _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
-            if (_table.PrimaryKeyColumn != null && !_table.PrimaryKeyColumn.IsAutoNumber)
-            {
-                //in EF v5 DatabaseGeneratedOption is in DataAnnotations.Schema
-                _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
-            }
-            _cb.AppendLine("using System.Data.Entity.ModelConfiguration;");
+            WriteUsings();
 
             MappingClassName = _mappingNamer.NameMappingClass(_table.NetName);
 
@@ -63,32 +57,66 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                         _cb.AppendLine("// Properties");
                         WriteColumns();
 
-                        foreach (var foreignKey in _table.ForeignKeys)
-                        {
-                            //we inherit from it instead (problem with self-joins)
-                            if (Equals(foreignKey.ReferencedTable(_table.DatabaseSchema), _inheritanceTable))
-                                continue;
+                        WriteForeignKeys();
 
-                            WriteForeignKey(foreignKey);
-                        }
-
-                        _cb.AppendLine("// Navigation properties");
-
-                        var hasTablePerTypeInheritance =
-                            (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
-
-                        foreach (var foreignKeyChild in _table.ForeignKeyChildren)
-                        {
-                            if (hasTablePerTypeInheritance && _table.IsSharedPrimaryKey(foreignKeyChild))
-                                continue;
-
-                            WriteForeignKeyCollection(foreignKeyChild);
-                        }
+                        WriteNavigationProperties();
                     }
                 }
             }
 
             return _cb.ToString();
+        }
+
+        private void WriteForeignKeys()
+        {
+            foreach (var foreignKey in _table.ForeignKeys)
+            {
+                //we inherit from it instead (problem with self-joins)
+                if (Equals(foreignKey.ReferencedTable(_table.DatabaseSchema), _inheritanceTable))
+                    continue;
+
+                WriteForeignKey(foreignKey);
+            }
+        }
+
+        private void WriteNavigationProperties()
+        {
+            _cb.AppendLine("// Navigation properties");
+
+            var hasTablePerTypeInheritance =
+                (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
+
+            foreach (var foreignKeyChild in _table.ForeignKeyChildren)
+            {
+                if (hasTablePerTypeInheritance && _table.IsSharedPrimaryKey(foreignKeyChild))
+                    continue;
+
+                WriteForeignKeyCollection(foreignKeyChild);
+            }
+        }
+
+        private void WriteUsings()
+        {
+            _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+
+            if (RequiresDataAnnotationsSchema())
+            {
+                //in EF v5 DatabaseGeneratedOption is in DataAnnotations.Schema
+                _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            }
+            _cb.AppendLine("using System.Data.Entity.ModelConfiguration;");
+        }
+
+        private bool RequiresDataAnnotationsSchema()
+        {
+            if (_table.PrimaryKeyColumn != null && !_table.PrimaryKeyColumn.IsAutoNumber) return true;
+            foreach (var column in _table.Columns)
+            {
+                if (column.IsComputed) return true;
+                if (column.DataType != null &&
+                    column.DataType.TypeName.Equals("timestamp", StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
         }
 
         private void MapTableName()
