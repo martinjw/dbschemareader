@@ -13,6 +13,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations
@@ -21,7 +22,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     public class MigrationSqlServerTest
     {
         private const string ProviderName = "System.Data.SqlClient";
-        const string ConnectionString = ConnectionStrings.Northwind;
+        readonly string ConnectionString = ConnectionStrings.Northwind;
         private readonly DbProviderFactory _factory;
 
         public MigrationSqlServerTest()

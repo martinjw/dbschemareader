@@ -193,6 +193,8 @@
     <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DatabaseScripts\create_database_northwind.sql" />
+    <Content Include="DatabaseScripts\create_schema_northwind.sql" />
     <Content Include="README.txt" />
     <Content Include="Utilities\EF\Catalog.edmx.sql" />
   </ItemGroup>

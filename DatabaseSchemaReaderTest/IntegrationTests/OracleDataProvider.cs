@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -20,7 +21,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class OracleDataProvider
     {
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void OracleOdp()
         {
             const string providername = "Oracle.DataAccess.Client";
@@ -37,7 +38,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual(11, table.Columns.Count);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void OracleManagedClient()
         {
             //tested using

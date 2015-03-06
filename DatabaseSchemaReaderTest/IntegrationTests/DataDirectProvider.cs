@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -21,7 +22,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class DataDirectProvider
     {
-        [TestMethod]
+        [TestMethod, TestCategory("DataDirect.SqlServer")]
         public void DataDirectSqlServer()
         {
             //not sql express
@@ -38,7 +39,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual(25, table.Columns.Count);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("DataDirect.Oracle")]
         public void DataDirectOracle()
         {
             const string providername = "DDTek.Oracle";

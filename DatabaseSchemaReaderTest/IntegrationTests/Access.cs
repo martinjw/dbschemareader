@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -18,7 +19,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     {
         //does not detect autonumber pks
 
-        [TestMethod]
+        [TestMethod, TestCategory("Access")]
         public void TestAccess97()
         {
             const string providername = "System.Data.OleDb";
@@ -40,7 +41,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsTrue(table.Columns.Count > 0);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Access")]
         public void TestAccess2007()
         {
             const string providername = "System.Data.OleDb";

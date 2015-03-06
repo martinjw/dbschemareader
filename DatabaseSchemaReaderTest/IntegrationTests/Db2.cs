@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -20,7 +21,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class Db2
     {
-        [TestMethod]
+        [TestMethod, TestCategory("DB2")]
         public void Db2Test()
         {
             const string providername = "IBM.Data.DB2";

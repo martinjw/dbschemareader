@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations
@@ -30,7 +31,7 @@ $$ LANGUAGE SQL;
 ALTER TABLE products ALTER COLUMN price SET DEFAULT 7.77;
  */
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestMigration()
         {
             //arrange

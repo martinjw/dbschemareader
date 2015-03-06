@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
@@ -17,7 +18,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
     public class ScriptWriterTest
     {
         const string Providername = "System.Data.SqlClient";
-        const string ConnectionString = ConnectionStrings.Northwind;
+        readonly string ConnectionString = ConnectionStrings.Northwind;
 
 
         [TestMethod]

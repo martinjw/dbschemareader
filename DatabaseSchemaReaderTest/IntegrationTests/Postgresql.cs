@@ -1,5 +1,4 @@
-﻿using System;
-using DatabaseSchemaReader;
+﻿using DatabaseSchemaReader;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -9,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -33,7 +33,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         //	</system.data>
         //also reference Npgsql.dll and Mono.Security.dll
 
-        [TestMethod]
+        [TestMethod, TestCategory("Postgresql")]
         public void TestNpgsql()
         {
             //using the MySql world database ported to Postgres
@@ -48,7 +48,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsTrue(country.Columns.Count > 0);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Devart.Postgresql")]
         public void TestDevartPostgreSql()
         {
             //http://www.devart.com/dotconnect/postgresql/docs/MetaData.html

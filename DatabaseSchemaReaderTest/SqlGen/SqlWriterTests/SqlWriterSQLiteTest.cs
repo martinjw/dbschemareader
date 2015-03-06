@@ -14,6 +14,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -60,7 +61,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             return _categoriesTable;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SQLite")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -71,7 +72,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SQLite")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -81,7 +82,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SQLite")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -91,7 +92,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SQLite")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -101,7 +102,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SQLite")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange

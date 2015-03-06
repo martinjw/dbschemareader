@@ -7,6 +7,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 using DatabaseSchemaReader;
 
@@ -21,7 +22,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class DevartProviderTests
     {
-        [TestMethod]
+        [TestMethod, TestCategory("Devart.Oracle")]
         public void DevartOracle()
         {
             const string providername = "Devart.Data.Oracle";
@@ -39,7 +40,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
         //ignored because it isn't installed on my machine.
-        [TestMethod]
+        [TestMethod, TestCategory("Devart.SqlServer")]
         public void DevartSqlServer()
         {
             const string providername = "Devart.Data.SqlServer";

@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -20,7 +21,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     public class SqlLite
     {
 
-        [TestMethod]
+        [TestMethod, TestCategory("SQLite")]
         public void SqlLiteTest()
         {
             const string providername = "System.Data.SQLite";

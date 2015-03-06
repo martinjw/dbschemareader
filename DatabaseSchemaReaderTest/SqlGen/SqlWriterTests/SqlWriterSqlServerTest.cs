@@ -14,6 +14,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -22,7 +23,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     public class SqlWriterSqlServerTest
     {
         private const string ProviderName = "System.Data.SqlClient";
-        const string ConnectionString = ConnectionStrings.Northwind;
+        readonly string _connectionString = ConnectionStrings.Northwind;
         private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 
@@ -35,56 +36,56 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             if (_categoriesTable != null) return _categoriesTable;
 
-            ProviderChecker.Check(ProviderName, ConnectionString);
+            ProviderChecker.Check(ProviderName, _connectionString);
 
-            var dbReader = new DatabaseReader(ConnectionString, ProviderName);
+            var dbReader = new DatabaseReader(_connectionString, ProviderName);
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
             _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
             return _categoriesTable;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, _connectionString);
 
             runner.RunCountSql();
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, _connectionString);
 
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, _connectionString);
 
             runner.RunPagingSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SqlServer, table, _factory, _connectionString);
 
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange
@@ -96,7 +97,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             //run generated sql
             using (var con = _factory.CreateConnection())
             {
-                con.ConnectionString = ConnectionString;
+                con.ConnectionString = _connectionString;
                 con.Open();
                 using (var transaction = con.BeginTransaction())
                 {

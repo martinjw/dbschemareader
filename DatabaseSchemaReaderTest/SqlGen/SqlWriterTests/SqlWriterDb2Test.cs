@@ -14,6 +14,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -57,7 +58,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             return _table;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("DB2")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadTable();
@@ -68,7 +69,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("DB2")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadTable();
@@ -78,7 +79,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("DB2")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadTable();
@@ -88,7 +89,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("DB2")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadTable();

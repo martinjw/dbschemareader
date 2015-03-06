@@ -14,6 +14,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -44,7 +45,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             return _regionsTable;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadRegionsFromHr();
@@ -55,7 +56,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadRegionsFromHr();
@@ -65,7 +66,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadRegionsFromHr();
@@ -75,7 +76,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadRegionsFromHr();
@@ -85,7 +86,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange

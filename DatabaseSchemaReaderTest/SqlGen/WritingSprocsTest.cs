@@ -12,6 +12,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen
@@ -26,7 +27,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
         private static DatabaseTable LoadCategoriesFromNorthwind()
         {
             const string providername = "System.Data.SqlClient";
-            const string connectionString = ConnectionStrings.Northwind;
+            var connectionString = ConnectionStrings.Northwind;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);

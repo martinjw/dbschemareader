@@ -18,6 +18,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.Codegen
@@ -30,7 +31,7 @@ namespace DatabaseSchemaReaderTest.Codegen
     [TestClass]
     public class CodeWriterTest
     {
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void NorthwindTest()
         {
             var dbReader = TestHelper.GetNorthwindReader();
@@ -70,7 +71,7 @@ namespace DatabaseSchemaReaderTest.Codegen
              */
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer.AdventureWorks")]
         public void AdventureWorksTest()
         {
             const string providername = "System.Data.SqlClient";
@@ -89,7 +90,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             }
             var directory = TestHelper.CreateDirectory("AdventureWorks");
             const string @namespace = "AdventureWorks.Domain";
-            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco, WriteStoredProcedures = true};
+            var settings = new CodeWriterSettings { Namespace = @namespace, CodeTarget = CodeTarget.Poco, WriteStoredProcedures = true };
 
             var codeWriter = new CodeWriter(schema, settings);
             codeWriter.Execute(directory);
@@ -107,7 +108,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.IsTrue(ok, "Should contain the uspLogError stored procedure (in standard AdventureWorks db)");
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("Oracle")]
         public void OracleHrTest()
         {
             const string providername = "System.Data.OracleClient";

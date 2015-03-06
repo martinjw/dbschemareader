@@ -9,6 +9,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations
@@ -20,7 +21,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
         private const string ConnectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("MySql")]
         public void TestMigration()
         {
             //arrange

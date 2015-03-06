@@ -8,6 +8,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -19,7 +20,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     public class VistaDb
     {
 
-        [TestMethod]
+        [TestMethod, TestCategory("VistaDb")]
         public void VistaDbTest()
         {
             //using VistaDb 4.2.18.4 (trial) with samples in default location

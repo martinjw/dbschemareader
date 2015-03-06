@@ -11,6 +11,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestCleanup = NUnit.Framework.TearDownAttribute;
 using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
 #endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -22,7 +23,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     public class SqlServerNorthwind
     {
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer.Odbc")]
         public void ReadNorthwindUsingOdbc()
         {
             //you'll get much more information from System.Data.SqlClient
@@ -39,7 +40,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindProducts()
         {
             var dbReader = TestHelper.GetNorthwindReader();
@@ -69,7 +70,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             //	Column Discontinued	bit
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindAllTables()
         {
             var dbReader = TestHelper.GetNorthwindReader();
@@ -103,7 +104,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             //	Column Discontinued	bit
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwind()
         {
             var dbReader = TestHelper.GetNorthwindReader();
@@ -135,7 +136,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindViews()
         {
             var dbReader = TestHelper.GetNorthwindReader();
@@ -148,7 +149,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindProductsWithCodeGen()
         {
             var dbReader = TestHelper.GetNorthwindReader();
@@ -189,7 +190,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindWithFilters()
         {
             //arrange
@@ -213,7 +214,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsNull(sproc);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void DublicatedArgumentsDemo()
         {
             var dbReader = TestHelper.GetNorthwindReader();
