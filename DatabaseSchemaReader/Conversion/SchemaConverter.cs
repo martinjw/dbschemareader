@@ -43,9 +43,11 @@ namespace DatabaseSchemaReader.Conversion
                 //exclude Oracle bin tables
                 if (t.Name.StartsWith("BIN$", StringComparison.OrdinalIgnoreCase)) continue;
                 if (!string.IsNullOrEmpty(keyMap.OwnerKey))
+                {
                     t.SchemaOwner = row[keyMap.OwnerKey].ToString();
-                //Db2 system tables creeping in
-                if (keyMap.IsDb2 && t.SchemaOwner.Equals("SYSTOOLS", StringComparison.OrdinalIgnoreCase)) continue;
+                    //Db2 system tables creeping in
+                    if (keyMap.IsDb2 && t.SchemaOwner.Equals("SYSTOOLS", StringComparison.OrdinalIgnoreCase)) continue;
+                }
                 list.Add(t);
             }
             return list;
