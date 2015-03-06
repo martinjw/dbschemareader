@@ -6,7 +6,7 @@
         {
             return @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""EntityFramework"" version=""6.1.1"" targetFramework=""net40"" />
+  <package id=""EntityFramework"" version=""6.1.2"" targetFramework=""net40"" />
 </packages>";
         }
 
@@ -14,9 +14,9 @@
         {
             return @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""FluentNHibernate"" version=""1.4.0.0"" targetFramework=""net40"" />
-  <package id=""Iesi.Collections"" version=""3.2.0.4000"" targetFramework=""net40"" />
-  <package id=""NHibernate"" version=""3.3.3.4001"" targetFramework=""net40"" />
+  <package id=""FluentNHibernate"" version=""1.4.0.0"" targetFramework=""net35"" />
+  <package id=""Iesi.Collections"" version=""3.2.0.4000"" targetFramework=""net35"" />
+  <package id=""NHibernate"" version=""3.3.3.4000"" targetFramework=""net35"" />
 </packages>";
         }
 
@@ -24,9 +24,9 @@
         {
             return @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""FluentNHibernate"" version=""1.4.0.0"" targetFramework=""net40"" />
+  <package id=""FluentNHibernate"" version=""2.0.1.0"" targetFramework=""net40"" />
   <package id=""Iesi.Collections"" version=""4.0.0.4000"" targetFramework=""net40"" />
-  <package id=""NHibernate"" version=""4.0.1.4000"" targetFramework=""net40"" />
+  <package id=""NHibernate"" version=""4.0.3.4000"" targetFramework=""net40"" />
 </packages>";
         }
     }
