@@ -130,7 +130,7 @@ publish/
 
 # NuGet Packages Directory
 ## TODO: If you have NuGet Package Restore enabled, uncomment the next line
-#packages/
+packages/
 
 # Windows Azure Build Output
 csx
@@ -213,5 +213,11 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+#DatabaseSchemaReader
 pack.bat
 nuget/
+CodeGenTester/CodeFirst/
+CodeGenTester/FluentNHib/
+CodeGenTester/NHib/
+CodeGenTester/packages/

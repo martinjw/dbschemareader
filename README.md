@@ -1,11 +1,24 @@
 ﻿# DatabaseSchemaReader
 
+A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.
+
+Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.
+
 https://dbschemareader.codeplex.com/
 
 https://dbschemareader.codeplex.com/documentation
 
 Nuget: Install-Package DatabaseSchemaReader https://img.shields.io/nuget/v/DatabaseSchemaReader.svg https://www.nuget.org/packages/DatabaseSchemaReader/
 
+* Database schema read from most ADO providers
+* Simple .net code generation:
+  * Generate POCO classes for tables, and NHibernate or EF Code First mapping files
+  * Generate simple ADO classes to use stored procedures
+* Simple sql generation:
+  * Generate table DDL (and translate to another SQL syntax, eg SqlServer to Oracle or SQLite)
+  * Generate CRUD stored procedures (for SqlServer, Oracle, MySQL, DB2)
+* Copy a database schema and data from any provider (SqlServer, Oracle etc) to a new SQLite database (and, with limitations, to SqlServer CE 4)
+* Compare two schemas to generate a migration script
 
 ## Use
 
