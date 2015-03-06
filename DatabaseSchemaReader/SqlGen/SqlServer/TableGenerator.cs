@@ -199,7 +199,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// </summary>
         protected virtual bool SupportsNextValueForSequence { get { return true; } }
 
-        private static string FixDefaultValue(string defaultValue)
+        protected virtual string FixDefaultValue(string defaultValue)
         {
             if (SqlTranslator.IsGuidGenerator(defaultValue) && !"newsequentialid()".Equals(defaultValue, StringComparison.OrdinalIgnoreCase))
             {

@@ -26,15 +26,20 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             if (column.IsPrimaryKey && (Table.PrimaryKey == null || Table.PrimaryKey.Columns.Count == 1))
             {
                 type += " PRIMARY KEY";
-                if (column.IsAutoNumber) type += " AUTOINCREMENT";
+                if (column.IsAutoNumber) //must be integer primary key
+                {
+                    return "INTEGER PRIMARY KEY AUTOINCREMENT";
+                }
             }
             if (!column.Nullable) type += " NOT NULL";
-            //if there's a default value, and it's not a guid generator
-            if (!string.IsNullOrEmpty(column.DefaultValue) && !SqlTranslator.IsGuidGenerator(column.DefaultValue))
+            //if there's a default value, and it's not a guid generator or autonumber
+            if (!string.IsNullOrEmpty(column.DefaultValue) &&
+                !SqlTranslator.IsGuidGenerator(column.DefaultValue) &&
+                !column.IsAutoNumber)
             {
                 var value = SqlTranslator.Fix(column.DefaultValue);
                 //SqlServer (N'string') format
-                if (value.StartsWith("(N'", StringComparison.OrdinalIgnoreCase)) 
+                if (value.StartsWith("(N'", StringComparison.OrdinalIgnoreCase))
                     value = value.Replace("(N'", "('");
                 type += " DEFAULT " + value;
             }
