@@ -31,6 +31,10 @@
 	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath4)" />
   </Target>
   
+  <Target Name="RestorePackages">
+    <Exec Command="&quot;.\tools\NuGet.exe&quot; restore &quot;DatabaseSchemaReader.sln&quot;" />
+  </Target>
+  
   <Target Name="BuildCopyToSQLite">
     <Message Text="Building CopyToSQLite" />
     <MSBuild Projects="CopyToSQLite\CopyToSQLite.csproj" 
@@ -42,7 +46,7 @@
     <RemoveDir Directories="$(ObjPath)"/>
   </Target>
  
-  <Target Name="Release" DependsOnTargets="BuildViewer; BuildViewer4; BuildCopyToSQLite; CleanUp">
+  <Target Name="Release" DependsOnTargets="RestorePackages; BuildViewer; BuildViewer4; BuildCopyToSQLite; CleanUp">
     <Message Text="Built All" />
   </Target>
   

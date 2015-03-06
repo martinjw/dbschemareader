@@ -71,8 +71,16 @@ namespace CopyToSQLite
                 dbCreator = new DatabaseCreator(_filePath);
             }
             InvokeProgressChanged(0, "Creating database tables");
-            dbCreator.CreateTables(ddl);
+            try
+            {
+                dbCreator.CreateTables(ddl);
 
+            }
+            catch (DbException exception)
+            {
+                LastErrorMessage = exception.Message;
+                return false;
+            }
             //put them in fk dependency order
             var sortedTables = SchemaTablesSorter.TopologicalSort(databaseSchema);
 
