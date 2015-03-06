@@ -1,5 +1,6 @@
-﻿using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.SqlGen.SqlServer;
+﻿using System;
+using System.Text.RegularExpressions;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServerCe
 {
@@ -37,6 +38,26 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
                                        CheckConstraintExcluder = check => true
                                    };
             return constraintWriter;
+        }
+
+        protected override string FixDefaultValue(string defaultValue)
+        {
+            if (string.IsNullOrEmpty(defaultValue)) return defaultValue;
+            //we only have getdate() function
+            var getDate = defaultValue.IndexOf("current_timestamp", StringComparison.OrdinalIgnoreCase);
+            if (getDate != -1)
+            {
+                defaultValue = defaultValue.Remove(getDate, "current_timestamp".Length).Insert(getDate, "getdate()");
+            }
+            var sysDateTime = defaultValue.IndexOf("sysdatetime()", StringComparison.OrdinalIgnoreCase);
+            if (sysDateTime != -1)
+            {
+                defaultValue = defaultValue.Remove(sysDateTime, "sysdatetime()".Length).Insert(sysDateTime, "getdate()");
+            }
+            //remove braces around numbers
+            defaultValue = SqlTranslator.RemoveParenthesis(defaultValue);
+            defaultValue = Regex.Replace(defaultValue, @"\((\d+)\)", "$1");
+            return defaultValue;
         }
 
         /// <summary>
