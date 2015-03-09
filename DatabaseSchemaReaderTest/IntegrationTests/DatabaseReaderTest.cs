@@ -69,7 +69,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual(11, table.Columns.Count);
         }
 
-        [TestMethod, TestCategory("SqlServer")]
+        [TestMethod, TestCategory("SqlServer.AdventureWorks")]
         public void SqlServer()
         {
             const string providername = "System.Data.SqlClient";
