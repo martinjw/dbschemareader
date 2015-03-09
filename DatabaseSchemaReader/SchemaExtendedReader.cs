@@ -59,8 +59,12 @@ namespace DatabaseSchemaReader
                     Owner = SchemaConverter.FindSchema(ds.Tables[ColumnsCollectionName]);
                 }
 
-                ds.Tables.Add(PrimaryKeys(tableName, conn));
-                ds.Tables.Add(ForeignKeys(tableName, conn));
+                var primaryKeys = PrimaryKeys(tableName, conn);
+                primaryKeys.TableName = PrimaryKeysCollectionName;
+                ds.Tables.Add(primaryKeys);
+                var foreignKeys = ForeignKeys(tableName, conn);
+                foreignKeys.TableName = ForeignKeyColumnsCollectionName;
+                ds.Tables.Add(foreignKeys);
                 ds.Tables.Add(UniqueKeys(tableName, conn));
                 ds.Tables.Add(CheckConstraints(tableName, conn));
 

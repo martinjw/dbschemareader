@@ -39,6 +39,20 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
         [TestMethod, TestCategory("MySql")]
+        public void MySqlTableTest()
+        {
+            const string providername = "MySql.Data.MySqlClient";
+            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            var country = dbReader.Table("country");
+            Assert.AreEqual(3, country.Columns.Count);
+            Assert.IsNotNull(country.PrimaryKeyColumn);
+            Assert.IsTrue(country.FindColumn("country_id").IsPrimaryKey);
+        }
+
+        [TestMethod, TestCategory("MySql")]
         public void MySqlUnsignedIntegersTest()
         {
             const string providername = "MySql.Data.MySqlClient";
