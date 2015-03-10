@@ -37,6 +37,8 @@ namespace DatabaseSchemaReader.Conversion
 
                 if (!string.IsNullOrEmpty(columnsKeyMap.SchemaKey))
                     column.SchemaOwner = row[columnsKeyMap.SchemaKey].ToString();
+                if (string.Equals("sqlite_default_schema", column.SchemaOwner, StringComparison.OrdinalIgnoreCase))
+                    column.SchemaOwner = string.Empty;
 
                 if (!string.IsNullOrEmpty(columnsKeyMap.OrdinalKey))
                     column.Ordinal = Convert.ToInt32(row[columnsKeyMap.OrdinalKey], CultureInfo.CurrentCulture);
