@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using DatabaseSchemaReader;
+using DatabaseSchemaReader.Data;
+using DatabaseSchemaReader.DataSchema;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -25,13 +28,13 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void SqlLiteTest()
         {
             const string providername = "System.Data.SQLite";
-            const string dir = @"C:\Data\northwind.db";
+            var dir = ConnectionStrings.SqLiteFilePath;
             if (!File.Exists(dir))
             {
                 Assert.Inconclusive("SqlLite test requires database file " + dir);
             }
 
-            const string connectionString = @"Data Source=" + dir;
+            string connectionString = @"Data Source=" + dir;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);

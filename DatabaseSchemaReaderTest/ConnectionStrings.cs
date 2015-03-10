@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace DatabaseSchemaReaderTest
 {
@@ -21,6 +22,11 @@ namespace DatabaseSchemaReaderTest
                 }
                 return @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
             }
+        }
+
+        public static string SqLiteFilePath
+        {
+            get { return Path.Combine(Environment.CurrentDirectory, "northwind.db"); }
         }
     }
 }
