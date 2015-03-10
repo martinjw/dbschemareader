@@ -23,13 +23,14 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     public class SqlWriterSQLiteTest
     {
         private const string ProviderName = "System.Data.SQLite";
-        private const string DatabaseFile = @"C:\Data\northwind.db";
-        private const string ConnectionString = "Data Source=" + DatabaseFile;
+        private readonly string _databaseFile = ConnectionStrings.SqLiteFilePath;
+        private readonly string _connectionString;
         private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 
         public SqlWriterSQLiteTest()
         {
+            _connectionString = "Data Source=" + _databaseFile;
             try
             {
                 _factory = DbProviderFactories.GetFactory(ProviderName);
@@ -48,12 +49,12 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             if (_categoriesTable != null) return _categoriesTable;
 
-            if (!File.Exists(DatabaseFile))
-                Assert.Inconclusive("SQLite database file not found: " + DatabaseFile);
+            if (!File.Exists(_databaseFile))
+                Assert.Inconclusive("SQLite database file not found: " + _databaseFile);
 
-            ProviderChecker.Check(ProviderName, ConnectionString);
+            ProviderChecker.Check(ProviderName, _connectionString);
 
-            var dbReader = new DatabaseReader(ConnectionString, ProviderName);
+            var dbReader = new DatabaseReader(_connectionString, ProviderName);
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
             _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
             if (_categoriesTable == null)
@@ -66,7 +67,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, _connectionString);
 
             runner.RunCountSql();
         }
@@ -77,7 +78,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, _connectionString);
 
             runner.RunSelectAllSql();
         }
@@ -87,7 +88,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, _connectionString);
 
             runner.RunPagingSql();
         }
@@ -97,7 +98,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadCategoriesFromNorthwind();
 
-            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.SQLite, table, _factory, _connectionString);
 
             runner.RunPagingStartToEndSql();
         }
@@ -114,7 +115,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             //run generated sql
             using (var con = _factory.CreateConnection())
             {
-                con.ConnectionString = ConnectionString;
+                con.ConnectionString = _connectionString;
                 con.Open();
                 using (var transaction = con.BeginTransaction())
                 {

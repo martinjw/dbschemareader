@@ -18,6 +18,15 @@ namespace DatabaseSchemaReaderTest.Compare
     {
         private const string Schema = "dbo";
 
+        private void AssertType<T>(object value)
+        {
+#if !NUNIT
+            Assert.IsInstanceOfType(value, typeof(T));
+#else
+            Assert.IsInstanceOf<T>(value);
+#endif
+        }
+
         [TestMethod]
         public void FindTable()
         {
@@ -34,7 +43,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseTable));
+            AssertType<DatabaseTable>(find);
         }
 
         [TestMethod]
@@ -54,7 +63,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseColumn));
+            AssertType<DatabaseColumn>(find);
         }
 
         [TestMethod]
@@ -74,7 +83,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseConstraint));
+            AssertType<DatabaseConstraint>(find);
         }
 
         [TestMethod]
@@ -94,7 +103,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseConstraint));
+            AssertType<DatabaseConstraint>(find);
         }
 
         [TestMethod]
@@ -114,7 +123,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseConstraint));
+            AssertType<DatabaseConstraint>(find);
         }
 
 
@@ -135,7 +144,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseIndex));
+            AssertType<DatabaseIndex>(find);
         }
 
 
@@ -156,7 +165,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseTrigger));
+            AssertType<DatabaseTrigger>(find);
         }
 
 
@@ -176,7 +185,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseStoredProcedure));
+            AssertType<DatabaseStoredProcedure>(find);
         }
 
         [TestMethod]
@@ -195,7 +204,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseFunction));
+            AssertType<DatabaseFunction>(find);
         }
 
         [TestMethod]
@@ -214,7 +223,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabasePackage));
+            AssertType<DatabasePackage>(find);
         }
 
         [TestMethod]
@@ -233,7 +242,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseView));
+            AssertType<DatabaseView>(find);
         }
 
         [TestMethod]
@@ -252,7 +261,7 @@ namespace DatabaseSchemaReaderTest.Compare
             var find = result.Find(schema);
 
             //assert
-            Assert.IsInstanceOfType(find, typeof(DatabaseSequence));
+            AssertType<DatabaseSequence>(find);
         }
 
         private static DatabaseSchema CreateSchema()

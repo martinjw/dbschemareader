@@ -171,6 +171,7 @@
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterOracleTest.cs" />
     <Compile Include="SqlGen\SqlWriterTests\SqlWriterMySqlTest.cs" />
     <Compile Include="SqlGen\WritingSprocsTest.cs" />
+    <Compile Include="TestCategoryAttribute.cs" />
     <Compile Include="TestHelper.cs" />
     <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
   </ItemGroup>
