@@ -40,9 +40,12 @@ namespace DatabaseSchemaReader.Conversion
             string tableKey = "TABLE_NAME";
             string columnKey = "COLUMN_NAME";
             if (!dt.Columns.Contains(key)) key = "foreignkey";
+            if (!dt.Columns.Contains(key)) key = "FK_NAME"; //ODBC
             if (!dt.Columns.Contains(tableKey)) tableKey = "table";
+            if (!dt.Columns.Contains(tableKey)) tableKey = "FK_TABLE_NAME"; //ODBC
             if (!dt.Columns.Contains(columnKey)) columnKey = "name";
             if (!dt.Columns.Contains(columnKey)) columnKey = "FKEY_FROM_COLUMN"; //VistaDB
+            if (!dt.Columns.Contains(columnKey)) columnKey = "FK_COLUMN_NAME"; //ODBC
 
             //this could be more than one table, so filter the view
             foreach (DataRowView row in dt.DefaultView)
