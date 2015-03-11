@@ -650,3 +650,43 @@ ALTER TABLE EmployeeTerritories
 	);
 GO
 
+--populate the Categories table
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Beverages' ,'Soft drinks, coffees, teas, beers, and ales' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Condiments' ,'Sweet and savory sauces, relishes, spreads, and seasonings' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Confections' ,'Desserts, candies, and sweet breads' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Dairy Products' ,'Cheeses' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Grains/Cereals' ,'Breads, crackers, pasta, and cereal' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Meat/Poultry' ,'Prepared meats' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Produce' ,'Dried fruit and bean curd' ,NULL
+);
+
+INSERT INTO [Categories] (
+  [CategoryName],  [Description],  [Picture]) VALUES (
+'Seafood' ,'Seaweed and fish' ,NULL
+);

@@ -114,7 +114,7 @@ namespace DatabaseSchemaReader.CodeGen
             var reference = FindSystemDataReference();
             var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework"),
                 new XElement(_xmlns + "SpecificVersion", "False"),
-                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.6.1.2\lib\net40\EntityFramework.dll"));
+                new XElement(_xmlns + "HintPath", @"..\packages\EntityFramework.6.1.3\lib\net40\EntityFramework.dll"));
             reference.AddAfterSelf(element);
             reference.AddAfterSelf(
                 new XElement(_xmlns + "Reference",
