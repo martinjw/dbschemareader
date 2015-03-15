@@ -76,6 +76,8 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
             //Devart.Data.Oracle - TABLE_NAME is NAME
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            //DB2 iSeries
+            if (!dt.Columns.Contains(ownerKey)) ownerKey = "SchemaName";
             //don't know
             if (!dt.Columns.Contains(ownerKey)) return null;
 
