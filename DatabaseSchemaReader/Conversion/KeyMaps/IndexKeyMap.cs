@@ -38,11 +38,19 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(Key)) Key = "indexname";
             //sqlite
             if (!dt.Columns.Contains(PrimaryKey)) PrimaryKey = "PRIMARY_KEY";
-            //postgresql
-            if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = null;
             //sqlserver 2008 - HEAP CLUSTERED NONCLUSTERED XML SPATIAL
             //sys_indexes has is_unique but it's not exposed. 
             if (!dt.Columns.Contains(Typekey)) Typekey = "type_desc";
+            //db2 iSeries
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "SchemaName";
+            if (!dt.Columns.Contains(Key)) Key = "ConstraintName";
+            if (!dt.Columns.Contains(TableKey)) TableKey = "TableName";
+            if (!dt.Columns.Contains(Typekey)) Typekey = "ConstraintType";
+            if (!dt.Columns.Contains(ColumnKey)) ColumnKey = "ColumnName";
+            if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = "OrdinalPosition";
+            //postgresql
+            if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = null;
+
 
             //pre 2008 sql server
             if (!dt.Columns.Contains(Typekey)) Typekey = null;

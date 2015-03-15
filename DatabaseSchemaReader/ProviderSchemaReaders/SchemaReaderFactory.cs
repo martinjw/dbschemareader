@@ -59,6 +59,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                     {
                         schemaReader = new VistaDbSchemaReader(connectionString, providerName);
                     }
+                    else if (providerName.Equals("IBM.Data.DB2.iSeries", StringComparison.OrdinalIgnoreCase))
+                    {
+                        schemaReader = new Db2ISeriesSchemaReader(connectionString, providerName);
+                    }
 
                     break;
             }

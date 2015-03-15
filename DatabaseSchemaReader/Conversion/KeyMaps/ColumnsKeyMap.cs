@@ -70,6 +70,17 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = "column_size";
             if (!dt.Columns.Contains(ScaleKey)) ScaleKey = "decimal_digits";
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = "column_def";
+            //iSeries
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "SchemaName";
+            if (!dt.Columns.Contains(TableKey)) TableKey = "TableName";
+            if (!dt.Columns.Contains(Key)) Key = "ColumnName";
+            if (!dt.Columns.Contains(OrdinalKey)) OrdinalKey = "OrdinalPosition";
+            if (!dt.Columns.Contains(DefaultKey)) DefaultKey = "ColumnDefault";
+            if (!dt.Columns.Contains(NullableKey)) NullableKey = "IsNullable";
+            if (!dt.Columns.Contains(DatatypeKey)) DatatypeKey = "DataType";
+            if (!dt.Columns.Contains(LengthKey)) LengthKey = "CharacterMaximumLength";
+            if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = "NumericPrecision";
+            if (!dt.Columns.Contains(ScaleKey)) ScaleKey = "NumericScale";
         }
 
         private void CheckDevartPostgreSql(DataTable dt)
