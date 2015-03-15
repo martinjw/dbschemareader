@@ -76,6 +76,8 @@ namespace DatabaseSchemaReader.Conversion
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "OWNER";
             //Devart.Data.Oracle - TABLE_NAME is NAME
             if (!dt.Columns.Contains(ownerKey)) ownerKey = "SCHEMA";
+            //don't know
+            if (!dt.Columns.Contains(ownerKey)) return null;
 
             //find the first table and return it
             foreach (DataRow row in dt.Rows)
