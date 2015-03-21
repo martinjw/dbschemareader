@@ -9,6 +9,12 @@
   </PropertyGroup>
   
   <!-- targets -->
+   <Target Name="BuildTests">
+    <Message Text="Building Tests" />
+    <MSBuild Projects="DatabaseSchemaReaderTest\DatabaseSchemaReaderTest.csproj" 
+		Properties="Configuration=Release;"/>
+    <Message Text="Tests Built" />
+  </Target>
   
   <Target Name="BuildViewer">
     <Message Text="Building SchemaViewer in .net 3.5" />
@@ -46,7 +52,7 @@
     <RemoveDir Directories="$(ObjPath)"/>
   </Target>
  
-  <Target Name="Release" DependsOnTargets="RestorePackages; BuildViewer; BuildViewer4; BuildCopyToSQLite; CleanUp">
+  <Target Name="Release" DependsOnTargets="RestorePackages; BuildTests; BuildViewer; BuildViewer4; BuildCopyToSQLite; CleanUp">
     <Message Text="Built All" />
   </Target>
   
