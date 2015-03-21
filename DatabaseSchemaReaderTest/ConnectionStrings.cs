@@ -24,6 +24,30 @@ namespace DatabaseSchemaReaderTest
             }
         }
 
+        public static string MySql
+        {
+            get
+            {
+                if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
+                {
+                    return @"Server=localhost;Uid=root;Pwd=Password12!;Database=sakila;Allow User Variables=True;";
+                }
+                return @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+            }
+        }
+
+        public static string PostgreSql
+        {
+            get
+            {
+                if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
+                {
+                    return @"Server=127.0.0.1;User id=postgres;Pwd=Password12!;database=world;";
+                }
+                return @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
+            }
+        }
+
         public static string SqLiteFilePath
         {
             get { return Path.Combine(Environment.CurrentDirectory, "northwind.db"); }

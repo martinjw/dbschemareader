@@ -38,7 +38,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             //using the MySql world database ported to Postgres
             const string providername = "Npgsql";
-            const string connectionString = @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
+            var connectionString = ConnectionStrings.PostgreSql;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
@@ -53,7 +53,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             //http://www.devart.com/dotconnect/postgresql/docs/MetaData.html
             const string providername = "Devart.Data.PostgreSql";
-            const string connectionString = @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
+            var connectionString = ConnectionStrings.PostgreSql;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
