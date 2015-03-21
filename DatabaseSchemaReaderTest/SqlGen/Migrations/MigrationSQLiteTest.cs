@@ -18,17 +18,17 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     public class MigrationSqLiteTest
     {
         private const string ProviderName = "System.Data.SQLite";
-        private const string DatabaseFile = @"C:\Data\northwind.db";
-        private const string ConnectionString = "Data Source=" + DatabaseFile;
 
         [TestMethod, TestCategory("SQLite")]
         public void TestMigration()
         {
+            var databaseFile = ConnectionStrings.SqLiteFilePath;
+            var connectionString = "Data Source=" + databaseFile;
             //arrange
-            var tableName = MigrationCommon.FindFreeTableName(ProviderName, ConnectionString);
+            var tableName = MigrationCommon.FindFreeTableName(ProviderName, connectionString);
             var migration = new DdlGeneratorFactory(SqlType.SQLite).MigrationGenerator();
 
-            MigrationCommon.ExecuteScripts(ProviderName, ConnectionString, tableName, migration);
+            MigrationCommon.ExecuteScripts(ProviderName, connectionString, tableName, migration);
         }
     }
 }

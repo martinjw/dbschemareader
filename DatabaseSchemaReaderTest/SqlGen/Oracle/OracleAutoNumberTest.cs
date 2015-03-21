@@ -40,14 +40,14 @@ END;",
             var ddl = tableGen.Write();
 
             //assert
-            Assert.IsTrue(ddl.Contains("\"Id\" NUMBER (9) NOT NULL,"));
+            Assert.IsTrue(ddl.Contains("\"Id\" NUMBER (9) NOT NULL,"), "Table should include Id column " + ddl);
             Assert.IsTrue(ddl.Contains(@"CREATE OR REPLACE TRIGGER ""Test_INS_TRG""
 BEFORE INSERT
 ON ""Test""
 FOR EACH ROW
 BEGIN
   SELECT ""Test_SEQ"".NEXTVAL INTO :NEW.""Id"" FROM DUAL;
-END;"));
+END;"), "Table should include trigger " + ddl);
         }
 
         [TestMethod]

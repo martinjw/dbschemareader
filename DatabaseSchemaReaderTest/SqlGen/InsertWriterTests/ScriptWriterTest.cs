@@ -34,9 +34,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var txt = rdr.ReadTable(table, ConnectionString, Providername);
 
             //assert
-            Assert.IsTrue(txt.Contains("INSERT INTO [Customers]"), "Insert statments created");
-            Assert.IsTrue(txt.Contains("[CustomerID],  [CompanyName]"), "Insert names the columns");
-            Assert.IsTrue(txt.Contains("'ALFKI'"), "Data includes Alfreds Futterkiste");
+            Assert.IsTrue(txt.Contains("INSERT INTO [Customers]"), "Insert statments created: " + txt);
+            Assert.IsTrue(txt.Contains("[CustomerID],  [CompanyName]"), "Insert names the columns: " + txt);
+            Assert.IsTrue(txt.Contains("'ALFKI'"), "Data includes Alfreds Futterkiste: " + txt);
         }
 
         [TestMethod]
@@ -51,9 +51,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var txt = rdr.ReadTable("Customers", ConnectionString, Providername);
 
             //assert
-            Assert.IsTrue(txt.Contains("INSERT INTO [Customers]"), "Insert statments created");
-            Assert.IsTrue(txt.Contains("[CustomerID],  [CompanyName]"), "Insert names the columns");
-            Assert.IsTrue(txt.Contains("'ALFKI'"), "Data includes Alfreds Futterkiste");
+            Assert.IsTrue(txt.Contains("INSERT INTO [Customers]"), "Insert statments created: " + txt);
+            Assert.IsTrue(txt.Contains("[CustomerID],  [CompanyName]"), "Insert names the columns: " + txt);
+            Assert.IsTrue(txt.Contains("'ALFKI'"), "Data includes Alfreds Futterkiste: " + txt);
         }
 
         [TestMethod]
@@ -77,8 +77,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
 
             //assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Contains("INSERT INTO [Categories]"), "Insert statments created");
-            Assert.IsTrue(result.Contains("[CategoryName],"), "Insert names the columns");
+            Assert.IsTrue(result.Contains("INSERT INTO [Categories]"), "Insert statments created: " + result);
+            Assert.IsTrue(result.Contains("[CategoryName],"), "Insert names the columns: " + result);
         }
     }
 }
