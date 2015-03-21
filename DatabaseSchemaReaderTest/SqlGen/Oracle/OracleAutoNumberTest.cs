@@ -41,13 +41,9 @@ END;",
 
             //assert
             Assert.IsTrue(ddl.Contains("\"Id\" NUMBER (9) NOT NULL,"), "Table should include Id column " + ddl);
-            Assert.IsTrue(ddl.Contains(@"CREATE OR REPLACE TRIGGER ""Test_INS_TRG""
-BEFORE INSERT
-ON ""Test""
-FOR EACH ROW
-BEGIN
-  SELECT ""Test_SEQ"".NEXTVAL INTO :NEW.""Id"" FROM DUAL;
-END;"), "Table should include trigger " + ddl);
+            //line breaks may cause environmental differences
+            Assert.IsTrue(ddl.Contains(@"CREATE OR REPLACE TRIGGER ""Test_INS_TRG"""), "Table should include 'create trigger' " + ddl);
+            Assert.IsTrue(ddl.Contains(@"SELECT ""Test_SEQ"".NEXTVAL INTO :NEW.""Id"" FROM DUAL;"), "Table should include trigger body " + ddl);
         }
 
         [TestMethod]

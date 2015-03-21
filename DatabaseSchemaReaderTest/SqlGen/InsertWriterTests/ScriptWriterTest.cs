@@ -18,7 +18,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
     public class ScriptWriterTest
     {
         const string Providername = "System.Data.SqlClient";
-        readonly string ConnectionString = ConnectionStrings.Northwind;
+        readonly string _connectionString = ConnectionStrings.Northwind;
 
 
         [TestMethod]
@@ -26,34 +26,34 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         {
             //arrange
             var dbReader = TestHelper.GetNorthwindReader();
-            var table = dbReader.Table("Customers");
+            var table = dbReader.Table("Categories");
 
             var rdr = new ScriptWriter();
 
             //act
-            var txt = rdr.ReadTable(table, ConnectionString, Providername);
+            var txt = rdr.ReadTable(table, _connectionString, Providername);
 
             //assert
-            Assert.IsTrue(txt.Contains("INSERT INTO [Customers]"), "Insert statments created: " + txt);
-            Assert.IsTrue(txt.Contains("[CustomerID],  [CompanyName]"), "Insert names the columns: " + txt);
-            Assert.IsTrue(txt.Contains("'ALFKI'"), "Data includes Alfreds Futterkiste: " + txt);
+            Assert.IsTrue(txt.Contains("INSERT INTO [Categories]"), "Insert statments created: [" + txt + "]");
+            Assert.IsTrue(txt.Contains("[CategoryName],  [Description]"), "Insert names the columns: [" + txt + "]");
+            Assert.IsTrue(txt.Contains("'Beverages'"), "Data includes Beverages: [" + txt + "]");
         }
 
         [TestMethod]
         public void TestInsertNoDirectDatabaseReaderIntegration()
         {
             //arrange
-            ProviderChecker.Check(Providername, ConnectionString);
+            ProviderChecker.Check(Providername, _connectionString);
 
             var rdr = new ScriptWriter();
 
             //act
-            var txt = rdr.ReadTable("Customers", ConnectionString, Providername);
+            var txt = rdr.ReadTable("Categories", _connectionString, Providername);
 
             //assert
-            Assert.IsTrue(txt.Contains("INSERT INTO [Customers]"), "Insert statments created: " + txt);
-            Assert.IsTrue(txt.Contains("[CustomerID],  [CompanyName]"), "Insert names the columns: " + txt);
-            Assert.IsTrue(txt.Contains("'ALFKI'"), "Data includes Alfreds Futterkiste: " + txt);
+            Assert.IsTrue(txt.Contains("INSERT INTO [Categories]"), "Insert statments created: [" + txt + "]");
+            Assert.IsTrue(txt.Contains("[CategoryName],  [Description]"), "Insert names the columns: [" + txt + "]");
+            Assert.IsTrue(txt.Contains("'Beverages'"), "Data includes Beverages: [" + txt + "]");
         }
 
         [TestMethod]
@@ -69,7 +69,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             string result = null;
 
             //act
-            rdr.ReadTable(table, ConnectionString, Providername, insertString =>
+            rdr.ReadTable(table, _connectionString, Providername, insertString =>
             {
                 result = insertString;
                 return false; //only need one record, return
