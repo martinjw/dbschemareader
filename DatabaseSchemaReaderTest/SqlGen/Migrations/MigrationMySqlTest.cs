@@ -18,18 +18,18 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     public class MigrationMySqlTest
     {
         private const string ProviderName = "MySql.Data.MySqlClient";
-        private const string ConnectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
 
 
         [TestMethod, TestCategory("MySql")]
         public void TestMigration()
         {
             //arrange
-            var tableName = MigrationCommon.FindFreeTableName(ProviderName, ConnectionString);
+            var connectionString = ConnectionStrings.MySql;
+            var tableName = MigrationCommon.FindFreeTableName(ProviderName, connectionString);
             var migration = new DdlGeneratorFactory(SqlType.MySql).MigrationGenerator();
 
             //MySql DDL isn't transactional. Hope this works.
-            MigrationCommon.ExecuteScripts(ProviderName, ConnectionString, tableName, migration);
+            MigrationCommon.ExecuteScripts(ProviderName, connectionString, tableName, migration);
         }
     }
 }

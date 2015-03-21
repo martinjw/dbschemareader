@@ -25,7 +25,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void MySqlTest()
         {
             const string providername = "MySql.Data.MySqlClient";
-            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+            var connectionString = ConnectionStrings.MySql;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
@@ -42,7 +42,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void MySqlTableTest()
         {
             const string providername = "MySql.Data.MySqlClient";
-            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+            var connectionString = ConnectionStrings.MySql;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
@@ -56,7 +56,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void MySqlUnsignedIntegersTest()
         {
             const string providername = "MySql.Data.MySqlClient";
-            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+            var connectionString = ConnectionStrings.MySql;
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
@@ -72,7 +72,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
 
         }
 
-        [TestMethod, TestCategory("MySql")]
+        [TestMethod, TestCategory("MySql.Devart")]
         public void MySqlViaDevartTest()
         {
             const string providername = "Devart.Data.MySql";

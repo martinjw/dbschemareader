@@ -19,7 +19,6 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     {
         //private const string ProviderName = "Npgsql";
         private const string ProviderName = "Devart.Data.PostgreSql";
-        private const string ConnectionString = @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
 
         /*
  
@@ -35,10 +34,11 @@ ALTER TABLE products ALTER COLUMN price SET DEFAULT 7.77;
         public void TestMigration()
         {
             //arrange
-            var tableName = MigrationCommon.FindFreeTableName(ProviderName, ConnectionString);
+            var connectionString = ConnectionStrings.PostgreSql;
+            var tableName = MigrationCommon.FindFreeTableName(ProviderName, connectionString);
             var migration = new DdlGeneratorFactory(SqlType.PostgreSql).MigrationGenerator();
 
-            MigrationCommon.ExecuteScripts(ProviderName, ConnectionString, tableName, migration);
+            MigrationCommon.ExecuteScripts(ProviderName, connectionString, tableName, migration);
         }
     }
 }
