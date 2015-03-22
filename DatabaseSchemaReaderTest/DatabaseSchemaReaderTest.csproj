@@ -38,6 +38,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Devart.Data, Version=5.0.1151.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\dotConnect.Express.for.SQLite.5.2.359\lib\Devart.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.MySql, Version=8.3.359.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\dotConnect.Express.for.MySQL.8.3.359\lib\Devart.Data.MySql.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.PostgreSql, Version=7.3.359.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\dotConnect.Express.for.PostgreSQL.7.3.359\lib\Devart.Data.PostgreSql.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -212,6 +224,8 @@
   <ItemGroup>
     <Content Include="DatabaseScripts\create_database_northwind.sql" />
     <Content Include="DatabaseScripts\create_schema_northwind.sql" />
+    <Content Include="DatabaseScripts\sakila-schema.sql" />
+    <Content Include="DatabaseScripts\postgres_world.sql" />
     <Content Include="README.txt" />
     <Content Include="Utilities\EF\Catalog.edmx.sql" />
   </ItemGroup>

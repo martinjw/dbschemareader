@@ -76,7 +76,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void MySqlViaDevartTest()
         {
             const string providername = "Devart.Data.MySql";
-            const string connectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;";
+            var connectionString = ConnectionStrings.MySqlDevart;
             ProviderChecker.Check(providername, connectionString);
 
             DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
