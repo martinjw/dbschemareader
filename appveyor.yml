@@ -16,6 +16,7 @@ before_test:
 - '"C:\Program Files\PostgreSQL\9.3\bin\psql.exe" -h localhost -U postgres world < "DatabaseSchemaReaderTest\DatabaseScripts\postgres_world.sql"'
 - '"C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" --user=root --password=Password12! -e "create database sakila"'
 - '"C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" --user=root --password=Password12! --database=sakila < "DatabaseSchemaReaderTest\DatabaseScripts\sakila-schema.sql"'
+- '"C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" --user=root --password=Password12! --database=sakila < "DatabaseSchemaReaderTest\DatabaseScripts\sakila-data.sql"'
 test:
   assemblies: DatabaseSchemaReaderTest\bin\Release\DatabaseSchemaReaderTest.dll
   categories:
