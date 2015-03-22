@@ -28,11 +28,19 @@ namespace DatabaseSchemaReaderTest
         {
             get
             {
+                return MySqlDevart + "Allow User Variables=True;";
+            }
+        }
+
+        public static string MySqlDevart
+        {
+            get
+            {
                 if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
                 {
-                    return @"Server=localhost;Uid=root;Pwd=Password12!;Database=sakila;Allow User Variables=True;";
+                    return @"Server=localhost;Uid=root;Pwd=Password12!;Database=sakila;";
                 }
-                return @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
+                return @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;";
             }
         }
 

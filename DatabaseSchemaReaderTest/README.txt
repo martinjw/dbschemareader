@@ -4,19 +4,26 @@ You can easily convert it to NUnit:
 - add reference to NUnit.framework
 - in properties, add the conditional compilation symbol NUNIT
 
-These tests are INTEGRATION TESTS. They all interact with the database, IO and .net ADO data providers.
-This means the databases must exist in order to run it.
+Many of these tests are INTEGRATION TESTS. They interact with the database, IO and .net ADO data providers.
+
+All ADO providers are accessed using ADO 2's DbProviderFactories. Although there are Nuget references, the tests and Database Schema Reader do not use the providers directly.
+If the provider is not installed (eg Devart.Oracle), the test runs as Inconclusive.
+If the database cannot be opened (invalid connection string/ password etc), the test runs as Inconclusive.
+
+If the providers are not available, or the database is not accessible, the tests should return Inconclusive.
+Some providers are referenced (via Nuget), but may still fail if the database is not installed.
+Database installation scripts are included in the DatabaseScripts folder.
+
+The following databases are used in the tests:
 *     SqlExpress with Northwind and AdventureWorks (integrated security)
 *     Oracle Express with HR (userId HR, password HR)
          to enable HR in Oracle XE open sqlplus
         > ALTER USER hr ACCOUNT UNLOCK;
         > ALTER USER hr IDENTIFIED BY HR;
-
 *     MySQL with Northwind (user id root, password mysql)
-Plus additional databases
 *     Postgresql with world
 *     Firebird with Employee.Fdb
-*     SQLite with Northwind (database file is C:\Data\Northwind.db)
+*     SQLite with Northwind (database file is Northwind.db, it is created locally by the assemblyInitialize event in InitSQLite)
 *     SqlServer CE 4 with Northwind (database file is C:\Data\Northwind.sdf)
 *     DB2 on localhost with standard Sample database (user db2admin, password db2)
 *     Ingres on localhost with standard demodb database
@@ -24,46 +31,13 @@ Plus additional databases
 *     Sybase ASE 12 on localhost with standard v12 demo database
 *     Sybase UltraLite (v12) with standard custdb database, installed in default Windows 7 directory
 
-All ADO providers are accessed using ADO 2's DbProviderFactories - there are no direct references.
-If the provider is not installed (eg Devart.Oracle), the test runs as Inconclusive.
-If the database cannot be opened (invalid connection string/ password etc), the test runs as Inconclusive.
-
 The tests check the standard databases- HR for Oracle, Adventureworks for SqlServer, Northwind for others (there are some customized versions for MySQL- this uses a simple SqlServer conversion).
 
 There are also tests using other ADO providers:
 * Oracle's ODP (http://www.oracle.com/technetwork/topics/dotnet/index-085163.html), which is free. 
-* Devart (http://www.devart.com/dotconnect/oracle/overview1.html) has free Oracle, SqlServer, MySql, PostgreSql and SQLite providers as well as licensed ones. I've tested both free and professional Oracle drivers; they are identical for this functionality.
+* Devart (http://www.devart.com/dotconnect/oracle/overview1.html) has free Oracle, MySql, PostgreSql and SQLite providers as well as licensed ones. I've tested both free and professional Oracle drivers; they are identical for this functionality.
 * DataDirect (http://web.datadirect.com/products/net/index.html) has some trial providers
 
 # AppVeyor
 Integration tests for databases apart from SqlServer are identified by TestCategoryAttribute.
-
-DatabaseScripts contains initialization for Northwind for SqlServer. Include the following in appveyor.yml:
-services:
-  - mssql2012sp1        # start SQL Server 2012 SP1 Express (or any other SqlServer)
-before_test:
-  - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_database_northwind.sql"
-  - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -d "NorthwindDsr" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_schema_northwind.sql"
-test:
-  categories:
-    except:
-      - Access # could be done
-      - Cache
-      - DataDirect.Oracle
-      - DataDirect.SqlServer
-      - DB2
-      - Devart.Oracle
-      - Devart.Postgresql
-      - Devart.SqlServer
-      - Firebird
-      - Ingres
-      - MySql # could be done
-      - Oracle
-      - Postgresql # could be done
-      - SqlAzure
-      - SQLite # could be done
-      - SqlServer.AdventureWorks
-      - SqlServer.Odbc # could be done
-      - SqlServerCe # could be done
-      - Sybase
-      - VistaDb
+See the appveyor.yml file.
