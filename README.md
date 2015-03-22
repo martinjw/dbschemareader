@@ -4,7 +4,7 @@ A simple, cross-database facade over .Net 2.0 DbProviderFactories to read databa
 
 Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.
 
-https://dbschemareader.codeplex.com/
+https://github.com/martinjw/dbschemareader or https://dbschemareader.codeplex.com/
 
 https://dbschemareader.codeplex.com/documentation
 
@@ -19,6 +19,7 @@ Nuget: Install-Package DatabaseSchemaReader https://img.shields.io/nuget/v/Datab
   * Generate CRUD stored procedures (for SqlServer, Oracle, MySQL, DB2)
 * Copy a database schema and data from any provider (SqlServer, Oracle etc) to a new SQLite database (and, with limitations, to SqlServer CE 4)
 * Compare two schemas to generate a migration script
+* Simple cross-database migrations generator
 
 ## Use
 
