@@ -23,7 +23,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     {
         //private const string ProviderName = "Npgsql";
         private const string ProviderName = "Devart.Data.PostgreSql";
-        private const string ConnectionString = @"Server=127.0.0.1;User id=postgres;password=sql;database=world;";
+        private readonly string _connectionString = ConnectionStrings.PostgreSql;
 
         private DatabaseTable _table;
         private readonly DbProviderFactory _factory;
@@ -44,9 +44,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             if (_table != null) return _table;
 
-            ProviderChecker.Check(ProviderName, ConnectionString);
+            ProviderChecker.Check(ProviderName, _connectionString);
 
-            var dbReader = new DatabaseReader(ConnectionString, ProviderName);
+            var dbReader = new DatabaseReader(_connectionString, ProviderName);
             dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
             _table = dbReader.Table("country"); //this hits database for columns and constraints
@@ -58,7 +58,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, _connectionString);
 
             runner.RunCountSql();
         }
@@ -69,7 +69,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, _connectionString);
 
             runner.RunSelectAllSql();
         }
@@ -79,7 +79,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, _connectionString);
 
             runner.RunPagingSql();
         }
@@ -89,7 +89,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         {
             var table = LoadTable();
 
-            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.PostgreSql, table, _factory, _connectionString);
 
             runner.RunPagingStartToEndSql();
         }
@@ -108,7 +108,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             //run generated sql
             using (var con = _factory.CreateConnection())
             {
-                con.ConnectionString = ConnectionString;
+                con.ConnectionString = _connectionString;
                 con.Open();
                 using (var transaction = con.BeginTransaction())
                 {

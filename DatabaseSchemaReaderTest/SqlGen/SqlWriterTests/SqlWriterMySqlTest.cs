@@ -22,7 +22,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     public class SqlWriterMySqlTest
     {
         private const string ProviderName = "MySql.Data.MySqlClient";
-        private const string ConnectionString = @"Server=localhost;Uid=root;Pwd=mysql;Database=Northwind;Allow User Variables=True;";
+        private readonly string _connectionString = ConnectionStrings.MySql;
         private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 
@@ -38,24 +38,24 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             }
         }
 
-        private DatabaseTable LoadCategoriesFromNorthwind()
+        private DatabaseTable LoadCountryFromSakila()
         {
             if (_categoriesTable != null) return _categoriesTable;
 
-            ProviderChecker.Check(ProviderName, ConnectionString);
+            ProviderChecker.Check(ProviderName, _connectionString);
 
-            var dbReader = new DatabaseReader(ConnectionString, ProviderName);
+            var dbReader = new DatabaseReader(_connectionString, ProviderName);
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
+            _categoriesTable = dbReader.Table("country"); //this hits database for columns and constraints
             return _categoriesTable;
         }
 
         [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForCount()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadCountryFromSakila();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, _connectionString);
 
             runner.RunCountSql();
         }
@@ -64,9 +64,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForSelectAll()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadCountryFromSakila();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, _connectionString);
 
             runner.RunSelectAllSql();
         }
@@ -74,9 +74,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForPaging()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadCountryFromSakila();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, _connectionString);
 
             runner.RunPagingSql();
         }
@@ -84,9 +84,9 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         [TestMethod, TestCategory("MySql")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadCountryFromSakila();
 
-            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, ConnectionString);
+            var runner = new SqlWriterCommonTest(SqlType.MySql, table, _factory, _connectionString);
 
             runner.RunPagingStartToEndSql();
         }
@@ -95,7 +95,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
         public void TestGeneratedSqlForInsert()
         {
             //arrange
-            var table = LoadCategoriesFromNorthwind();
+            var table = LoadCountryFromSakila();
             var writer = new SqlWriter(table, SqlType.MySql);
             //MySQL can only use output parameters with sprocs.
             var sql = writer.InsertSqlWithoutOutputParameter();
@@ -105,7 +105,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             //run generated sql
             using (var con = _factory.CreateConnection())
             {
-                con.ConnectionString = ConnectionString;
+                con.ConnectionString = _connectionString;
                 con.Open();
                 using (var transaction = con.BeginTransaction())
                 {
