@@ -8,7 +8,9 @@ https://github.com/martinjw/dbschemareader or https://dbschemareader.codeplex.co
 
 https://dbschemareader.codeplex.com/documentation
 
-Nuget: Install-Package DatabaseSchemaReader https://img.shields.io/nuget/v/DatabaseSchemaReader.svg https://www.nuget.org/packages/DatabaseSchemaReader/
+Nuget: Install-Package DatabaseSchemaReader [![Nuget](https://img.shields.io/nuget/v/DatabaseSchemaReader.svg) ](https://www.nuget.org/packages/DatabaseSchemaReader/)
+
+[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/martinjw/dbschemareader?svg=true)](https://ci.appveyor.com/project/martinjw/dbschemareader)
 
 * Database schema read from most ADO providers
 * Simple .net code generation:
@@ -47,7 +49,7 @@ foreach (var table in schema.Tables)
 
 There are two simple UIs.
 
-* DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for 
+* DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for
  - code generation, table DDL and stored procedure generation.
  - comparing the schema to another database.
 
