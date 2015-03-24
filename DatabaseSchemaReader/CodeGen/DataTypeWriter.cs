@@ -61,6 +61,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (column.Nullable &&
                 dt != null &&
                 !dt.IsString &&
+                !string.IsNullOrEmpty(dataType) &&
                 !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
             {
                 dataType += "?"; //nullable

@@ -86,6 +86,8 @@ namespace DatabaseSchemaReader.Utilities
 
 
             var doc = XDocument.Load(ssdlFilePath);
+            if (doc == null) throw new ArgumentException("No xml in file", "ssdlFilePath");
+            if (doc.Root == null) throw new ArgumentException("Invalid xml in file", "ssdlFilePath");
             _edmx = doc.Root.GetNamespaceOfPrefix("edmx");
             return ReadSsdl(doc);
         }
@@ -97,8 +99,9 @@ namespace DatabaseSchemaReader.Utilities
         /// <returns>A <see cref="DatabaseSchema"/></returns>
         public DatabaseSchema ReadSsdl(XDocument ssdlDocument)
         {
-
+            if (ssdlDocument == null) throw new ArgumentNullException("ssdlDocument");
             var storage = ssdlDocument.Root;
+            if (storage == null) throw new ArgumentException("Invalid document", "ssdlDocument");
             _edmx = storage.GetNamespaceOfPrefix("edmx");
             if (storage.Name.LocalName != "Schema")
                 throw new InvalidOperationException("SSDL file does not have expected structure");
@@ -112,6 +115,7 @@ namespace DatabaseSchemaReader.Utilities
             var databaseSchema = new DatabaseSchema(null, SqlType.SqlServer);
 
             var entityContainer = storageSchema.Element(_schema + "EntityContainer");
+            if (entityContainer == null) return databaseSchema;
             foreach (var entitySet in entityContainer.Elements(_schema + "EntitySet"))
             {
                 var name = (string)entitySet.Attribute("Name");

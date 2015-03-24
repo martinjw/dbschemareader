@@ -214,14 +214,20 @@ namespace DatabaseSchemaReader.Procedures
             if (fullName == "System.Data.OracleClient.OracleParameter")
             {
                 var prop = parameter.GetType().GetProperty("OracleType");
-                //OracleType.Cursor
-                prop.SetValue(parameter, 5, null);
+                if (prop != null)
+                {
+                    //OracleType.Cursor
+                    prop.SetValue(parameter, 5, null);
+                }
             }
             else if (fullName == "Oracle.DataAccess.Client.OracleParameter")
             {
                 var prop = parameter.GetType().GetProperty("OracleDbType");
-                //OracleDbType.RefCursor
-                prop.SetValue(parameter, 121, null);
+                if (prop != null)
+                {
+                    //OracleDbType.RefCursor
+                    prop.SetValue(parameter, 121, null);
+                }
             }
         }
     }

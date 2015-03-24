@@ -106,7 +106,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
         {
-            if (string.IsNullOrEmpty(originalColumnName) || databaseColumn == null)
+            if (databaseTable == null) return null;
+            if (databaseColumn == null) return null;
+            if (string.IsNullOrEmpty(originalColumnName))
                 return base.RenameColumn(databaseTable, databaseColumn, originalColumnName);
             var name = TableName(databaseTable) + "." + Escape(originalColumnName);
             return "sp_rename '" + name + "', '" + Escape(databaseColumn.Name) + "', 'COLUMN';";
@@ -114,7 +116,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
         {
-            if (string.IsNullOrEmpty(originalTableName) || databaseTable == null)
+            if (databaseTable == null) return null;
+            if (string.IsNullOrEmpty(originalTableName))
                 return base.RenameTable(databaseTable, originalTableName);
             var name = SchemaPrefix(databaseTable.SchemaOwner) + Escape(originalTableName);
             return "sp_rename '" + name + "', '" + Escape(databaseTable.Name) + "';";
