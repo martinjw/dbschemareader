@@ -131,6 +131,7 @@ namespace DatabaseSchemaReader.CodeGen
         public void UpgradeTo2010()
         {
             var projectElement = _document.Root;
+            if (projectElement == null) return;
             projectElement.SetAttributeValue("ToolsVersion", "4.0");
             var target = projectElement.Descendants(_xmlns + "TargetFrameworkVersion").First();
             target.SetValue("v4.0");

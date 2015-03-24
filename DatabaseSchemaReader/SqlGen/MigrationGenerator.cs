@@ -164,7 +164,8 @@ namespace DatabaseSchemaReader.SqlGen
         /// <returns></returns>
         protected string RenameColumnTo(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
         {
-            if (string.IsNullOrEmpty(originalColumnName) || databaseColumn == null)
+            if (databaseColumn == null) return null;
+            if (string.IsNullOrEmpty(originalColumnName))
                 return RenameColumn(databaseTable, databaseColumn, originalColumnName);
             return string.Format(CultureInfo.InvariantCulture,
                 "ALTER TABLE {0} RENAME COLUMN {1} TO {2}",
@@ -187,6 +188,7 @@ namespace DatabaseSchemaReader.SqlGen
 
             //use the standard constraint writer for the database
             var constraintWriter = _ddlFactory.ConstraintWriter(databaseTable);
+            if (constraintWriter == null) return null;
             constraintWriter.IncludeSchema = IncludeSchema; //cascade setting
             return constraintWriter.WriteConstraint(constraint);
         }
@@ -437,7 +439,8 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected string RenameTableTo(DatabaseTable databaseTable, string originalTableName)
         {
-            if (string.IsNullOrEmpty(originalTableName) || databaseTable == null)
+            if (databaseTable == null) return null;
+            if (string.IsNullOrEmpty(originalTableName))
                 return RenameTable(databaseTable, originalTableName);
             return string.Format(CultureInfo.InvariantCulture,
                                  "ALTER TABLE {0} RENAME TO {1};",

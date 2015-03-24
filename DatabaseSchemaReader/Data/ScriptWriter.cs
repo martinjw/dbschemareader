@@ -77,10 +77,12 @@ namespace DatabaseSchemaReader.Data
         /// <returns></returns>
         public string ReadTable(string tableName, string connectionString, string providerName)
         {
-            var dr = new DatabaseReader(connectionString, providerName);
-            var databaseTable = dr.Table(tableName);
-
-            return ReadTable(databaseTable, connectionString, providerName);
+            using (var dr = new DatabaseReader(connectionString, providerName))
+            {
+                var databaseTable = dr.Table(tableName);
+                if (databaseTable == null) return null;
+                return ReadTable(databaseTable, connectionString, providerName);
+            }
         }
 
         /// <summary>
@@ -100,7 +102,7 @@ namespace DatabaseSchemaReader.Data
                            var s = w.WriteInsert(record);
                            return processRecord(s);
                        });
-           
+
         }
 
     }
