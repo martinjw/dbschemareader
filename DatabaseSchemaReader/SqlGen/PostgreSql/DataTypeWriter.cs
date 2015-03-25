@@ -78,7 +78,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 return "TIMESTAMP";
 
             //bytes
-            if (DataTypeConverter.IsBlob(dataType, column))
+            if (DataTypeConverter.IsBlob(dataType, column.Length))
                 return "OID";//blobs become object ids
             if (DataTypeConverter.IsBinary(dataType))
             {

@@ -22,7 +22,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     public class MigrationSqlServerTest
     {
         private const string ProviderName = "System.Data.SqlClient";
-        readonly string ConnectionString = ConnectionStrings.Northwind;
+        readonly string _connectionString = ConnectionStrings.Northwind;
         private readonly DbProviderFactory _factory;
 
         public MigrationSqlServerTest()
@@ -34,14 +34,14 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
         public void TestMigration()
         {
             //arrange
-            var tableName = MigrationCommon.FindFreeTableName(ProviderName, ConnectionString);
+            var tableName = MigrationCommon.FindFreeTableName(ProviderName, _connectionString);
             var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
 
             var table = MigrationCommon.CreateTestTable(tableName);
             var newColumn = MigrationCommon.CreateNewColumn();
             //this creates a nullable column with no default. Normally we automatically create a default.
             //ensure it is nullable, as we don't want to create a default which we can't delete
-            newColumn.Nullable = true; 
+            newColumn.Nullable = true;
             var unqiueConstraint = MigrationCommon.CreateUniqueConstraint(newColumn);
             var fk = MigrationCommon.CreateForeignKey(table);
             var index = MigrationCommon.CreateUniqueIndex(newColumn, tableName);
@@ -66,7 +66,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
             {
                 using (var con = _factory.CreateConnection())
                 {
-                    con.ConnectionString = ConnectionString;
+                    con.ConnectionString = _connectionString;
                     using (var cmd = con.CreateCommand())
                     {
                         con.Open();

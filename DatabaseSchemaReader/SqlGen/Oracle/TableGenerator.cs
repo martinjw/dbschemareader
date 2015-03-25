@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         {
             var sb = new StringBuilder();
             var formatProvider = SqlFormatProvider();
-            var tableName = formatProvider.Escape(Table.SchemaOwner) + "." + formatProvider.Escape(Table.Name);
+            var tableName = SchemaTableName(Table);
             foreach (var column in Table.Columns.Where(c => !string.IsNullOrEmpty(c.Description)))
             {
                 sb.Append("COMMENT ON COLUMN ");
@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             var formatProvider = SqlFormatProvider();
             var sb = new StringBuilder();
             sb.Append("COMMENT ON TABLE ");
-            sb.Append(formatProvider.Escape(Table.SchemaOwner) + "." + formatProvider.Escape(Table.Name));
+            sb.Append(SchemaTableName(Table));
             sb.Append(" IS '");
             sb.Append(Table.Description);
             sb.AppendLine("'" + formatProvider.LineEnding());

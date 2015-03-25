@@ -66,7 +66,8 @@ namespace DatabaseSchemaReader.Data
                 {
                     _nullColumns.Add(key);
                 }
-                if (!IncludeBlobs && DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn))
+                if (!IncludeBlobs &&
+                    DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn.Length))
                 {
                     _nullColumns.Add(key);
                 }
@@ -119,7 +120,7 @@ namespace DatabaseSchemaReader.Data
             PrepareIdentityInsert(sb);
 
             var changes = _dataTable.GetChanges(DataRowState.Added);
-            if(changes != null)
+            if (changes != null)
                 foreach (DataRow row in changes.Rows)
                     sb.AppendLine(WriteInsert(row));
 
@@ -134,7 +135,7 @@ namespace DatabaseSchemaReader.Data
             if (changes != null)
                 foreach (DataRow row in changes.Rows)
                     sb.AppendLine(WriteDelete(row));
-            
+
             return sb.ToString();
         }
 
@@ -205,12 +206,12 @@ namespace DatabaseSchemaReader.Data
             foreach (var databaseColumn in _databaseTable.Columns)
             {
                 if (databaseColumn.IsAutoNumber) continue;
-                if(!_dataTable.Columns.Contains(databaseColumn.Name)) continue;
-                if(!IncludeAllFieldsInUpdate && row[databaseColumn.Name].Equals(row[databaseColumn.Name, DataRowVersion.Original])) continue;
+                if (!_dataTable.Columns.Contains(databaseColumn.Name)) continue;
+                if (!IncludeAllFieldsInUpdate && row[databaseColumn.Name].Equals(row[databaseColumn.Name, DataRowVersion.Original])) continue;
 
                 var columnType = _columnTypes[databaseColumn.Name];
                 object data = row[databaseColumn.Name];
-                values.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name) + " = " +  _converter.Convert(columnType, data, databaseColumn.Name));
+                values.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name) + " = " + _converter.Convert(columnType, data, databaseColumn.Name));
             }
 
             var value = string.Join(" ,", values.ToArray());
@@ -280,7 +281,7 @@ namespace DatabaseSchemaReader.Data
         {
             var pk = new List<string>();
             var unescapedPk = new List<string>();
-            if(!IncludeAllFieldsInWhereClause)
+            if (!IncludeAllFieldsInWhereClause)
                 foreach (var databaseColumn in _databaseTable.Columns)
                 {
                     if ((databaseColumn.IsPrimaryKey || databaseColumn.IsAutoNumber) && _dataTable.Columns.Contains(databaseColumn.Name))
@@ -292,7 +293,7 @@ namespace DatabaseSchemaReader.Data
             //if no primary key use all fields
             if (pk.Count == 0)
             {
-                foreach(DataColumn col in _dataTable.Columns)
+                foreach (DataColumn col in _dataTable.Columns)
                 {
                     if (_databaseTable.Columns.Any(c => c.Name == col.ColumnName))
                     {

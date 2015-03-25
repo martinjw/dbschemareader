@@ -46,10 +46,10 @@ namespace DatabaseSchemaReader.SqlGen
                     dataType == "VARGRAPHIC" ||
                     dataType == "LONG VARGRAPHIC");
         }
-        public static bool IsBlob(string dataType, DatabaseColumn column)
+        public static bool IsBlob(string dataType, int? length)
         {
             //special case SQLServer
-            if (dataType == "VARBINARY" && column.Length == -1)
+            if (dataType == "VARBINARY" && length == -1)
                 return true; //VARBINARY(MAX)
             return (dataType == "BLOB" ||
                     dataType == "MEDIUMBLOB" ||
@@ -183,26 +183,41 @@ namespace DatabaseSchemaReader.SqlGen
                 }
             }
             //does the schema data types contain this type? if so, assign it.
+            var dataType = FindDataType(dbType, dataTypeList, sqlType, column.Length);
+            column.DataType = dataType;
+        }
+
+        /// <summary>
+        /// Finds the DataType for a given string dbType
+        /// </summary>
+        public static DataType FindDataType(string dbType, ICollection<DataType> dataTypeList, SqlType sqlType, int? length)
+        {
+            if (dbType == null) throw new ArgumentNullException("dbType");
+            if (dataTypeList == null) throw new ArgumentNullException("dataTypeList");
+
             var match = dataTypeList.FirstOrDefault(d => d.TypeName.Equals(dbType, StringComparison.OrdinalIgnoreCase));
             if (match != null)
             {
-                column.DataType = match;
-                return;
+                return match;
             }
+            return InventDataType(dbType, dataTypeList, sqlType, length);
+        }
+
+
+        private static DataType InventDataType(string dbType, ICollection<DataType> dataTypeList, SqlType sqlType, int? length)
+        {
             //we need to invent a dataType - we need a .Net typeName
             if (IsVariableString(dbType) || IsFixedLengthString(dbType))
             {
                 var dataType = new DataType(dbType, typeof(string).FullName);
-                column.DataType = dataType;
                 dataTypeList.Add(dataType);
-                return;
+                return dataType;
             }
-            if (IsBinary(dbType) || IsBlob(dbType, column))
+            if (IsBinary(dbType) || IsBlob(dbType, length))
             {
                 var dataType = new DataType(dbType, "System.Byte[]");
-                column.DataType = dataType;
                 dataTypeList.Add(dataType);
-                return;
+                return dataType;
             }
 
             if (sqlType == SqlType.SqlServer &&
@@ -210,33 +225,31 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 var dataType = new DataType(dbType, "System.Byte[]");
                 dataType.ProviderDbType = (int)SqlDbType.Timestamp;
-                column.DataType = dataType;
                 dataTypeList.Add(dataType);
-                return;
+                return dataType;
             }
             if (IsDateTime(dbType))
             {
                 var dataType = new DataType(dbType, typeof(DateTime).FullName);
-                column.DataType = dataType;
                 dataTypeList.Add(dataType);
-                return;
+                return dataType;
             }
             if (IsInteger(dbType))
             {
                 var netType = typeof(int).FullName;
                 if (dbType.Equals("BIGINT")) netType = typeof(long).FullName;
                 var dataType = new DataType(dbType, netType);
-                column.DataType = dataType;
                 dataTypeList.Add(dataType);
-                return;
+                return dataType;
             }
             if (HasPrecision(dbType))
             {
                 var dataType = new DataType(dbType, typeof(decimal).FullName);
-                column.DataType = dataType;
                 dataTypeList.Add(dataType);
+                return dataType;
             }
-            //we've picked off the most common types here
+            //we've picked off the most common types here 
+            return null;
         }
 
     }

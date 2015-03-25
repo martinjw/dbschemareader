@@ -74,5 +74,24 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             Assert.IsTrue(ddl.Contains("[Id] INT NOT NULL DEFAULT NEXT VALUE FOR [MySequence]"));
         }
 
+        [TestMethod]
+        public void TestSqlServerTableWithDescription()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.SqlServer);
+            var table = schema.AddTable("Test");
+            var id = table.AddColumn<int>("Id").AddPrimaryKey();
+            id.Description = "This is the primary key";
+            table.AddColumn<string>("Name").AddLength(200);
+            var tableGen = new TableGenerator(table);
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("EXEC sys.sp_addextendedproperty"));
+            Assert.IsTrue(ddl.Contains("'This is the primary key'"));
+        }
+
     }
 }

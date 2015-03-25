@@ -270,7 +270,6 @@
     <Compile Include="SqlGen\Oracle\TableGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ConstraintWriter.cs" />
     <Compile Include="SqlGen\SqlServer\DataTypeWriter.cs" />
-    <Compile Include="SqlGen\SqlServer\ForeignKeyGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ProcedureGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ProcedureWriter.cs" />
     <Compile Include="SqlGen\SqlServer\SqlFormatProvider.cs" />

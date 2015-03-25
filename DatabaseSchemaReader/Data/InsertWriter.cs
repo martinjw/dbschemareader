@@ -76,12 +76,13 @@ namespace DatabaseSchemaReader.Data
                 }
                 var columnType = dataType.GetNetType();
                 _columnTypes.Add(key, columnType);
-                if(dataType.IsDateTime)
+                if (dataType.IsDateTime)
                 {
                     //get the original database type (datetime2, date, time, timestamp etc)
                     _dateTypes.Add(key, databaseColumn.DbDataType.ToUpperInvariant());
                 }
-                if (!IncludeBlobs && DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn))
+                if (!IncludeBlobs &&
+                    DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn.Length))
                 {
                     _nullColumns.Add(key);
                 }
@@ -109,7 +110,8 @@ namespace DatabaseSchemaReader.Data
                 {
                     _nullColumns.Add(key);
                 }
-                if (!IncludeBlobs && DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn))
+                if (!IncludeBlobs &&
+                    DataTypeConverter.IsBlob(databaseColumn.DbDataType.ToUpperInvariant(), databaseColumn.Length))
                 {
                     _nullColumns.Add(key);
                 }
