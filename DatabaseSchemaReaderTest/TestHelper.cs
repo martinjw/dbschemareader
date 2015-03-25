@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReaderTest.IntegrationTests;
@@ -26,7 +27,14 @@ namespace DatabaseSchemaReaderTest
             {
                 //if it's already there, clear it out
                 var sub = directory.GetDirectories(folder).First();
-                sub.Delete(true);
+                try
+                {
+                    sub.Delete(true);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    //can't access it, carry on
+                }
             }
             var subdirectory = directory.CreateSubdirectory(folder);
             //because it may not actually have been created...

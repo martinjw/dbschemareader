@@ -42,9 +42,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             var sb = new StringBuilder();
 
-            var schemaName = (IncludeSchema && !string.IsNullOrEmpty(Table.SchemaOwner)) ? EscapeName(Table.SchemaOwner) + "." : string.Empty;
-
-            sb.AppendLine("CREATE TABLE " + schemaName + EscapeName(TableName));
+            sb.AppendLine("CREATE TABLE " + SchemaTableName(Table));
             sb.AppendLine("(");
             var columnList = new List<string>();
             foreach (var column in Table.Columns)
@@ -65,6 +63,23 @@ namespace DatabaseSchemaReader.SqlGen
             }
 
             return sb.ToString();
+        }
+
+        protected string SchemaTableName(DatabaseTable databaseTable)
+        {
+            return SchemaName(databaseTable.SchemaOwner) + EscapeName(databaseTable.Name);
+        }
+
+        /// <summary>
+        /// If there is a schema (eg "dbo") returns it escaped with trailing dot ("[dbo].")
+        /// </summary>
+        protected string SchemaName(string schema)
+        {
+            if (IncludeSchema && !string.IsNullOrEmpty(schema))
+            {
+                return EscapeName(schema) + ".";
+            }
+            return string.Empty;
         }
 
         public string WriteColumn(DatabaseColumn column)

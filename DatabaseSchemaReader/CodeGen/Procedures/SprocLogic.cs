@@ -69,8 +69,9 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             {
                 var databaseSchema = _storedProcedure.DatabaseSchema;
                 if (databaseSchema == null) return false;
-
-                return databaseSchema.Provider.StartsWith("Devart", StringComparison.OrdinalIgnoreCase);
+                var provider = databaseSchema.Provider;
+                if (provider == null) return false;
+                return provider.StartsWith("Devart", StringComparison.OrdinalIgnoreCase);
             }
         }
 

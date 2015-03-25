@@ -85,7 +85,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
                 return "TIMESTAMP";
 
             //bytes
-            if (DataTypeConverter.IsBlob(dataType, column))
+            if (DataTypeConverter.IsBlob(dataType, column.Length))
                 return "BLOB";
             if (DataTypeConverter.IsBinary(dataType))
             {

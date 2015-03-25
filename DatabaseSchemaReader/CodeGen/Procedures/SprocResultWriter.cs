@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.SqlGen;
 
 namespace DatabaseSchemaReader.CodeGen.Procedures
 {
@@ -126,7 +127,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
                 var dataType = argument.DataType.NetDataTypeCSharpName;
                 if (!argument.DataType.IsString) dataType += "?";
                 _cb.AppendAutomaticProperty(dataType, argument.NetName);
-           }
+            }
         }
 
         private void WriteProperties(DatabaseResultSet result)
@@ -137,7 +138,8 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
                 {
                     column.NetName = NameFixer.ToPascalCase(column.Name);
                 }
-                var dataType = TranslateDataTypeToCSharp(column.DbDataType);
+                var dt = column.DataType;
+                var dataType = dt != null ? dt.NetCodeName(column) : TranslateDataTypeToCSharp(column.DbDataType);
 
                 if (!string.Equals(dataType, "String", StringComparison.OrdinalIgnoreCase) &&
                     !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
@@ -185,8 +187,8 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             using (_cb.BeginNest("public override string ToString()"))
             {
                 var line = string.Format(
-                    CultureInfo.InvariantCulture, 
-                    "return \"[{0}] = \" + {0};", 
+                    CultureInfo.InvariantCulture,
+                    "return \"[{0}] = \" + {0};",
                     column.NetName);
                 _cb.AppendLine(line);
             }

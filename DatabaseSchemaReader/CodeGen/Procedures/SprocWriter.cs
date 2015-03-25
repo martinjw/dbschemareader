@@ -284,7 +284,8 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
                     {
                         var column = result.Columns[index];
                         var name = column.NetName ?? NameFixer.ToPascalCase(column.Name);
-                        var dataType = column.DbDataType;
+                        var dt = column.DataType;
+                        var dataType = dt != null ? dt.NetCodeName(column) : column.DbDataType;
                         if (!string.Equals(dataType, "String", StringComparison.OrdinalIgnoreCase) && !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
                         {
                             dataType += "?"; //nullable

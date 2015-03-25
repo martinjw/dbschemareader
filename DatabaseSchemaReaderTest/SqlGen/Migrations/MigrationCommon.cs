@@ -35,7 +35,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
             //we only need a schema because MySQL foreign key references do not allow just the foreign key table name- they need the columns too
             var schema = new DatabaseSchema(null, null);
 
-            var testTable = new DatabaseTable { Name = tableName };
+            var testTable = new DatabaseTable { Name = tableName, Description = "This is a test table" };
             schema.Tables.Add(testTable);
             testTable.DatabaseSchema = schema; //the migration will discover this and know how to link the self referencing table
 
@@ -45,7 +45,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
                 Name = "Id",
                 DbDataType = "int",
                 DataType = intDataType,
-                Nullable = false
+                Nullable = false,
+                Description = "Primary key",
             };
             testTable.Columns.Add(idColumn);
 
@@ -54,7 +55,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
                 Name = "Parent", //for a self-referencing foreign key
                 DbDataType = "int",
                 DataType = intDataType,
-                Nullable = true
+                Nullable = true,
+                Description = "Self referencing foreign key",
             };
             testTable.Columns.Add(parentColumn);
 
@@ -63,7 +65,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
                 Name = "NAME",
                 DbDataType = "VARCHAR",
                 Length = 10,
-                DataType = new DataType("VARCHAR", "string")
+                DataType = new DataType("VARCHAR", "string"),
+                Description = "Simple varchar column",
             };
             testTable.Columns.Add(nameColumn);
 

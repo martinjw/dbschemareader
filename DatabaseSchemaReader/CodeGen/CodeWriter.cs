@@ -138,6 +138,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var fileName = className + ".cs";
             var path = Path.Combine(directory.FullName, fileName);
+            if (!directory.Exists) directory.Create();
             File.WriteAllText(path, txt);
             return fileName;
         }
