@@ -40,10 +40,15 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //act
             string txt = insertWriter.Write(SqlType.SqlServer);
             //we don't care about formatting
-            txt = txt.Replace(Environment.NewLine, string.Empty);
+            txt = RemoveLineBreaks(txt);
 
             //assert
             Assert.AreEqual("INSERT INTO [Categories] (  [Id],  [Name]) VALUES (1 ,N'Hello');", txt);
+        }
+
+        private static string RemoveLineBreaks(string txt)
+        {
+            return txt.Replace(Environment.NewLine, string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
         }
 
         [TestMethod]
@@ -66,7 +71,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //act
             string txt = insertWriter.Write(SqlType.Oracle);
             //we don't care about formatting
-            txt = txt.Replace(Environment.NewLine, string.Empty);
+            txt = RemoveLineBreaks(txt);
 
             //assert
             Assert.AreEqual("INSERT INTO \"Categories\" (  \"Id\",  \"Name\") VALUES (1 ,'Hello');", txt);
@@ -92,7 +97,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //act
             string txt = insertWriter.Write(SqlType.SqlServer);
             //we don't care about formatting
-            txt = txt.Replace(Environment.NewLine, string.Empty);
+            txt = RemoveLineBreaks(txt);
 
             //assert
             Assert.AreEqual("INSERT INTO [Categories] (  [Name]) VALUES (N'Hello');", txt);
@@ -118,7 +123,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //act
             string txt = insertWriter.Write(SqlType.SqlServer);
             //we don't care about formatting
-            txt = txt.Replace(Environment.NewLine, string.Empty);
+            txt = RemoveLineBreaks(txt);
 
             //assert
             Assert.IsTrue(txt.Contains("INSERT INTO [Categories] (  [Id],  [Name]) VALUES (1 ,N'Hello');"));
@@ -147,7 +152,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //act
             string txt = insertWriter.Write(SqlType.Oracle);
             //we don't care about formatting
-            txt = txt.Replace(Environment.NewLine, string.Empty);
+            txt = RemoveLineBreaks(txt);
 
             //assert
             Assert.AreEqual("INSERT INTO \"Categories\" (  \"Name\") VALUES ('Hello');", txt);
