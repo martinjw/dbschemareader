@@ -158,6 +158,7 @@
     <Compile Include="Filters\IFilter.cs" />
     <Compile Include="Filters\PrefixFilter.cs" />
     <Compile Include="IDatabaseReader.cs" />
+    <Compile Include="ProviderSchemaReaders\Db2ISeriesSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\Db2SchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\IngresSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
@@ -256,7 +257,6 @@
     <Compile Include="SqlGen\Oracle\TableGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ConstraintWriter.cs" />
     <Compile Include="SqlGen\SqlServer\DataTypeWriter.cs" />
-    <Compile Include="SqlGen\SqlServer\ForeignKeyGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ProcedureGenerator.cs" />
     <Compile Include="SqlGen\SqlServer\ProcedureWriter.cs" />
     <Compile Include="SqlGen\SqlServer\SqlFormatProvider.cs" />

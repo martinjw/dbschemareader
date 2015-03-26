@@ -58,6 +58,7 @@
     <Compile Include="Codegen\ClassWriterTablePerTypeTest.cs" />
     <Compile Include="Codegen\ClassWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterWithViewTest.cs" />
+    <Compile Include="Codegen\CodeWriterIntegrationTest.cs" />
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterTest.cs" />

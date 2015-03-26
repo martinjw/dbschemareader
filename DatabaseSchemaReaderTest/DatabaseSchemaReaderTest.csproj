@@ -78,6 +78,7 @@
     <Compile Include="Codegen\CodeFirstContextWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstMappingWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstWriterTest.cs" />
+    <Compile Include="Codegen\CodeWriterIntegrationTest.cs" />
     <Compile Include="Codegen\CodeWriterTest.cs" />
     <Compile Include="Codegen\ClassWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterWithViewTest.cs" />
