@@ -36,6 +36,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             {
                 //MySQL is not installed. ProviderChecker will assert.inconclusive.
             }
+            catch (System.Configuration.ConfigurationErrorsException)
+            {
+                //MySQL is not installed. ProviderChecker will assert.inconclusive.
+            }
         }
 
         private DatabaseTable LoadCountryFromSakila()
