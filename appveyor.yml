@@ -1,6 +1,13 @@
 #appveyor build. Validated at https://ci.appveyor.com/tools/validate-yaml
 version: 1.4.{build}
+skip_tags: true
 configuration: Release
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
 services:
 - mssql2008r2sp2
 - mysql56
@@ -8,6 +15,8 @@ services:
 build:
   project: build.proj
   verbosity: minimal
+after_build:
+- tools\nuget pack DatabaseSchemaReader\DatabaseSchemaReader.nuspec -Version "%APPVEYOR_BUILD_VERSION%"
 before_test:
 - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_database_northwind.sql"
 - sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -d "NorthwindDsr" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_schema_northwind.sql"
@@ -39,3 +48,5 @@ test:
 artifacts:
 - path: bin
   name: DatabaseSchemaReader
+- path: '*.nupkg'
+  name: Nuget
