@@ -6,11 +6,12 @@
 		<authors>Martin Willey</authors>
 		<owners>Martin Willey</owners>
 		<licenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</licenseUrl>
-		<projectUrl>http://dbschemareader.codeplex.com/</projectUrl>
+		<projectUrl>https://github.com/martinjw/dbschemareader</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
-		<tags>ADO, Entity Framework Code First, SQL Server, SQLite, Oracle</tags>
+		<releaseNotes>Support for DB2 iSeries, minor bugfixes</releaseNotes>
+		<tags>ADO, Entity Framework Code First, SQL Server, SQLite, Oracle, MySQL, PostgreSql, Schema, Database</tags>
 	</metadata>
 	<files>
 		<file src="..\bin\DatabaseSchemaReader.dll" target="lib\net35" /> 

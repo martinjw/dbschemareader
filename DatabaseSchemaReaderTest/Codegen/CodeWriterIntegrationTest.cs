@@ -128,16 +128,90 @@ namespace DatabaseSchemaReaderTest.Codegen
                 Assert.Fail("Could not find Procedures subdirectory");
             var files = procedures.GetFiles("*.cs");
             var employeeSales = files.FirstOrDefault(f => f.Name == "EmployeeSalesByCountry.cs");
-            Assert.IsNotNull(employeeSales, "Should have written EmployeeSalesByCountry class for Employee Sales By Country procedure");
+            Assert.IsNotNull(employeeSales, 
+                "Should have written EmployeeSalesByCountry class for Employee Sales By Country procedure");
 
             var cs = File.ReadAllText(employeeSales.FullName);
-            Assert.IsTrue(cs.Contains("public virtual IEnumerable<EmployeeSalesByCountryResult> Execute(DateTime? beginningDate, DateTime? endingDate)"), "Generated input signature");
+            Assert.IsTrue(cs.Contains("public virtual IEnumerable<EmployeeSalesByCountryResult> Execute(DateTime? beginningDate, DateTime? endingDate)"), 
+                "Generated input signature");
 
             var employeeSalesResult = files.FirstOrDefault(f => f.Name == "EmployeeSalesByCountryResult.cs");
-            Assert.IsNotNull(employeeSalesResult, "Should have written EmployeeSalesByCountryResult class for Employee Sales By Country procedure");
+            Assert.IsNotNull(employeeSalesResult, 
+                "Should have written EmployeeSalesByCountryResult class for Employee Sales By Country procedure");
 
             cs = File.ReadAllText(employeeSalesResult.FullName);
-            Assert.IsTrue(cs.Contains("public virtual string Country { get; set; }"), "Generated property for resultSet column");
+            Assert.IsTrue(cs.Contains("public virtual string Country { get; set; }"), 
+                "Generated property for resultSet column");
+        }
+        
+        [TestMethod, TestCategory("MySql")]
+        public void MySqlProcedureTest()
+        {
+            const string providername = "MySql.Data.MySqlClient";
+            var connectionString = ConnectionStrings.MySql;
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            var schema = dbReader.ReadAll();
+
+            var procedure = schema.StoredProcedures
+                .Find(x => string.Equals(x.Name, "film_not_in_stock", StringComparison.OrdinalIgnoreCase));
+            if (procedure == null)
+            {
+                Assert.Inconclusive("No sproc film_not_in_stock in Sakila");
+            }
+
+            //getting the procedure resultsets is a special call
+            var runner = new ResultSetReader(schema);
+            runner.Execute();
+
+            var directory = TestHelper.CreateDirectory("MySqlSproc");
+            const string @namespace = "MySqlSproc.Domain";
+            var settings = new CodeWriterSettings
+            {
+                Namespace = @namespace,
+                CodeTarget = CodeTarget.Poco,
+                WriteStoredProcedures = true
+            };
+
+            //act
+            var codeWriter = new CodeWriter(schema, settings);
+            codeWriter.Execute(directory);
+
+            //assert
+            //This procedure produces a table of inventory ID numbers for the copies of the film not in stock, 
+            //and returns (in the p_film_count parameter) a count that indicates the number of rows in that table.
+
+            //using (var connection = new MySqlConnection("Server=...;Database=sakila;Allow User Variables=True;"))
+            //{
+            //	var sproc = new FilmNotInStock(connection);
+            //	var result = sproc.Execute(2, 1);
+            //	Console.WriteLine(result.PFilmCount);
+            //	Console.WriteLine(string.Join(",", result.FilmNotInStockResult0.Select(x => x.InventoryId)));
+            //}
+
+            var procedures = directory.GetDirectories("Procedures").FirstOrDefault();
+            if (procedures == null)
+                Assert.Fail("Could not find Procedures subdirectory");
+            var files = procedures.GetFiles("*.cs");
+
+            var filmNotInStock = files.FirstOrDefault(f => f.Name == "FilmNotInStock.cs");
+            Assert.IsNotNull(filmNotInStock, 
+                "Should have written FilmNotInStock class for film_not_in_stock procedure");
+
+            var cs = File.ReadAllText(filmNotInStock.FullName);
+            //there are 2 input parameters, an OUT parameter and a resultset.
+            Assert.IsTrue(cs.Contains("public virtual FilmNotInStockResult Execute(int? pFilmId, int? pStoreId)"),
+                "Generated input signature");
+
+            var result = files.FirstOrDefault(f => f.Name == "FilmNotInStockResult.cs");
+            Assert.IsNotNull(result, "Should have written FilmNotInStockResult class");
+
+            cs = File.ReadAllText(result.FullName);
+            Assert.IsTrue(cs.Contains("public virtual int? PFilmCount { get; set; }"), 
+                "Generated property for OUT parameter");
+            Assert.IsTrue(cs.Contains("public virtual IList<FilmNotInStockResult0> FilmNotInStockResult0 { get; private set; }"),
+                "Generated collection property for resultset");
         }
 
         [TestMethod, TestCategory("SqlServer.AdventureWorks")]
