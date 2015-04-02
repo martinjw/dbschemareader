@@ -51,7 +51,7 @@ namespace DatabaseSchemaReader.SqlGen
             if (constraint == null) return null;
             var columnList = GetColumnList(constraint.Columns);
 
-            var pkName = ConstraintName(constraint.Name);
+            var pkName = ConstraintName(constraint);
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY ({2})",
@@ -78,7 +78,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             var columnList = GetColumnList(uniqueKey.Columns);
 
-            var name = ConstraintName(uniqueKey.Name);
+            var name = ConstraintName(uniqueKey);
 
             return string.Format(CultureInfo.InvariantCulture,
                                  AddUniqueConstraintFormat,
@@ -123,7 +123,7 @@ namespace DatabaseSchemaReader.SqlGen
                 constraintName = constraintName.Replace("[", "").Replace("]", "").Replace(".", "_");
                 expression = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].", StringComparison.Ordinal) + 1) + " " + expression;
             }
-            var name = ConstraintName(constraintName);
+            var name = LimitNameToMaximumLength(constraintName);
 
             return string.Format(CultureInfo.InvariantCulture,
                                  @"ALTER TABLE {0} ADD CONSTRAINT {1} CHECK ({2})",
@@ -234,9 +234,16 @@ namespace DatabaseSchemaReader.SqlGen
             return string.Empty;
         }
 
-        protected string ConstraintName(string name)
+        protected virtual string ConstraintName(DatabaseConstraint constraint)
         {
+            var name = constraint.Name;
             if (string.IsNullOrEmpty(name)) return "CON";
+            name = LimitNameToMaximumLength(name);
+            return name;
+        }
+
+        private string LimitNameToMaximumLength(string name)
+        {
             //when translating we may exceed limits
             var maximumNameLength = SqlFormatProvider().MaximumNameLength;
             if (name.Length > maximumNameLength)

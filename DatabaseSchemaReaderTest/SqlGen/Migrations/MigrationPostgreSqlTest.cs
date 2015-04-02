@@ -17,8 +17,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations
     [TestClass]
     public class MigrationPostgreSqlTest
     {
-        //private const string ProviderName = "Npgsql";
-        private const string ProviderName = "Devart.Data.PostgreSql";
+        private const string ProviderName = "Npgsql";
+        //private const string ProviderName = "Devart.Data.PostgreSql";
 
         /*
  

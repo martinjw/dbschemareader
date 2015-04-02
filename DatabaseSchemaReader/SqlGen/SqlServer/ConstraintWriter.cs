@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (constraint == null) return null;
             var columnList = GetColumnList(constraint.Columns);
 
-            var pkName = ConstraintName(constraint.Name);
+            var pkName = ConstraintName(constraint);
             var nonClustered = "";
             if (constraint.Columns.Count == 1)
             {

@@ -135,9 +135,14 @@ namespace DatabaseSchemaReader.SqlGen
                 {
                     var hasPrecision = HasPrecision(column.DbDataType.ToUpperInvariant());
                     if (hasPrecision)
+                    {
                         column.Precision = length;
+                        column.Scale = 0; //implicit
+                    }
                     else
+                    {
                         column.Length = length;
+                    }
                 }
                 return column;
             }
