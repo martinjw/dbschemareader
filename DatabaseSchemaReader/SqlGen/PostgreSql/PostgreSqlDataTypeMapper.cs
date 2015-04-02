@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace DatabaseSchemaReader.SqlGen.PostgreSql
@@ -22,7 +23,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             _mapping.Add(DbType.Date, "DATE");
             _mapping.Add(DbType.DateTime, "TIMESTAMP");
             _mapping.Add(DbType.DateTime2, "TIMESTAMP");
-            _mapping.Add(DbType.DateTimeOffset, "TIMESTAMP");
+            _mapping.Add(DbType.DateTimeOffset, "TIMESTAMP WITH TIME ZONE");
             _mapping.Add(DbType.Decimal, "DECIMAL");
             _mapping.Add(DbType.Double, "DOUBLE PRECISION");
             _mapping.Add(DbType.Guid, "UUID");
@@ -35,6 +36,14 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             _mapping.Add(DbType.Time, "TIME");
             _mapping.Add(DbType.Xml, "XML");
 
+        }
+
+        public override string Map(Type type)
+        {
+            if (type == typeof(TimeSpan))
+                return "INTERVAL";
+
+            return base.Map(type);
         }
 
         public override string Map(DbType dbType)

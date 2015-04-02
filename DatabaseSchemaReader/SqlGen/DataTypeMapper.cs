@@ -10,11 +10,11 @@ namespace DatabaseSchemaReader.SqlGen
         public string Map<T>() where T : struct
         {
             //map common .Net types to the DbType, and then to the platform type
-            var type = typeof (T);
+            var type = typeof(T);
             return Map(type);
         }
 
-        public string Map(Type type)
+        public virtual string Map(Type type)
         {
             if (type == typeof(string))
                 return Map(DbType.String);
@@ -40,11 +40,19 @@ namespace DatabaseSchemaReader.SqlGen
                 return Map(DbType.DateTime);
             if (type == typeof(byte[]))
                 return Map(DbType.Binary);
+            if (type == typeof(byte))
+                return Map(DbType.Byte);
             if (type == typeof(Guid))
                 return Map(DbType.Guid);
 
             if (type == typeof(bool))
                 return Map(DbType.Boolean);
+
+            if (type == typeof(DateTimeOffset))
+                return Map(DbType.DateTimeOffset);
+            //Oracle and PostgreSql have Interval types, but not SqlServer, and there's no DbType for it
+            if (type == typeof(TimeSpan))
+                return Map(DbType.Int32);
 
             return null;
         }

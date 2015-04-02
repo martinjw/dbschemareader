@@ -89,6 +89,7 @@
     <Compile Include="DataSchema\Oracle12IdentityConversionTest.cs" />
     <Compile Include="DataSchema\OracleSchemaReaderTest.cs" />
     <Compile Include="DataSchema\OracleSequenceTriggerTest.cs" />
+    <Compile Include="DataSchema\PostgreSqlTest.cs" />
     <Compile Include="DataSchema\RemoveTableTest.cs" />
     <Compile Include="IntegrationTests\Access.cs" />
     <Compile Include="IntegrationTests\Db2.cs" />

@@ -10,7 +10,11 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
-		<releaseNotes>Support for DB2 iSeries, minor bugfixes</releaseNotes>
+		<releaseNotes>
+##v1.4.1 
+ * Improve PostgreSql datatype mapping
+##v1.4.0
+ * Support for DB2 iSeries, minor bugfixes</releaseNotes>
 		<tags>ADO, Entity Framework Code First, SQL Server, SQLite, Oracle, MySQL, PostgreSql, Schema, Database</tags>
 	</metadata>
 	<files>

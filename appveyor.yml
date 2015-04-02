@@ -1,5 +1,5 @@
 #appveyor build. Validated at https://ci.appveyor.com/tools/validate-yaml
-version: 1.4.{build}
+version: 1.4.1.{build}
 skip_tags: true
 configuration: Release
 assembly_info:
