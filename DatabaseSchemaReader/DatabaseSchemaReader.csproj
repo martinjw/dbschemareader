@@ -51,7 +51,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Build\toBrain.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\..\Build\toBrain.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -292,7 +292,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Build\toBrain.snk">
+    <None Include="..\..\..\Build\toBrain.snk">
       <Link>toBrain.snk</Link>
     </None>
   </ItemGroup>
