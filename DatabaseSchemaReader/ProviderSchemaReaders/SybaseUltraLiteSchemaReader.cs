@@ -19,7 +19,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
             //the GetSchema collection doesn't include datatypes.
             //But it seems to be there in the syscolumn table (as "domain")
-
+            ReportReadOperation(ColumnsCollectionName);
             const string sql =
                 @"SELECT
 t.""table_name"",
@@ -77,6 +77,7 @@ c.table_id = t.object_id";
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             const string sql =
                 @"SELECT 
 i.index_name AS constraint_name, 
@@ -98,6 +99,7 @@ WHERE i.type  = 'primary'";
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             const string sql = @"SELECT 
 i.index_name AS constraint_name, 
 t.table_name,
@@ -127,6 +129,7 @@ WHERE i.type  = 'foreign'";
 
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             const string sql = @"SELECT 
 i.index_name AS constraint_name, 
 t.table_name,

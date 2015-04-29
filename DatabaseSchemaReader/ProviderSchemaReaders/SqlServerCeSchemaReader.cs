@@ -12,6 +12,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable IdentityColumns(string tableName, DbConnection conn)
         {
+            ReportReadOperation(IdentityColumnsCollectionName);
             const string sqlCommand = @"SELECT 
     NULL SchemaOwner, TABLE_NAME TableName, COLUMN_NAME ColumnName 
 FROM 
@@ -73,24 +74,28 @@ WHERE
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
+            ReportReadOperation(TriggersCollectionName);
             //no triggers in CE
             return CreateDataTable(TriggersCollectionName);
         }
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetPrimaryKeyType(), connection);
             dt.TableName = PrimaryKeysCollectionName;
             return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetForeignKeyType(), connection);
             dt.TableName = ForeignKeysCollectionName;
             return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetUniqueKeyType(), connection);
             dt.TableName = UniqueKeysCollectionName;
             return dt;
@@ -98,6 +103,7 @@ WHERE
         public override DataTable ForeignKeyColumns(string tableName)
         {
             //we return this in ForeignKeys
+            ReportReadOperation(ForeignKeyColumnsCollectionName);
             return CreateDataTable(ForeignKeyColumnsCollectionName);
         }
         private static string GetPrimaryKeyType()

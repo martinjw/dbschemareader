@@ -102,6 +102,7 @@ WHERE
 
         protected override DataTable IdentityColumns(string tableName, DbConnection conn)
         {
+            ReportReadOperation(IdentityColumnsCollectionName);
             const string sqlCommand = @"SELECT 
 TABLE_SCHEMA AS 'SchemaOwner', 
 TABLE_NAME AS 'TableName', 
@@ -123,10 +124,12 @@ WHERE EXTRA = 'auto_increment' AND
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             return FindKeys(tableName, GetForeignKeyType(), connection);
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetUniqueKeyType(), connection);
             dt.TableName = UniqueKeysCollectionName;
             return dt;
@@ -152,6 +155,7 @@ WHERE EXTRA = 'auto_increment' AND
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
+            ReportReadOperation(TriggersCollectionName);
             const string sqlCommand = @"SELECT 
   TRIGGER_SCHEMA AS 'OWNER',
   TRIGGER_NAME,

@@ -12,6 +12,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable Sequences(DbConnection connection)
         {
+            ReportReadOperation(SequencesCollectionName);
             DataTable dt = CreateDataTable(SequencesCollectionName);
 
             const string sqlCommand = @"SELECT seqschema AS SCHEMA, seqname AS SEQUENCE_NAME, increment AS INCREMENTBY, minvalue, maxvalue 
@@ -31,6 +32,7 @@ WHERE seqschema <> 'SYSIBM' AND seqtype = 'S'";
 
         protected override DataTable IdentityColumns(string tableName, DbConnection connection)
         {
+            ReportReadOperation(IdentityColumnsCollectionName);
             DataTable dt = CreateDataTable(IdentityColumnsCollectionName);
             const string sqlCommand = @"SELECT tabschema, tabname As TableName, colname As ColumnName
 FROM syscat.colidentattributes
@@ -51,6 +53,7 @@ AND tabschema = @schemaOwner or @schemaOwner Is NULL";
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
+            ReportReadOperation(TriggersCollectionName);
             const string sqlCommand = @"select tabschema as Owner, 
 trigname as Trigger_Name, 
 tabname as table_name, 

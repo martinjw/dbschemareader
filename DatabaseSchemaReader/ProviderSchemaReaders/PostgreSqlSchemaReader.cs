@@ -16,24 +16,28 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             var dt = FindKeys(tableName, "PRIMARY KEY", connection);
             dt.TableName = PrimaryKeysCollectionName;
             return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             var dt = FindKeys(tableName, "FOREIGN KEY", connection);
             dt.TableName = ForeignKeysCollectionName;
             return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             var dt = FindKeys(tableName, "UNIQUE", connection);
             dt.TableName = UniqueKeysCollectionName;
             return dt;
         }
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             string sqlCommand = GetCheckSql();
             return CommandForTable(tableName, connection, CheckConstraintsCollectionName, sqlCommand);
         }
@@ -120,6 +124,7 @@ WHERE
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
+            ReportReadOperation(TriggersCollectionName);
             var version = ServerVersion(conn);
             string timing = "CONDITION_TIMING";
             if (version.IndexOf(',') != -1)
@@ -159,6 +164,7 @@ WHERE
             }
             //Npgsql doesn't have a functions collection, so this is a simple substitute
             //based on http://www.alberton.info/postgresql_meta_info.html 
+            ReportReadOperation(collectionName);
             var dt = CreateDataTable(collectionName);
             const string sqlCommand = @"SELECT 
 ns.nspname AS SCHEMA, 
@@ -192,6 +198,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
         protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             var argReader = new PostgreSqlArgumentReader(Factory, Owner);
+            ReportReadOperation("ProcedureParameters");
             var dt = argReader.StoredProcedureArguments(storedProcedureName, connection);
             dt.TableName = ProcedureParametersCollectionName;
             return dt;

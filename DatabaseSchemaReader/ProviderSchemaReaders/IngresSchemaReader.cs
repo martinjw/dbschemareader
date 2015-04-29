@@ -20,6 +20,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             const string sql = @"SELECT 
 trim(constraint_name) AS constraint_name, 
 trim(table_name) AS table_name, 
@@ -36,6 +37,7 @@ WHERE
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             const string sql = @"SELECT 
 trim(constraint_name) AS constraint_name, 
 trim(table_name) AS table_name, 
@@ -52,6 +54,7 @@ WHERE
 
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             const string sql = @"SELECT 
 trim(constraint_name) AS constraint_name, 
 trim(table_name) AS table_name, 
@@ -104,6 +107,7 @@ WHERE
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
             //need to trim the char(256)
+            ReportReadOperation(ForeignKeysCollectionName);
             const string sql = @"SELECT 
 trim(c.ref_constraint_name) AS constraint_name, 
 trim(c.ref_table_name) AS table_name, 

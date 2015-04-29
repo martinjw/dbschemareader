@@ -18,13 +18,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             if (string.IsNullOrEmpty(tableName)) return CreateDataTable(PrimaryKeysCollectionName);
 
             const string sql = @"sp_pkeys @tableName";
-
+            ReportReadOperation(PrimaryKeysCollectionName);
             return SybaseCommandForTable(connection, PrimaryKeysCollectionName, tableName, sql);
         }
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
             //the standard provider calls sp_oledb_fkeys
+            ReportReadOperation(ForeignKeysCollectionName);
             const string sql = @"select table_schema = user_name (t.uid),  constraint_name = cn.name, table_name = t.name, fk_table = ft.name, column_name = tc.name
 from sysreferences r
 join sysobjects t on t.id = r.tableid

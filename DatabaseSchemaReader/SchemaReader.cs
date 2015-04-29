@@ -72,7 +72,6 @@ namespace DatabaseSchemaReader
         internal virtual string ViewsCollectionName { get { return "Views"; } }
         #endregion
 
-
         /// <summary>
         /// Gets or sets the owner (for Oracle) /schema (for SqlServer) / database (MySql). Always set it with Oracle; if you use other than dbo in SqlServer you should also set it. 
         /// If it is null or empty, all owners are returned.
@@ -105,6 +104,33 @@ namespace DatabaseSchemaReader
         /// </summary>
         protected DbProviderFactory Factory { get; private set; }
 
+        #region Progress Reporting
+        /// <summary>
+        /// ReportProgress Event
+        /// </summary>
+        internal EventHandler<ReportProgressEventArgs> ReportProgressEventHandler { get; set; }
+
+        /// <summary>
+        /// Report the current reading operation
+        /// </summary>
+        /// <param name="collectionName"></param>
+        protected void ReportReadOperation(string collectionName)
+        {
+            ReportReadOperation(collectionName, null);
+        }
+
+        /// <summary>
+        /// Report the current reading operation
+        /// </summary>
+        /// <param name="collectionName"></param>
+        /// <param name="tableName"></param>
+        protected void ReportReadOperation(string collectionName, string tableName)
+        {
+            ReportProgressEventArgs.RaiseReportProgress(ReportProgressEventHandler, this, "Reading", collectionName, tableName, null, null);
+        }
+
+        #endregion
+
         /// <summary>
         /// DataTable of all users
         /// </summary>
@@ -118,6 +144,7 @@ namespace DatabaseSchemaReader
                 conn.Open();
                 if (!SchemaCollectionExists(conn, collection))
                     return CreateDataTable(collection);
+                ReportReadOperation(collection);
                 return conn.GetSchema(collection);
             }
         }
@@ -133,6 +160,7 @@ namespace DatabaseSchemaReader
                 conn.ConnectionString = ConnectionString;
                 conn.Open();
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                ReportReadOperation(collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }
         }
@@ -195,6 +223,7 @@ namespace DatabaseSchemaReader
                 if (!SchemaCollectionExists(conn, collectionName))
                     return CreateDataTable(collectionName); //doesn't exist in SqlServerCe
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                ReportReadOperation(collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }
         }
@@ -221,6 +250,7 @@ namespace DatabaseSchemaReader
         protected virtual DataTable Columns(string tableName, DbConnection connection)
         {
             string[] restrictions = SchemaRestrictions.ForTable(connection, ColumnsCollectionName, tableName);
+            ReportReadOperation(ColumnsCollectionName);
             return connection.GetSchema(ColumnsCollectionName, restrictions);
         }
 
@@ -252,6 +282,7 @@ namespace DatabaseSchemaReader
             {
                 return CreateDataTable(collectionName);
             }
+            ReportReadOperation(collectionName);
 
             return RunGetSchema(connection, collectionName, tableName);
         }
@@ -308,6 +339,7 @@ namespace DatabaseSchemaReader
                 if (!SchemaCollectionExists(connection, collectionName))
                     return CreateDataTable(collectionName);
             }
+            ReportReadOperation(collectionName);
 
             return RunGetSchema(connection, collectionName, tableName);
         }
@@ -342,6 +374,7 @@ namespace DatabaseSchemaReader
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             try
             {
+                ReportReadOperation(collectionName);
                 return connection.GetSchema(collectionName, restrictions);
             }
             catch (ArgumentException)
@@ -389,6 +422,7 @@ namespace DatabaseSchemaReader
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
             try
             {
+                ReportReadOperation(collectionName);
                 var dt = connection.GetSchema(collectionName, restrictions);
                 dt.TableName = ForeignKeysCollectionName;
                 return dt;
@@ -427,6 +461,7 @@ namespace DatabaseSchemaReader
                 return CreateDataTable(collectionName);
 
             string[] restrictions = SchemaRestrictions.ForTable(connection, collectionName, tableName);
+            ReportReadOperation(collectionName);
             var dt = connection.GetSchema(collectionName, restrictions);
             if (dt.TableName != collectionName) //devart postgresql returns a table called IndexColumns.
                 dt.TableName = collectionName;
@@ -476,6 +511,7 @@ namespace DatabaseSchemaReader
         /// <returns></returns>
         protected virtual DataTable CheckConstraints(string tableName, DbConnection connection)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             return GenericCollection(CheckConstraintsCollectionName, connection, tableName);
         }
 
@@ -506,6 +542,7 @@ namespace DatabaseSchemaReader
             if (!SchemaCollectionExists(connection, collectionName))
                 return CreateDataTable(SequencesCollectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
+            ReportReadOperation(collectionName);
             var dt = connection.GetSchema(collectionName, restrictions);
             dt.TableName = SequencesCollectionName;
             return dt;
@@ -548,6 +585,7 @@ namespace DatabaseSchemaReader
         {
             if (SchemaCollectionExists(connection, collectionName))
             {
+                ReportReadOperation(collectionName);
                 return connection.GetSchema(collectionName, SchemaRestrictions.ForTable(connection, collectionName, tableName));
             }
             return CreateDataTable(collectionName);
@@ -581,6 +619,7 @@ namespace DatabaseSchemaReader
             if (!SchemaCollectionExists(connection, collectionName))
                 return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
+            ReportReadOperation(collectionName);
             return connection.GetSchema(collectionName, restrictions);
         }
 
@@ -608,6 +647,7 @@ namespace DatabaseSchemaReader
             string collectionName = ProceduresCollectionName;
             if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(collectionName);
             string[] restrictions = SchemaRestrictions.ForOwner(connection, collectionName);
+            ReportReadOperation(collectionName);
             return connection.GetSchema(collectionName, restrictions);
         }
 
@@ -641,6 +681,7 @@ namespace DatabaseSchemaReader
             if (!SchemaCollectionExists(connection, collectionName)) return CreateDataTable(ProcedureParametersCollectionName);
 
             string[] restrictions = SchemaRestrictions.ForRoutine(connection, collectionName, storedProcedureName);
+            ReportReadOperation(collectionName);
             var dt = connection.GetSchema(collectionName, restrictions);
             dt.TableName = ProcedureParametersCollectionName;
             return dt;
@@ -663,6 +704,7 @@ namespace DatabaseSchemaReader
                 if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(ProcedureParametersCollectionName);
 
                 string[] restrictions = SchemaRestrictions.ForSpecific(conn, collectionName, packageName, "PACKAGENAME");
+                ReportReadOperation(collectionName);
                 var dt = conn.GetSchema(collectionName, restrictions);
                 dt.TableName = ProcedureParametersCollectionName;
                 return dt;
@@ -680,6 +722,7 @@ namespace DatabaseSchemaReader
                 string collectionName = PackagesCollectionName;
                 if (!SchemaCollectionExists(conn, collectionName)) return CreateDataTable(collectionName);
                 string[] restrictions = SchemaRestrictions.ForOwner(conn, collectionName);
+                ReportReadOperation(collectionName);
                 return conn.GetSchema(collectionName, restrictions);
             }
         }
@@ -776,6 +819,7 @@ namespace DatabaseSchemaReader
         {
             try
             {
+                ReportReadOperation("DataTypes");
                 return connection.GetSchema(DbMetaDataCollectionNames.DataTypes);
             }
             catch (NotSupportedException)

@@ -187,6 +187,7 @@
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
+    <Compile Include="ReportProgressEventArgs.cs" />
     <Compile Include="SqlGen\DataTypeConverter.cs" />
     <Compile Include="SqlGen\DataTypeMapper.cs" />
     <Compile Include="SqlGen\DataTypeMappingFactory.cs" />

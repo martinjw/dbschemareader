@@ -20,6 +20,49 @@ namespace DatabaseSchemaReader
     /// </remarks>
     public class DatabaseReader : IDatabaseReader
     {
+        #region Progress Reporting
+        private volatile bool _cancel = false;
+
+        /// <summary>
+        /// ReportProgress Event
+        /// </summary>
+        public event EventHandler<ReportProgressEventArgs> ReportProgress;
+
+        private void CheckCancelled()
+        {
+            if(_cancel)
+                throw new OperationCanceledException();
+        }
+
+        private void SetSchemaReaderReportProgressEventHandler()
+        {
+            if(_schemaReader.ReportProgressEventHandler == null)
+                _schemaReader.ReportProgressEventHandler = ReportProgress;
+        }
+
+        /// <summary>
+        /// Report the current reading operation
+        /// </summary>
+        /// <param name="progressType"></param>
+        /// <param name="structureType"></param>
+        /// <param name="structureName"></param>
+        /// <param name="index"></param>
+        /// <param name="count"></param>
+        private void RaiseReportProgress(string progressType, string structureType, string structureName, int? index, int? count)
+        {
+            ReportProgressEventArgs.RaiseReportProgress(ReportProgress, this, progressType, structureType, structureName, index, count);
+        }
+
+        /// <summary>
+        /// Cancel any operation that is in progress
+        /// </summary>
+        public void MarkCanceled()
+        {
+            _cancel = true;
+        }
+
+        #endregion
+
         private readonly Exclusions _exclusions = new Exclusions();
         private readonly SchemaExtendedReader _schemaReader;
         private readonly DatabaseSchema _db;
@@ -105,16 +148,25 @@ namespace DatabaseSchemaReader
         public DatabaseSchema ReadAll()
         {
             _fixUp = false;
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             DataTypes();
+            CheckCancelled();
             AllUsers();
+            CheckCancelled();
             AllTables();
+            CheckCancelled();
             AllViews();
+            CheckCancelled();
 
             AllStoredProcedures();
+            CheckCancelled();
             //oracle extra
             DatabaseSchema.Sequences.Clear();
             var sequences = _schemaReader.Sequences();
+            CheckCancelled();
             DatabaseSchema.Sequences.AddRange(SchemaProcedureConverter.Sequences(sequences));
+            CheckCancelled();
 
             _fixUp = true;
             UpdateReferences();
@@ -127,6 +179,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseUser> AllUsers()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             var list = new List<DatabaseUser>();
             DataTable dt = _schemaReader.Users();
             //sql
@@ -137,10 +191,12 @@ namespace DatabaseSchemaReader
             if (!dt.Columns.Contains(key)) key = "username";
             foreach (DataRow row in dt.Rows)
             {
+                CheckCancelled();
                 var u = new DatabaseUser();
                 u.Name = row[key].ToString();
                 list.Add(u);
             }
+            CheckCancelled();
             DatabaseSchema.Users.Clear();
             DatabaseSchema.Users.AddRange(list);
             return list;
@@ -151,6 +207,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseTable> TableList()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             DataTable dt = _schemaReader.Tables();
             return SchemaConverter.Tables(dt);
         }
@@ -160,6 +218,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseTable> AllTables()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             DataTable tabs = _schemaReader.Tables();
             //get full datatables for all tables, to minimize database calls
 
@@ -191,10 +251,13 @@ namespace DatabaseSchemaReader
                 return string.Compare(t1.Name, t2.Name, StringComparison.OrdinalIgnoreCase);
             });
 
-
+            int tablesCount = tables.Count;
+            int index = 0;
             foreach (DatabaseTable table in tables)
             {
+                CheckCancelled();
                 var tableName = table.Name;
+                RaiseReportProgress("Processing", "Table", tableName, ++index, tablesCount);
                 var schemaName = table.SchemaOwner;
                 table.Description = tableDescriptions.FindDescription(table.SchemaOwner, tableName);
 
@@ -222,6 +285,7 @@ namespace DatabaseSchemaReader
                 table.Triggers.AddRange(triggerConverter.Triggers(tableName));
                 _schemaReader.PostProcessing(table);
             }
+            CheckCancelled();
             DatabaseSchema.Tables.Clear();
             DatabaseSchema.Tables.AddRange(tables);
             UpdateReferences();
@@ -239,6 +303,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseView> AllViews()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             DataTable dt = _schemaReader.Views();
             List<DatabaseView> views = SchemaConverter.Views(dt);
             var viewFilter = Exclusions.ViewFilter;
@@ -248,10 +314,16 @@ namespace DatabaseSchemaReader
             }
             //get full datatables for all tables, to minimize database calls
             var columnLoader = new ViewColumnLoader(_schemaReader);
+            int viewsCount = views.Count;
+            int index = 0;
             foreach (DatabaseView v in views)
             {
-                v.Columns.AddRange(columnLoader.Load(v.Name, v.SchemaOwner));
+                CheckCancelled();
+                string viewName = v.Name;
+                RaiseReportProgress("Processing", "View", viewName, ++index, viewsCount);
+                v.Columns.AddRange(columnLoader.Load(viewName, v.SchemaOwner));
             }
+            CheckCancelled();
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
             return views;
@@ -263,6 +335,8 @@ namespace DatabaseSchemaReader
         /// <param name="tableName">Name of the table. Oracle names can be case sensitive.</param>
         public DatabaseTable Table(string tableName)
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
 
             var schemaOwner = _schemaReader.Owner;
@@ -281,6 +355,7 @@ namespace DatabaseSchemaReader
                 table.Name = tableName;
                 table.SchemaOwner = schemaOwner;
                 //columns must be done first as it is updated by the others
+                CheckCancelled();
                 table.Columns.Clear();
                 var columnConverter = new ColumnConverter(ds.Tables[_schemaReader.ColumnsCollectionName]);
                 var databaseColumns = columnConverter.Columns(tableName, schemaOwner).ToList();
@@ -303,22 +378,26 @@ namespace DatabaseSchemaReader
                     var pkConstraints = converter.Constraints();
                     PrimaryKeyLogic.AddPrimaryKey(table, pkConstraints);
                 }
+                CheckCancelled();
                 if (ds.Tables.Contains(_schemaReader.ForeignKeysCollectionName))
                 {
                     var converter = new SchemaConstraintConverter(ds.Tables[_schemaReader.ForeignKeysCollectionName], ConstraintType.ForeignKey);
                     table.AddConstraints(converter.Constraints());
                 }
+                CheckCancelled();
                 if (ds.Tables.Contains(_schemaReader.ForeignKeyColumnsCollectionName))
                 {
                     var fkConverter = new ForeignKeyColumnConverter(ds.Tables[_schemaReader.ForeignKeyColumnsCollectionName]);
                     fkConverter.AddForeignKeyColumns(table.ForeignKeys);
                 }
+                CheckCancelled();
 
                 if (ds.Tables.Contains(_schemaReader.UniqueKeysCollectionName))
                 {
                     var converter = new SchemaConstraintConverter(ds.Tables[_schemaReader.UniqueKeysCollectionName], ConstraintType.UniqueKey);
                     table.AddConstraints(converter.Constraints());
                 }
+                CheckCancelled();
                 if (ds.Tables.Contains(_schemaReader.ComputedColumnsCollectionName))
                 {
                     SchemaConstraintConverter.AddComputed(ds.Tables[_schemaReader.ComputedColumnsCollectionName], table);
@@ -333,6 +412,7 @@ namespace DatabaseSchemaReader
                 _schemaReader.PostProcessing(table);
 
             }
+            CheckCancelled();
 
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
@@ -346,6 +426,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseStoredProcedure> StoredProcedureList()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             DataTable dt = _schemaReader.StoredProcedures();
             SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
             return DatabaseSchema.StoredProcedures;
@@ -361,6 +443,8 @@ namespace DatabaseSchemaReader
         /// </remarks>
         public IList<DatabaseStoredProcedure> AllStoredProcedures()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             try
             {
                 DataTable functions = _schemaReader.Functions();
@@ -373,7 +457,7 @@ namespace DatabaseSchemaReader
                 throw; //or suppress if not applicable
             }
 
-
+            CheckCancelled();
             DataTable dt = _schemaReader.StoredProcedures();
             SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
             var procFilter = Exclusions.StoredProcedureFilter;
@@ -391,6 +475,7 @@ namespace DatabaseSchemaReader
             }
             //do all the arguments as one call and sort them out. 
             //NB: This is often slow on Oracle
+            RaiseReportProgress("Reading", "Procedures Arguments", null, null, null);
             DataTable args = _schemaReader.StoredProcedureArguments(null);
 
             var converter = new SchemaProcedureConverter();
@@ -399,15 +484,27 @@ namespace DatabaseSchemaReader
             if (args.Rows.Count == 0)
             {
                 //MySql v6 won't do all stored procedures. So we have to do them individually.
-                foreach (var sproc in DatabaseSchema.StoredProcedures)
+                var storedProcedures = DatabaseSchema.StoredProcedures;
+                int sprocCount = storedProcedures.Count;
+                int index = 0;
+                foreach (var sproc in storedProcedures)
                 {
-                    args = _schemaReader.StoredProcedureArguments(sproc.Name);
+                    CheckCancelled();
+                    string sprocName = sproc.Name;
+                    RaiseReportProgress("Reading", "Procedure Arguments", sprocName, ++index, sprocCount);
+                    args = _schemaReader.StoredProcedureArguments(sprocName);
                     converter.UpdateArguments(DatabaseSchema, args);
                 }
 
-                foreach (var function in DatabaseSchema.Functions)
+                var functions = DatabaseSchema.Functions;
+                int functionsCount = functions.Count;
+                index = 0;
+                foreach (var function in functions)
                 {
-                    args = _schemaReader.StoredProcedureArguments(function.Name);
+                    CheckCancelled();
+                    string functionName = function.Name;
+                    RaiseReportProgress("Reading", "Function Arguments", functionName, ++index, functionsCount);
+                    args = _schemaReader.StoredProcedureArguments(functionName);
                     converter.UpdateArguments(DatabaseSchema, args);
                 }
             }
@@ -415,12 +512,16 @@ namespace DatabaseSchemaReader
             converter.UpdateArguments(DatabaseSchema, args);
             foreach (var function in DatabaseSchema.Functions)
             {
+                CheckCancelled();
                 //return types are assigned as arguments (in most platforms). Move them to return type.
                 function.CheckArgumentsForReturnType();
             }
+            CheckCancelled();
 
             //procedure, function and view source sql
+            RaiseReportProgress("Reading", "Procedure Source", null, null, null);
             DataTable srcs = _schemaReader.ProcedureSource(null);
+            RaiseReportProgress("Processing", "Sources", null, null, null);
             SchemaSourceConverter.AddSources(DatabaseSchema, srcs);
 
             UpdateReferences();
@@ -433,6 +534,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DataType> DataTypes()
         {
+            CheckCancelled();
+            SetSchemaReaderReportProgressEventHandler();
             List<DataType> list = SchemaConverter.DataTypes(_schemaReader.DataTypes());
             if (list.Count == 0) list = _schemaReader.SchemaDataTypes();
             DatabaseSchema.DataTypes.Clear();
@@ -445,8 +548,10 @@ namespace DatabaseSchemaReader
         {
             //a simple latch so ReadAll will only call this at the end
             if (!_fixUp) return;
+            CheckCancelled();
 
             DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
+            CheckCancelled();
 
             //last, do custom post processing if implemented
             _schemaReader.PostProcessing(DatabaseSchema);

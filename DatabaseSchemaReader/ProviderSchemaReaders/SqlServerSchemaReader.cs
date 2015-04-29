@@ -46,6 +46,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         }
         protected override DataTable CheckConstraints(string tableName, DbConnection conn)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             string sqlCommand = GetCheckSql();
             var dt = CommandForTable(tableName, conn, "Checks", sqlCommand);
             dt.TableName = CheckConstraintsCollectionName;
@@ -147,6 +148,7 @@ WHERE
 
         protected override DataTable IdentityColumns(string tableName, DbConnection connection)
         {
+            ReportReadOperation(IdentityColumnsCollectionName);
             const string sqlCommand = @"SELECT 
 SchemaOwner = s.name, 
 TableName = o.name, 
@@ -186,24 +188,28 @@ ORDER BY o.name, c.name";
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetPrimaryKeyType(), connection);
             dt.TableName = PrimaryKeysCollectionName;
             return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetForeignKeyType(), connection);
             dt.TableName = ForeignKeysCollectionName;
             return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             DataTable dt = FindKeys(tableName, GetUniqueKeyType(), connection);
             dt.TableName = UniqueKeysCollectionName;
             return dt;
         }
         public override DataTable ForeignKeyColumns(string tableName)
         {
+            ReportReadOperation(ForeignKeyColumnsCollectionName);
             //we return this in ForeignKeys
             return CreateDataTable(ForeignKeyColumnsCollectionName);
         }
@@ -291,6 +297,7 @@ WHERE
             if (SchemaCollectionExists(connection, SequencesCollectionName))
                 return base.Sequences(connection);
 
+            ReportReadOperation(SequencesCollectionName);
             //2 steps - check if have any sequences (SqlServer 2012+), then load them
             var dt = CreateDataTable(SequencesCollectionName);
             using (var conn = Factory.CreateConnection())

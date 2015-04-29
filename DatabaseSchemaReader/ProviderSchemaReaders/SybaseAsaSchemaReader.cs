@@ -19,6 +19,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             const string sql = @"SELECT 
 i.index_name AS constraint_name, 
 t.table_name,
@@ -41,6 +42,7 @@ ORDER BY t.table_name, i.index_name, ic.sequence";
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             const string sql = @"SELECT 
 i.index_name AS constraint_name, 
 t.table_name,
@@ -70,6 +72,7 @@ ORDER BY t.table_name, i.index_name, ic.sequence";
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             const string sql = @"SELECT 
 con.constraint_name AS constraint_name, 
 t.table_name,
@@ -90,6 +93,7 @@ ORDER BY t.table_name, con.constraint_name";
 
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             const string sql = @"SELECT 
 con.constraint_name AS constraint_name, 
 t.table_name,

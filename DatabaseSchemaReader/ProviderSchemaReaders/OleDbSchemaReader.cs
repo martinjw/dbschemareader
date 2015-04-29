@@ -36,18 +36,21 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Primary_Keys, tableName, connection, PrimaryKeysCollectionName);
             return schemaTable;
         }
 
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, tableName, connection, ForeignKeysCollectionName);
             return schemaTable;
         }
 
         protected override DataTable CheckConstraints(string tableName, DbConnection connection)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Check_Constraints, null, connection, CheckConstraintsCollectionName);
 
             //let's try to read the table name from the constraint name
@@ -69,6 +72,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 
         protected override DataTable Indexes(string tableName, DbConnection connection)
         {
+            ReportReadOperation("Indexes");
             var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Indexes, null, connection, IndexesCollectionName);
             return schemaTable;
         }
@@ -76,6 +80,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection) 
         {
             //for JET and ACE providers this isn't supported, but we'll try anyway
+            ReportReadOperation(ProcedureParametersCollectionName);
             var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Procedure_Parameters, storedProcedureName, connection, ProcedureParametersCollectionName);
             return schemaTable;
         }

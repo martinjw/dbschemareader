@@ -47,6 +47,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         }
         protected override DataTable CheckConstraints(string tableName, DbConnection conn)
         {
+            ReportReadOperation("CheckConstraints", tableName);
             string sqlCommand = GetCheckSql();
             return CommandForTable(tableName, conn, CheckConstraintsCollectionName, sqlCommand);
         }
@@ -72,6 +73,7 @@ ORDER BY cons.table_name, cons.constraint_name";
 
         protected override DataTable Columns(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ColumnsCollectionName);
             //for Oracle, we do our own thing
             var dt = CreateDataTable(ColumnsCollectionName);
             using (DbDataAdapter da = Factory.CreateDataAdapter())
@@ -238,18 +240,21 @@ ORDER BY TABLE_NAME, COLUMN_NAME";
 
         protected override DataTable PrimaryKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(PrimaryKeysCollectionName);
             var dt = FindKeys(tableName, "P", connection);
             dt.TableName = PrimaryKeysCollectionName;
             return dt;
         }
         protected override DataTable ForeignKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(ForeignKeysCollectionName);
             var dt = FindKeys(tableName, "R", connection);
             dt.TableName = ForeignKeysCollectionName;
             return dt;
         }
         protected override DataTable UniqueKeys(string tableName, DbConnection connection)
         {
+            ReportReadOperation(UniqueKeysCollectionName);
             var dt = FindKeys(tableName, "U", connection);
             dt.TableName = UniqueKeysCollectionName;
             return dt;
@@ -257,6 +262,7 @@ ORDER BY TABLE_NAME, COLUMN_NAME";
         public override DataTable ForeignKeyColumns(string tableName)
         {
             //we return this in ForeignKeys
+            ReportReadOperation(ForeignKeyColumnsCollectionName);
             return CreateDataTable(ForeignKeyColumnsCollectionName);
         }
 
@@ -323,6 +329,7 @@ ORDER BY TABLE_NAME, COLUMN_NAME";
 
         protected override DataTable Triggers(string tableName, DbConnection conn)
         {
+            ReportReadOperation(TriggersCollectionName);
             const string sqlCommand = @"SELECT OWNER,
   TRIGGER_NAME,
   TABLE_NAME,

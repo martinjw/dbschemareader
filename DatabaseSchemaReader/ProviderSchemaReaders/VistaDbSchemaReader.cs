@@ -43,12 +43,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
             //it's not reported in the MetaDataCollections, but it is there.
             var collectionName = ProceduresCollectionName;
+            ReportReadOperation(collectionName);
             return connection.GetSchema(collectionName, new string[] { });
         }
 
         protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             //it's not reported in the MetaDataCollections, but it is there.
+            ReportReadOperation("PROCEDUREPARAMETERS");
             var dt = connection.GetSchema("PROCEDUREPARAMETERS", new[] { null, null, storedProcedureName, null });
             dt.TableName = ProcedureParametersCollectionName;
             return dt;
