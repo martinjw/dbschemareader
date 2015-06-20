@@ -12,6 +12,7 @@
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
 		<releaseNotes>
 ##v1.4.1 
+ * Performance improved for reading stored procedures (thanks michmela44)
  * Improve PostgreSql datatype mapping
 ##v1.4.0
  * Support for DB2 iSeries, minor bugfixes</releaseNotes>
