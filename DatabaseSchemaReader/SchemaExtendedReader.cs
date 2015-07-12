@@ -62,9 +62,8 @@ namespace DatabaseSchemaReader
                 var primaryKeys = PrimaryKeys(tableName, conn);
                 primaryKeys.TableName = PrimaryKeysCollectionName;
                 ds.Tables.Add(primaryKeys);
-                var foreignKeys = ForeignKeys(tableName, conn);
-                foreignKeys.TableName = ForeignKeyColumnsCollectionName;
-                ds.Tables.Add(foreignKeys);
+                ds.Tables.Add(ForeignKeys(tableName, conn));
+                ds.Tables.Add(ForeignKeyColumns(tableName, conn));
                 ds.Tables.Add(UniqueKeys(tableName, conn));
                 ds.Tables.Add(CheckConstraints(tableName, conn));
 

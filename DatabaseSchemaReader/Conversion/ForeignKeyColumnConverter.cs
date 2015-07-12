@@ -56,6 +56,7 @@ namespace DatabaseSchemaReader.Conversion
                 if (fk == null)
                 {
                     fk = CreateNewForeignKey(tableName, name);
+                    _foreignKeys.Add(fk);
                 }
 
                 string col = row[columnKey].ToString();
