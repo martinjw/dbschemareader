@@ -1,11 +1,9 @@
-﻿using System.Data;
-using System.Data.Common;
-
-namespace DatabaseSchemaReader.ProviderSchemaReaders
+﻿namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
     class FirebirdSqlSchemaReader : SchemaExtendedReader
     {
-        public FirebirdSqlSchemaReader(string connectionString, string providerName) : base(connectionString, providerName)
+        public FirebirdSqlSchemaReader(string connectionString, string providerName)
+            : base(connectionString, providerName)
         {
         }
 

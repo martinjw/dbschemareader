@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.Utilities;
 #if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #else
@@ -44,7 +41,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
 
             ProviderChecker.Check(ProviderName, ConnectionString);
 
-            
+
         }
         [TestInitialize]
         public void Setup()
@@ -80,9 +77,9 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         {
             Assert.AreEqual(11, employees.Columns.Count, "The employee table contains 11 columns.");
             Assert.AreEqual(2, employees.ForeignKeys.Count, "The employee table contains 2 foreign keys.");
-            var integ28 = employees.ForeignKeys.FirstOrDefault(f => f.Name == "INTEG_28");
+            var integ28 = employees.ForeignKeys.First(f => f.Name == "INTEG_28");
             Assert.AreEqual(1, integ28.Columns.Count, "The INTEG_28 fk on employee table references with 1 key.");
-            var integ29 = employees.ForeignKeys.FirstOrDefault(f => f.Name == "INTEG_29");
+            var integ29 = employees.ForeignKeys.First(f => f.Name == "INTEG_29");
             Assert.AreEqual(3, integ29.Columns.Count, "The INTEG_28 fk on employee table references with 3 key.");
         }
 
