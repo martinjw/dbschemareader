@@ -63,6 +63,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                     {
                         schemaReader = new Db2ISeriesSchemaReader(connectionString, providerName);
                     }
+                    else if (providerName.Equals("FirebirdSql.Data.FirebirdClient", StringComparison.OrdinalIgnoreCase))
+                    {
+                        schemaReader = new FirebirdSqlSchemaReader(connectionString, providerName);
+                    }
 
                     break;
             }
