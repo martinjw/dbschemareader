@@ -197,8 +197,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             //act
             var sql = migration.AlterColumn(table, column, null);
 
-            //assert
+            //assert            
+            Console.WriteLine(sql);
             Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" VARCHAR (40)"), "names should be quoted correctly");
+            Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" SET NOT NULL;"), "NULL should be handled correctly");
         }
     }
 }
