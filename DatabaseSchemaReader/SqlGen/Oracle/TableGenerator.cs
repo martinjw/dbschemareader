@@ -96,7 +96,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             return new SqlFormatProvider();
         }
 
-        protected override string WriteDataType(DatabaseColumn column)
+        public override string WriteDataType(DatabaseColumn column)
         {
             if (column.IsComputed)
             {

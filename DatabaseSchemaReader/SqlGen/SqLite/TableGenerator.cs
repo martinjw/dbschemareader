@@ -20,7 +20,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             return new SqlFormatProvider();
         }
 
-        protected override string WriteDataType(DatabaseColumn column)
+        public override string WriteDataType(DatabaseColumn column)
         {
             var type = new DataTypeWriter().WriteDataType(column);
             if (column.IsPrimaryKey && (Table.PrimaryKey == null || Table.PrimaryKey.Columns.Count == 1))

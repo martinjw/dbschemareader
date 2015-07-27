@@ -116,7 +116,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             return new SqlFormatProvider();
         }
 
-        protected override string WriteDataType(DatabaseColumn column)
+        public override string WriteDataType(DatabaseColumn column)
         {
             var defaultValue = string.Empty;
             if (!string.IsNullOrEmpty(column.DefaultValue))

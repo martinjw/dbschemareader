@@ -21,7 +21,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             return new SqlFormatProvider();
         }
 
-        protected override string WriteDataType(DatabaseColumn column)
+        public override string WriteDataType(DatabaseColumn column)
         {
             var type = new DataTypeWriter().WriteDataType(column);
             type += (!column.Nullable ? " NOT NULL" : string.Empty);

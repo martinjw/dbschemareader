@@ -105,12 +105,15 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             //* and so on...
             //
 
+
+            var columnDef = Escape(databaseColumn.Name) + " TYPE " +
+                            tableGenerator.WriteDataType(databaseColumn).TrimEnd();
             return comment +
                 Environment.NewLine +
                 string.Format(CultureInfo.InvariantCulture,
                     AlterColumnFormat,
-                    TableName(databaseTable),
-                    columnDefinition.Replace("NOT NULL",String.Empty)) + string.Format("\r\nALTER TABLE {0} ALTER COLUMN {1} {2} NOT NULL;", TableName(databaseTable), Escape(databaseColumn.Name), (databaseColumn.Nullable ? "DROP" : "SET"));
+                    TableName(databaseTable),                    
+                    columnDef.Replace("NOT NULL",String.Empty)) + string.Format("\r\nALTER TABLE {0} ALTER COLUMN {1} {2} NOT NULL;", TableName(databaseTable), Escape(databaseColumn.Name), (databaseColumn.Nullable ? "DROP" : "SET"));
         }
     }
 }

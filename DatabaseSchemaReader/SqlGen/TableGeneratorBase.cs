@@ -24,7 +24,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             return SqlFormatProvider().Escape(name);
         }
-        protected abstract string WriteDataType(DatabaseColumn column);
+        public abstract string WriteDataType(DatabaseColumn column);
         protected abstract string NonNativeAutoIncrementWriter();
 
         protected abstract string ConstraintWriter();

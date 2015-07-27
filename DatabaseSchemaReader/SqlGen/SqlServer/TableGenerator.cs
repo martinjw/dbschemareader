@@ -142,7 +142,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return (column.IsComputed);
         }
 
-        protected override string WriteDataType(DatabaseColumn column)
+        public override string WriteDataType(DatabaseColumn column)
         {
             if (HandleComputed(column))
             {
