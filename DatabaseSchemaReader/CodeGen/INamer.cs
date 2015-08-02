@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// </summary>
         /// <param name="namedObject">The named object.</param>
         /// <returns></returns>
-        string Name(NamedObject namedObject);
+        string Name(INamedObject namedObject);
 
         /// <summary>
         /// Names the collection.

@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A database object that should have an unique name within the collection
     /// </summary>
     [Serializable]
-    public abstract class NamedObject
+    public abstract class NamedObject<T> : IEquatable<T>, INamedObject where T : NamedObject<T>
     {
 
         /// <summary>
@@ -26,6 +26,23 @@ namespace DatabaseSchemaReader.DataSchema
         public object Tag { get; set; }
 
         /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public virtual bool Equals(T other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+            if (Name == null && other.Name == null) return Equals(this, other);
+            return (Name == other.Name);
+        }
+
+        /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
         /// </summary>
         /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
@@ -42,7 +59,7 @@ namespace DatabaseSchemaReader.DataSchema
                 return false;
             }
 
-            var o = (NamedObject)obj;
+            var o = (NamedObject<T>)obj;
             if (Name == null && o.Name == null) return base.Equals(obj);
             return (Name == o.Name);
         }

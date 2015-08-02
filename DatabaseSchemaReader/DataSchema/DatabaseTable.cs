@@ -11,7 +11,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A table in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseTable : NamedSchemaObject
+    public partial class DatabaseTable : NamedSchemaObject<DatabaseTable>
     {
         #region Fields
         //backing fields and initialize collections

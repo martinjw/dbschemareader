@@ -138,6 +138,7 @@
     <Compile Include="DataSchema\ConstraintType.cs" />
     <Compile Include="DataSchema\DatabaseColumnExtensions.cs" />
     <Compile Include="DataSchema\DatabaseColumnIdentity.cs" />
+    <Compile Include="DataSchema\INamedObject.cs" />
     <Compile Include="DataSchema\NamedObject.cs" />
     <Compile Include="DataSchema\DatabaseArgument.cs" />
     <Compile Include="DataSchema\DatabaseColumn.cs" />

@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A column in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseColumn : NamedSchemaObject
+    public partial class DatabaseColumn : NamedSchemaObject<DatabaseColumn>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseColumn"/> class.

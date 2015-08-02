@@ -14,7 +14,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// </summary>
         /// <param name="namedObject">The named object.</param>
         /// <returns></returns>
-        public virtual string Name(NamedObject namedObject)
+        public virtual string Name(INamedObject namedObject)
         {
             var name = NameFixer.ToPascalCase(namedObject.Name);
             var column = namedObject as DatabaseColumn;

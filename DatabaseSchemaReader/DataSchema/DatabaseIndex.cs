@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// We don't capture if this is a UNIQUE or NONCLUSTERED index.
     /// </remarks>
     [Serializable]
-    public partial class DatabaseIndex : NamedSchemaObject
+    public partial class DatabaseIndex : NamedSchemaObject<DatabaseIndex>
     {
         #region Fields
         //backing fields
@@ -85,11 +85,11 @@ namespace DatabaseSchemaReader.DataSchema
         {
             var columnNames = Columns.Select(c => c.Name);
             //if this the same as the primary key?
-            if (parentTable.PrimaryKey != null && 
+            if (parentTable.PrimaryKey != null &&
                 parentTable.PrimaryKey.Columns.SequenceEqual(columnNames))
                 return true;
             return parentTable.UniqueKeys.Any(
-                uniqueKey => uniqueKey.Name == Name || 
+                uniqueKey => uniqueKey.Name == Name ||
                     uniqueKey.Columns.SequenceEqual(columnNames));
         }
 

@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a stored procedure in the database.
     /// </summary>
     [Serializable]
-    public partial class DatabaseStoredProcedure : NamedSchemaObject
+    public partial class DatabaseStoredProcedure : NamedSchemaObject<DatabaseStoredProcedure>
     {
         #region Fields
         //backing fields
