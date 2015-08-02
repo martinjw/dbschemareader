@@ -176,6 +176,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="constraints">The constraints.</param>
         public void AddConstraints(IEnumerable<DatabaseConstraint> constraints)
         {
+            if (constraints == null) return; //nothing to do
+
             foreach (var constraint in constraints)
             {
                 AddConstraint(constraint);
@@ -188,6 +190,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="con">The constraint.</param>
         public void AddConstraint(DatabaseConstraint con)
         {
+            if (con == null) throw new ArgumentNullException("con");
+
             switch (con.ConstraintType)
             {
                 case ConstraintType.PrimaryKey:
