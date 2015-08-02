@@ -71,13 +71,16 @@ namespace DatabaseSchemaReader.Conversion.Loaders
                 _fkColumnConverter.AddForeignKeyColumns(fks);
                 return fks;
             }
-            var constraints = _sr.ForeignKeys(tableName);
-            var converter = new SchemaConstraintConverter(constraints, ConstraintType.ForeignKey);
-            fks = converter.Constraints();
-            var cols = _sr.ForeignKeyColumns(tableName);
-            var colConverter = new ForeignKeyColumnConverter(cols);
-            colConverter.AddForeignKeyColumns(fks);
-            return fks;
+            //normally preloaded in ctor (all constraints, no table name).
+            //if a database only allows loading constraints by table name, we'll uncomment below
+            return new List<DatabaseConstraint>();
+            //var constraints = _sr.ForeignKeys(tableName);
+            //var converter = new SchemaConstraintConverter(constraints, ConstraintType.ForeignKey);
+            //fks = converter.Constraints();
+            //var cols = _sr.ForeignKeyColumns(tableName);
+            //var colConverter = new ForeignKeyColumnConverter(cols);
+            //colConverter.AddForeignKeyColumns(fks);
+            //return fks;
         }
 
         public IList<DatabaseConstraint> Load(string tableName, string schemaName, ConstraintType constraintType)
