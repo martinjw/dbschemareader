@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a sequence in the database (eg Oracle, SqlServer 2011)
     /// </summary>
     [Serializable]
-    public partial class DatabaseSequence : NamedSchemaObject
+    public partial class DatabaseSequence : NamedSchemaObject<DatabaseSequence>
     {
         /// <summary>
         /// Gets or sets the mininum value.
