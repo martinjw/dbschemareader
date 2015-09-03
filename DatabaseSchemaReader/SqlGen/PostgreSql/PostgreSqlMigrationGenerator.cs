@@ -37,8 +37,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         public override string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "ALTER TABLE {0} DROP COLUMN {1} CASCADE;",
-                TableName(databaseTable),
+                "ALTER TABLE {0} DROP COLUMN {1} CASCADE;", 
+                TableName(databaseTable), 
                 Escape(databaseColumn.Name));
         }
 
