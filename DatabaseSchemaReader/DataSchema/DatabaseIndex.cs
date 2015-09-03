@@ -85,11 +85,11 @@ namespace DatabaseSchemaReader.DataSchema
         {
             var columnNames = Columns.Select(c => c.Name);
             //if this the same as the primary key?
-            if (parentTable.PrimaryKey != null &&
+            if (parentTable.PrimaryKey != null && 
                 parentTable.PrimaryKey.Columns.SequenceEqual(columnNames))
                 return true;
             return parentTable.UniqueKeys.Any(
-                uniqueKey => uniqueKey.Name == Name ||
+                uniqueKey => uniqueKey.Name == Name || 
                     uniqueKey.Columns.SequenceEqual(columnNames));
         }
 
