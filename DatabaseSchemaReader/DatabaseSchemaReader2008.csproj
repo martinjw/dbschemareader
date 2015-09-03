@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C5936AA-BA13-451A-A67C-F7B567FF535B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -144,6 +144,7 @@
     <Compile Include="DataSchema\DatabaseUser.cs" />
     <Compile Include="DataSchema\DatabaseView.cs" />
     <Compile Include="DataSchema\DataType.cs" />
+    <Compile Include="DataSchema\INamedObject.cs" />
     <Compile Include="DataSchema\NamedObject.cs" />
     <Compile Include="DataSchema\NamedSchemaObject.cs" />
     <Compile Include="DataSchema\SqlType.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="IDatabaseReader.cs" />
     <Compile Include="ProviderSchemaReaders\Db2ISeriesSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\Db2SchemaReader.cs" />
+    <Compile Include="ProviderSchemaReaders\FirebirdSqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\IngresSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\MySqlSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\OleDbSchemaReader.cs" />
