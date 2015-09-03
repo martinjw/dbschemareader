@@ -41,6 +41,7 @@ namespace DatabaseSchemaReader.Conversion
             string columnKey = "COLUMN_NAME";
             if (!dt.Columns.Contains(key)) key = "foreignkey";
             if (!dt.Columns.Contains(key)) key = "FK_NAME"; //ODBC
+            if (!dt.Columns.Contains(key)) key = "CONSTRAINT"; //Devart
             if (!dt.Columns.Contains(tableKey)) tableKey = "table";
             if (!dt.Columns.Contains(tableKey)) tableKey = "FK_TABLE_NAME"; //ODBC
             if (!dt.Columns.Contains(columnKey)) columnKey = "name";
