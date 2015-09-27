@@ -211,6 +211,8 @@ namespace DatabaseSchemaReader.Data
 
             foreach (var databaseColumn in _databaseTable.Columns)
             {
+                if(databaseColumn.DbDataType == "timestamp") continue;
+
                 if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
 
                 if (_nullColumns.Contains(databaseColumn.Name))
@@ -282,6 +284,7 @@ namespace DatabaseSchemaReader.Data
             var cols = new List<string>();
             foreach (var databaseColumn in _databaseTable.Columns)
             {
+                if (databaseColumn.DbDataType == "timestamp") continue;
                 if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
                 cols.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name));
             }
