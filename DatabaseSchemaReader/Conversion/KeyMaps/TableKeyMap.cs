@@ -23,13 +23,15 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             IsDb2 = dt.Columns.Contains("REMARKS");
             //Intersystems Cache
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "TABLE_SCHEM";
+            //DB2
+            if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "SCHEMANAME";
+            if (!dt.Columns.Contains(TableName)) TableName = "TABLENAME";
             //no schema
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = null;
-
         }
-         public string TableName { get; private set; }
-         public string OwnerKey { get; private set; }
-         public string TypeKey { get; private set; }
-         public bool IsDb2 { get; private set; }
+        public string TableName { get; private set; }
+        public string OwnerKey { get; private set; }
+        public string TypeKey { get; private set; }
+        public bool IsDb2 { get; private set; }
     }
 }
