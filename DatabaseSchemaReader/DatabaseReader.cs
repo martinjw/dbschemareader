@@ -258,6 +258,18 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Does table exist?
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">tableName</exception>
+        public bool TableExists(string tableName)
+        {
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            return _schemaReader.TableExists(tableName);
+        }
+
+        /// <summary>
         /// Gets the table. If <see cref="Owner"/> is specified, it is used.
         /// </summary>
         /// <param name="tableName">Name of the table. Oracle names can be case sensitive.</param>

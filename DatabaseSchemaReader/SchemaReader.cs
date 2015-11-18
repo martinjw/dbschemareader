@@ -138,6 +138,27 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Does table exist?
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentException">TableName is null or empty;tableName</exception>
+        public bool TableExists(string tableName)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentException("TableName is null or empty", "tableName");
+            string collectionName = TablesCollectionName;
+            using (DbConnection conn = Factory.CreateConnection())
+            {
+                conn.ConnectionString = ConnectionString;
+                conn.Open();
+                string[] restrictions = SchemaRestrictions.ForTable(conn, TablesCollectionName, tableName);
+                var dt = conn.GetSchema(collectionName, restrictions);
+                //could have same name in different schemas
+                return dt.Rows.Count > 0;
+            }
+        }
+
+        /// <summary>
         /// Get all data for a specified table name.
         /// </summary>
         /// <param name="tableName">Name of the table. Oracle names can be case sensitive.</param>
