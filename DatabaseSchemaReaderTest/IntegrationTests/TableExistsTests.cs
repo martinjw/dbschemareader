@@ -1,0 +1,41 @@
+﻿#if !NUNIT
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+#else
+using NUnit.Framework;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestCleanup = NUnit.Framework.TearDownAttribute;
+using TestContext = System.Object;
+using TestCategory = NUnit.Framework.CategoryAttribute;
+#endif
+
+namespace DatabaseSchemaReaderTest.IntegrationTests
+{
+    [TestClass]
+    public class TableExistsTests
+    {
+        [TestMethod, TestCategory("SqlServer")]
+        public void TableExists()
+        {
+            //arrange
+            var dbReader = TestHelper.GetNorthwindReader();
+
+            //act
+            var result = dbReader.TableExists("Products");
+            //assert
+            Assert.IsTrue(result, "Products table should exist in Northwind database");
+        }
+
+        [TestMethod, TestCategory("SqlServer")]
+        public void TableDoesNotExist()
+        {
+            //arrange
+            var dbReader = TestHelper.GetNorthwindReader();
+            //act
+            var result = dbReader.TableExists("Does_Not_Exist");
+            //assert
+            Assert.IsFalse(result, "Does_Not_Exist table should not exist in Northwind database");
+        }
+    }
+}
