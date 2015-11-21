@@ -11,6 +11,11 @@
 		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
 		<releaseNotes>
+##v1.4.3 
+ * Fix: PgSQL alter column(thanks roadrunner75)
+ * Fix: Db2 Tables schema reading
+ * Fix: SqlServer timestamps (InsertWriter) (thanks shiningrise)
+ * Added: DatabaseReader.TableExists method
 ##v1.4.2 
  * Firebird schema reading fixes (thanks faddiv)
 ##v1.4.1 
