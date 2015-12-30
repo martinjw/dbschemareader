@@ -250,6 +250,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
             list.Add(new DataType("bit", typeof(long).FullName));
             list.Add(new DataType("bool", typeof(bool).FullName));
             list.Add(new DataType("boolean", typeof(bool).FullName));
+            list.Add(new DataType("bpchar", typeof(string).FullName));
             list.Add(new DataType("bytea", typeof(Byte[]).FullName));
             list.Add(new DataType("char", typeof(string).FullName));
             list.Add(new DataType("character varying", typeof(string).FullName));
