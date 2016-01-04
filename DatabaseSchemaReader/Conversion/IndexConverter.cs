@@ -24,8 +24,10 @@ namespace DatabaseSchemaReader.Conversion
 
         public IEnumerable<DatabaseIndex> Indexes(string tableName, string schemaName)
         {
-            return _indexes.Where(i => string.Equals(i.TableName, tableName, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(i.SchemaOwner, schemaName, StringComparison.OrdinalIgnoreCase));
+            return _indexes.Where(i =>
+                string.Equals(i.TableName, tableName, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(i.SchemaOwner, schemaName, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(i => i.Name);
         }
 
         private static void ConvertIndexes(DataTable dt, ICollection<DatabaseIndex> indexes)
