@@ -44,7 +44,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Net4\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;Net4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Net4\DatabaseSchemaReader.xml</DocumentationFile>
@@ -121,7 +121,10 @@
     <Compile Include="Conversion\DatabaseColumnExtensions.cs" />
     <Compile Include="Conversion\KeyMaps\TableKeyMap.cs" />
     <Compile Include="Conversion\Loaders\IndexLoader.cs" />
+    <Compile Include="Conversion\Loaders\ProcedureLoader.cs" />
     <Compile Include="Conversion\Loaders\SchemaConstraintLoader.cs" />
+    <Compile Include="Conversion\Loaders\AllTablesLoader.cs" />
+    <Compile Include="Conversion\Loaders\TableLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
     <Compile Include="Conversion\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
@@ -132,6 +135,7 @@
     <Compile Include="Conversion\KeyMaps\SequenceKeyMap.cs" />
     <Compile Include="Conversion\TableDescriptionConverter.cs" />
     <Compile Include="Conversion\TriggerConverter.cs" />
+    <Compile Include="Conversion\UserConverter.cs" />
     <Compile Include="Conversion\ViewColumnConverter.cs" />
     <Compile Include="Conversion\Loaders\ViewColumnLoader.cs" />
     <Compile Include="DatabaseReader.cs" />
@@ -188,6 +192,7 @@
     <Compile Include="ProviderSchemaReaders\OracleSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlArgumentReader.cs" />
     <Compile Include="ProviderSchemaReaders\PostgreSqlSchemaReader.cs" />
+    <Compile Include="ReaderEventArgs.cs" />
     <Compile Include="SqlGen\DataTypeConverter.cs" />
     <Compile Include="SqlGen\DataTypeMapper.cs" />
     <Compile Include="SqlGen\DataTypeMappingFactory.cs" />
@@ -227,6 +232,7 @@
     <Compile Include="ProviderSchemaReaders\SqlServerSchemaReader.cs" />
     <Compile Include="SqlGen\SqlServer\SqlServerDataTypeMapper.cs" />
     <Compile Include="SqlGen\SqlTranslator.cs" />
+    <Compile Include="CancellationToken.cs" />
     <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\EntityFrameworkImporter.cs" />

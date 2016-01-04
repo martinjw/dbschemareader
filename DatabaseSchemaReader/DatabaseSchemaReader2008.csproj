@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C5936AA-BA13-451A-A67C-F7B567FF535B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CancellationToken.cs" />
     <Compile Include="CodeGen\ClassBuilder.cs" />
     <Compile Include="CodeGen\ClassWriter.cs" />
     <Compile Include="CodeGen\CodeFirst\CodeFirstContextWriter.cs" />
@@ -108,9 +109,12 @@
     <Compile Include="Conversion\KeyMaps\StoredProcedureKeyMap.cs" />
     <Compile Include="Conversion\KeyMaps\TableKeyMap.cs" />
     <Compile Include="Conversion\KeyMaps\ViewKeyMap.cs" />
+    <Compile Include="Conversion\Loaders\AllTablesLoader.cs" />
     <Compile Include="Conversion\Loaders\ColumnLoader.cs" />
     <Compile Include="Conversion\Loaders\IndexLoader.cs" />
+    <Compile Include="Conversion\Loaders\ProcedureLoader.cs" />
     <Compile Include="Conversion\Loaders\SchemaConstraintLoader.cs" />
+    <Compile Include="Conversion\Loaders\TableLoader.cs" />
     <Compile Include="Conversion\Loaders\ViewColumnLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
     <Compile Include="Conversion\ProviderToSqlType.cs" />
@@ -120,6 +124,7 @@
     <Compile Include="Conversion\SchemaSourceConverter.cs" />
     <Compile Include="Conversion\TableDescriptionConverter.cs" />
     <Compile Include="Conversion\TriggerConverter.cs" />
+    <Compile Include="Conversion\UserConverter.cs" />
     <Compile Include="Conversion\ViewColumnConverter.cs" />
     <Compile Include="DatabaseReader.cs" />
     <Compile Include="DataSchema\ConstraintType.cs" />
@@ -177,6 +182,7 @@
     <Compile Include="ProviderSchemaReaders\SybaseAseSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\SybaseUltraLiteSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\VistaDbSchemaReader.cs" />
+    <Compile Include="ReaderEventArgs.cs" />
     <Compile Include="SqlGen\DataTypeConverter.cs" />
     <Compile Include="SqlGen\DataTypeMapper.cs" />
     <Compile Include="SqlGen\DataTypeMappingFactory.cs" />
