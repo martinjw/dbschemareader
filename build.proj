@@ -34,7 +34,6 @@
     <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
 		Properties="Configuration=Net4;OutputPath=$(OutputPath4);IntermediateOutputPath=$(ObjPath)Net4\"/>
     <Message Text="SchemaViewer Built" />
-	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath4)" />
   </Target>
   
   <Target Name="BuildViewer45">
@@ -46,7 +45,6 @@
     <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
 		Properties="Configuration=net45;OutputPath=$(OutputPath45);IntermediateOutputPath=$(ObjPath)Net45\"/>
     <Message Text="SchemaViewer Built in 4.5" />
-	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath45)" />
   </Target>
   
   <Target Name="RestorePackages">
