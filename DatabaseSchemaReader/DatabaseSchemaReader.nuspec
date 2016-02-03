@@ -11,6 +11,10 @@
 		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
 		<releaseNotes>
+##v1.5 
+ * New: DatabaseReader has overloads supporting CancellationToken
+ * New: DatabaseReader has a ReaderProgress event (thanks inqb)
+ * New: Build for v4.5 as well as v3.5 and v4.0
 ##v1.4.4 
  * Fix: PgSQL add bpchar datatype
 ##v1.4.3 
@@ -32,6 +36,8 @@
 		<file src="..\bin\DatabaseSchemaReader.xml" target="lib\net35" /> 
 		<file src="..\bin\net4\DatabaseSchemaReader.dll" target="lib\net40" /> 
 		<file src="..\bin\net4\DatabaseSchemaReader.xml" target="lib\net40" /> 
+		<file src="..\bin\net45\DatabaseSchemaReader.dll" target="lib\net45" /> 
+		<file src="..\bin\net45\DatabaseSchemaReader.xml" target="lib\net45" /> 
 		<file src="README.txt" target="" /> 
 	</files>
 </package>
