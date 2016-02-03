@@ -1,8 +1,12 @@
-﻿See http://dbschemareader.codeplex.com/ for source code, documentation and GUIs.
+﻿Source: https://github.com/martinjw/dbschemareader or http://dbschemareader.codeplex.com/
+GUI: https://github.com/martinjw/dbschemareader/releases or http://dbschemareader.codeplex.com/releases
+Documentation: http://dbschemareader.codeplex.com/documentation
 
 ===General===
 
-Since .Net 2.0, we can obtain schema information from databases such as tables, columns and stored procedures. This is implemented through the DbConnection.GetSchema method. The ADO providers are inconsistent and inconvienent (DataTables...), so this library is an adapter which loads those collections into simple collections of plain old CLR objects, which are the same for all providers. It also obtains additional information using the database metadata directly.
+A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.
+
+Any ADO provider can be read into a single standard model.
 
 Supported databases include SqlServer, SqlServer Ce, Oracle (via Microsoft, ODP and Devart), MySQL, SQLite, Postgresql, DB2, Ingres, VistaDb and Sybase ASE/ASA/UltraLite.
 
