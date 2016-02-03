@@ -32,8 +32,8 @@
 		<tags>ADO, Entity Framework Code First, SQL Server, SQLite, Oracle, MySQL, PostgreSql, Schema, Database</tags>
 	</metadata>
 	<files>
-		<file src="..\bin\DatabaseSchemaReader.dll" target="lib\net35" /> 
-		<file src="..\bin\DatabaseSchemaReader.xml" target="lib\net35" /> 
+		<file src="..\bin\net35\DatabaseSchemaReader.dll" target="lib\net35" /> 
+		<file src="..\bin\net35\DatabaseSchemaReader.xml" target="lib\net35" /> 
 		<file src="..\bin\net4\DatabaseSchemaReader.dll" target="lib\net40" /> 
 		<file src="..\bin\net4\DatabaseSchemaReader.xml" target="lib\net40" /> 
 		<file src="..\bin\net45\DatabaseSchemaReader.dll" target="lib\net45" /> 
