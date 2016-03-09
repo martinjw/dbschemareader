@@ -220,6 +220,8 @@
     <Compile Include="SqlGen\SqlServer\SqlServerDataTypeMapper.cs" />
     <Compile Include="SqlGen\SqlServer\SqlServerMigrationGenerator.cs" />
     <Compile Include="SqlGen\SqlTranslator.cs" />
+    <Compile Include="Utilities\DbProviderFactoryDescription.cs" />
+    <Compile Include="Utilities\DbProviderFactoryRepository.cs" />
     <Compile Include="Utilities\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\EntityFrameworkImporter.cs" />
