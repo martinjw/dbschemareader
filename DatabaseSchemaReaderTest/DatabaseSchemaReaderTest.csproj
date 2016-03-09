@@ -54,7 +54,9 @@
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Npgsql.2.2.7\lib\net40\Mono.Security.dll</HintPath>
       <Private>True</Private>
@@ -228,6 +230,7 @@
     </Compile>
     <Compile Include="Utilities\EF\EntityImporterTest.cs" />
     <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
+    <Compile Include="Utilities\DbProviderFactoryRepositoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DatabaseScripts\create_database_northwind.sql" />
