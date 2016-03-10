@@ -9,17 +9,16 @@ namespace DatabaseSchemaReader.Utilities
     /// </summary>
     public static class FactoryTools
     {
-        private static DbProviderFactory _manualProviderFactory;
-
         /// <summary>
-        /// Finds the factory.
+        /// Finds the factory. You can override with <see cref="P:SingleProviderFactory"/> (simple) or <see cref="P:ProviderRespository"/>
         /// </summary>
         /// <param name="providerName">Name of the provider.</param>
         /// <returns></returns>
         public static DbProviderFactory GetFactory(string providerName)
         {
             //a simple static manual override.
-            if (_manualProviderFactory != null) return _manualProviderFactory;
+            if (SingleProviderFactory != null) return SingleProviderFactory;
+            if (ProviderRepository != null) return ProviderRepository.GetFactory(providerName);
             return DbProviderFactories.GetFactory(providerName);
         }
 
@@ -27,13 +26,15 @@ namespace DatabaseSchemaReader.Utilities
         /// <summary>
         /// Adds an existing factory. Call this before creating the DatabaseReader or SchemaReader.  Use with care!
         /// </summary>
-        /// <param name="factory">The factory.</param>
-        /// <exception cref="System.ArgumentNullException">schemaReader</exception>
-        public static void AddFactory(DbProviderFactory factory)
-        {
-            if (factory == null) throw new ArgumentNullException("factory");
-            _manualProviderFactory = factory;
-        }
+        public static DbProviderFactory SingleProviderFactory { get; set; }
+
+        /// <summary>
+        /// Gets or sets a provider repository.
+        /// </summary>
+        /// <value>
+        /// The provider repository.
+        /// </value>
+        public static DbProviderFactoryRepository ProviderRepository { get; set; }
 
 
         /// <summary>
