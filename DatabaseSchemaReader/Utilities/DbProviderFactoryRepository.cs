@@ -13,17 +13,17 @@ namespace DatabaseSchemaReader.Utilities
     ///declared at app.config or machine.config. Basically extracted from
     ///http://sandrinodimattia.net/dbproviderfactoryrepository-managing-dbproviderfactories-in-code/
     /// </summary>
-    public static class DbProviderFactoryRepository
+    public class DbProviderFactoryRepository
     {
         /// <summary>
         ///The table containing all the data.
         /// </summary>
-        private static DataTable _dbProviderFactoryTable;
+        private DataTable _dbProviderFactoryTable;
 
         /// <summary>
         ///Initialize the repository.
         /// </summary>
-        static DbProviderFactoryRepository()
+        public DbProviderFactoryRepository()
         {
             LoadDbProviderFactories();
         }
@@ -32,7 +32,7 @@ namespace DatabaseSchemaReader.Utilities
         ///Gets all providers.
         /// </summary>
         /// <returns></returns>
-        public static IEnumerable<DbProviderFactoryDescription> GetAllDescriptions()
+        public IEnumerable<DbProviderFactoryDescription> GetAllDescriptions()
         {
             return _dbProviderFactoryTable.Rows.Cast<DataRow>().Select(o => new DbProviderFactoryDescription(o));
         }
@@ -42,7 +42,7 @@ namespace DatabaseSchemaReader.Utilities
         /// </summary>
         /// <param name="invariant"></param>
         /// <returns></returns>
-        public static DbProviderFactoryDescription GetDescriptionByInvariant(string invariant)
+        public DbProviderFactoryDescription GetDescriptionByInvariant(string invariant)
         {
             var row =
                 _dbProviderFactoryTable.Rows.Cast<DataRow>()
@@ -55,7 +55,7 @@ namespace DatabaseSchemaReader.Utilities
         /// </summary>
         /// <param name="description">The description.</param>
         /// <returns></returns>
-        public static DbProviderFactory GetFactory(DbProviderFactoryDescription description)
+        public DbProviderFactory GetFactory(DbProviderFactoryDescription description)
         {
             var providerType = //AssemblyHelper.LoadTypeFrom(description.AssemblyQualifiedName);
                 Type.GetType(description.AssemblyQualifiedName);
@@ -81,7 +81,7 @@ namespace DatabaseSchemaReader.Utilities
         /// </summary>
         /// <param name="invariant">The invariant.</param>
         /// <returns></returns>
-        public static DbProviderFactory GetFactory(string invariant)
+        public DbProviderFactory GetFactory(string invariant)
         {
             if (string.IsNullOrEmpty(invariant))
             {
@@ -98,7 +98,7 @@ namespace DatabaseSchemaReader.Utilities
         /// <param name="path">The path.</param>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="System.ArgumentException">$Path does not {path} exist.</exception>
-        public static void LoadExternalDbProviderAssemblies(string path)
+        public void LoadExternalDbProviderAssemblies(string path)
         {
             LoadExternalDbProviderAssemblies(path, true);
         }
@@ -110,7 +110,7 @@ namespace DatabaseSchemaReader.Utilities
         /// <param name="includeSubfolders">if set to <c>true</c> [include subfolders].</param>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="System.ArgumentException">$Path does not {path} exist.</exception>
-        public static void LoadExternalDbProviderAssemblies(string path, bool includeSubfolders)
+        public void LoadExternalDbProviderAssemblies(string path, bool includeSubfolders)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -181,6 +181,42 @@ namespace DatabaseSchemaReader.Utilities
         }
 
         /// <summary>
+        ///Adds the specified provider.
+        /// </summary>
+        /// <param name="provider">The provider.</param>
+        public void Add(DbProviderFactoryDescription provider)
+        {
+            Delete(provider);
+            _dbProviderFactoryTable.Rows.Add(provider.Name, provider.Description, provider.InvariantName, provider.AssemblyQualifiedName);
+        }
+
+        /// <summary>
+        ///Deletes the specified provider if present.
+        /// </summary>
+        /// <param name="provider">The provider.</param>
+        private void Delete(DbProviderFactoryDescription provider)
+        {
+            var row =
+                _dbProviderFactoryTable.Rows.Cast<DataRow>()
+                    .FirstOrDefault(o => o["InvariantName"] != null && o["InvariantName"].ToString() == provider.InvariantName);
+            if (row != null)
+            {
+                _dbProviderFactoryTable.Rows.Remove(row);
+            }
+        }
+
+        /// <summary>
+        ///Opens the table.
+        /// </summary>
+        private void LoadDbProviderFactories()
+        {
+            _dbProviderFactoryTable = DbProviderFactories.GetFactoryClasses();
+        }
+    }
+
+    internal static class AssemblyExtensions
+    {
+        /// <summary>
         /// Gets the loadable types.
         /// </summary>
         /// <param name="assembly">The assembly.</param>
@@ -197,39 +233,6 @@ namespace DatabaseSchemaReader.Utilities
             {
                 return e.Types.Where(t => t != null);
             }
-        }
-
-        /// <summary>
-        ///Adds the specified provider.
-        /// </summary>
-        /// <param name="provider">The provider.</param>
-        public static void Add(DbProviderFactoryDescription provider)
-        {
-            Delete(provider);
-            _dbProviderFactoryTable.Rows.Add(provider.Name, provider.Description, provider.InvariantName, provider.AssemblyQualifiedName);
-        }
-
-        /// <summary>
-        ///Deletes the specified provider if present.
-        /// </summary>
-        /// <param name="provider">The provider.</param>
-        private static void Delete(DbProviderFactoryDescription provider)
-        {
-            var row =
-                _dbProviderFactoryTable.Rows.Cast<DataRow>()
-                    .FirstOrDefault(o => o["InvariantName"] != null && o["InvariantName"].ToString() == provider.InvariantName);
-            if (row != null)
-            {
-                _dbProviderFactoryTable.Rows.Remove(row);
-            }
-        }
-
-        /// <summary>
-        ///Opens the table.
-        /// </summary>
-        private static void LoadDbProviderFactories()
-        {
-            _dbProviderFactoryTable = DbProviderFactories.GetFactoryClasses();
         }
     }
 }
