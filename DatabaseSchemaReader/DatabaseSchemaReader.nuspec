@@ -11,6 +11,8 @@
 		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
 		<releaseNotes>
+##v1.6 
+ * New: CodeWriterSettings has a CodeInserter to insert custom code during codegen.
 ##v1.5 
  * New: DatabaseReader has overloads supporting CancellationToken
  * New: DatabaseReader has a ReaderProgress event (thanks inqb)

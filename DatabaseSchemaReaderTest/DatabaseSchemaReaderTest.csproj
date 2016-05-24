@@ -93,6 +93,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codegen\ClassWriterInserterTest.cs" />
     <Compile Include="Codegen\CodeFirstContextWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstMappingWriterTest.cs" />
     <Compile Include="Codegen\CodeFirstWriterTest.cs" />

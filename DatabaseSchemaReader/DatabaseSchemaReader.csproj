@@ -77,6 +77,7 @@
     <Compile Include="CodeGen\CodeFirst\CodeFirstContextWriter.cs" />
     <Compile Include="CodeGen\CodeFirst\CodeFirstMappingWriter.cs" />
     <Compile Include="CodeGen\CodeFirst\RiaServicesWriter.cs" />
+    <Compile Include="CodeGen\CodeInserter.cs" />
     <Compile Include="CodeGen\CodeTarget.cs" />
     <Compile Include="CodeGen\CodeWriter.cs" />
     <Compile Include="CodeGen\CodeWriterSettings.cs" />
