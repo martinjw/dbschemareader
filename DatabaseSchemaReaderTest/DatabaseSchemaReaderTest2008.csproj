@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1114FF99-4A7A-4369-9C38-18FCECF773A3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -68,6 +68,7 @@
     <Compile Include="Codegen\ClassWriterAssociationTableTest.cs" />
     <Compile Include="Codegen\ClassWriterCompositeKeyTest.cs" />
     <Compile Include="Codegen\ClassWriterForeignKeyTest.cs" />
+    <Compile Include="Codegen\ClassWriterInserterTest.cs" />
     <Compile Include="Codegen\ClassWriterOneToOneTest.cs" />
     <Compile Include="Codegen\ClassWriterTablePerTypeTest.cs" />
     <Compile Include="Codegen\ClassWriterTest.cs" />

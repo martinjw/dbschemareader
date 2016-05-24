@@ -16,6 +16,7 @@ namespace DatabaseSchemaReader.CodeGen
         private DataAnnotationWriter _dataAnnotationWriter;
         private readonly CodeWriterSettings _codeWriterSettings;
         private DatabaseTable _inheritanceTable;
+        private CodeInserter _codeInserter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
@@ -27,6 +28,8 @@ namespace DatabaseSchemaReader.CodeGen
             _codeWriterSettings = codeWriterSettings;
             _table = table;
             _cb = new ClassBuilder();
+            _codeInserter = codeWriterSettings.CodeInserter;
+            if (_codeInserter == null) _codeInserter = new CodeInserter();
         }
 
         /// <summary>
@@ -48,6 +51,9 @@ namespace DatabaseSchemaReader.CodeGen
             _inheritanceTable = _table.FindInheritanceTable();
 
             WriteNamespaces();
+            var customNamespaces = _codeWriterSettings.CodeInserter.WriteNamespaces(_table);
+            if (!string.IsNullOrEmpty(customNamespaces)) _cb.AppendLine(customNamespaces);
+
 
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
@@ -68,6 +74,8 @@ namespace DatabaseSchemaReader.CodeGen
                     classDefinition += " : " + _inheritanceTable.NetName;
                 }
 
+                var customTableAnnotations = _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table);
+                if (!string.IsNullOrEmpty(customTableAnnotations)) _cb.AppendLine(customTableAnnotations);
                 using (_cb.BeginNest(classDefinition, comment))
                 {
                     WriteClassMembers(className);
@@ -306,7 +314,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
             var propertyName = column.NetName;
-            //in case teh netName hasn't been set
+            //in case the netName hasn't been set
             if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
             // KL: Ensures that property name doesn't match class name
             if (propertyName == column.Table.NetName)
@@ -330,6 +338,9 @@ namespace DatabaseSchemaReader.CodeGen
                 //must not conflict with entity fk name
                 propertyName += "Id";
             }
+
+            var customColumnAnnotations = _codeWriterSettings.CodeInserter.WriteColumnAnnotations(_table, column);
+            if (!string.IsNullOrEmpty(customColumnAnnotations)) _cb.AppendLine(customColumnAnnotations);
 
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
