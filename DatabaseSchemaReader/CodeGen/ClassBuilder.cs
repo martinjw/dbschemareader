@@ -6,23 +6,32 @@ namespace DatabaseSchemaReader.CodeGen
     /// <summary>
     /// Writes a class while retaining indenting
     /// </summary>
-    class ClassBuilder
+    public class ClassBuilder
     {
         readonly StringBuilder _sb = new StringBuilder();
         private string _indent = string.Empty;
         private int _indentLevel;
 
+        /// <summary>
+        /// Appends the line.
+        /// </summary>
+        /// <param name="s">The string.</param>
         public void AppendLine(string s)
         {
             _sb.AppendLine(_indent + s);
         }
 
+        /// <summary>
+        /// Appends the format.
+        /// </summary>
+        /// <param name="s">The string.</param>
+        /// <param name="args">The arguments.</param>
         public void AppendFormat(string s, params object[] args)
         {
             _sb.AppendLine(_indent + string.Format(CultureInfo.InvariantCulture, s, args));
         }
 
-        public void AppendXmlSummary(string summary)
+        internal void AppendXmlSummary(string summary)
         {
             if (string.IsNullOrEmpty(summary)) return;
             _sb.AppendLine(_indent + "/// <summary>");
@@ -30,12 +39,12 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(_indent + "/// </summary>");
         }
 
-        public Nester BeginNest(string s)
+        internal Nester BeginNest(string s)
         {
             return BeginNest(s, null);
         }
 
-        public Nester BeginNest(string s, string summary)
+        internal Nester BeginNest(string s, string summary)
         {
             _sb.AppendLine();
             AppendXmlSummary(summary);
@@ -45,7 +54,7 @@ namespace DatabaseSchemaReader.CodeGen
             return new Nester(this);
         }
 
-        public Nester BeginBrace(string s)
+        internal Nester BeginBrace(string s)
         {
             //simple bracing, no leading line
             _sb.AppendLine(_indent + s);
@@ -54,12 +63,12 @@ namespace DatabaseSchemaReader.CodeGen
             return new Nester(this);
         }
 
-        public void AppendAutomaticProperty(string dataType, string propertyName)
+        internal void AppendAutomaticProperty(string dataType, string propertyName)
         {
             AppendAutomaticProperty(dataType, propertyName, true);
         }
 
-        public void AppendAutomaticProperty(string dataType, string propertyName, bool isVirtual)
+        internal void AppendAutomaticProperty(string dataType, string propertyName, bool isVirtual)
         {
             var line = string.Format(
                 CultureInfo.InvariantCulture,
@@ -73,11 +82,11 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(); //add an empty line
         }
 
-        public void AppendAutomaticCollectionProperty(string dataType, string propertyName)
+        internal void AppendAutomaticCollectionProperty(string dataType, string propertyName)
         {
             AppendAutomaticCollectionProperty(dataType, propertyName, false);
         }
-        public void AppendAutomaticCollectionProperty(string dataType, string propertyName, bool protectedSetter)
+        internal void AppendAutomaticCollectionProperty(string dataType, string propertyName, bool protectedSetter)
         {
             var line = string.Format(
                 CultureInfo.InvariantCulture,
@@ -92,7 +101,7 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(); //add an empty line
         }
 
-        public void EndNest()
+        internal void EndNest()
         {
             PopIndent(); //pop before writing close brace
             _sb.AppendLine(_indent + "}");
@@ -109,6 +118,12 @@ namespace DatabaseSchemaReader.CodeGen
             _indent = new string(' ', _indentLevel * 4);
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents the source code.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents the source code.
+        /// </returns>
         public override string ToString()
         {
             return _sb.ToString();

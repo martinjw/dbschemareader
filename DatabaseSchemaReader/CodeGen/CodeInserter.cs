@@ -11,20 +11,20 @@ namespace DatabaseSchemaReader.CodeGen
         /// Write any namespaces.
         /// </summary>
         /// <param name="table">The table.</param>
-        /// <returns></returns>
-        public virtual string WriteNamespaces(DatabaseTable table)
+        /// <param name="classBuilder">The class builder.</param>
+        public virtual void WriteNamespaces(DatabaseTable table, ClassBuilder classBuilder)
         {
-            return null;
+            //
         }
 
         /// <summary>
         /// Write any table annotations.
         /// </summary>
         /// <param name="table">The table.</param>
-        /// <returns></returns>
-        public virtual string WriteTableAnnotations(DatabaseTable table)
+        /// <param name="classBuilder">The class builder.</param>
+        public virtual void WriteTableAnnotations(DatabaseTable table, ClassBuilder classBuilder)
         {
-            return null;
+            //
         }
 
         /// <summary>
@@ -32,10 +32,20 @@ namespace DatabaseSchemaReader.CodeGen
         /// </summary>
         /// <param name="table">The table.</param>
         /// <param name="column">The column.</param>
-        /// <returns></returns>
-        public virtual string WriteColumnAnnotations(DatabaseTable table, DatabaseColumn column)
+        /// <param name="classBuilder">The class builder.</param>
+        public virtual void WriteColumnAnnotations(DatabaseTable table, DatabaseColumn column, ClassBuilder classBuilder)
         {
-            return null;
+            //
+        }
+
+        /// <summary>
+        /// Writes any class members (custom fields, properties, methods).
+        /// </summary>
+        /// <param name="table">The table.</param>
+        /// <param name="cb">The cb.</param>
+        public virtual void WriteClassMembers(DatabaseTable table, ClassBuilder cb)
+        {
+            //
         }
     }
 }
