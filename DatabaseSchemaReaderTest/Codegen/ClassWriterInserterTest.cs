@@ -53,19 +53,19 @@ namespace DatabaseSchemaReaderTest.Codegen
 
         public class CustomCodeInserter : CodeInserter
         {
-            public override string WriteNamespaces(DatabaseTable table)
+            public override void WriteNamespaces(DatabaseTable table, ClassBuilder classBuilder)
             {
-                return "using System.ComponentModel.DataAnnotations.Schema";
+                classBuilder.AppendLine("using System.ComponentModel.DataAnnotations.Schema");
             }
 
-            public override string WriteTableAnnotations(DatabaseTable table)
+            public override void WriteTableAnnotations(DatabaseTable table, ClassBuilder classBuilder)
             {
-                return "[Table(\"" + table.Name + "\")]";
+                classBuilder.AppendFormat("[Table(\"{0}\")]", table.Name);
             }
 
-            public override string WriteColumnAnnotations(DatabaseTable table, DatabaseColumn column)
+            public override void WriteColumnAnnotations(DatabaseTable table, DatabaseColumn column, ClassBuilder classBuilder)
             {
-                return "[Column(\"" + column.Name + "\")]";
+                classBuilder.AppendFormat("[Column(\"{0}\")]", column.Name);
             }
         }
     }

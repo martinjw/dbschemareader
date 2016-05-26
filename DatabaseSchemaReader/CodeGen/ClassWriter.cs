@@ -51,9 +51,7 @@ namespace DatabaseSchemaReader.CodeGen
             _inheritanceTable = _table.FindInheritanceTable();
 
             WriteNamespaces();
-            var customNamespaces = _codeWriterSettings.CodeInserter.WriteNamespaces(_table);
-            if (!string.IsNullOrEmpty(customNamespaces)) _cb.AppendLine(customNamespaces);
-
+            _codeWriterSettings.CodeInserter.WriteNamespaces(_table, _cb);
 
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
@@ -74,8 +72,8 @@ namespace DatabaseSchemaReader.CodeGen
                     classDefinition += " : " + _inheritanceTable.NetName;
                 }
 
-                var customTableAnnotations = _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table);
-                if (!string.IsNullOrEmpty(customTableAnnotations)) _cb.AppendLine(customTableAnnotations);
+                _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
+
                 using (_cb.BeginNest(classDefinition, comment))
                 {
                     WriteClassMembers(className);
@@ -118,6 +116,8 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 InitializeCollectionsInConstructor(className);
             }
+
+            _codeWriterSettings.CodeInserter.WriteClassMembers(_table, _cb);
 
             if (_inheritanceTable == null)
                 WritePrimaryKey(className);
@@ -339,8 +339,7 @@ namespace DatabaseSchemaReader.CodeGen
                 propertyName += "Id";
             }
 
-            var customColumnAnnotations = _codeWriterSettings.CodeInserter.WriteColumnAnnotations(_table, column);
-            if (!string.IsNullOrEmpty(customColumnAnnotations)) _cb.AppendLine(customColumnAnnotations);
+            _codeWriterSettings.CodeInserter.WriteColumnAnnotations(_table, column, _cb);
 
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
