@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DatabaseSchemaReader.DataSchema
@@ -10,6 +11,9 @@ namespace DatabaseSchemaReader.DataSchema
     [Serializable]
     public partial class DatabaseColumn : NamedSchemaObject<DatabaseColumn>
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private DatabaseColumnIdentity _identityDefinition;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseColumn"/> class.
         /// </summary>
@@ -147,7 +151,15 @@ namespace DatabaseSchemaReader.DataSchema
         /// Null if this is not an identity column (<see cref="IsAutoNumber"/> is false), 
         /// or the database uses another method of autonumbering (<see cref="DefaultValue"/> or sequences).
         /// </summary>
-        public DatabaseColumnIdentity IdentityDefinition { get; set; }
+        public DatabaseColumnIdentity IdentityDefinition
+        {
+            get { return _identityDefinition; }
+            set
+            {
+                _identityDefinition = value;
+                if (_identityDefinition != null) IsAutoNumber = true;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the "computed" (or "virtual") definition.
