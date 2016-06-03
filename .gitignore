@@ -215,7 +215,7 @@ pip-log.txt
 .mr.developer.cfg
 
 #DatabaseSchemaReader
-pack.bat
+*.bat
 nuget/
 CodeGenTester/CodeFirst/
 CodeGenTester/FluentNHib/
