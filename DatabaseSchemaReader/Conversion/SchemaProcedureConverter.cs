@@ -114,6 +114,66 @@ namespace DatabaseSchemaReader.Conversion
         public IFilter StoredProcedureFilter { get; set; }
         public IFilter PackageFilter { get; set; }
 
+
+        public IList<DatabaseArgument> Arguments(DataTable arguments)
+        {
+            var result = new List<DatabaseArgument>();
+            if (arguments.Columns.Count == 0) return result; //empty datatable
+
+            var argumentsKeyMap = new ArgumentsKeyMap(arguments);
+
+            var argumentGrouping =
+                arguments.Rows.OfType<DataRow>()
+                    .ToLookup(
+                        x =>
+                            (x[argumentsKeyMap.OwnerKey] ?? string.Empty) + "." +
+                            (x[argumentsKeyMap.SprocName] ?? string.Empty));
+
+            bool hasPackage = !string.IsNullOrEmpty(argumentsKeyMap.PackageKey);
+
+            //project the sprocs (which won't have packages) into a distinct view
+            DataTable sprocTable;
+            arguments.DefaultView.Sort = argumentsKeyMap.SprocName;
+            if (!hasPackage)
+                sprocTable = arguments.DefaultView.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey); //distinct
+            else
+                sprocTable = arguments.DefaultView.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey, argumentsKeyMap.PackageKey);
+
+            var sprocFilter = StoredProcedureFilter;
+            var packFilter = PackageFilter;
+            //go thru all sprocs with arguments- if not in sproc list, add it
+            foreach (DataRow row in sprocTable.Rows)
+            {
+                string name = row[argumentsKeyMap.SprocName].ToString();
+                //a procedure without a name?
+                if (string.IsNullOrEmpty(name)) continue;
+                if (sprocFilter != null && sprocFilter.Exclude(name)) continue;
+
+                string owner = row[argumentsKeyMap.OwnerKey].ToString();
+                if (argumentsKeyMap.IsDb2)
+                {
+                    //ignore db2 system sprocs
+                    if (IsDb2SystemSchema(owner)) continue;
+                }
+
+                string package = null; //for non-Oracle, package is always null
+                if (hasPackage)
+                {
+                    package = row[argumentsKeyMap.PackageKey].ToString();
+                    if (string.IsNullOrEmpty(package)) package = null; //so we can match easily
+                    else if (packFilter != null && packFilter.Exclude(package)) continue;
+                }
+
+                var rows = argumentGrouping[owner + "." + name];
+                if (!string.IsNullOrEmpty(argumentsKeyMap.OrdinalKey))
+                    rows = rows.OrderBy(r => r[argumentsKeyMap.OrdinalKey]);
+                List<DatabaseArgument> args = StoredProcedureArguments(rows, argumentsKeyMap);
+
+                result.AddRange(args);
+            }
+            return result;
+        }
+
         public void UpdateArguments(DatabaseSchema databaseSchema, DataTable arguments)
         {
             if (arguments.Columns.Count == 0) return; //empty datatable
@@ -132,10 +192,10 @@ namespace DatabaseSchemaReader.Conversion
             //project the sprocs (which won't have packages) into a distinct view
             DataTable sprocTable;
             arguments.DefaultView.Sort = argumentsKeyMap.SprocName;
-                if (!hasPackage)
-                    sprocTable = arguments.DefaultView.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey); //distinct
-                else
-                    sprocTable = arguments.DefaultView.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey, argumentsKeyMap.PackageKey);
+            if (!hasPackage)
+                sprocTable = arguments.DefaultView.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey); //distinct
+            else
+                sprocTable = arguments.DefaultView.ToTable(true, argumentsKeyMap.SprocName, argumentsKeyMap.OwnerKey, argumentsKeyMap.PackageKey);
 
             var sprocFilter = StoredProcedureFilter;
             var packFilter = PackageFilter;

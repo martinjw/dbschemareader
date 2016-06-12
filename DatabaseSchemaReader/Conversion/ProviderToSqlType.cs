@@ -40,5 +40,33 @@ namespace DatabaseSchemaReader.Conversion
             //could be something we don't have a direct syntax for
             return null;
         }
+
+        /// <summary>
+        /// Converts the specified SQL type into the most common provider.
+        /// </summary>
+        /// <param name="sqlType">Type of the SQL.</param>
+        /// <returns></returns>
+        public static string Convert(SqlType sqlType)
+        {
+            switch (sqlType)
+            {
+                case SqlType.SqlServer:
+                    return "System.Data.SqlClient";
+                case SqlType.Oracle:
+                    return "System.Data.OracleClient";
+                case SqlType.MySql:
+                    return "MySql.Data.MySqlClient";
+                case SqlType.SQLite:
+                    return "System.Data.SQLite";
+                case SqlType.SqlServerCe:
+                    return "System.Data.SqlServerCe.4.0";
+                case SqlType.PostgreSql:
+                    return "Npgsql";
+                case SqlType.Db2:
+                    return "IBM.Data.DB2";
+                default:
+                    return null;
+            }
+        }
     }
 }

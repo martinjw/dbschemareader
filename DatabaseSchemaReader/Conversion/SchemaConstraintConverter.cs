@@ -137,6 +137,30 @@ namespace DatabaseSchemaReader.Conversion
         }
 
 
+        public static IList<DatabaseColumn> ConvertIdentity(DataTable dt)
+        {
+            var result = new List<DatabaseColumn>();
+            bool hasSeedInfo = dt.Columns.Contains("IdentitySeed");
+            bool hasIncrementInfo = dt.Columns.Contains("IdentityIncrement");
+            bool hasIdentityOptions = dt.Columns.Contains("IDENTITY_OPTIONS");
+            bool hasGeneratedType = dt.Columns.Contains("GENERATION_TYPE");
+            foreach (DataRow row in dt.Rows)
+            {
+                string schemaOwner = row["SchemaOwner"].ToString();
+                string tableName = row["TableName"].ToString();
+                string colName = row["ColumnName"].ToString();
+                var col = new DatabaseColumn
+                          {
+                              SchemaOwner = schemaOwner,
+                              TableName = tableName,
+                              Name = colName,
+                          };
+                result.Add(col);
+                AddIdentity(col, row, hasSeedInfo, hasIncrementInfo, hasIdentityOptions, hasGeneratedType);
+            }
+            return result;
+        }
+
 
         /// <summary>
         /// Converts the "IdentityColumns" DataTable by updating the Identity column in a table
@@ -156,26 +180,32 @@ namespace DatabaseSchemaReader.Conversion
                 var col = table.FindColumn(colName);
                 if (col != null)
                 {
-                    col.IsAutoNumber = true;
-                    col.IdentityDefinition = new DatabaseColumnIdentity();
-                    if (hasSeedInfo)
-                        col.IdentityDefinition.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
-                    if (hasIncrementInfo)
-                        col.IdentityDefinition.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
-                    if (hasIdentityOptions)
-                    {
-                        var options = row["IDENTITY_OPTIONS"].ToString();
-                        ParseIdentityOptions(col.IdentityDefinition, options);
-                    }
-                    if (hasGeneratedType)
-                    {
-                        if (string.Equals(row["GENERATION_TYPE"].ToString(), "BY DEFAULT",
-                            StringComparison.OrdinalIgnoreCase))
-                        {
-                            col.IdentityDefinition.IdentityByDefault = true;
-                        }
-                    }
+                    AddIdentity(col, row, hasSeedInfo, hasIncrementInfo, hasIdentityOptions, hasGeneratedType);
                     //col.IsPrimaryKey = true;
+                }
+            }
+        }
+
+        private static void AddIdentity(DatabaseColumn col, DataRow row, bool hasSeedInfo, bool hasIncrementInfo,
+            bool hasIdentityOptions, bool hasGeneratedType)
+        {
+            col.IsAutoNumber = true;
+            col.IdentityDefinition = new DatabaseColumnIdentity();
+            if (hasSeedInfo)
+                col.IdentityDefinition.IdentitySeed = long.Parse(row["IdentitySeed"].ToString());
+            if (hasIncrementInfo)
+                col.IdentityDefinition.IdentityIncrement = long.Parse(row["IdentityIncrement"].ToString());
+            if (hasIdentityOptions)
+            {
+                var options = row["IDENTITY_OPTIONS"].ToString();
+                ParseIdentityOptions(col.IdentityDefinition, options);
+            }
+            if (hasGeneratedType)
+            {
+                if (string.Equals(row["GENERATION_TYPE"].ToString(), "BY DEFAULT",
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    col.IdentityDefinition.IdentityByDefault = true;
                 }
             }
         }
@@ -210,6 +240,28 @@ namespace DatabaseSchemaReader.Conversion
             start = start + prefix.Length;
             var end = haystack.IndexOf(suffix, start);
             return haystack.Substring(start, end - start);
+        }
+
+        public static IList<DatabaseColumn> ConvertComputed(DataTable dt)
+        {
+            var result = new List<DatabaseColumn>();
+            foreach (DataRow row in dt.Rows)
+            {
+                string schemaOwner = row["SchemaOwner"].ToString();
+                var tableName = row["TABLENAME"].ToString();
+                var colName = row["COLUMNNAME"].ToString();
+                var col = new DatabaseColumn
+                {
+                    SchemaOwner = schemaOwner,
+                    TableName = tableName,
+                    Name = colName,
+                };
+                result.Add(col);
+                col.ComputedDefinition = row["COMPUTEDDEFINITION"].ToString();
+                //remove the default value - it's readonly!
+                col.DefaultValue = null;
+            }
+            return result;
         }
 
         public static void AddComputed(DataTable dt, DatabaseTable table)

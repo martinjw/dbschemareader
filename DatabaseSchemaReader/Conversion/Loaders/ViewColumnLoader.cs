@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Conversion.Loaders
@@ -22,6 +23,11 @@ namespace DatabaseSchemaReader.Conversion.Loaders
             var cols = _sr.ViewColumns(null);
             _noColumns = (cols.Rows.Count == 0);
             _columnConverter = new ViewColumnConverter(cols);
+        }
+
+        public IList<DatabaseColumn> Load()
+        {
+            return _columnConverter.Columns().ToList();
         }
 
         public IEnumerable<DatabaseColumn> Load(string viewName, string schemaName)

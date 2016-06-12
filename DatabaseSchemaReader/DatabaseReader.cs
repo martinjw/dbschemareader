@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Linq;
+// ReSharper disable once RedundantUsingDirective 
 using System.Threading;
-using DatabaseSchemaReader.Conversion;
-using DatabaseSchemaReader.Conversion.Loaders;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 using DatabaseSchemaReader.ProviderSchemaReaders;
+using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
+using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 
 namespace DatabaseSchemaReader
 {
@@ -18,8 +19,9 @@ namespace DatabaseSchemaReader
     /// </remarks>
     public class DatabaseReader : IDatabaseReader
     {
-        private readonly Exclusions _exclusions = new Exclusions();
-        private readonly SchemaExtendedReader _schemaReader;
+        private readonly SchemaParameters _schemaParameters;
+        private readonly ReaderAdapter _readerAdapter;
+        //private readonly SchemaExtendedReader _schemaReader;
         private readonly DatabaseSchema _db;
         private bool _fixUp = true;
 
@@ -27,6 +29,21 @@ namespace DatabaseSchemaReader
         /// ReaderProgress Event
         /// </summary>
         public event EventHandler<ReaderEventArgs> ReaderProgress;
+
+#if NETSTANDARD1_5
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbConnection.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        public DatabaseReader(System.Data.Common.DbConnection connection)
+        {
+            var name = connection.GetType().Namespace;
+            _db = new DatabaseSchema(connection.ConnectionString, name);
+            _schemaParameters = new SchemaParameters(connection) {DatabaseSchema = _db};
+            _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
+        }
+#endif
+#if !NETSTANDARD1_5
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class. For Oracle, use the overload.
@@ -45,8 +62,12 @@ namespace DatabaseSchemaReader
         /// <param name="sqlType">Type of the SQL.</param>
         public DatabaseReader(string connectionString, SqlType sqlType)
         {
-            _schemaReader = SchemaReaderFactory.Create(connectionString, sqlType);
-            _db = new DatabaseSchema(connectionString, _schemaReader.ProviderName);
+            if (connectionString == null) throw new ArgumentNullException("connectionString");
+            _schemaParameters = new SchemaParameters(connectionString, sqlType);
+            _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
+            //_schemaReader = SchemaReaderFactory.Create(connectionString, sqlType);
+            _db = new DatabaseSchema(connectionString, _schemaParameters.ProviderName);
+            _schemaParameters.DatabaseSchema = _db;
         }
 
         /// <summary>
@@ -66,10 +87,18 @@ namespace DatabaseSchemaReader
         /// <param name="databaseSchema">The database schema. Can be a subclassed version.</param>
         public DatabaseReader(DatabaseSchema databaseSchema)
         {
-            _schemaReader = SchemaReaderFactory.Create(databaseSchema.ConnectionString, databaseSchema.Provider);
-            _schemaReader.Owner = databaseSchema.Owner;
+            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema");
+            if (databaseSchema.ConnectionString == null) throw new ArgumentException("No connectionString");
+
+            _schemaParameters = new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider);
+            _schemaParameters.DatabaseSchema = databaseSchema;
+            _schemaParameters.Owner = databaseSchema.Owner;
+            _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
+            //_schemaReader = SchemaReaderFactory.Create(databaseSchema.ConnectionString, databaseSchema.Provider);
+            //_schemaReader.Owner = databaseSchema.Owner;
             _db = databaseSchema;
         }
+#endif
 
         private void RaiseReadingProgress(SchemaObjectType schemaObjectType)
         {
@@ -87,7 +116,7 @@ namespace DatabaseSchemaReader
         /// <value>
         /// The exclusions.
         /// </value>
-        public Exclusions Exclusions { get { return _exclusions; } }
+        public Exclusions Exclusions { get { return _schemaParameters.Exclusions; } }
 
         /// <summary>
         /// Gets or sets the owner user. Always set it with Oracle (otherwise you'll get SYS, MDSYS etc...)
@@ -95,12 +124,8 @@ namespace DatabaseSchemaReader
         /// <value>The user.</value>
         public string Owner
         {
-            get { return _schemaReader.Owner; }
-            set
-            {
-                _schemaReader.Owner = value;
-                _db.Owner = value;
-            }
+            get { return _readerAdapter.Owner; }
+            set { _readerAdapter.Owner = value; }
         }
 
         /// <summary>
@@ -153,10 +178,9 @@ namespace DatabaseSchemaReader
         private void AllSequences()
         {
             RaiseReadingProgress(SchemaObjectType.Sequences);
-            var sequences = _schemaReader.Sequences();
-            ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.Sequences);
+            var sequences = _readerAdapter.Sequences(null);
             DatabaseSchema.Sequences.Clear();
-            DatabaseSchema.Sequences.AddRange(SchemaProcedureConverter.Sequences(sequences));
+            DatabaseSchema.Sequences.AddRange(sequences);
         }
 
         /// <summary>
@@ -165,13 +189,10 @@ namespace DatabaseSchemaReader
         public IList<DatabaseUser> AllUsers()
         {
             RaiseReadingProgress(SchemaObjectType.Users);
-            DataTable dt = _schemaReader.Users();
-
-            ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.Users);
-            var list = UserConverter.Convert(dt);
+            var users = _readerAdapter.Users();
             DatabaseSchema.Users.Clear();
-            DatabaseSchema.Users.AddRange(list);
-            return list;
+            DatabaseSchema.Users.AddRange(users);
+            return users;
         }
 
         /// <summary>
@@ -180,8 +201,7 @@ namespace DatabaseSchemaReader
         public IList<DatabaseTable> TableList()
         {
             RaiseReadingProgress(SchemaObjectType.Tables);
-            DataTable dt = _schemaReader.Tables();
-            return SchemaConverter.Tables(dt);
+            return _readerAdapter.Tables(null);
         }
 
         /// <summary>
@@ -197,10 +217,17 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseTable> AllTables(CancellationToken ct)
         {
-            var loader = new AllTablesLoader(_schemaReader, Exclusions);
-            var handler = ReaderProgress;
-            if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
-            var tables = loader.Load(ct);
+            if (ct.IsCancellationRequested) return new List<DatabaseTable>();
+            RaiseReadingProgress(SchemaObjectType.Tables);
+
+            var builder = new TableBuilder(_readerAdapter);
+            var tables = builder.Execute(ct);
+            if (ct.IsCancellationRequested) return tables;
+
+            //var loader = new AllTablesLoader(_schemaReader, Exclusions);
+            //var handler = ReaderProgress;
+            //if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
+            //var tables = loader.Load(ct);
             if (ct.IsCancellationRequested) return tables;
 
             DatabaseSchema.Tables.Clear();
@@ -210,7 +237,7 @@ namespace DatabaseSchemaReader
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
 
-            _schemaReader.PostProcessing(DatabaseSchema);
+            //TODO _schemaReader.PostProcessing(DatabaseSchema);
 
             return tables;
         }
@@ -230,29 +257,37 @@ namespace DatabaseSchemaReader
         {
             if (ct.IsCancellationRequested) return DatabaseSchema.Views;
             RaiseReadingProgress(SchemaObjectType.Views);
-            DataTable dt = _schemaReader.Views();
+            var views = _readerAdapter.Views(null);
 
             if (ct.IsCancellationRequested) return DatabaseSchema.Views;
             ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.Views);
-            List<DatabaseView> views = SchemaConverter.Views(dt);
             var viewFilter = Exclusions.ViewFilter;
             if (viewFilter != null)
             {
-                views.RemoveAll(v => viewFilter.Exclude(v.Name));
+                views = views.Where(t => !viewFilter.Exclude(t.Name)).ToList();
             }
 
             //get full datatables for all tables, to minimize database calls
             if (ct.IsCancellationRequested) return views;
             RaiseReadingProgress(SchemaObjectType.ViewColumns);
 
-            var columnLoader = new ViewColumnLoader(_schemaReader);
+            var viewColumns = _readerAdapter.ViewColumns(null);
             var count = views.Count;
             for (var index = 0; index < count; index++)
             {
                 if (ct.IsCancellationRequested) return views;
                 DatabaseView v = views[index];
                 ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.ViewColumns, v.Name, index, count);
-                v.Columns.AddRange(columnLoader.Load(v.Name, v.SchemaOwner));
+                IEnumerable<DatabaseColumn> cols;
+                if (viewColumns.Count == 0)
+                {
+                    cols = _readerAdapter.ViewColumns(v.Name);
+                }
+                else
+                {
+                    cols = viewColumns.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner);
+                }
+                v.Columns.AddRange(cols);
             }
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
@@ -268,7 +303,9 @@ namespace DatabaseSchemaReader
         public bool TableExists(string tableName)
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
-            return _schemaReader.TableExists(tableName);
+            var tables = _readerAdapter.Tables(tableName);
+            return tables.Count > 0;
+            //return _schemaReader.TableExists(tableName);
         }
 
         /// <summary>
@@ -289,16 +326,27 @@ namespace DatabaseSchemaReader
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
 
-            var loader = new TableLoader(_schemaReader, DatabaseSchema);
+            var builder = new TableBuilder(_readerAdapter);
             var handler = ReaderProgress;
-            if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
-            var table = loader.Load(tableName, ct);
+            if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
+            var table = builder.Execute(ct, tableName);
+
+            //var loader = new TableLoader(_schemaReader, DatabaseSchema);
+            //var handler = ReaderProgress;
+            //if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
+            //var table = loader.Load(tableName, ct);
+            var existingTable = DatabaseSchema.FindTableByName(tableName, _schemaParameters.Owner);
+            if (existingTable != null)
+            {
+                DatabaseSchema.Tables.Remove(existingTable);
+            }
+            DatabaseSchema.Tables.Add(table);
 
             if (ct.IsCancellationRequested) return table;
 
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
-            _schemaReader.PostProcessing(DatabaseSchema);
+            //TODO _schemaReader.PostProcessing(DatabaseSchema);
 
             return table;
         }
@@ -308,9 +356,8 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseStoredProcedure> StoredProcedureList()
         {
-            DataTable dt = _schemaReader.StoredProcedures();
-            SchemaProcedureConverter.StoredProcedures(DatabaseSchema, dt);
-            return DatabaseSchema.StoredProcedures;
+            return _readerAdapter.StoredProcedures(null);
+            //return DatabaseSchema.StoredProcedures;
         }
 
         /// <summary>
@@ -331,10 +378,15 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseStoredProcedure> AllStoredProcedures(CancellationToken ct)
         {
-            var loader = new ProcedureLoader(_schemaReader, DatabaseSchema, Exclusions);
+            var builder = new ProcedureBuilder(_readerAdapter, DatabaseSchema, Exclusions);
             var handler = ReaderProgress;
-            if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
-            loader.Load(ct);
+            if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
+            builder.Execute(ct);
+
+            //var loader = new ProcedureLoader(_schemaReader, DatabaseSchema, Exclusions);
+            //var handler = ReaderProgress;
+            //if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
+            //loader.Load(ct);
 
             UpdateReferences();
 
@@ -346,8 +398,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DataType> DataTypes()
         {
-            List<DataType> list = SchemaConverter.DataTypes(_schemaReader.DataTypes());
-            if (list.Count == 0) list = _schemaReader.SchemaDataTypes();
+            var list = _readerAdapter.DataTypes();
             DatabaseSchema.DataTypes.Clear();
             DatabaseSchema.DataTypes.AddRange(list);
             DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema); //if columns/arguments loaded later, run this method again.
@@ -362,7 +413,7 @@ namespace DatabaseSchemaReader
             DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
 
             //last, do custom post processing if implemented
-            _schemaReader.PostProcessing(DatabaseSchema);
+            //_schemaReader.PostProcessing(DatabaseSchema);
         }
 
         #region Implementation of IDisposable
@@ -385,10 +436,10 @@ namespace DatabaseSchemaReader
         {
             if (disposing)
             {
-                // free managed resources
-                if (_schemaReader != null)
+                // may have created it's own dbconnection
+                if (_schemaParameters != null)
                 {
-                    _schemaReader.Dispose();
+                    _schemaParameters.Dispose();
                 }
             }
         }
