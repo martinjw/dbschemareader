@@ -24,6 +24,11 @@ namespace DatabaseSchemaReader.Conversion
             return _triggers.Where(x => string.Equals(x.TableName, tableName, StringComparison.OrdinalIgnoreCase));
         }
 
+        public IEnumerable<DatabaseTrigger> Result()
+        {
+            return _triggers;
+        }
+
         /// <summary>
         /// Converts the "Triggers" DataTable into <see cref="DatabaseTrigger"/> objects
         /// </summary>

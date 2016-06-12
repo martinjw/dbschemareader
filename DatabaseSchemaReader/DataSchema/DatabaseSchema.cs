@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using DatabaseSchemaReader.Conversion;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -50,32 +51,7 @@ namespace DatabaseSchemaReader.DataSchema
         public DatabaseSchema(string connectionString, SqlType sqlType)
             :this(connectionString, null)
         {
-            switch (sqlType)
-            {
-                case SqlType.SqlServer:
-                    Provider = "System.Data.SqlClient";
-                    break;
-                case SqlType.Oracle:
-                    Provider = "System.Data.OracleClient";
-                    break;
-                case SqlType.MySql:
-                    Provider = "MySql.Data.MySqlClient";
-                    break;
-                case SqlType.SQLite:
-                    Provider = "System.Data.SQLite";
-                    break;
-                case SqlType.SqlServerCe:
-                    Provider = "System.Data.SqlServerCe.4.0";
-                    break;
-                case SqlType.PostgreSql:
-                    Provider = "Npgsql";
-                    break;
-                case SqlType.Db2:
-                    Provider = "IBM.Data.DB2";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("sqlType");
-            }
+            Provider = ProviderToSqlType.Convert(sqlType);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseSchema"/> class.

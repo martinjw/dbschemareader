@@ -14,6 +14,11 @@ namespace DatabaseSchemaReader.Conversion
             _list = Convert(dataTable);
         }
 
+        public IList<DatabaseTable> Result()
+        {
+            return _list;
+        }
+
         private static IList<DatabaseTable> Convert(DataTable dataTable)
         {
             var list = new List<DatabaseTable>();
