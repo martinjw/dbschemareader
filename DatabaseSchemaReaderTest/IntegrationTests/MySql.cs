@@ -1,15 +1,6 @@
-﻿using DatabaseSchemaReader;
-#if !NUNIT
+using DatabaseSchemaReader;
+using DatabaseSchemaReader.Utilities.DbProvider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestContext = System.Object;
-using TestCategory = NUnit.Framework.CategoryAttribute;
-#endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -79,7 +70,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var connectionString = ConnectionStrings.MySqlDevart;
             ProviderChecker.Check(providername, connectionString);
 
-            DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
+            DiscoverProviderFactory.Discover(connectionString, providername);
             var dbReader = new DatabaseReader(connectionString, providername);
             dbReader.Owner = "sakila";
             var schema = dbReader.ReadAll();

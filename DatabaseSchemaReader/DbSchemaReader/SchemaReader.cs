@@ -6,6 +6,7 @@ using System.Globalization;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
+using DatabaseSchemaReader.Utilities.DbProvider;
 
 namespace DatabaseSchemaReader
 {

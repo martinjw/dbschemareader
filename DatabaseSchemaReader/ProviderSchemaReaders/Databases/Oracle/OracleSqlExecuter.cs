@@ -1,4 +1,7 @@
 ﻿using System.Data.Common;
+#if NETSTANDARD1_5
+using System.Reflection;
+#endif
 using System.Text.RegularExpressions;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
@@ -44,7 +47,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
             var bindByName = command.GetType().GetProperty("BindByName");
 #else
             var bindByName = command.GetType().GetTypeInfo().GetDeclaredProperty("BindByName");
-
 #endif
             if (bindByName != null)
             {

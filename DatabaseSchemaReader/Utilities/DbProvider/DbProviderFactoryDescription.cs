@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace DatabaseSchemaReader.Utilities
+namespace DatabaseSchemaReader.Utilities.DbProvider
 {
     /// <summary>
     ///     Description of a DbProviderFactory for Repository.

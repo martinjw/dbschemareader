@@ -107,7 +107,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             //NB: DATE in SQLServer is yyMMdd. DATE in Oracle is yyMMddHHss.
 
             //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
-            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType == (int)SqlDbType.Timestamp)
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType == 19) //(int)SqlDbType.Timestamp
             {
                 return "NUMBER";
             }

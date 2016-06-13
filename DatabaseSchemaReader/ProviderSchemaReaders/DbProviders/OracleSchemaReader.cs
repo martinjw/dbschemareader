@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
@@ -415,7 +416,7 @@ WHERE
         {
             var pk = databaseTable.PrimaryKeyColumn;
             if (pk == null) return;
-            if (LooksLikeAutoNumberDefaults(pk.DefaultValue))
+            if (Databases.Oracle.Conversion.LooksLikeAutoNumberDefaults(pk.DefaultValue))
             {
                 //Oracle 12c default values from sequence
                 pk.IsAutoNumber = true;
@@ -425,18 +426,6 @@ WHERE
             if (match != null) pk.IsAutoNumber = true;
         }
 
-        /// <summary>
-        /// Does the column default value look like a sequence allocation ("mysequence.NextVal")?
-        /// </summary>
-        /// <param name="defaultValue">The default value.</param>
-        /// <returns></returns>
-        public static bool LooksLikeAutoNumberDefaults(string defaultValue)
-        {
-            if (string.IsNullOrEmpty(defaultValue)) return false;
-            //simple cases only. If the sequence.nextval is cast/converted, 
-            return defaultValue.IndexOf(".NEXTVAL", StringComparison.OrdinalIgnoreCase) != -1 ||
-                defaultValue.IndexOf(".CURRVAL", StringComparison.OrdinalIgnoreCase) != -1;
-        }
 
         public override DataTable TableDescription(string tableName)
         {

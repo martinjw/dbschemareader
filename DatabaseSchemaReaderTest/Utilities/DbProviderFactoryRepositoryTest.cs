@@ -3,14 +3,8 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.Utilities;
-#if !NUNIT
+using DatabaseSchemaReader.Utilities.DbProvider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-#endif
 
 namespace DatabaseSchemaReaderTest.Utilities
 {

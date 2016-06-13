@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.ProviderSchemaReaders
+namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
     /// <summary>
     /// Use static <see cref="FindTrigger"/> to find an oracle autoNumber trigger.
@@ -94,6 +94,5 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         /// The name of the sequence.
         /// </value>
         public string SequenceName { get; set; }
-
     }
 }

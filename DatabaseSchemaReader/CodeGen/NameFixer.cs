@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -12,8 +11,9 @@ namespace DatabaseSchemaReader.CodeGen
     /// </summary>
     public static class NameFixer
     {
-        private static readonly CodeDomProvider CSharpProvider = CodeDomProvider.CreateProvider("C#");
-
+#if !NETSTANDARD1_5
+        private static readonly System.CodeDom.Compiler.CodeDomProvider CSharpProvider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("C#");
+#endif
         /// <summary>
         /// Fixes the specified name to be pascal cased and (crudely) singular.
         /// </summary>
@@ -71,11 +71,13 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             //this could still be a c# keyword
+#if !NETSTANDARD1_5
             if (!CSharpProvider.IsValidIdentifier(name))
             {
                 //in practice all keywords are lowercase. 
                 name = "@" + name;
             }
+#endif
             return name;
         }
 

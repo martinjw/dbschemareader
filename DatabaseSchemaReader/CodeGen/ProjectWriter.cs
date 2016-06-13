@@ -146,7 +146,12 @@ namespace DatabaseSchemaReader.CodeGen
         private static XDocument LoadProjectXml()
         {
             const string streamPath = "DatabaseSchemaReader.CodeGen.Project.xml";
-            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(streamPath);
+#if !NETSTANDARD1_5
+            var executingAssembly = Assembly.GetExecutingAssembly();
+#else
+            var executingAssembly = typeof(ProjectWriter).GetTypeInfo().Assembly;
+#endif
+            var stream = executingAssembly.GetManifestResourceStream(streamPath);
             if (stream == null) return null;
             return XDocument.Load(XmlReader.Create(stream));
         }

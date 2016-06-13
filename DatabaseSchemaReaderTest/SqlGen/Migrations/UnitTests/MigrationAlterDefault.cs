@@ -1,17 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestContext = System.Object;
-#endif
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
 {

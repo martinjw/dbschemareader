@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD1_5
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -303,3 +304,4 @@ namespace DatabaseSchemaReader.Data
         }
     }
 }
+#endif

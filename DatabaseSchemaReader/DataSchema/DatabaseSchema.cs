@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using DatabaseSchemaReader.Conversion;
 
 namespace DatabaseSchemaReader.DataSchema
 {

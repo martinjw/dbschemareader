@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Reflection;
 using DatabaseSchemaReader.SqlGen;
 
 namespace DatabaseSchemaReader.DataSchema
@@ -270,7 +271,13 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(DbType.Binary);
             }
-            if (type.IsValueType)
+#if NETSTANDARD1_5
+            var typeInfo = type.GetTypeInfo();
+            var isValue = typeInfo.IsValueType;
+#else
+            var isValue = type.IsValueType;
+#endif
+            if (isValue)
             {
                 return DataTypeMappingFactory.DataTypeMapper(databasetable).Map(type);
             }

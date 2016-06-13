@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader

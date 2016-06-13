@@ -1,13 +1,6 @@
-﻿using System.Data.SQLite;
+using System.Data.SQLite;
 using System.IO;
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.SetUpFixtureAttribute;
-using AssemblyInitialize = NUnit.Framework.SetUpAttribute;
-using AssemblyCleanup = NUnit.Framework.TearDownAttribute;
-#endif
 
 namespace DatabaseSchemaReaderTest
 {
@@ -15,11 +8,7 @@ namespace DatabaseSchemaReaderTest
     public class InitSqLite
     {
         [AssemblyInitialize]
-#if !NUNIT
         public static void AssemblyInit(TestContext context)
-#else
-        public static void AssemblyInit()
-#endif
         {
             //initialize SQLite database
             var filePath = ConnectionStrings.SqLiteFilePath;
