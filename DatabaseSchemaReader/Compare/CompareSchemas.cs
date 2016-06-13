@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
 

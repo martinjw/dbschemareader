@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen

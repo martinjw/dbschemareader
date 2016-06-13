@@ -1,12 +1,6 @@
-﻿using System;
+using System;
 using System.Data.Common;
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-#endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {

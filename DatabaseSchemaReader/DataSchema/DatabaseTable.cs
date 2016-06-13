@@ -65,7 +65,7 @@ namespace DatabaseSchemaReader.DataSchema
             _defaultConstraints = new List<DatabaseConstraint>();
             _readOnlyDefaultConstraints = new ReadOnlyCollection<DatabaseConstraint>(_defaultConstraints);
         }
-
+#if !NETSTANDARD1_5
         [OnDeserialized]
         void OnDeserializedMethod(StreamingContext context)
         {
@@ -74,7 +74,7 @@ namespace DatabaseSchemaReader.DataSchema
             _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
             _readOnlyDefaultConstraints = new ReadOnlyCollection<DatabaseConstraint>(_defaultConstraints);
         }
-
+#endif
         /// <summary>
         /// Gets or sets the database schema.
         /// </summary>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders;
+using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
 {
@@ -36,7 +37,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     return null;
                 }
             }
-            if (OracleSchemaReader.LooksLikeAutoNumberDefaults(autoNumberColumn.DefaultValue))
+            if (ProviderSchemaReaders.Databases.Oracle.Conversion.LooksLikeAutoNumberDefaults(autoNumberColumn.DefaultValue))
             {
                 return null;
             }

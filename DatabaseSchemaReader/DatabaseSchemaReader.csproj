@@ -18,6 +18,8 @@
     <SccProvider>SAK</SccProvider>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -138,7 +140,7 @@
     <Compile Include="Conversion\Loaders\AllTablesLoader.cs" />
     <Compile Include="Conversion\Loaders\TableLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
-    <Compile Include="Conversion\ProviderToSqlType.cs" />
+    <Compile Include="DataSchema\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
     <Compile Include="Conversion\SchemaConverter.cs" />
     <Compile Include="Conversion\SchemaProcedureConverter.cs" />
@@ -208,10 +210,12 @@
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Columns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\ComputedColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Constraints.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\Oracle\Conversion.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\DataTypeList.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Functions.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\IdentityColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Indexes.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\Oracle\OracleSequenceTrigger.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\OracleSqlExecuter.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Packages.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\ProcedureArguments.cs" />
@@ -257,7 +261,6 @@
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Views.cs" />
     <Compile Include="ProviderSchemaReaders\DbProviders\Db2ISeriesSchemaReader.cs" />
     <Compile Include="ProviderSchemaReaders\DbProviders\FirebirdSqlSchemaReader.cs" />
-    <Compile Include="ProviderSchemaReaders\DbProviders\OracleSequenceTrigger.cs" />
     <Compile Include="ProviderSchemaReaders\ResultModels\ProcedureSource.cs" />
     <Compile Include="ProviderSchemaReaders\ResultModels\SourceType.cs" />
     <Compile Include="ProviderSchemaReaders\SchemaParameters.cs" />
@@ -315,12 +318,12 @@
     <Compile Include="SqlGen\SqlServer\SqlServerDataTypeMapper.cs" />
     <Compile Include="SqlGen\SqlTranslator.cs" />
     <Compile Include="CancellationToken.cs" />
-    <Compile Include="Utilities\DbProviderFactoryDescription.cs" />
-    <Compile Include="Utilities\DbProviderFactoryRepository.cs" />
-    <Compile Include="Utilities\DiscoverProviderFactory.cs" />
+    <Compile Include="Utilities\DbProvider\DbProviderFactoryDescription.cs" />
+    <Compile Include="Utilities\DbProvider\DbProviderFactoryRepository.cs" />
+    <Compile Include="Utilities\DbProvider\DiscoverProviderFactory.cs" />
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\EntityFrameworkImporter.cs" />
-    <Compile Include="Utilities\FactoryTools.cs" />
+    <Compile Include="Utilities\DbProvider\FactoryTools.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />
     <Compile Include="Utilities\TopologicalSorter.cs" />

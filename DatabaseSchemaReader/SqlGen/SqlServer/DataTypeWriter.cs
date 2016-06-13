@@ -175,10 +175,10 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (dataType == "VARCHAR2") return "VARCHAR";
             if (dataType == "NVARCHAR2") return "NVARCHAR";
             //DateTime in SQL Server range from 1753 A.D. to 9999 A.D., whereas dates in Oracle range from 4712 B.C. to 4712 A.D. For 2008, DateTime2 is 0001-9999, plus more accuracy.
-            if (dataType == "DATE" && providerType != (int)SqlDbType.Date)
+            if (dataType == "DATE" && providerType != 31) //(int)SqlDbType.Date
                 return "DATETIME";
             //Oracle timestamp is a date with fractional sections. SqlServer timestamp is a binary type used for optimistic concurrency.
-            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != (int)SqlDbType.Timestamp)
+            if (dataType.StartsWith("TIMESTAMP", StringComparison.OrdinalIgnoreCase) && providerType != 19) //(int)SqlDbType.Timestamp
                 return "DATETIME";
             //Oracle numbers- use precise SqlServer versiom
             if (dataType == "NUMBER")

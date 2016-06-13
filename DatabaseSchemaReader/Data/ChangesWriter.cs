@@ -1,3 +1,4 @@
+#if !NETSTANDARD1_5
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -139,7 +140,7 @@ namespace DatabaseSchemaReader.Data
             return sb.ToString();
         }
 
-        #region Identity
+#region Identity
         private void PrepareIdentityInsert(StringBuilder sb)
         {
             if (!IncludeIdentity || (_sqlType != SqlType.SqlServer && _sqlType != SqlType.SqlServerCe) ||
@@ -173,7 +174,7 @@ namespace DatabaseSchemaReader.Data
             }
             sb.AppendLine("GO");
         }
-        #endregion
+#endregion
 
         private string WriteInsert(DataRow row)
         {
@@ -308,3 +309,4 @@ namespace DatabaseSchemaReader.Data
 
     }
 }
+#endif

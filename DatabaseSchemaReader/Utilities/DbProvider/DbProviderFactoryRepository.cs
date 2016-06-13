@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace DatabaseSchemaReader.Utilities
+namespace DatabaseSchemaReader.Utilities.DbProvider
 {
     /// <summary>
     ///Extension of DbProviderFactories for allowing programmatically adding external dll dataprovider which are not

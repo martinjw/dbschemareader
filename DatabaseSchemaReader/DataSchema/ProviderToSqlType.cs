@@ -1,7 +1,6 @@
 ﻿using System;
-using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.Conversion
+namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
     /// Converts a provider invariant name to a SqlType

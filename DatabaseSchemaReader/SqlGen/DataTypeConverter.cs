@@ -81,7 +81,7 @@ namespace DatabaseSchemaReader.SqlGen
             int providerType = -1;
             if (column.DataType != null)
                 providerType = column.DataType.ProviderDbType;
-            return (providerType == (int)SqlDbType.Timestamp); //this is just a byte array
+            return (providerType == 19); //(int)SqlDbType.Timestamp); //this is just a byte array
         }
         public static bool IsInteger(string dataType)
         {
@@ -171,7 +171,7 @@ namespace DatabaseSchemaReader.SqlGen
             //a datatype already assigned
             if (column.DataType != null) return;
             //use upper case
-            var dbType = column.DbDataType.ToUpper(CultureInfo.InvariantCulture);
+            var dbType = column.DbDataType.ToUpperInvariant();
             //nothing to convert
             if (string.IsNullOrEmpty(dbType)) return;
             var sqlType = SqlType.SqlServer;
@@ -183,7 +183,7 @@ namespace DatabaseSchemaReader.SqlGen
                 if (schema != null)
                 {
                     var provider = schema.Provider;
-                    sqlType = Conversion.ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
+                    sqlType = ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
                     dataTypeList = schema.DataTypes;
                 }
             }
@@ -229,7 +229,7 @@ namespace DatabaseSchemaReader.SqlGen
                 dbType.StartsWith("TIMESTAMP(", StringComparison.OrdinalIgnoreCase))
             {
                 var dataType = new DataType(dbType, "System.Byte[]");
-                dataType.ProviderDbType = (int)SqlDbType.Timestamp;
+                dataType.ProviderDbType = 19;// (int)SqlDbType.Timestamp;
                 dataTypeList.Add(dataType);
                 return dataType;
             }

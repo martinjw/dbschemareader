@@ -2,11 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.CodeGen.NHibernate;
 using DatabaseSchemaReader.CodeGen.Procedures;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -54,7 +52,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// <exception cref="InvalidOperationException"/>
         /// <exception cref="IOException"/>
         /// <exception cref="UnauthorizedAccessException"/>
-        /// <exception cref="SecurityException" />
+        /// <exception cref="System.Security.SecurityException" />
         public void Execute(DirectoryInfo directory)
         {
             if (directory == null)

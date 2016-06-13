@@ -1,17 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 using DatabaseSchemaReader.CodeGen;
 using Microsoft.Build.Evaluation; //reference Microsoft.Build.dll v4.0 and Microsoft.Build.Framework.dll
-#if !NUNIT
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestContext = System.Object;
-#endif
 
 namespace DatabaseSchemaReaderTest.Codegen
 {

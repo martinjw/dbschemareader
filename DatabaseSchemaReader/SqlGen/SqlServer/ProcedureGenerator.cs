@@ -1,5 +1,4 @@
-﻿using DatabaseSchemaReader.Conversion;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {

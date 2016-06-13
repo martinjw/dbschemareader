@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Data.Common;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
-using DatabaseSchemaReader.Utilities;
+
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
     class SchemaParameters : IDisposable
     {
+        private bool _createdConnection;
 #if NETSTANDARD1_5
         public SchemaParameters(DbConnection dbConnection)
         {
@@ -20,10 +20,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         }
 
 #else
-        private bool _createdConnection;
         private void CreateDbConnection()
         {
-            var factory = FactoryTools.GetFactory(ProviderName);
+            var factory = DatabaseSchemaReader.Utilities.DbProvider.FactoryTools.GetFactory(ProviderName);
             DbConnection = factory.CreateConnection();
             try
             {
@@ -79,7 +78,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         public DatabaseSchema DatabaseSchema { get; set; }
 
 
-        #region Implementation of IDisposable
+#region Implementation of IDisposable
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -106,6 +105,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             }
         }
 
-        #endregion Implementation of IDisposable
+#endregion Implementation of IDisposable
     }
 }

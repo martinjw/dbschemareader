@@ -8,20 +8,7 @@ namespace DatabaseSchemaReader.Conversion
 {
     internal static class DatabaseColumnExtensions
     {
-        public static bool IsTimestamp(this DatabaseColumn column)
-        {
-            if (column.DataType != null)
-            {
-                //if it's a timestamp, you can't insert it
-                if (column.DataType.ProviderDbType == (int)SqlDbType.Timestamp
-                    //double check as could be Oracle type with same provider code
-                    && column.DataType.GetNetType() == typeof(byte[]))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+
 
         /// <summary>
         /// Static method to convert a list of columns into a generic DataTable for binding

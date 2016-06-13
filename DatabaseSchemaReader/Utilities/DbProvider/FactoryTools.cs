@@ -1,8 +1,7 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 
-namespace DatabaseSchemaReader.Utilities
+namespace DatabaseSchemaReader.Utilities.DbProvider
 {
     /// <summary>
     /// Tools to help with DbProviderFactory

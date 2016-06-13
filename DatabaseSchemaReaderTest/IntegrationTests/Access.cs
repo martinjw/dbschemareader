@@ -1,16 +1,7 @@
 ﻿using System.IO;
 using DatabaseSchemaReader;
-#if !NUNIT
+using DatabaseSchemaReader.Utilities.DbProvider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#else
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-using TestContext = System.Object;
-using TestCategory = NUnit.Framework.CategoryAttribute;
-#endif
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -32,7 +23,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             const string connectionString = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dir;
             ProviderChecker.Check(providername, connectionString);
 
-            DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
+            DiscoverProviderFactory.Discover(connectionString, providername);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
@@ -54,7 +45,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             const string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + dir;
             ProviderChecker.Check(providername, connectionString);
 
-            DatabaseSchemaReader.Utilities.DiscoverProviderFactory.Discover(connectionString, providername);
+            DiscoverProviderFactory.Discover(connectionString, providername);
 
             var dbReader = new DatabaseReader(connectionString, providername);
             var schema = dbReader.ReadAll();
