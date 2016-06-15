@@ -30,7 +30,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 FROM ALL_ARGUMENTS
 WHERE (OWNER = :OWNER OR :OWNER IS NULL)
 AND (OBJECT_NAME = :PROCEDURENAME OR :PROCEDURENAME IS NULL)
-ORDER BY ";
+ORDER BY OWNER, PACKAGE_NAME, OBJECT_NAME, POSITION";
         }
 
         public IList<DatabaseArgument> Execute(DbConnection connection)

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-// ReSharper disable once RedundantUsingDirective 
-using System.Threading;
+﻿// ReSharper disable once RedundantUsingDirective
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 using DatabaseSchemaReader.ProviderSchemaReaders;
 using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DatabaseSchemaReader
 {
@@ -21,8 +20,10 @@ namespace DatabaseSchemaReader
     {
         private readonly SchemaParameters _schemaParameters;
         private readonly ReaderAdapter _readerAdapter;
+
         //private readonly SchemaExtendedReader _schemaReader;
         private readonly DatabaseSchema _db;
+
         private bool _fixUp = true;
 
         /// <summary>
@@ -94,10 +95,9 @@ namespace DatabaseSchemaReader
             _schemaParameters.DatabaseSchema = databaseSchema;
             _schemaParameters.Owner = databaseSchema.Owner;
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
-            //_schemaReader = SchemaReaderFactory.Create(databaseSchema.ConnectionString, databaseSchema.Provider);
-            //_schemaReader.Owner = databaseSchema.Owner;
             _db = databaseSchema;
         }
+
 #endif
 
         private void RaiseReadingProgress(SchemaObjectType schemaObjectType)
@@ -224,12 +224,6 @@ namespace DatabaseSchemaReader
             var tables = builder.Execute(ct);
             if (ct.IsCancellationRequested) return tables;
 
-            //var loader = new AllTablesLoader(_schemaReader, Exclusions);
-            //var handler = ReaderProgress;
-            //if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
-            //var tables = loader.Load(ct);
-            if (ct.IsCancellationRequested) return tables;
-
             DatabaseSchema.Tables.Clear();
             DatabaseSchema.Tables.AddRange(tables);
             UpdateReferences();
@@ -256,39 +250,12 @@ namespace DatabaseSchemaReader
         public IList<DatabaseView> AllViews(CancellationToken ct)
         {
             if (ct.IsCancellationRequested) return DatabaseSchema.Views;
-            RaiseReadingProgress(SchemaObjectType.Views);
-            var views = _readerAdapter.Views(null);
 
-            if (ct.IsCancellationRequested) return DatabaseSchema.Views;
-            ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.Views);
-            var viewFilter = Exclusions.ViewFilter;
-            if (viewFilter != null)
-            {
-                views = views.Where(t => !viewFilter.Exclude(t.Name)).ToList();
-            }
+            var builder = new ViewBuilder(_readerAdapter, Exclusions);
+            var handler = ReaderProgress;
+            if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
+            var views = builder.Execute(ct);
 
-            //get full datatables for all tables, to minimize database calls
-            if (ct.IsCancellationRequested) return views;
-            RaiseReadingProgress(SchemaObjectType.ViewColumns);
-
-            var viewColumns = _readerAdapter.ViewColumns(null);
-            var count = views.Count;
-            for (var index = 0; index < count; index++)
-            {
-                if (ct.IsCancellationRequested) return views;
-                DatabaseView v = views[index];
-                ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.ViewColumns, v.Name, index, count);
-                IEnumerable<DatabaseColumn> cols;
-                if (viewColumns.Count == 0)
-                {
-                    cols = _readerAdapter.ViewColumns(v.Name);
-                }
-                else
-                {
-                    cols = viewColumns.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner);
-                }
-                v.Columns.AddRange(cols);
-            }
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
             return views;
@@ -331,10 +298,6 @@ namespace DatabaseSchemaReader
             if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
             var table = builder.Execute(ct, tableName);
 
-            //var loader = new TableLoader(_schemaReader, DatabaseSchema);
-            //var handler = ReaderProgress;
-            //if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
-            //var table = loader.Load(tableName, ct);
             var existingTable = DatabaseSchema.FindTableByName(tableName, _schemaParameters.Owner);
             if (existingTable != null)
             {

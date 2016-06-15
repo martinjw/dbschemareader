@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Data;
-using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
+using System.Collections.Generic;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -19,6 +18,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             get { return Parameters.Owner; }
             set { Parameters.Owner = value; }
         }
+
         public virtual IList<DataType> DataTypes()
         {
             return new List<DataType>();
@@ -28,6 +28,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             return new List<DatabaseTable>();
         }
+
         public virtual IList<DatabaseColumn> Columns(string tableName)
         {
             return new List<DatabaseColumn>();
@@ -37,6 +38,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             return new List<DatabaseView>();
         }
+
+        public virtual IList<ProcedureSource> ViewSources(string viewName)
+        {
+            return new List<ProcedureSource>();
+        }
+
         public virtual IList<DatabaseColumn> ViewColumns(string viewName)
         {
             return new List<DatabaseColumn>();
@@ -112,7 +119,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new List<DatabaseStoredProcedure>();
         }
 
-
         public virtual IList<DatabaseFunction> Functions(string name)
         {
             return new List<DatabaseFunction>();
@@ -132,7 +138,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             return new List<ProcedureSource>();
         }
-
 
         public virtual IList<DatabaseUser> Users()
         {

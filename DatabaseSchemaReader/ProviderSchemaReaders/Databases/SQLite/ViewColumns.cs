@@ -1,62 +1,58 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.KeyMaps;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.RowConverters;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
-    internal class ViewColumns : SqlExecuter<DatabaseColumn>
+    internal class ViewColumns
     {
         private readonly string _viewName;
-        private readonly ColumnRowConverter _converter;
 
-        public ViewColumns(string owner, string viewName)
+        public ViewColumns(string viewName)
         {
             _viewName = viewName;
-            Owner = owner;
-            Sql = @"select c.TABLE_SCHEMA, 
-c.TABLE_NAME, 
-COLUMN_NAME, 
-ORDINAL_POSITION, 
-COLUMN_DEFAULT, 
-IS_NULLABLE, 
-DATA_TYPE, 
-CHARACTER_MAXIMUM_LENGTH, 
-NUMERIC_PRECISION, 
-NUMERIC_SCALE, 
-DATETIME_PRECISION 
-from INFORMATION_SCHEMA.COLUMNS c
-JOIN INFORMATION_SCHEMA.VIEWS v 
- ON c.TABLE_SCHEMA = v.TABLE_SCHEMA AND 
-    c.TABLE_NAME = v.TABLE_NAME
-where 
-    (c.TABLE_SCHEMA = @Owner or (@Owner is null)) and 
-    (c.TABLE_NAME = @TableName or (@TableName is null))
- order by 
-    c.TABLE_SCHEMA, c.TABLE_NAME, ORDINAL_POSITION";
-
-            var keyMap = new ColumnsKeyMap();
-            _converter = new ColumnRowConverter(keyMap);
+            PragmaSql = @"PRAGMA table_info('{0}')";
         }
+
+        protected List<DatabaseColumn> Result { get; } = new List<DatabaseColumn>();
+        public string PragmaSql { get; set; }
 
         public IList<DatabaseColumn> Execute(DbConnection connection)
         {
-            ExecuteDbReader(connection);
+            var views = new Views(_viewName).Execute(connection);
+
+            foreach (var view in views)
+            {
+                var viewName = view.Name;
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = string.Format(PragmaSql, viewName);
+                    int ordinal = 0;
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            var colName = dr.GetString("name");
+                            var col = new DatabaseColumn
+                                      {
+                                          TableName = viewName,
+                                          Name = colName,
+                                          Ordinal = ordinal,
+                                          //type will be like "nvarchar(32)".
+                                          //Lengths /precisions could be parsed out (nb remember this is Sqlite)
+                                          DbDataType = dr.GetString("type"),
+                                          Nullable = dr.GetBoolean("notnull"),
+                                          DefaultValue = dr.GetString("dflt_value"),
+                                          IsPrimaryKey = dr.GetBoolean("pk"),
+                                      };
+                            Result.Add(col);
+                            ordinal++;
+                        }
+                    }
+                }
+            }
+
             return Result;
-        }
-
-        protected override void AddParameters(DbCommand command)
-        {
-
-            AddDbParameter(command, "TableName", _viewName);
-        }
-
-        protected override void Mapper(IDataRecord record)
-        {
-            var col = _converter.Convert(record);
-            Result.Add(col);
         }
     }
 }

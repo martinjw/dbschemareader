@@ -3,9 +3,9 @@ using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
 
-namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
+namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
-    internal class Tables : OracleSqlExecuter<DatabaseTable>
+    internal class Tables : SqlExecuter<DatabaseTable>
     {
         private readonly string _tableName;
 
@@ -13,15 +13,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
         {
             _tableName = tableName;
             Owner = owner;
-            Sql = @"SELECT
-  OWNER,
-  TABLE_NAME
-FROM ALL_TABLES
-WHERE 
-    (OWNER=:OWNER or :OWNER IS NULL) AND 
-    (TABLE_NAME = :TABLENAME or :TABLENAME IS NULL) AND
-    OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')
-ORDER BY OWNER, TABLE_NAME";
+            Sql = @"SELECT 
+table_schema, 
+table_name 
+FROM information_schema.tables 
+WHERE (table_schema = :OWNER OR :OWNER IS NULL)
+AND (table_name = :TABLENAME OR :TABLENAME IS NULL)
+ORDER BY table_schema, table_name";
         }
 
         public IList<DatabaseTable> Execute(DbConnection connection)
@@ -34,15 +32,14 @@ ORDER BY OWNER, TABLE_NAME";
 
         protected override void AddParameters(DbCommand command)
         {
-            base.AddParameters(command);
             AddDbParameter(command, "OWNER", Owner);
             AddDbParameter(command, "TABLENAME", _tableName);
         }
 
         protected override void Mapper(IDataRecord record)
         {
-            var schema = record["OWNER"].ToString();
-            var name = record["TABLE_NAME"].ToString();
+            var schema = record["table_schema"].ToString();
+            var name = record["table_name"].ToString();
             var table = new DatabaseTable
                         {
                             Name = name,

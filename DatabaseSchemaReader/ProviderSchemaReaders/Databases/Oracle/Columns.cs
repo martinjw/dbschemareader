@@ -1,16 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using DatabaseSchemaReader.DataSchema;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.KeyMaps;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.RowConverters;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
-    internal class Columns : OracleSqlExecuter<DatabaseColumn>
+    class Columns : OracleSqlExecuter<DatabaseColumn>
     {
         private readonly string _tableName;
-        private readonly ColumnRowConverter _converter;
 
         public Columns(string owner, string tableName)
         {
@@ -19,24 +16,21 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
             Sql = @"SELECT OWNER,
   TABLE_NAME,
   COLUMN_NAME,
-  COLUMN_ID      AS ID,
-  DATA_TYPE      AS DataType,
-  CHAR_LENGTH    AS LENGTH,
-  DATA_LENGTH    AS DATALENGTH,
-  DATA_PRECISION AS PRECISION,
-  DATA_SCALE     AS Scale,
-  NULLABLE       AS Nullable,
-  DATA_DEFAULT   AS Column_default
+  COLUMN_ID      AS ordinal_position,
+  DATA_TYPE,
+  CHAR_LENGTH,
+  DATA_LENGTH,
+  DATA_PRECISION,
+  DATA_SCALE,
+  NULLABLE,
+  DATA_DEFAULT
 FROM ALL_TAB_COLUMNS
-WHERE 
+WHERE
 TABLE_NAME NOT LIKE 'BIN$%'
 AND (OWNER = :OWNER OR :OWNER IS NULL)
 AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')
 AND (TABLE_NAME  = :TABLENAME OR :TABLENAME IS NULL)
-ORDER BY OWNER, TABLE_NAME, ID";
-
-            var keyMap = new ColumnsKeyMap();
-            _converter = new ColumnRowConverter(keyMap);
+ORDER BY OWNER, TABLE_NAME, COLUMN_ID";
         }
 
         public IList<DatabaseColumn> Execute(DbConnection connection)
@@ -54,7 +48,29 @@ ORDER BY OWNER, TABLE_NAME, ID";
 
         protected override void Mapper(IDataRecord record)
         {
-            var col = _converter.Convert(record);
+            var owner = record.GetString("OWNER");
+            var tableName = record.GetString("TABLE_NAME");
+            var name = record.GetString("COLUMN_NAME");
+
+            var col = new DatabaseColumn
+            {
+                SchemaOwner = owner,
+                TableName = tableName,
+                Name = name,
+                Ordinal = record.GetNullableInt("ordinal_position").GetValueOrDefault(),
+                DbDataType = record.GetString("DATA_TYPE"),
+                Length = record.GetNullableInt("CHAR_LENGTH"),
+                Precision = record.GetNullableInt("DATA_PRECISION"),
+                Scale = record.GetNullableInt("DATA_SCALE"),
+                Nullable = record.GetBoolean("NULLABLE"),
+            };
+            if (col.Length < 1)
+            {
+                col.Length = record.GetNullableInt("DATA_LENGTH");
+            }
+            var d = record.GetString("DATA_DEFAULT");
+            if (!string.IsNullOrEmpty(d)) d = d.Trim(' ', '\'', '=');
+            col.DefaultValue = d;
             Result.Add(col);
         }
     }

@@ -27,6 +27,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
+        public static int GetInt(this IDataRecord record, string fieldName)
+        {
+            return GetNullableInt(record, fieldName).GetValueOrDefault();
+        }
+
         public static long? GetNullableLong(this IDataRecord record, string fieldName)
         {
             var value = record[fieldName];

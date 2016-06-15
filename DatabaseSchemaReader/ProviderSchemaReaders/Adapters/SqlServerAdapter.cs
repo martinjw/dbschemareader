@@ -95,6 +95,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 .Execute(Parameters.DbConnection);
         }
 
+        public override IList<ProcedureSource> ViewSources(string viewName)
+        {
+            return new ViewSources(Parameters.Owner, viewName)
+                .Execute(Parameters.DbConnection);
+        }
+
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
             return new ViewColumns(Parameters.Owner, viewName)

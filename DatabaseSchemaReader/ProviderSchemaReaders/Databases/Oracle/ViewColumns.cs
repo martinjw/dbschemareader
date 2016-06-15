@@ -2,43 +2,36 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.KeyMaps;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.RowConverters;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
     internal class ViewColumns : OracleSqlExecuter<DatabaseColumn>
     {
         private readonly string _viewName;
-        private readonly ColumnRowConverter _converter;
 
         public ViewColumns(string owner, string viewName)
         {
             _viewName = viewName;
             Owner = owner;
-            Sql = @"select c.TABLE_SCHEMA, 
-c.TABLE_NAME, 
-COLUMN_NAME, 
-ORDINAL_POSITION, 
-COLUMN_DEFAULT, 
-IS_NULLABLE, 
-DATA_TYPE, 
-CHARACTER_MAXIMUM_LENGTH, 
-NUMERIC_PRECISION, 
-NUMERIC_SCALE, 
-DATETIME_PRECISION 
-from INFORMATION_SCHEMA.COLUMNS c
-JOIN INFORMATION_SCHEMA.VIEWS v 
- ON c.TABLE_SCHEMA = v.TABLE_SCHEMA AND 
-    c.TABLE_NAME = v.TABLE_NAME
-where 
-    (c.TABLE_SCHEMA = @Owner or (@Owner is null)) and 
-    (c.TABLE_NAME = @TableName or (@TableName is null))
- order by 
-    c.TABLE_SCHEMA, c.TABLE_NAME, ORDINAL_POSITION";
-
-            var keyMap = new ColumnsKeyMap();
-            _converter = new ColumnRowConverter(keyMap);
+            Sql = @"SELECT c.OWNER,
+  TABLE_NAME,
+  COLUMN_NAME,
+  COLUMN_ID      AS ordinal_position,
+  DATA_TYPE,
+  CHAR_LENGTH,
+  DATA_LENGTH,
+  DATA_PRECISION,
+  DATA_SCALE,
+  NULLABLE,
+  DATA_DEFAULT
+FROM ALL_TAB_COLUMNS c
+INNER JOIN ALL_VIEWS v ON c.OWNER = v.OWNER AND c.TABLE_NAME = v.VIEW_NAME
+WHERE
+TABLE_NAME NOT LIKE 'BIN$%'
+AND (c.OWNER = :OWNER OR :OWNER IS NULL)
+AND c.OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')
+AND (TABLE_NAME  = :TABLENAME OR :TABLENAME IS NULL)
+ORDER BY c.OWNER, TABLE_NAME, COLUMN_ID";
         }
 
         public IList<DatabaseColumn> Execute(DbConnection connection)
@@ -56,7 +49,29 @@ where
 
         protected override void Mapper(IDataRecord record)
         {
-            var col = _converter.Convert(record);
+            var owner = record.GetString("OWNER");
+            var tableName = record.GetString("TABLE_NAME");
+            var name = record.GetString("COLUMN_NAME");
+
+            var col = new DatabaseColumn
+            {
+                SchemaOwner = owner,
+                TableName = tableName,
+                Name = name,
+                Ordinal = record.GetNullableInt("ordinal_position").GetValueOrDefault(),
+                DbDataType = record.GetString("DATA_TYPE"),
+                Length = record.GetNullableInt("CHAR_LENGTH"),
+                Precision = record.GetNullableInt("DATA_PRECISION"),
+                Scale = record.GetNullableInt("DATA_SCALE"),
+                Nullable = record.GetBoolean("NULLABLE"),
+            };
+            if (col.Length < 1)
+            {
+                col.Length = record.GetNullableInt("DATA_LENGTH");
+            }
+            var d = record.GetString("DATA_DEFAULT");
+            if (!string.IsNullOrEmpty(d)) d = d.Trim(' ', '\'', '=');
+            col.DefaultValue = d;
             Result.Add(col);
         }
     }

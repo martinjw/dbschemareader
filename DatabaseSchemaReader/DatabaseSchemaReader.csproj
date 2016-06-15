@@ -201,6 +201,7 @@
     <Compile Include="ProviderSchemaReaders\Adapters\SqlServerCeAdapter.cs" />
     <Compile Include="ProviderSchemaReaders\Builders\ProcedureBuilder.cs" />
     <Compile Include="ProviderSchemaReaders\Builders\TableBuilder.cs" />
+    <Compile Include="ProviderSchemaReaders\Builders\ViewBuilder.cs" />
     <Compile Include="ProviderSchemaReaders\Converters\KeyMaps\ColumnsKeyMap.cs" />
     <Compile Include="ProviderSchemaReaders\Converters\RowConverters\ColumnRowConverter.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\DataRecordExtensions.cs" />
@@ -228,7 +229,19 @@
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Users.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\ViewColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Views.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\CheckConstraints.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\ColumnDescriptions.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Constraints.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Functions.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\DataTypeList.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Columns.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\TableDescriptions.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Triggers.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Users.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Views.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Tables.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlExecuter.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SQLite\Columns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SQLite\Constraints.cs" />
@@ -250,6 +263,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\IdentityColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Sequences.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\StoredProcedures.cs" />

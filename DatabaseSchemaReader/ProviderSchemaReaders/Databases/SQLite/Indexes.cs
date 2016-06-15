@@ -14,9 +14,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
         public Indexes(string tableName)
         {
             _tableName = tableName;
-            Sql = @"SELECT name, tbl_name, sql FROM sqlite_master
-WHERE type='index' AND
-    (tbl_name = @TABLE_NAME or (@TABLE_NAME is null))
+            Sql = @"SELECT
+  name,
+  tbl_name,
+  sql
+FROM sqlite_master
+WHERE type = 'index'
+AND (tbl_name = @TABLE_NAME OR (@TABLE_NAME IS NULL))
 ORDER BY tbl_name, name";
             PragmaSql = @"PRAGMA index_info('{0}')";
         }
@@ -25,7 +29,7 @@ ORDER BY tbl_name, name";
 
         protected override void AddParameters(DbCommand command)
         {
-            AddDbParameter(command, "tableName", _tableName);
+            AddDbParameter(command, "TABLE_NAME", _tableName);
         }
 
         protected override void Mapper(IDataRecord record)
@@ -43,14 +47,6 @@ ORDER BY tbl_name, name";
                 };
                 Result.Add(index);
             }
-            var colName = record.GetString("ColumnName");
-            if (string.IsNullOrEmpty(colName)) return;
-
-            var col = new DatabaseColumn
-            {
-                Name = colName,
-            };
-            index.Columns.Add(col);
         }
 
         public IList<DatabaseIndex> Execute(DbConnection dbConnection)

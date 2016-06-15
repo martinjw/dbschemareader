@@ -14,5 +14,50 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new DataTypeList().Execute();
         }
 
+
+        public override IList<DatabaseTable> Tables(string tableName)
+        {
+            return new Tables(tableName)
+                .Execute(Parameters.DbConnection);
+        }
+
+        public override IList<DatabaseColumn> Columns(string tableName)
+        {
+            return new Columns( tableName)
+                .Execute(Parameters.DbConnection);
+        }
+
+
+        public override IList<DatabaseIndex> Indexes(string tableName)
+        {
+            return new Indexes( tableName)
+                .Execute(Parameters.DbConnection);
+        }
+
+        public override IList<DatabaseConstraint> ForeignKeys(string tableName)
+        {
+            return new Constraints(tableName)
+                .Execute(Parameters.DbConnection);
+        }
+
+        public override IList<DatabaseTrigger> Triggers(string tableName)
+        {
+            return new Triggers( tableName)
+                .Execute(Parameters.DbConnection);
+        }
+
+
+        public override IList<DatabaseView> Views(string viewName)
+        {
+            return new Views(viewName)
+               .Execute(Parameters.DbConnection);
+        }
+
+        public override IList<DatabaseColumn> ViewColumns(string viewName)
+        {
+            return new ViewColumns(viewName)
+                .Execute(Parameters.DbConnection);
+        }
+
     }
 }

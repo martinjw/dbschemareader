@@ -20,7 +20,7 @@ SELECT
   CYCLE_FLAG
 FROM ALL_SEQUENCES
 WHERE  
-(SEQUENCE_OWNER = @schemaOwner OR @schemaOwner IS NULL)";
+(SEQUENCE_OWNER = :schemaOwner OR :schemaOwner IS NULL)";
 
         }
 
