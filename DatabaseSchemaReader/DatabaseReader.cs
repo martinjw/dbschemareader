@@ -1,12 +1,12 @@
-﻿// ReSharper disable once RedundantUsingDirective
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 using DatabaseSchemaReader.ProviderSchemaReaders;
 using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+// ReSharper disable once RedundantUsingDirective
+using System.Threading;
 
 namespace DatabaseSchemaReader
 {
