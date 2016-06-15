@@ -4,6 +4,8 @@ using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+// ReSharper disable once RedundantUsingDirective
+using System.Threading;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
 {
