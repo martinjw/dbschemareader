@@ -201,12 +201,6 @@ namespace DatabaseSchemaReader.DataSchema
         public bool IsAutoNumber { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this column is an identity column (or equivalent)
-        /// </summary>
-        [Obsolete("Use IsAutoNumber")]
-        public bool IsIdentity { get { return IsAutoNumber; } set { IsAutoNumber = value; } }
-
-        /// <summary>
         /// Gets or sets a value indicating whether this instance is indexed.
         /// </summary>
         /// <value>

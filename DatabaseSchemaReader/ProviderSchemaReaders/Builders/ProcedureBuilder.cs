@@ -138,6 +138,16 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 sproc.Arguments.Clear();
                 sproc.Arguments.AddRange(sprocArgs);
             }
+            foreach (var func in functions)
+            {
+                var funcArgs =
+                    args.Where(
+                        x =>
+                            x.SchemaOwner == func.SchemaOwner && x.ProcedureName == func.Name &&
+                            x.PackageName == func.Package);
+                func.Arguments.Clear();
+                func.Arguments.AddRange(funcArgs);
+            }
             //foreach (var arg in args)
             //{
             //    var packName = arg.PackageName;

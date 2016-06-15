@@ -14,14 +14,17 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 case SqlType.Oracle:
                     schemaReader = new OracleAdapter(schemaParameters);
                     break;
+                case SqlType.SQLite:
+                    schemaReader = new SqLiteAdapter(schemaParameters);
+                    break;               
+                case SqlType.PostgreSql:
+                    schemaReader = new PostgreSqlAdapter(schemaParameters);
+                    break;
                 //case SqlType.SqlServerCe:
                 //    schemaReader = new SqlServerCeAdapter(schemaParameters);
                 //    break;
                 //case SqlType.MySql:
                 //    schemaReader = new MySqlAdapter(schemaParameters);
-                //    break;
-                //case SqlType.PostgreSql:
-                //    schemaReader = new PostgreSqlAdapter(schemaParameters);
                 //    break;
                 default:
                     //var providerName = schemaParameters.ProviderName;

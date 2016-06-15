@@ -46,15 +46,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             var dt = _schemaReader.Tables(tableName);
             return SchemaConverter.Tables(dt);
-            if (string.IsNullOrEmpty(tableName))
-            {
-            }
-            //single table == exists logic
-            if (_schemaReader.TableExists(tableName))
-            {
-                return new List<DatabaseTable> { new DatabaseTable { Name = tableName } };
-            }
-            return new List<DatabaseTable>();
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)

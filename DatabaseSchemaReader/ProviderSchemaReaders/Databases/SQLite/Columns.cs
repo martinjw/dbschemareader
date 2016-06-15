@@ -45,6 +45,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                                 DefaultValue = dr.GetString("dflt_value"),
                                 IsPrimaryKey = dr.GetBoolean("pk"),
                             };
+                            if (col.IsPrimaryKey && col.DbDataType == "INTEGER")
+                            {
+                                col.IsAutoNumber = true;
+                            }
                             Result.Add(col);
                             ordinal++;
                         }

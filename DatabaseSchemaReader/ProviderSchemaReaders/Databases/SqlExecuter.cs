@@ -41,9 +41,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
-        protected DbParameter AddDbParameter(DbCommand command, string parameterName, object value)
+        protected static DbParameter AddDbParameter(DbCommand command, string parameterName, object value)
         {
-            DbParameter parameter = command.CreateParameter();
+            var parameter = command.CreateParameter();
             parameter.ParameterName = parameterName;
             parameter.Value = value ?? DBNull.Value;
             command.Parameters.Add(parameter);

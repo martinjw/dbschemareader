@@ -33,7 +33,7 @@ ORDER BY name";
 
         protected override void Mapper(IDataRecord record)
         {
-            var name = record["TABLE_NAME"].ToString();
+            var name = record["name"].ToString();
             var table = new DatabaseTable
                         {
                             Name = name,
