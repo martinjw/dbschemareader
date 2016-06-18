@@ -48,8 +48,29 @@ ORDER BY OWNER, PACKAGE_NAME, OBJECT_NAME, POSITION";
 
         protected override void Mapper(IDataRecord record)
         {
-            //var col = _converter.Convert(record);
-            //Result.Add(col);
+            var owner = record.GetString("OWNER");
+            var packName = record.GetString("PACKAGE_NAME");
+            var sprocName = record.GetString("OBJECT_NAME");
+            var name = record.GetString("ARGUMENT_NAME");
+            var arg = new DatabaseArgument
+            {
+                SchemaOwner = owner,
+                PackageName = packName,
+                ProcedureName = sprocName,
+                Name = name,
+                Ordinal = record.GetInt("POSITION"),
+                DatabaseDataType = record.GetString("DATA_TYPE"),
+                Length = record.GetNullableInt("DATA_LENGTH"),
+                Precision = record.GetNullableInt("DATA_PRECISION"),
+                Scale = record.GetNullableInt("DATA_SCALE"),
+                
+            };
+            string inout = record.GetString("IN_OUT");
+            if (inout.Contains("IN")) arg.In = true;
+            //can be INOUT
+            if (inout.Contains("OUT")) arg.Out = true;
+
+            Result.Add(arg);
         }
     }
 }

@@ -15,11 +15,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
             Owner = owner;
             Sql = @"SELECT
   OWNER,
-  OBJECT_NAME
-FROM ALL_OBJECTS
+  OBJECT_NAME,
+  PROCEDURE_NAME,
+  OBJECT_TYPE
+FROM ALL_PROCEDURES
 WHERE (OWNER = :OWNER OR :OWNER IS NULL)
 AND (OBJECT_NAME = :NAME OR :NAME IS NULL)
-AND OBJECT_TYPE = 'PROCEDURE'
+AND (OBJECT_TYPE = 'PROCEDURE' OR OBJECT_TYPE = 'PACKAGE')
+AND NOT (PROCEDURE_NAME IS NULL AND OBJECT_TYPE = 'PACKAGE')
 AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')
 ";
 
@@ -40,11 +43,19 @@ AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTL
 
         protected override void Mapper(IDataRecord record)
         {
+            string pack = null;
             var owner = record.GetString("OWNER");
             var name = record.GetString("OBJECT_NAME");
+            var procName = record.GetString("PROCEDURE_NAME");
+            if (procName != null)
+            {
+                pack = name;
+                name = procName;
+            }
             var sproc = new DatabaseStoredProcedure
             {
                 SchemaOwner = owner,
+                Package = pack,
                 Name = name,
             };
             Result.Add(sproc);

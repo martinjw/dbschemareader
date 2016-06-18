@@ -6,15 +6,16 @@
   "frameworks": {
     "netstandard1.5": {
       "buildOptions": {
+        "define": [ "COREFX" ],
         "compile": {
-            "exclude": [
-                "DbSchemaReader/**/*.cs",
-                "ProviderSchemaReaders/DbProviders/**/*.cs",
-                "Conversion/**/*.cs",
-                "Data/**/*.cs",
-                "Procedures/**/*.cs",
-                "Utilities/DbProvider/**/*.cs"
-            ]
+          "exclude": [
+            "DbSchemaReader/**/*.cs",
+            "ProviderSchemaReaders/DbProviders/**/*.cs",
+            "Conversion/**/*.cs",
+            "Data/**/*.cs",
+            "Procedures/**/*.cs",
+            "Utilities/DbProvider/**/*.cs"
+          ]
         }
       },
       "imports": "dnxcore50",

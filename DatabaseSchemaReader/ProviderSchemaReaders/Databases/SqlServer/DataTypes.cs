@@ -3,7 +3,7 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
-    public class DataTypes
+    class DataTypes
     {
         public IList<DataType> Execute()
         {
