@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD1_5
+﻿#if !COREFX
 using System.Collections.Generic;
 using System.Linq;
 using DatabaseSchemaReader.Conversion;

@@ -24,7 +24,7 @@ FROM ALL_SOURCE
 WHERE 
     TYPE IN ('PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY') 
     AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')
-    AND OWNER = :schemaOwner AND    
+    AND OWNER = :schemaOwner     
     AND (NAME = :name OR :name IS NULL)
 ORDER BY OWNER, NAME, TYPE, LINE";
 
@@ -56,38 +56,42 @@ ORDER BY OWNER, NAME, TYPE, LINE";
         {
             var name = record.GetString("Name");
             var schemaOwner = record.GetString("Owner");
-            var source = Result.Find(x => x.Name == name && x.SchemaOwner == schemaOwner);
+            var type = record.GetString("Type").Trim();
+            var sourceType = SourceType.StoredProcedure;
+            switch (type)
+            {
+                case "PACKAGE": //oracle package
+                    sourceType = SourceType.Package;
+                    break;
+
+                case "PACKAGE BODY": //oracle package body
+                    sourceType = SourceType.PackageBody;
+                    break;
+
+                case "PROCEDURE": //oracle procedure
+                    sourceType = SourceType.StoredProcedure;
+                    break;
+
+                case "FUNCTION": //oracle function
+                    sourceType = SourceType.Function;
+                    break;
+            }
+            var source = Result.Find(x => x.Name == name && x.SchemaOwner == schemaOwner && x.SourceType == sourceType);
             if (source == null)
             {
                 source = new ProcedureSource
                 {
                     Name = record.GetString("Name"),
-                    SchemaOwner = record.GetString("Owner")
+                    SchemaOwner = record.GetString("Owner"),
+                    SourceType = sourceType,
                 };
-                switch (record.GetString("Type").Trim())
-                {
-                    case "PACKAGE": //oracle package
-                        source.SourceType = SourceType.Package;
-                        break;
 
-                    case "PACKAGE BODY": //oracle package body
-                        source.SourceType = SourceType.PackageBody;
-                        break;
-
-                    case "PROCEDURE": //oracle procedure
-                        source.SourceType = SourceType.StoredProcedure;
-                        break;
-
-                    case "FUNCTION": //oracle function
-                        source.SourceType = SourceType.Function;
-                        break;
-                }
+                Result.Add(source);
             }
 
             //adding line by line
             //text will have a newline but not cReturn
             source.Text += record.GetString("Text");
-            Result.Add(source);
 
         }
     }

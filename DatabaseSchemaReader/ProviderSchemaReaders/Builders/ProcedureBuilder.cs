@@ -148,23 +148,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 func.Arguments.Clear();
                 func.Arguments.AddRange(funcArgs);
             }
-            //foreach (var arg in args)
-            //{
-            //    var packName = arg.PackageName;
-            //    var owner = arg.SchemaOwner;
-            //    var sprocName = arg.ProcedureName;
-            //    if (packName == string.Empty) packName = null;
-
-            //    var sproc = FindStoredProcedureOrFunction(sprocs, functions, sprocName, owner, packName);
-            //    if (sproc == null) //sproc in a package and not found before?
-            //    {
-            //        sproc = CreateProcedureOrFunction(sprocs, functions, args);
-            //        sproc.Name = sprocName;
-            //        sproc.SchemaOwner = owner;
-            //        sproc.Package = packName;
-            //    }
-            //    sproc.Arguments.Add(arg);
-            //}
         }
 
         private void FilterOracleOwner(List<DatabaseArgument> args)
@@ -179,41 +162,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     return;
                 }
                 var systemOwners = new[] { "SYS", "CTXSYS", "MDSYS", "OLAPSYS", "ORDSYS", "OUTLN", "WKSYS", "WMSYS", "XDB", "ORDPLUGINS", "SYSTEM" };
-                args.RemoveAll(x => systemOwners.Contains(x.SchemaOwner) || x.SchemaOwner.StartsWith("APEX"));
+                args.RemoveAll(x => systemOwners.Contains(x.SchemaOwner) || x.SchemaOwner.StartsWith("APEX", StringComparison.Ordinal));
             }
-        }
-
-        private DatabaseStoredProcedure CreateProcedureOrFunction(ICollection<DatabaseStoredProcedure> sprocs, ICollection<DatabaseFunction> functions, List<DatabaseArgument> args)
-        {
-            //if it's ordinal 0 and no name, it's a function not a sproc
-            DatabaseStoredProcedure sproc;
-            if (args.Find(arg => arg.Ordinal == 0 && string.IsNullOrEmpty(arg.Name)) != null)
-            {
-                //functions are just a type of stored procedure
-                var fun = new DatabaseFunction();
-                functions.Add(fun);
-                sproc = fun;
-            }
-            else
-            {
-                sproc = new DatabaseStoredProcedure();
-                sprocs.Add(sproc);
-            }
-            return sproc;
-        }
-
-        private DatabaseStoredProcedure FindStoredProcedureOrFunction(List<DatabaseStoredProcedure> sprocs, List<DatabaseFunction> functions, string name, string owner, string package)
-        {
-            var sproc = sprocs.Find(x => x.Name == name && x.SchemaOwner == owner && x.Package == package);
-            if (sproc == null) //is it actually a function?
-            {
-                DatabaseFunction fun = functions.Find(f => f.Name == name && f.SchemaOwner == owner && f.Package == package);
-                if (fun != null)
-                {
-                    return fun;
-                }
-            }
-            return sproc;
         }
 
         private void MoveFunctionsIntoPackages(List<DatabasePackage> packs, List<DatabaseFunction> functions, IFilter packFilter)
@@ -233,7 +183,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 package.Functions.AddRange(packContents);
                 _databaseSchema.Packages.Add(package);
             }
-            functions.RemoveAll(x => string.IsNullOrEmpty(x.Package));
+            functions.RemoveAll(x => !string.IsNullOrEmpty(x.Package));
         }
 
         private void MoveStoredProceduresIntoPackages(List<DatabasePackage> packs, List<DatabaseStoredProcedure> sprocs, IFilter packFilter)
@@ -253,7 +203,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 package.StoredProcedures.AddRange(packContents);
                 _databaseSchema.Packages.Add(package);
             }
-            sprocs.RemoveAll(x => string.IsNullOrEmpty(x.Package));
+            sprocs.RemoveAll(x => !string.IsNullOrEmpty(x.Package));
         }
     }
 }

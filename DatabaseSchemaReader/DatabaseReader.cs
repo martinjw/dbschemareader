@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         public event EventHandler<ReaderEventArgs> ReaderProgress;
 
-#if NETSTANDARD1_5
+#if COREFX
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbConnection.
         /// </summary>
@@ -44,7 +44,7 @@ namespace DatabaseSchemaReader
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
         }
 #endif
-#if !NETSTANDARD1_5
+#if !COREFX
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class. For Oracle, use the overload.
@@ -231,8 +231,6 @@ namespace DatabaseSchemaReader
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
 
-            //TODO _schemaReader.PostProcessing(DatabaseSchema);
-
             return tables;
         }
 
@@ -272,7 +270,6 @@ namespace DatabaseSchemaReader
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
             var tables = _readerAdapter.Tables(tableName);
             return tables.Count > 0;
-            //return _schemaReader.TableExists(tableName);
         }
 
         /// <summary>
@@ -309,7 +306,6 @@ namespace DatabaseSchemaReader
 
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
-            //TODO _schemaReader.PostProcessing(DatabaseSchema);
 
             return table;
         }
@@ -346,11 +342,6 @@ namespace DatabaseSchemaReader
             if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
             builder.Execute(ct);
 
-            //var loader = new ProcedureLoader(_schemaReader, DatabaseSchema, Exclusions);
-            //var handler = ReaderProgress;
-            //if (handler != null) loader.ReaderProgress += RaiseReadingProgress;
-            //loader.Load(ct);
-
             UpdateReferences();
 
             return DatabaseSchema.StoredProcedures;
@@ -374,9 +365,6 @@ namespace DatabaseSchemaReader
             if (!_fixUp) return;
 
             DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
-
-            //last, do custom post processing if implemented
-            //_schemaReader.PostProcessing(DatabaseSchema);
         }
 
         #region Implementation of IDisposable

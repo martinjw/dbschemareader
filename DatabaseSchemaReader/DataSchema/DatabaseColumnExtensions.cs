@@ -9,6 +9,11 @@ namespace DatabaseSchemaReader.DataSchema
     /// </summary>
     public static class DatabaseColumnExtensions
     {
+        /// <summary>
+        /// Determines whether this column is a timestamp.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
         public static bool IsTimestamp(this DatabaseColumn column)
         {
             if (column.DataType != null)

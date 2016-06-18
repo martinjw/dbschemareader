@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
     class SchemaParameters : IDisposable
     {
         private bool _createdConnection;
-#if NETSTANDARD1_5
+#if COREFX
         public SchemaParameters(DbConnection dbConnection)
         {
             DbConnection = dbConnection;

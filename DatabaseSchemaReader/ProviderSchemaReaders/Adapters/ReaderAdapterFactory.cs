@@ -66,7 +66,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             }
             if (schemaReader == null)
             {
-#if !NETSTANDARD1_5
+#if !COREFX
                 schemaReader = new DbProviderReaderAdapter(schemaParameters);
 #else
                 schemaReader = new ReaderAdapter(schemaParameters);

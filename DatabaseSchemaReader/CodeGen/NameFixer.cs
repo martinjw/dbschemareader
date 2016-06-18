@@ -11,7 +11,7 @@ namespace DatabaseSchemaReader.CodeGen
     /// </summary>
     public static class NameFixer
     {
-#if !NETSTANDARD1_5
+#if !COREFX
         private static readonly System.CodeDom.Compiler.CodeDomProvider CSharpProvider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("C#");
 #endif
         /// <summary>
@@ -71,7 +71,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             //this could still be a c# keyword
-#if !NETSTANDARD1_5
+#if !COREFX
             if (!CSharpProvider.IsValidIdentifier(name))
             {
                 //in practice all keywords are lowercase. 

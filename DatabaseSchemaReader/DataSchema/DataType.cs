@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace DatabaseSchemaReader.DataSchema
@@ -28,6 +29,21 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly string _netDataType;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly string _typeName;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private static readonly HashSet<Type> NumericTypes = new HashSet<Type>
+        {
+            typeof(int),
+            typeof(uint),
+            typeof(double),
+            typeof(decimal),
+            typeof(short),
+            typeof(ushort),
+            typeof(long),
+            typeof(ulong),
+            typeof(float),
+            typeof(sbyte),
+            typeof(byte),
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataType"/> class.
@@ -251,26 +267,27 @@ namespace DatabaseSchemaReader.DataSchema
                 if (string.IsNullOrEmpty(NetDataType))
                     return false;
                 Type type = Type.GetType(NetDataType);
-                switch (Type.GetTypeCode(type))
-                {
-                    //Char may be a decimal...
-                    case TypeCode.Decimal:
-                    case TypeCode.SByte:
-                    case TypeCode.Byte:
-                    case TypeCode.Int16:
-                    case TypeCode.UInt16:
-                    case TypeCode.Int32:
-                    case TypeCode.UInt32:
-                    case TypeCode.Int64:
-                    case TypeCode.UInt64:
-                    case TypeCode.Single:
-                    case TypeCode.Double:
-                        _isNumeric = true;
-                        break;
-                    default:
-                        _isNumeric = false;
-                        break;
-                }
+                _isNumeric = NumericTypes.Contains(type);
+                //switch (Type.GetTypeCode(type))
+                //{
+                //    //Char may be a decimal...
+                //    case TypeCode.Decimal:
+                //    case TypeCode.SByte:
+                //    case TypeCode.Byte:
+                //    case TypeCode.Int16:
+                //    case TypeCode.UInt16:
+                //    case TypeCode.Int32:
+                //    case TypeCode.UInt32:
+                //    case TypeCode.Int64:
+                //    case TypeCode.UInt64:
+                //    case TypeCode.Single:
+                //    case TypeCode.Double:
+                //        _isNumeric = true;
+                //        break;
+                //    default:
+                //        _isNumeric = false;
+                //        break;
+                //}
                 return _isNumeric.Value;
             }
         }

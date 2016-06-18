@@ -3,7 +3,7 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
-    public class DataTypeList
+    class DataTypeList
     {
         public IList<DataType> Execute()
         {

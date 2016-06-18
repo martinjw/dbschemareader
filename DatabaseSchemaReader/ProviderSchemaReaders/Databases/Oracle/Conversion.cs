@@ -3,7 +3,7 @@ using System;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
-    public static class Conversion
+    static class Conversion
     {
 
         /// <summary>
