@@ -20,12 +20,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 case SqlType.PostgreSql:
                     schemaReader = new PostgreSqlAdapter(schemaParameters);
                     break;
+                case SqlType.MySql:
+                    schemaReader = new MySqlAdapter(schemaParameters);
+                    break;
                 //case SqlType.SqlServerCe:
                 //    schemaReader = new SqlServerCeAdapter(schemaParameters);
                 //    break;
-                //case SqlType.MySql:
-                //    schemaReader = new MySqlAdapter(schemaParameters);
-                //    break;
+
                 default:
                     //var providerName = schemaParameters.ProviderName;
                     //all the other types
