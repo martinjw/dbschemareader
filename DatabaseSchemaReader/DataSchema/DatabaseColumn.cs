@@ -119,34 +119,6 @@ namespace DatabaseSchemaReader.DataSchema
         public string TableName { get; set; }
 
         /// <summary>
-        /// Do not use. Initialize <see cref="IdentityDefinition"/> and access <see cref="DatabaseColumnIdentity.IdentitySeed"/>
-        /// </summary>
-        [Obsolete("Access via IdentityDefinition")]
-        public long IdentitySeed
-        {
-            get { return (IdentityDefinition == null) ? 1 : IdentityDefinition.IdentitySeed; }
-            set
-            {
-                if (IdentityDefinition == null) IdentityDefinition = new DatabaseColumnIdentity();
-                IdentityDefinition.IdentitySeed = value;
-            }
-        }
-
-        /// <summary>
-        /// Do not use. Initialize <see cref="IdentityDefinition"/> and access <see cref="DatabaseColumnIdentity.IdentityIncrement"/>
-        /// </summary>
-        [Obsolete("Access via IdentityDefinition")]
-        public long IdentityIncrement
-        {
-            get { return (IdentityDefinition == null) ? 1 : IdentityDefinition.IdentityIncrement; }
-            set
-            {
-                if (IdentityDefinition == null) IdentityDefinition = new DatabaseColumnIdentity();
-                IdentityDefinition.IdentityIncrement = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the identity definition (if this is an Identity column). 
         /// Null if this is not an identity column (<see cref="IsAutoNumber"/> is false), 
         /// or the database uses another method of autonumbering (<see cref="DefaultValue"/> or sequences).

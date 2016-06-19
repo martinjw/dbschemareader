@@ -42,7 +42,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.IsTrue(txt.Contains("[Column(\"CategoryId\")]"));
         }
 
-        public class CustomCodeInserter : CodeInserter
+        class CustomCodeInserter : CodeInserter
         {
             public override void WriteNamespaces(DatabaseTable table, ClassBuilder classBuilder)
             {
