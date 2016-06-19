@@ -355,18 +355,6 @@ namespace DatabaseSchemaReader.DataSchema
             get { return Columns.Any(x => x.IsAutoNumber); }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this instance has an identity column.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if this instance has an identity column; otherwise, <c>false</c>.
-        /// </value>
-        [Obsolete("Use HasAutoNumberColumn")]
-        public bool HasIdentityColumn
-        {
-            get { return HasAutoNumberColumn; }
-        }
-
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
