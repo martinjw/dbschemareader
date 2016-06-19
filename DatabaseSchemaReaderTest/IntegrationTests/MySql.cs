@@ -58,8 +58,8 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
 
             var pk = country.PrimaryKeyColumn;
             Assert.IsNotNull(pk, "Primary key constraints should be loaded");
-            Assert.AreEqual(pk.DbDataType, "smallint(5) unsigned");
-            Assert.AreEqual(pk.DataType.TypeName, "SMALLINT");
+            Assert.AreEqual("smallint(5) unsigned", pk.DbDataType);
+            Assert.AreEqual("SMALLINT", pk.DataType.TypeName);
 
         }
 
