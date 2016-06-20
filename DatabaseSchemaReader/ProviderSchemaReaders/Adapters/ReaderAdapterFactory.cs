@@ -23,9 +23,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 case SqlType.MySql:
                     schemaReader = new MySqlAdapter(schemaParameters);
                     break;
-                //case SqlType.SqlServerCe:
-                //    schemaReader = new SqlServerCeAdapter(schemaParameters);
-                //    break;
+                case SqlType.SqlServerCe:
+                    schemaReader = new SqlServerCeAdapter(schemaParameters);
+                    break;
 
                 default:
                     //var providerName = schemaParameters.ProviderName;

@@ -112,7 +112,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var tableFilter = _readerAdapter.Parameters.Exclusions.TableFilter;
             if (tableFilter != null)
             {
-                //no RemoveAll in System.Runtime
                 tables = tables.Where(t => !tableFilter.Exclude(t.Name)).ToList();
             }
 

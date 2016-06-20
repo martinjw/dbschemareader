@@ -53,6 +53,7 @@ ORDER BY o.name, c.name";
                 SchemaOwner = schema,
                 TableName = tableName,
                 Name = columnName,
+                IsAutoNumber = true,
                 IdentityDefinition = new DatabaseColumnIdentity { IdentityIncrement = increment, IdentitySeed = seed},
             };
 

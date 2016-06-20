@@ -263,7 +263,11 @@
     <Compile Include="ProviderSchemaReaders\Databases\SQLite\Triggers.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SQLite\ViewColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SQLite\Views.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServerCe\Columns.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServerCe\Constraints.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServerCe\DataTypeList.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServerCe\Indexes.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServerCe\Tables.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\CheckConstraints.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ColumnDescriptions.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Columns.cs" />
