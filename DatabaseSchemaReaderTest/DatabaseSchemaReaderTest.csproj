@@ -240,6 +240,9 @@
     <Content Include="DatabaseScripts\sakila-data.sql" />
     <Content Include="DatabaseScripts\sakila-schema.sql" />
     <Content Include="DatabaseScripts\postgres_world.sql" />
+    <None Include="northwind.sdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="README.txt" />
     <Content Include="Utilities\EF\Catalog.edmx.sql" />
   </ItemGroup>

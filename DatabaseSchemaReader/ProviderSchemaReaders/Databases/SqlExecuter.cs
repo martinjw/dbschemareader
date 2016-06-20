@@ -41,11 +41,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
-        protected static DbParameter AddDbParameter(DbCommand command, string parameterName, object value)
+        protected static DbParameter AddDbParameter(DbCommand command, string parameterName, object value, DbType? dbType = null)
         {
             var parameter = command.CreateParameter();
             parameter.ParameterName = parameterName;
             parameter.Value = value ?? DBNull.Value;
+            if (dbType.HasValue) parameter.DbType = dbType.Value; //SqlServerCe needs this
             command.Parameters.Add(parameter);
             return parameter;
         }

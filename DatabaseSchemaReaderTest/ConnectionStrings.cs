@@ -60,5 +60,10 @@ namespace DatabaseSchemaReaderTest
         {
             get { return Path.Combine(Environment.CurrentDirectory, "northwind.db"); }
         }
+
+        public static string SqlServerCeFilePath
+        {
+            get { return Path.Combine(Environment.CurrentDirectory, "northwind.sdf"); }
+        }
     }
 }
