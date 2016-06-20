@@ -222,3 +222,4 @@ CodeGenTester/FluentNHib/
 CodeGenTester/NHib/
 CodeGenTester/packages/
 DatabaseSchemaReader.sln.GhostDoc.xml
+!DatabaseSchemaReaderTest/northwind.sdf
