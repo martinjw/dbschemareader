@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Serialization;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -82,14 +83,6 @@ namespace DatabaseSchemaReader.DataSchema
         public bool Out { get; set; }
 
         #region Derived properties
-
-        /// <summary>
-        /// Gets or sets the database schema.
-        /// </summary>
-        /// <value>
-        /// The database schema.
-        /// </value>
-        public DatabaseSchema DatabaseSchema { get; set; }
 
         /// <summary>
         /// Gets or sets the dataType. MAY BE NULL (eg Oracle REF CURSOR is not in datatypes list) - in which case refer to the string <see cref="DatabaseDataType"/>.

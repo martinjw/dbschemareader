@@ -156,6 +156,5 @@ namespace DatabaseSchemaReader.DataSchema
             return (Name ?? ConstraintType.ToString()) +
                 " on " + TableName;
         }
-
     }
 }

@@ -46,6 +46,14 @@ namespace DatabaseSchemaReader.DataSchema
         };
 
         /// <summary>
+        /// Protected ctor for serialization
+        /// </summary>
+        protected DataType()
+        {
+            
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DataType"/> class.
         /// </summary>
         /// <param name="typeName">Name of the type.</param>

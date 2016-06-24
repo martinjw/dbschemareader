@@ -152,7 +152,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="collection">The collection.</param>
         /// <param name="name">The name.</param>
         /// <returns></returns>
-        public static DatabaseConstraint FindByName(this ReadOnlyCollection<DatabaseConstraint> collection, string name)
+        public static DatabaseConstraint FindByName(this List<DatabaseConstraint> collection, string name)
         {
             if (collection == null) return null;
             if (string.IsNullOrEmpty(name)) return null;
