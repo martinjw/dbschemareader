@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 {
@@ -26,7 +27,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             {
                 connection.Open();
             }
-
+            Trace.WriteLine($"Sql: {Sql}");
             using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = Sql;

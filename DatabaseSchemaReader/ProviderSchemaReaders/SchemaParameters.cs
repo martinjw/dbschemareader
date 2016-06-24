@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 
-
 namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
-    class SchemaParameters : IDisposable
+    class SchemaParameters
     {
-        private bool _createdConnection;
 #if COREFX
-        public SchemaParameters(DbConnection dbConnection)
+        public SchemaParameters(System.Data.Common.DbConnection dbConnection)
         {
             DbConnection = dbConnection;
             ProviderName = DbConnection.GetType().Namespace;
@@ -19,29 +16,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             Exclusions = new Exclusions();
         }
 
+        public System.Data.Common.DbConnection DbConnection { get; private set; }
 #else
-        private void CreateDbConnection()
-        {
-            var factory = DatabaseSchemaReader.Utilities.DbProvider.FactoryTools.GetFactory(ProviderName);
-            DbConnection = factory.CreateConnection();
-            try
-            {
-                DbConnection.ConnectionString = ConnectionString;
-            }
-            catch (ArgumentException argumentException)
-            {
-                throw new InvalidOperationException("Invalid connection string "+ ConnectionString, argumentException);
-            }
-            _createdConnection = true;
-        }
-
         public SchemaParameters(string connectionString, SqlType sqlType)
         {
             ConnectionString = connectionString;
             ProviderName = ProviderToSqlType.Convert(sqlType);
             SqlType = sqlType;
             Exclusions = new Exclusions();
-            CreateDbConnection();
         }
 
         public SchemaParameters(string connectionString, string provider)
@@ -50,13 +32,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             ProviderName = provider;
             SqlType = ProviderToSqlType.Convert(ProviderName);
             Exclusions = new Exclusions();
-            CreateDbConnection();
         }
 #endif
 
         public string ConnectionString { get; private set; }
-
-        public DbConnection DbConnection { get; private set; }
+		
         public SqlType? SqlType { get; private set; }
 
         /// <summary>
@@ -76,35 +56,5 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         public string ProviderName { get; private set; }
 
         public DatabaseSchema DatabaseSchema { get; set; }
-
-
-#region Implementation of IDisposable
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        /// <filterpriority>2</filterpriority>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_createdConnection)
-                {
-                    DbConnection.Dispose();
-                }
-            }
-        }
-
-#endregion Implementation of IDisposable
     }
 }

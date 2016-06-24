@@ -151,24 +151,26 @@ namespace DatabaseSchemaReader
         public DatabaseSchema ReadAll(CancellationToken ct)
         {
             _fixUp = false;
-            if (ct.IsCancellationRequested) return _db;
-            DataTypes();
+            using (_readerAdapter.CreateConnection())
+            {
+                if (ct.IsCancellationRequested) return _db;
+                DataTypes();
 
-            if (ct.IsCancellationRequested) return _db;
-            AllUsers();
+                if (ct.IsCancellationRequested) return _db;
+                AllUsers();
 
-            if (ct.IsCancellationRequested) return _db;
-            AllTables(ct);
+                if (ct.IsCancellationRequested) return _db;
+                AllTables(ct);
 
-            if (ct.IsCancellationRequested) return _db;
-            AllViews(ct);
+                if (ct.IsCancellationRequested) return _db;
+                AllViews(ct);
 
-            if (ct.IsCancellationRequested) return _db;
-            AllStoredProcedures(ct);
+                if (ct.IsCancellationRequested) return _db;
+                AllStoredProcedures(ct);
 
-            if (ct.IsCancellationRequested) return _db;
-            AllSequences();
-
+                if (ct.IsCancellationRequested) return _db;
+                AllSequences();
+            }
             _fixUp = true;
             UpdateReferences();
 
@@ -189,7 +191,11 @@ namespace DatabaseSchemaReader
         public IList<DatabaseUser> AllUsers()
         {
             RaiseReadingProgress(SchemaObjectType.Users);
-            var users = _readerAdapter.Users();
+            IList<DatabaseUser> users;
+            using (_readerAdapter.CreateConnection())
+            {
+                users = _readerAdapter.Users();
+            }
             DatabaseSchema.Users.Clear();
             DatabaseSchema.Users.AddRange(users);
             return users;
@@ -201,7 +207,10 @@ namespace DatabaseSchemaReader
         public IList<DatabaseTable> TableList()
         {
             RaiseReadingProgress(SchemaObjectType.Tables);
-            return _readerAdapter.Tables(null);
+            using (_readerAdapter.CreateConnection())
+            {
+                return _readerAdapter.Tables(null);
+            }
         }
 
         /// <summary>
@@ -220,8 +229,12 @@ namespace DatabaseSchemaReader
             if (ct.IsCancellationRequested) return new List<DatabaseTable>();
             RaiseReadingProgress(SchemaObjectType.Tables);
 
-            var builder = new TableBuilder(_readerAdapter);
-            var tables = builder.Execute(ct);
+            IList<DatabaseTable> tables;
+            using (_readerAdapter.CreateConnection())
+            {
+                var builder = new TableBuilder(_readerAdapter);
+                tables = builder.Execute(ct);
+            }
             if (ct.IsCancellationRequested) return tables;
 
             DatabaseSchema.Tables.Clear();
@@ -249,10 +262,14 @@ namespace DatabaseSchemaReader
         {
             if (ct.IsCancellationRequested) return DatabaseSchema.Views;
 
-            var builder = new ViewBuilder(_readerAdapter, Exclusions);
-            var handler = ReaderProgress;
-            if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
-            var views = builder.Execute(ct);
+            IList<DatabaseView> views;
+            using (_readerAdapter.CreateConnection())
+            {
+                var builder = new ViewBuilder(_readerAdapter, Exclusions);
+                var handler = ReaderProgress;
+                if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
+                views = builder.Execute(ct);
+            }
 
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
@@ -268,8 +285,11 @@ namespace DatabaseSchemaReader
         public bool TableExists(string tableName)
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
-            var tables = _readerAdapter.Tables(tableName);
-            return tables.Count > 0;
+            using (_readerAdapter.CreateConnection())
+            {
+                var tables = _readerAdapter.Tables(tableName);
+                return tables.Count > 0;
+            }
         }
 
         /// <summary>
@@ -290,10 +310,14 @@ namespace DatabaseSchemaReader
         {
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
 
-            var builder = new TableBuilder(_readerAdapter);
-            var handler = ReaderProgress;
-            if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
-            var table = builder.Execute(ct, tableName);
+            DatabaseTable table;
+            using (_readerAdapter.CreateConnection())
+            {
+                var builder = new TableBuilder(_readerAdapter);
+                var handler = ReaderProgress;
+                if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
+                table = builder.Execute(ct, tableName);
+            }
 
             var existingTable = DatabaseSchema.FindTableByName(tableName, _schemaParameters.Owner);
             if (existingTable != null)
@@ -315,8 +339,10 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseStoredProcedure> StoredProcedureList()
         {
-            return _readerAdapter.StoredProcedures(null);
-            //return DatabaseSchema.StoredProcedures;
+            using (_readerAdapter.CreateConnection())
+            {
+                return _readerAdapter.StoredProcedures(null);
+            }
         }
 
         /// <summary>
@@ -337,10 +363,13 @@ namespace DatabaseSchemaReader
         /// </summary>
         public IList<DatabaseStoredProcedure> AllStoredProcedures(CancellationToken ct)
         {
-            var builder = new ProcedureBuilder(_readerAdapter, DatabaseSchema, Exclusions);
-            var handler = ReaderProgress;
-            if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
-            builder.Execute(ct);
+            using (_readerAdapter.CreateConnection())
+            {
+                var builder = new ProcedureBuilder(_readerAdapter, DatabaseSchema, Exclusions);
+                var handler = ReaderProgress;
+                if (handler != null) builder.ReaderProgress += RaiseReadingProgress;
+                builder.Execute(ct);
+            }
 
             UpdateReferences();
 
@@ -387,11 +416,7 @@ namespace DatabaseSchemaReader
         {
             if (disposing)
             {
-                // may have created it's own dbconnection
-                if (_schemaParameters != null)
-                {
-                    _schemaParameters.Dispose();
-                }
+                //nothing to dispose?
             }
         }
 

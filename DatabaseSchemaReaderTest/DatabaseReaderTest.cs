@@ -32,7 +32,6 @@ namespace DatabaseSchemaReaderTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void SqlTypeTest()
         {
             var dr =  new DatabaseReader("Dummy", SqlType.SqlServer);

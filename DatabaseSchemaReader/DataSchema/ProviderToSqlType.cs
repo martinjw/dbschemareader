@@ -18,18 +18,20 @@ namespace DatabaseSchemaReader.DataSchema
 
             if (providerName.Equals("System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
                 return SqlType.SqlServer;
-            if (providerName.Equals("System.Data.SQLite", StringComparison.OrdinalIgnoreCase))
+            if (providerName.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) != -1)
+            {
                 return SqlType.SQLite;
+            }
             if (providerName.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1)
+            {
                 return SqlType.Oracle;
-            if (providerName.Equals("MySql.Data.MySqlClient", StringComparison.OrdinalIgnoreCase))
+            }
+            if (providerName.IndexOf("MySql", StringComparison.OrdinalIgnoreCase) != -1)
+            {
                 return SqlType.MySql;
-            if (providerName.Equals("Devart.Data.MySql", StringComparison.OrdinalIgnoreCase))
-                return SqlType.MySql;
+            }
             if (providerName.Equals("System.Data.SqlServerCe.4.0", StringComparison.OrdinalIgnoreCase))
                 return SqlType.SqlServerCe;
-            if (providerName.Equals("System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
-                return SqlType.SqlServer;
             if (providerName.Equals("Npgsql", StringComparison.OrdinalIgnoreCase) || 
                 providerName.Equals("Devart.Data.PostgreSql", StringComparison.OrdinalIgnoreCase))
                 return SqlType.PostgreSql;

@@ -60,9 +60,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             var dt = _schemaReader.StoredProcedures();
             SchemaProcedureConverter.StoredProcedures(Parameters.DatabaseSchema, dt);
-            if (Parameters.SqlType == SqlType.Oracle && !string.IsNullOrEmpty(Parameters.Owner))
+            if (Parameters.SqlType == SqlType.Oracle && !string.IsNullOrEmpty(Owner))
             {
-                Parameters.DatabaseSchema.StoredProcedures.RemoveAll(x => x.SchemaOwner != Parameters.Owner);
+                Parameters.DatabaseSchema.StoredProcedures.RemoveAll(x => x.SchemaOwner != Owner);
             }
             return Parameters.DatabaseSchema.StoredProcedures;
         }
@@ -88,7 +88,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             {
                 return columnLoader.Load();
             }
-            return columnLoader.Load(viewName, Parameters.Owner).ToList();
+            return columnLoader.Load(viewName, Owner).ToList();
         }
 
         public override IList<DatabaseArgument> ProcedureArguments(string name)
@@ -176,9 +176,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabasePackage> Packages(string name)
         {
             var packages = SchemaProcedureConverter.Packages(_schemaReader.Packages());
-            if (Parameters.SqlType == SqlType.Oracle && !string.IsNullOrEmpty(Parameters.Owner))
+            if (Parameters.SqlType == SqlType.Oracle && !string.IsNullOrEmpty(Owner))
             {
-                packages.RemoveAll(x => x.SchemaOwner != Parameters.Owner);
+                packages.RemoveAll(x => x.SchemaOwner != Owner);
             }
             return packages;
         }
