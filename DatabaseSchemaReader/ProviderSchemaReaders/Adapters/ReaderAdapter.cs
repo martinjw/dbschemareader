@@ -1,16 +1,46 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System.Collections.Generic;
+using System.Data.Common;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
     class ReaderAdapter
     {
         public readonly SchemaParameters Parameters;
+        private ConnectionAdapter _connectionAdapter;
 
         public ReaderAdapter(SchemaParameters schemaParameters)
         {
             Parameters = schemaParameters;
+        }
+
+        /// <summary>
+        /// Call this in a using block to share a connection over several calls.
+        /// </summary>
+        public virtual IConnectionAdapter CreateConnection()
+        {
+            if (_connectionAdapter != null)
+            {
+                //already have a connection, a wrapper to access it but won't be disposed
+                return new NestedConnection(_connectionAdapter);
+            }
+            //top level connection
+            _connectionAdapter = new ConnectionAdapter(Parameters);
+            return _connectionAdapter;
+        }
+
+        protected DbConnection DbConnection
+        {
+            get
+            {
+                if (_connectionAdapter == null)
+                {
+                    _connectionAdapter = new ConnectionAdapter(Parameters);
+                }
+                return _connectionAdapter.DbConnection;
+            }
         }
 
         public virtual string Owner

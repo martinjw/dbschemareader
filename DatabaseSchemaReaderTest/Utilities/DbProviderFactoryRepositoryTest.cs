@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.Utilities;
 using DatabaseSchemaReader.Utilities.DbProvider;
+using DatabaseSchemaReaderTest.IntegrationTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DatabaseSchemaReaderTest.Utilities
@@ -72,6 +73,8 @@ namespace DatabaseSchemaReaderTest.Utilities
             FactoryTools.SingleProviderFactory = SqlClientFactory.Instance;
             provider = FactoryTools.GetFactory("Xxxx");
             Assert.AreEqual("System.Data.SqlClient.SqlClientFactory", provider.GetType().FullName, "Overridden, always returns SqlClient");
+
+            ProviderChecker.Check(providername, ConnectionStrings.Northwind);
 
             var dr = new DatabaseReader(ConnectionStrings.Northwind, "Xxxxx");
             var tables = dr.TableList();

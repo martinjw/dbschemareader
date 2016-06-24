@@ -190,6 +190,7 @@
     <Compile Include="Filters\Filter.cs" />
     <Compile Include="Filters\IFilter.cs" />
     <Compile Include="IDatabaseReader.cs" />
+    <Compile Include="ProviderSchemaReaders\ConnectionContext\ConnectionAdapter.cs" />
     <Compile Include="ProviderSchemaReaders\Adapters\DbProviderReaderAdapter.cs" />
     <Compile Include="ProviderSchemaReaders\Adapters\MySqlAdapter.cs" />
     <Compile Include="ProviderSchemaReaders\Adapters\OracleAdapter.cs" />
@@ -202,6 +203,8 @@
     <Compile Include="ProviderSchemaReaders\Builders\ProcedureBuilder.cs" />
     <Compile Include="ProviderSchemaReaders\Builders\TableBuilder.cs" />
     <Compile Include="ProviderSchemaReaders\Builders\ViewBuilder.cs" />
+    <Compile Include="ProviderSchemaReaders\ConnectionContext\IConnectionAdapter.cs" />
+    <Compile Include="ProviderSchemaReaders\ConnectionContext\NestedConnection.cs" />
     <Compile Include="ProviderSchemaReaders\Converters\KeyMaps\ColumnsKeyMap.cs" />
     <Compile Include="ProviderSchemaReaders\Converters\RowConverters\ColumnRowConverter.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\DataRecordExtensions.cs" />

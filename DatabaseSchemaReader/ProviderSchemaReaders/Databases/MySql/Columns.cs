@@ -24,7 +24,6 @@ COLUMN_TYPE,
 CHARACTER_MAXIMUM_LENGTH, 
 NUMERIC_PRECISION, 
 NUMERIC_SCALE, 
-DATETIME_PRECISION, 
 COLUMN_COMMENT
 from INFORMATION_SCHEMA.COLUMNS c
 JOIN INFORMATION_SCHEMA.TABLES t 
@@ -65,7 +64,7 @@ where
                 Length = record.GetNullableInt("CHARACTER_MAXIMUM_LENGTH"),
                 Precision = record.GetNullableInt("NUMERIC_PRECISION"),
                 Scale = record.GetNullableInt("NUMERIC_SCALE"),
-                DateTimePrecision = record.GetNullableInt("DATETIME_PRECISION"),
+                //DateTimePrecision = record.GetNullableInt("DATETIME_PRECISION"), //added in MySQL 5.6.4. 
                 Description = record.GetString("COLUMN_COMMENT"),
             };
             Result.Add(col);
