@@ -11,7 +11,7 @@ using System.Threading;
 namespace DatabaseSchemaReader
 {
     /// <summary>
-    /// Uses <see cref="DatabaseSchemaReader.SchemaReader"/> to read database schema into schema objects (rather than DataTables).
+    /// Reads database schema into schema model.
     /// </summary>
     /// <remarks>
     /// Either load independent objects (list of Tables, StoredProcedures), fuller information (a Tables with all Columns, constraints...), or full database schemas (<see cref="ReadAll()"/>: all tables, views, stored procedures with all information; the DatabaseSchema object will hook up the relationships). Obviously the fuller versions will be slow on moderate to large databases.

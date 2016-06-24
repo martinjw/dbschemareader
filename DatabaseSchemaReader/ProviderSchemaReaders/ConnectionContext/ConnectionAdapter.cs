@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Data.Common;
-using System.Diagnostics;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
 {
     class ConnectionAdapter : IConnectionAdapter
     {
         private readonly SchemaParameters _parameters;
+#if !COREFX
         private DbConnection _dbConnection;
+#endif
 
         public ConnectionAdapter(SchemaParameters parameters)
         {
             _parameters = parameters;
         }
 #if COREFX
-        public DbConnection DbConnection { get { return _parameters.DbConnection; }}
+        public DbConnection DbConnection => _parameters.DbConnection;
 #else
 
         public DbConnection DbConnection
@@ -31,7 +32,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
 
         private void CreateDbConnection()
         {
-            Trace.WriteLine($"Creating connection for {_parameters.ProviderName}");
+            System.Diagnostics.Trace.WriteLine($"Creating connection for {_parameters.ProviderName}");
             var factory = DatabaseSchemaReader.Utilities.DbProvider.FactoryTools.GetFactory(_parameters.ProviderName);
             _dbConnection = factory.CreateConnection();
             try
@@ -69,7 +70,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
                 // may have created it's own dbconnection
                 if (_dbConnection != null)
                 {
-                    Trace.WriteLine("Closing connection");
+                    System.Diagnostics.Trace.WriteLine("Closing connection");
                     _dbConnection.Dispose();
                     _dbConnection = null;
                 }
@@ -77,6 +78,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
 #endif
         }
 
-#endregion Implementation of IDisposable
+        #endregion Implementation of IDisposable
     }
 }
