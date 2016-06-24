@@ -9,14 +9,6 @@ namespace DatabaseSchemaReader.DataSchema
     public partial class DatabaseTrigger : NamedSchemaObject<DatabaseTrigger>
     {
         /// <summary>
-        /// Gets or sets the database schema.
-        /// </summary>
-        /// <value>
-        /// The database schema.
-        /// </value>
-        public DatabaseSchema DatabaseSchema { get; set; }
-
-        /// <summary>
         /// Gets or sets the name of the table.
         /// </summary>
         /// <value>

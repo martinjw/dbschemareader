@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -52,7 +53,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The names of the foreign key table.
         /// </value>
-        public IList<string> ForeignKeyTableNames { get; private set; }
+        public List<string> ForeignKeyTableNames { get; private set; }
 
         /// <summary>
         /// Gets or sets the length if this is string (VARCHAR) or character (CHAR) type data. In SQLServer, a length of -1 indicates VARCHAR(MAX).
@@ -210,6 +211,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The table.
         /// </value>
+        [XmlIgnore]
         public DatabaseTable Table { get; set; }
 
         /// <summary>
@@ -218,6 +220,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The database schema.
         /// </value>
+        [XmlIgnore]
         public DatabaseSchema DatabaseSchema { get; set; }
 
         /// <summary>
@@ -234,6 +237,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The foreign key table.
         /// </value>
+        [XmlIgnore]
         public DatabaseTable ForeignKeyTable { get; set; }
 
         #endregion

@@ -53,7 +53,6 @@ namespace DatabaseSchemaReader.DataSchema
             databaseSchema.StoredProcedures.ForEach(delegate(DatabaseStoredProcedure sproc)
             {
                 sproc.DatabaseSchema = databaseSchema;
-                sproc.Arguments.ForEach(delegate(DatabaseArgument arg) { arg.DatabaseSchema = databaseSchema; });
             });
             if (databaseSchema.Packages.Count > 0)
             {

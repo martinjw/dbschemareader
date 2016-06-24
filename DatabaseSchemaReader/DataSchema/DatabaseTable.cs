@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -14,36 +13,35 @@ namespace DatabaseSchemaReader.DataSchema
     public partial class DatabaseTable : NamedSchemaObject<DatabaseTable>
     {
         #region Fields
+
         //backing fields and initialize collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private DatabaseConstraint _primaryKey;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _foreignKeys;
-        //we expose readonly collections because the constraints need logic to add
-        //readonly collections cannot be serialized, but it's just a wrapper of the underlying list
-        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private ReadOnlyCollection<DatabaseConstraint> _readOnlyForeignKeys;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _uniqueKeys;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private ReadOnlyCollection<DatabaseConstraint> _readOnlyUniqueKeys;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseIndex> _indexes;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _checkConstraints;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private ReadOnlyCollection<DatabaseConstraint> _readOnlyCheckConstraints;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseColumn> _columns;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseTrigger> _triggers;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseTable> _foreignKeyChildren;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _defaultConstraints;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never), NonSerialized]
-        private ReadOnlyCollection<DatabaseConstraint> _readOnlyDefaultConstraints;
+
         #endregion
 
         /// <summary>
@@ -56,31 +54,19 @@ namespace DatabaseSchemaReader.DataSchema
             _indexes = new List<DatabaseIndex>();
 
             _foreignKeys = new List<DatabaseConstraint>();
-            _readOnlyForeignKeys = new ReadOnlyCollection<DatabaseConstraint>(_foreignKeys);
             _foreignKeyChildren = new List<DatabaseTable>();
             _uniqueKeys = new List<DatabaseConstraint>();
-            _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);
             _checkConstraints = new List<DatabaseConstraint>();
-            _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
             _defaultConstraints = new List<DatabaseConstraint>();
-            _readOnlyDefaultConstraints = new ReadOnlyCollection<DatabaseConstraint>(_defaultConstraints);
         }
-#if !COREFX
-        [OnDeserialized]
-        void OnDeserializedMethod(StreamingContext context)
-        {
-            _readOnlyForeignKeys = new ReadOnlyCollection<DatabaseConstraint>(_foreignKeys);
-            _readOnlyUniqueKeys = new ReadOnlyCollection<DatabaseConstraint>(_uniqueKeys);
-            _readOnlyCheckConstraints = new ReadOnlyCollection<DatabaseConstraint>(_checkConstraints);
-            _readOnlyDefaultConstraints = new ReadOnlyCollection<DatabaseConstraint>(_defaultConstraints);
-        }
-#endif
+
         /// <summary>
-        /// Gets or sets the database schema.
+        /// Gets or sets the database schema. Circular reference useful to move back up the tree.
         /// </summary>
         /// <value>
         /// The database schema.
         /// </value>
+        [XmlIgnore]
         public DatabaseSchema DatabaseSchema { get; set; }
 
         /// <summary>
@@ -112,7 +98,9 @@ namespace DatabaseSchemaReader.DataSchema
         {
             get { return Columns.FirstOrDefault(c => c.IsPrimaryKey); }
         }
+
         #region Constraints
+
         /// <summary>
         /// Gets or sets the primary key.
         /// </summary>
@@ -128,35 +116,38 @@ namespace DatabaseSchemaReader.DataSchema
                 AddConstraintColumns(value);
             }
         }
+
         /// <summary>
         /// Gets the foreign keys. Add using <see cref="AddConstraint"/>.
         /// </summary>
         /// <value>
         /// The foreign keys.
         /// </value>
-        public ReadOnlyCollection<DatabaseConstraint> ForeignKeys
+        public List<DatabaseConstraint> ForeignKeys
         {
-            get { return _readOnlyForeignKeys; }
+            get { return _foreignKeys; }
         }
+
         /// <summary>
         /// Gets or sets the unique keys.
         /// </summary>
         /// <value>
         /// The unique keys.
         /// </value>
-        public ReadOnlyCollection<DatabaseConstraint> UniqueKeys
+        public List<DatabaseConstraint> UniqueKeys
         {
-            get { return _readOnlyUniqueKeys; }
+            get { return _uniqueKeys; }
         }
+
         /// <summary>
         /// Gets or sets the check constraints.
         /// </summary>
         /// <value>
         /// The check constraints.
         /// </value>
-        public ReadOnlyCollection<DatabaseConstraint> CheckConstraints
+        public List<DatabaseConstraint> CheckConstraints
         {
-            get { return _readOnlyCheckConstraints; }
+            get { return _checkConstraints; }
         }
 
         /// <summary>
@@ -165,9 +156,9 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The default constraints.
         /// </value>
-        public ReadOnlyCollection<DatabaseConstraint> DefaultConstraints
+        public List<DatabaseConstraint> DefaultConstraints
         {
-            get { return _readOnlyDefaultConstraints; }
+            get { return _defaultConstraints; }
         }
 
         /// <summary>
@@ -197,15 +188,19 @@ namespace DatabaseSchemaReader.DataSchema
                 case ConstraintType.PrimaryKey:
                     PrimaryKey = con;
                     break;
+
                 case ConstraintType.ForeignKey:
                     _foreignKeys.Add(con);
                     break;
+
                 case ConstraintType.UniqueKey:
                     _uniqueKeys.Add(con);
                     break;
+
                 case ConstraintType.Check:
                     _checkConstraints.Add(con);
                     break;
+
                 case ConstraintType.Default:
                     _defaultConstraints.Add(con);
                     break;
@@ -233,6 +228,7 @@ namespace DatabaseSchemaReader.DataSchema
                         case ConstraintType.PrimaryKey:
                             col.IsPrimaryKey = true;
                             break;
+
                         case ConstraintType.ForeignKey:
                             if (!string.IsNullOrEmpty(con.RefersToTable))
                             {
@@ -241,6 +237,7 @@ namespace DatabaseSchemaReader.DataSchema
                                 col.ForeignKeyTableName = con.RefersToTable;
                             }
                             break;
+
                         case ConstraintType.UniqueKey:
                             col.IsUniqueKey = true;
                             break;
@@ -249,6 +246,7 @@ namespace DatabaseSchemaReader.DataSchema
                 }
             }
         }
+
         #endregion
 
         /// <summary>
@@ -273,12 +271,12 @@ namespace DatabaseSchemaReader.DataSchema
                     column.ForeignKeyTable = null;
                 }
             }
-
         }
 
         /// <summary>
         /// Gets the foreign key children.
         /// </summary>
+        [XmlIgnore]
         public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren; } }
 
         /// <summary>
@@ -297,6 +295,7 @@ namespace DatabaseSchemaReader.DataSchema
             get { return _indexes; }
             set { value.ForEach(AddIndex); }
         }
+
         /// <summary>
         /// Adds an index.
         /// </summary>
@@ -355,7 +354,6 @@ namespace DatabaseSchemaReader.DataSchema
             get { return Columns.Any(x => x.IsAutoNumber); }
         }
 
-
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
@@ -366,6 +364,5 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return Name;
         }
-
     }
 }
