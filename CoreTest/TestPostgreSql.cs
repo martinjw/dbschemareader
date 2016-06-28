@@ -1,6 +1,4 @@
-﻿using DatabaseSchemaReader.DataSchema;
-using System;
-//using Npgsql;
+﻿using System;
 using Xunit;
 
 namespace DatabaseSchemaReaderTest
@@ -23,15 +21,15 @@ namespace DatabaseSchemaReaderTest
         public void RunTableList()
         {
             //couldn't get package to restore.
-            //using (var connection = new NpgsqlConnection(Northwind))
-            //{
-            //    var dr = new DatabaseSchemaReader.DatabaseReader(connection);
-            //    var schema = dr.ReadAll();
-            //    var tableList = dr.TableList();
-            //    var tables = dr.AllTables();
-            //    var views = dr.AllViews();
-            //    Assert.NotEmpty(tableList);
-            //}
+            using (var connection = new Npgsql.NpgsqlConnection(PostgreSql))
+            {
+                var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+                var schema = dr.ReadAll();
+                var tableList = dr.TableList();
+                var tables = dr.AllTables();
+                var views = dr.AllViews();
+                Assert.NotEmpty(tableList);
+            }
         }
     }
 }
