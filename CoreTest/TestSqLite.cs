@@ -1,5 +1,4 @@
-﻿using DatabaseSchemaReader.DataSchema;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace DatabaseSchemaReaderTest

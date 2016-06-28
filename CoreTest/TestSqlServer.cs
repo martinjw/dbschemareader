@@ -1,5 +1,4 @@
-﻿using DatabaseSchemaReader.DataSchema;
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using Xunit;
 
