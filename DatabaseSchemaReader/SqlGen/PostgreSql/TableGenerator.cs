@@ -141,7 +141,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             else
             {
                 if (column.IsPrimaryKey)
-                    sql += " NOT NULL";
+                    sql += " NOT NULL" + defaultValue;
                 else
                     sql += " " + (!column.Nullable ? " NOT NULL" : string.Empty) + defaultValue;
             }
@@ -163,8 +163,16 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             }
             else //numeric default
             {
+                string d;
                 //remove any parenthesis
-                var d = defaultValue.Trim(new[] { '(', ')' });
+                if (defaultValue.IndexOf("nextval(", StringComparison.OrdinalIgnoreCase) != -1)
+                {
+                    d = defaultValue;
+                }
+                else
+                {
+                    d = defaultValue.Trim(new[] { '(', ')' });
+                }
                 //special case casting. What about other single integers?
                 if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
                     d = "((0::text)::money)"; //cast from int to money. Weird.
