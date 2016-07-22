@@ -2,7 +2,7 @@
 
 A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.
 
-Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.
+Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model. For .net Core, we support SqlServer, SqlServer CE 4, SQLite, PostgreSql, MySQL and Oracle (even if the database clients  are not yet available in .net Core, we are ready for them).
 
 https://github.com/martinjw/dbschemareader or https://dbschemareader.codeplex.com/
 
@@ -25,6 +25,7 @@ Nuget: Install-Package DatabaseSchemaReader [![Nuget](https://img.shields.io/nug
 
 ## Use
 
+* Full .net framework (v3.5, v4.0, v4.5)
 ```C#
 //To use it simply specify the connection string and ADO provider (eg System.Data,SqlClient or System.Data.OracleClient)
 const string providername = "System.Data.SqlClient";
@@ -44,7 +45,22 @@ foreach (var table in schema.Tables)
   //do something with your model
 }
 ```
+* .net Core (netStandard1.5)
+```C#
+//In .net Core, create the connection with the connection string
+using (var connection = new SqlConnection("Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind"))
+{
+    var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+    //Then load the schema (this will take a little time on moderate to large database structures)
+    var schema = dbReader.ReadAll();
 
+    //The structure is identical for all providers (and the full framework).
+    foreach (var table in schema.Tables)
+    {
+      //do something with your model
+    }
+}
+```
 ## UIs
 
 There are two simple UIs.
