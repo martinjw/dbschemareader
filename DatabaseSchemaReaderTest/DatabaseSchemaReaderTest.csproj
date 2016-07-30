@@ -107,6 +107,9 @@
     <Compile Include="Codegen\ClassWriterForeignKeyTest.cs" />
     <Compile Include="Codegen\ClassWriterOneToOneTest.cs" />
     <Compile Include="Codegen\ClassWriterTablePerTypeTest.cs" />
+    <Compile Include="Codegen\EfCoreContextWriterTest.cs" />
+    <Compile Include="Codegen\EfCoreMappingWriterManyToManyTest.cs" />
+    <Compile Include="Codegen\EfCoreMappingWriterTest.cs" />
     <Compile Include="Codegen\NHibernateMappingWriterTest.cs" />
     <Compile Include="Codegen\RiaServicesTest.cs" />
     <Compile Include="Codegen\DataAnnotationWriterTest.cs" />

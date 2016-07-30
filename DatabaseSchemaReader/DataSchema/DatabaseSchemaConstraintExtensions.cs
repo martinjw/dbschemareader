@@ -250,7 +250,7 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
-        /// Finds the individual foreign key constraints for a foreing key child
+        /// Finds the individual foreign key constraints for a foreign key child
         /// </summary>
         /// <param name="table">The table.</param>
         /// <param name="foreignKeyChild">The foreign key child.</param>

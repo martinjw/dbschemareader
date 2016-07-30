@@ -24,7 +24,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             //arrange
             DatabaseSchema schema = PrepareModel();
             var products = schema.FindTableByName("Products");
-            var target = new CodeFirstMappingWriter(products, new CodeWriterSettings(), new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var target = new CodeFirstMappingWriter(products, codeWriterSettings, new MappingNamer());
 
             //act
             var result = target.Write();
@@ -32,7 +33,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //assert
             var hasMappingClass = result.Contains("public class ProductMapping : EntityTypeConfiguration<Product>");
             //we don't have the UseForeignKeyIdProperties=true, so map back to the instance property
-            var hasForeignKey = 
+            var hasForeignKey =
                 result.Contains("HasRequired(x => x.SupplierKey).WithMany(c => c.ProductCollection).Map(m => m.MapKey(\"SupplierKey\"))");
             var hasManyToMany = result.Contains("HasMany(x => x.CategoryCollection).WithMany(z => z.ProductCollection)");
 
@@ -47,7 +48,12 @@ namespace DatabaseSchemaReaderTest.Codegen
             //arrange
             DatabaseSchema schema = PrepareModel();
             var products = schema.FindTableByName("Products");
-            var target = new CodeFirstMappingWriter(products, new CodeWriterSettings { UseForeignKeyIdProperties = true }, new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoEntityCodeFirst,
+                UseForeignKeyIdProperties = true
+            };
+            var target = new CodeFirstMappingWriter(products, codeWriterSettings, new MappingNamer());
 
             //act
             var result = target.Write();
@@ -105,7 +111,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var target = new CodeFirstMappingWriter(table, codeWriterSettings, new MappingNamer());
 
             //act
             var result = target.Write();
@@ -132,7 +139,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var target = new CodeFirstMappingWriter(table, codeWriterSettings, new MappingNamer());
 
             //act
             var result = target.Write();
@@ -159,7 +167,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             //make sure it's all tied up
             DatabaseSchemaFixer.UpdateReferences(schema);
 
-            var target = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var target = new CodeFirstMappingWriter(table, codeWriterSettings, new MappingNamer());
 
             //act
             target.Write();
@@ -221,7 +230,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var table = schema.FindTableByName("car");
 
             var mappingNamer = new MappingNamer();
-            var codeWriterSettings = new CodeWriterSettings{ CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
             var target = new CodeFirstMappingWriter(table, codeWriterSettings, mappingNamer);
 
             //act
