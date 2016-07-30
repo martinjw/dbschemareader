@@ -24,6 +24,10 @@
         /// <summary>
         /// Entities for RIA Services (buddy classes)
         /// </summary>
-        PocoRiaServices
+        PocoRiaServices,
+        /// <summary>
+        /// Entities for Entity Framework Core mapping
+        /// </summary>
+        PocoEfCore,
     }
 }

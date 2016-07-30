@@ -143,6 +143,12 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteProjectFile(DirectoryInfo directory, ProjectWriter pw)
         {
+            if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore)
+            {
+                //for Core we might be project.json. 
+                //Even for csproj Nuget restore is too complex so skip this.
+                return;
+            }
             var vs2010 = _codeWriterSettings.WriteProjectFile;
             var vs2008 = _codeWriterSettings.WriteProjectFileNet35;
             if (IsCodeFirst()) vs2008 = false;
@@ -168,17 +174,20 @@ namespace DatabaseSchemaReader.CodeGen
 
         private bool IsCodeFirst()
         {
-            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst;
+            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
         }
 
         private bool FilterIneligible(DatabaseTable table)
         {
             if (!IsCodeFirst()) return false;
-            if (table.IsManyToManyTable())
+            if (table.IsManyToManyTable()  && _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
                 return true;
             if (table.PrimaryKey == null)
                 return true;
-            if (table.Name.Equals("__MigrationHistory", StringComparison.OrdinalIgnoreCase))
+            if (table.Name.Equals("__MigrationHistory", StringComparison.OrdinalIgnoreCase)) //EF 6
+                return true;
+            if (table.Name.Equals("__EFMigrationsHistory", StringComparison.OrdinalIgnoreCase)) //EF Core1
                 return true;
             if (table.Name.Equals("EdmMetadata", StringComparison.OrdinalIgnoreCase))
                 return true;
@@ -277,6 +286,7 @@ namespace DatabaseSchemaReader.CodeGen
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
                 case CodeTarget.PocoRiaServices:
+                    case CodeTarget.PocoEfCore:
                     var cfmw = new CodeFirstMappingWriter(table, _codeWriterSettings, _mappingNamer);
                     var cfmap = cfmw.Write();
 
@@ -382,6 +392,5 @@ namespace DatabaseSchemaReader.CodeGen
             File.WriteAllText(path, txt);
             //not included in project as this is just for demo
         }
-
     }
 }

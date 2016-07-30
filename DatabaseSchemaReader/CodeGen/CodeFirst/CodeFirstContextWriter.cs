@@ -43,8 +43,15 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         {
             _cb.AppendLine("using System;");
             _cb.AppendLine("using System.Data.Common;"); //DbConnection
-            _cb.AppendLine("using System.Data.Entity;");
-            _cb.AppendLine("using System.Data.Entity.Infrastructure;"); //IncludeMetadataConvention
+            if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore)
+            {
+                _cb.AppendLine("using Microsoft.EntityFrameworkCore;");
+            }
+            else
+            {
+                _cb.AppendLine("using System.Data.Entity;");
+                _cb.AppendLine("using System.Data.Entity.Infrastructure;"); //IncludeMetadataConvention
+            }
             _cb.AppendLine("using " + _codeWriterSettings.Namespace + ".Mapping;");
 
             using (_cb.BeginNest("namespace " + _codeWriterSettings.Namespace))
@@ -77,21 +84,38 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             {
                 _cb.AppendLine("//default ctor uses app.config connection named " + ContextName);
             }
-            using (_cb.BeginNest("public " + ContextName + "(DbConnection connection) : base(connection,true)", "Constructor"))
+            if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore)
             {
-                _cb.AppendLine("//ctor for tracing");
+                using (
+                    _cb.BeginNest("public " + ContextName + "(DbContextOptions options) : base(options)",
+                        "Constructor with options"))
+                {
+                    _cb.AppendLine("//ctor for integration testing");
+                }
+            }
+            else
+            {
+                using (
+                    _cb.BeginNest("public " + ContextName + "(DbConnection connection) : base(connection,true)",
+                        "Constructor"))
+                {
+                    _cb.AppendLine("//ctor for tracing");
+                }
             }
         }
 
         private void WriteDbSets(IEnumerable<DatabaseTable> dbSetTables)
         {
+            var dbSet = _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore ?
+                "public DbSet<" : "public IDbSet<";
+
             foreach (var table in dbSetTables)
             {
                 var className = table.NetName;
                 var dbSetName = _codeWriterSettings.Namer.NameCollection(className);
 
                 //we won't pluralize, let's just suffix it "Set"
-                using (_cb.BeginNest("public IDbSet<" + className + "> " + dbSetName))
+                using (_cb.BeginNest(dbSet + className + "> " + dbSetName))
                 {
                     _cb.AppendLine("get { return Set<" + className + ">(); }");
                 }
@@ -100,9 +124,16 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
         private void WriteOnModelCreating(IEnumerable<DatabaseTable> dbSetTables)
         {
-            using (_cb.BeginNest("protected override void OnModelCreating(DbModelBuilder modelBuilder)"))
+            var isCore = _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
+            var onModelCreating = isCore
+                ? "protected override void OnModelCreating(ModelBuilder modelBuilder)"
+                : "protected override void OnModelCreating(DbModelBuilder modelBuilder)";
+            using (_cb.BeginNest(onModelCreating))
             {
-                _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
+                if (!isCore)
+                {
+                    _cb.AppendLine("Database.SetInitializer<" + ContextName + ">(null);");
+                }
                 //_cb.AppendLine(
                 //    "//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
                 if (IsOracle)
@@ -120,7 +151,14 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 {
                     var className = table.NetName;
 
-                    _cb.AppendLine("modelBuilder.Configurations.Add(new " + className + "Mapping());");
+                    if (isCore)
+                    {
+                        _cb.AppendLine("modelBuilder.Entity<" + className + ">(" + className + "Mapping.Map);");
+                    }
+                    else
+                    {
+                        _cb.AppendLine("modelBuilder.Configurations.Add(new " + className + "Mapping());");
+                    }
                 }
             }
         }

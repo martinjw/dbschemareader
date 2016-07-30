@@ -82,7 +82,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var table = schema.FindTableByName("Address");
 
-            var cw = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var cw = new CodeFirstMappingWriter(table, codeWriterSettings, new MappingNamer());
 
             //act
             var txt = cw.Write();
@@ -102,7 +103,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var table = schema.FindTableByName("Orders");
 
-            var cw = new CodeFirstMappingWriter(table, new CodeWriterSettings(), new MappingNamer());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var cw = new CodeFirstMappingWriter(table, codeWriterSettings, new MappingNamer());
 
             //act
             var txt = cw.Write();
@@ -123,7 +125,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var table = schema.FindTableByName("Address");
 
-            var cw = new MappingWriter(table, new CodeWriterSettings());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var cw = new MappingWriter(table, codeWriterSettings);
 
             //act
             var txt = cw.Write();
@@ -143,7 +146,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var table = schema.FindTableByName("Orders");
 
-            var cw = new MappingWriter(table, new CodeWriterSettings());
+            var codeWriterSettings = new CodeWriterSettings { CodeTarget = CodeTarget.PocoEntityCodeFirst };
+            var cw = new MappingWriter(table, codeWriterSettings);
 
             //act
             var txt = cw.Write();

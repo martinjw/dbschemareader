@@ -175,13 +175,15 @@ namespace DatabaseSchemaReader.CodeGen
 
         private bool IsCodeFirst()
         {
-            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst;
+            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
         }
 
         private bool IsEntityFramework()
         {
             return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
-                _codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices;
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices ||
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
         }
 
         private bool IsNHibernate()
