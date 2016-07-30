@@ -42,13 +42,13 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
         public string Write(ICollection<DatabaseTable> tables)
         {
             _cb.AppendLine("using System;");
-            _cb.AppendLine("using System.Data.Common;"); //DbConnection
             if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore)
             {
                 _cb.AppendLine("using Microsoft.EntityFrameworkCore;");
             }
             else
             {
+                _cb.AppendLine("using System.Data.Common;"); //DbConnection
                 _cb.AppendLine("using System.Data.Entity;");
                 _cb.AppendLine("using System.Data.Entity.Infrastructure;"); //IncludeMetadataConvention
             }

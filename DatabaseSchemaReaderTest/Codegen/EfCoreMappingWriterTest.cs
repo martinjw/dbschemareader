@@ -43,7 +43,7 @@ namespace DatabaseSchemaReaderTest.Codegen
 
 
             var hasForeignKey =
-                result.Contains("b.HasOne(x => x.SupplierKey).HasMany(c => c.ProductCollection);");
+                result.Contains("b.HasOne(x => x.SupplierKey).WithMany(c => c.ProductCollection);");
             //we have to create a many to many table for this
             //var hasManyToMany = result.Contains("HasMany(x => x.CategoryCollection).WithMany(z => z.ProductCollection)");
 

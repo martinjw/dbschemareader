@@ -16,7 +16,7 @@ namespace DatabaseSchemaReader.CodeGen
         private DataAnnotationWriter _dataAnnotationWriter;
         private readonly CodeWriterSettings _codeWriterSettings;
         private DatabaseTable _inheritanceTable;
-        private CodeInserter _codeInserter;
+        //private CodeInserter _codeInserter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
@@ -28,8 +28,8 @@ namespace DatabaseSchemaReader.CodeGen
             _codeWriterSettings = codeWriterSettings;
             _table = table;
             _cb = new ClassBuilder();
-            _codeInserter = codeWriterSettings.CodeInserter;
-            if (_codeInserter == null) _codeInserter = new CodeInserter();
+            //_codeInserter = codeWriterSettings.CodeInserter;
+            //if (_codeInserter == null) _codeInserter = new CodeInserter();
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             foreach (var foreignKey in _table.ForeignKeyChildren)
             {
-                if (foreignKey.IsManyToManyTable() && IsCodeFirst())
+                if (foreignKey.IsManyToManyTable() && _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
                 {
                     WriteManyToManyCollection(foreignKey);
                     continue;
@@ -287,7 +287,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var foreignKey in _table.ForeignKeyChildren)
                 {
-                    if (foreignKey.IsManyToManyTable() && IsCodeFirst())
+                    if (foreignKey.IsManyToManyTable() && _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
                     {
                         WriteManyToManyInitialize(foreignKey);
                         continue;
