@@ -173,11 +173,11 @@ namespace DatabaseSchemaReader.CodeGen
         }
 
 
-        private bool IsCodeFirst()
-        {
-            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
-                _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
-        }
+        //private bool IsCodeFirst()
+        //{
+        //    return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
+        //        _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
+        //}
 
         private bool IsEntityFramework()
         {
@@ -315,24 +315,8 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
-            var propertyName = column.NetName;
-            //in case the netName hasn't been set
-            if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
-            // KL: Ensures that property name doesn't match class name
-            if (propertyName == column.Table.NetName)
-            {
-                propertyName = string.Format("{0}Column", propertyName);
-            }
+            var propertyName = PropertyName(column);
             var dataType = _dataTypeWriter.Write(column);
-
-            if (column.IsPrimaryKey && column.IsForeignKey)
-            {
-                //a foreign key will be written, so we need to avoid a collision
-                var refTable = column.ForeignKeyTable;
-                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
-                if (fkDataType == propertyName)
-                    notNetName = true;
-            }
 
             if (notNetName)
             {
@@ -343,10 +327,49 @@ namespace DatabaseSchemaReader.CodeGen
 
             _codeWriterSettings.CodeInserter.WriteColumnAnnotations(_table, column, _cb);
 
+            var writeAnnotations = true;
+            if (column.IsPrimaryKey &&
+                _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore &&
+                _table.PrimaryKey.Columns.Count > 1)
+            {
+                //EF Core doesn't like [Key] annotations on composite keys
+                writeAnnotations = false;
+            }
+            if(writeAnnotations)
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
             var useVirtual = !IsEntityFramework();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
+        }
+
+        /// <summary>
+        /// Logic for propertyName. Shared with mapping.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns></returns>
+        internal static string PropertyName(DatabaseColumn column)
+        {
+            var propertyName = column.NetName;
+            //in case the netName hasn't been set
+            if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
+            // KL: Ensures that property name doesn't match class name
+            if (propertyName == column.Table.NetName)
+            {
+                propertyName = string.Format("{0}Column", propertyName);
+            }
+            if (column.IsPrimaryKey && column.IsForeignKey)
+            {
+                //a foreign key will be written, so we need to avoid a collision
+                var refTable = column.ForeignKeyTable;
+                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
+                if (fkDataType == propertyName)
+                {
+                    //in EF, you want a fk Id property
+                    //must not conflict with entity fk name
+                    propertyName += "Id";
+                }
+            }
+            return propertyName;
         }
 
 

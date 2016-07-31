@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;

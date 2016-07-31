@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen.CodeFirst
@@ -60,8 +61,10 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 {
                     WriteConstructors();
 
-                    var dbSetTables = tables
-                        .Where(x => !x.IsManyToManyTable())
+                    var dbSetTables = tables;
+                    if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                        dbSetTables = tables.Where(x => !x.IsManyToManyTable()).ToList();
+                    dbSetTables = dbSetTables
                         //doesn't support tables without a primary key
                         .Where(x => x.PrimaryKey != null ||
                             //unless it's a view
