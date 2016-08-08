@@ -28,7 +28,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             _mapping.Add(DbType.Guid, "RAW(16)");
             _mapping.Add(DbType.Int16, "NUMBER(5)");
             _mapping.Add(DbType.Int32, "NUMBER(9)");
-            _mapping.Add(DbType.Int64, "NUMBER(15)");
+            _mapping.Add(DbType.Int64, "NUMBER(19)");
             _mapping.Add(DbType.Single, "REAL");
             _mapping.Add(DbType.StringFixedLength, "NCHAR");
             _mapping.Add(DbType.String, "NVARCHAR2");
