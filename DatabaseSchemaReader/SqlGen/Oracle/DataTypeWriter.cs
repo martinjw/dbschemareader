@@ -148,6 +148,12 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 precision = 9;
                 scale = 0;
             }
+            if (dataType == "BIGINT")
+            {
+                dataType = "NUMBER";
+                precision = 19;
+                scale = 0;
+            }
             if (dataType == "SMALLINT")
             {
                 dataType = "NUMBER";

@@ -200,6 +200,7 @@
     <Compile Include="SqlGen\Oracle\OracleAutoNumberTest.cs" />
     <Compile Include="SqlGen\Oracle\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\Oracle\DataTypesTest.cs" />
+    <Compile Include="SqlGen\Oracle\LongIntegerTest.cs" />
     <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
     <Compile Include="SqlGen\SqlServerCe\AllTablesGeneratorTest.cs" />
