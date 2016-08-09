@@ -3,7 +3,7 @@
         "summary": "A simple, cross-database tool to read database metadata",
         "tags": [ "ADO", "Entity Framework Code First", "SQLServer", "SQLite", "Oracle", "MySQL", "PostgreSql", "Schema", "Database" ],
         "owners": [ "Martin Willey" ],
-        "releaseNotes": "Update to NetStandard",
+        "releaseNotes": "2.1: CodeGen for EF Core; Oracle fixes",
         "projectUrl": "https://github.com/martinjw/dbschemareader",
         "licenseUrl": "http://www.microsoft.com/en-us/openness/licenses.aspx#MPL",
         "repository": {
