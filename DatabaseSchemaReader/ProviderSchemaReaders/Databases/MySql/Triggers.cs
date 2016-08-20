@@ -30,8 +30,8 @@ WHERE
 
         protected override void AddParameters(DbCommand command)
         {
-            AddDbParameter(command, "@Owner", Owner);
-            AddDbParameter(command, "@TABLE_NAME", _tableName);
+            AddDbParameter(command, "@schemaOwner", Owner);
+            AddDbParameter(command, "@tableName", _tableName);
         }
 
         protected override void Mapper(IDataRecord record)
