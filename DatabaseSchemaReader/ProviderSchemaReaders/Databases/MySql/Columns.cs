@@ -52,6 +52,9 @@ where
 
         protected override void Mapper(IDataRecord record)
         {
+            //overflow protection
+            var length = record.GetNullableLong("CHARACTER_MAXIMUM_LENGTH");
+            var maxLength = (length > int.MaxValue) ? int.MaxValue : (int?)length;
             var col = new DatabaseColumn
             {
                 SchemaOwner = record.GetString("TABLE_SCHEMA"),
@@ -61,7 +64,7 @@ where
                 Nullable = record.GetBoolean("IS_NULLABLE"),
                 DefaultValue = record.GetString("COLUMN_DEFAULT"),
                 DbDataType = record.GetString("COLUMN_TYPE"),
-                Length = record.GetNullableInt("CHARACTER_MAXIMUM_LENGTH"),
+                Length = maxLength,
                 Precision = record.GetNullableInt("NUMERIC_PRECISION"),
                 Scale = record.GetNullableInt("NUMERIC_SCALE"),
                 //DateTimePrecision = record.GetNullableInt("DATETIME_PRECISION"), //added in MySQL 5.6.4. 
