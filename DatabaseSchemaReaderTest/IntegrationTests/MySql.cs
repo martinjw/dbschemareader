@@ -20,6 +20,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
+            dbReader.Owner = "sakila";
             var schema = dbReader.ReadAll();
             var country = schema.FindTableByName("country");
             Assert.AreEqual(3, country.Columns.Count);
