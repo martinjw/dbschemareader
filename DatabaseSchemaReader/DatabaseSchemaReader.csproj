@@ -140,6 +140,7 @@
     <Compile Include="Conversion\Loaders\AllTablesLoader.cs" />
     <Compile Include="Conversion\Loaders\TableLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
+    <Compile Include="DataSchema\INamedSchemaObject.cs" />
     <Compile Include="DataSchema\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
     <Compile Include="Conversion\SchemaConverter.cs" />

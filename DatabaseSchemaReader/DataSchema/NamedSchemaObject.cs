@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A database object that has an unique schema and name
     /// </summary>
     [Serializable]
-    public abstract class NamedSchemaObject<T> : NamedObject<T> where T : NamedSchemaObject<T>
+    public abstract class NamedSchemaObject<T> : NamedObject<T>, INamedSchemaObject where T : NamedSchemaObject<T>
     {
 
         /// <summary>
