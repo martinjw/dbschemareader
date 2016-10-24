@@ -53,7 +53,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "TABLE_SCHEMA";
             //Devart.Data.MySQL
             if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "DATABASE";
-
+            //odbc
+            if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "TABLE_SCHEM";
 
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = null; //not in Oracle catalog
             if (!dt.Columns.Contains(AutoIncrementKey)) AutoIncrementKey = null;
