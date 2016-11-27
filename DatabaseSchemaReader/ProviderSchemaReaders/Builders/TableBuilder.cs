@@ -63,6 +63,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var triggers = _readerAdapter.Triggers(tableName);
             var tableDescs = _readerAdapter.TableDescriptions(tableName);
             var colDescs = _readerAdapter.ColumnDescriptions(tableName);
+            var computed = _readerAdapter.ComputedColumns(tableName);
 
             var indexes = MergeIndexColumns(_readerAdapter.Indexes(tableName), _readerAdapter.IndexColumns(tableName));
             if (columns.Count == 0) return null;
@@ -75,7 +76,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             table.Columns.AddRange(columns);
             UpdateCheckConstraints(table, checkConstraints);
             UpdateIdentities(table.Columns, identityColumns);
-            UpdateComputed(table.Columns, identityColumns);
+            UpdateComputed(table.Columns, computed);
             UpdateConstraints(table, pks, ConstraintType.PrimaryKey);
             UpdateConstraints(table, uks, ConstraintType.UniqueKey);
             UpdateConstraints(table, fks, ConstraintType.ForeignKey);
@@ -106,6 +107,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var triggers = _readerAdapter.Triggers(null);
             var tableDescs = _readerAdapter.TableDescriptions(null);
             var colDescs = _readerAdapter.ColumnDescriptions(null);
+            var computed = _readerAdapter.ComputedColumns(null);
             var indexes = MergeIndexColumns(_readerAdapter.Indexes(null), _readerAdapter.IndexColumns(null));
             var noIndexes = (indexes.Count == 0); //we may not be able to get any indexes without a tableName
 
@@ -139,7 +141,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 table.Columns.AddRange(tableCols);
                 UpdateIdentities(table.Columns, identityColumns);
                 UpdateCheckConstraints(table, checkConstraints);
-                UpdateComputed(table.Columns, identityColumns);
+                UpdateComputed(table.Columns, computed);
                 UpdateConstraints(table, pks, ConstraintType.PrimaryKey);
                 UpdateConstraints(table, uks, ConstraintType.UniqueKey);
                 UpdateConstraints(table, fks, ConstraintType.ForeignKey);
@@ -260,7 +262,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                                                       x.TableName == computed.TableName &&
                                                       x.Name == computed.Name);
                 if (column == null) continue;
-                column.ComputedDefinition = column.ComputedDefinition;
+                column.ComputedDefinition = computed.ComputedDefinition;
             }
         }
     }
