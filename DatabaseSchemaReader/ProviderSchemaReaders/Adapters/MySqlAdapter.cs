@@ -27,6 +27,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 .Execute(DbConnection);
         }
 
+        public override IList<DatabaseColumn> ComputedColumns(string tableName)
+        {
+            return new ComputedColumns(Owner, tableName)
+                .Execute(DbConnection);
+        }
+
         public override IList<DatabaseView> Views(string viewName)
         {
             return new Views(Owner, viewName)
