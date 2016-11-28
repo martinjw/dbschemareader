@@ -147,7 +147,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             const string streamPath = "DatabaseSchemaReader.CodeGen.Project.xml";
 #if !COREFX
-            var executingAssembly = Assembly.GetExecutingAssembly();
+            var executingAssembly = typeof(ProjectWriter).Assembly;
 #else
             var executingAssembly = typeof(ProjectWriter).GetTypeInfo().Assembly;
 #endif
