@@ -273,6 +273,11 @@ namespace DatabaseSchemaReader
 
             DatabaseSchema.Views.Clear();
             DatabaseSchema.Views.AddRange(views);
+
+            UpdateReferences();
+            if (DatabaseSchema.DataTypes.Count > 0)
+                DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
+
             return views;
         }
 
