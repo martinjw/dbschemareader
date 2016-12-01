@@ -103,17 +103,19 @@ namespace DatabaseSchemaReader.DataSchema
             //first look up the refers to table name
             var refTable = schema.Tables
                 .FirstOrDefault(table =>
-                    //the string RefersToTable is the same
+                     //the string RefersToTable is the same
                      string.Equals(table.Name, RefersToTable, StringComparison.OrdinalIgnoreCase)
-                         //if we have a schema name, must match too
-                     && (string.IsNullOrEmpty(RefersToSchema) || string.Equals(table.SchemaOwner, RefersToSchema, StringComparison.OrdinalIgnoreCase)));
+                     //if we have a schema name, must match too
+                     && (string.IsNullOrEmpty(RefersToSchema) || 
+                     string.Equals(table.SchemaOwner, RefersToSchema, StringComparison.OrdinalIgnoreCase)));
 
             //if not found, look for the constraint name
-            if (refTable == null) refTable = schema.Tables
+            if (refTable == null && !string.IsNullOrEmpty(RefersToConstraint))
+                refTable = schema.Tables
                  .FirstOrDefault(table =>
                      //or the RefersToConstraint is it's primary key
                      (table.PrimaryKey != null &&
-                         //one or the other may not have a name
+                     //one or the other may not have a name
                      string.Equals(table.PrimaryKey.Name, RefersToConstraint, StringComparison.OrdinalIgnoreCase)));
 
             return refTable;

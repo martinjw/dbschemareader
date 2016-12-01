@@ -19,10 +19,10 @@ namespace DatabaseSchemaReader.DataSchema
         /// </remarks>
         public static void UpdateReferences(DatabaseSchema databaseSchema)
         {
-            databaseSchema.Tables.ForEach(delegate(DatabaseTable table)
+            databaseSchema.Tables.ForEach(delegate (DatabaseTable table)
             {
                 table.DatabaseSchema = databaseSchema;
-                table.Columns.ForEach(delegate(DatabaseColumn c)
+                table.Columns.ForEach(delegate (DatabaseColumn c)
                 {
                     //fix the bidirectional references
                     c.DatabaseSchema = databaseSchema;
@@ -33,24 +33,25 @@ namespace DatabaseSchemaReader.DataSchema
                     foreach (var fkTableName in c.ForeignKeyTableNames)
                     {
                         DatabaseTable fkTable = databaseSchema.FindTableByName(fkTableName);
+                        if (fkTable == null) continue;
                         c.ForeignKeyTable = fkTable;
-                        if (fkTable != null && !fkTable.ForeignKeyChildren.Contains(table))
+                        if (!fkTable.ForeignKeyChildren.Contains(table))
                             fkTable.ForeignKeyChildren.Add(table);
                     }
                 });
             });
             //update schema
-            databaseSchema.Views.ForEach(delegate(DatabaseView view)
+            databaseSchema.Views.ForEach(delegate (DatabaseView view)
             {
                 view.DatabaseSchema = databaseSchema;
-                view.Columns.ForEach(delegate(DatabaseColumn c)
+                view.Columns.ForEach(delegate (DatabaseColumn c)
                                       {
                                           //fix the bidirectional references
                                           c.DatabaseSchema = databaseSchema;
                                           c.Table = view;
                                       });
             });
-            databaseSchema.StoredProcedures.ForEach(delegate(DatabaseStoredProcedure sproc)
+            databaseSchema.StoredProcedures.ForEach(delegate (DatabaseStoredProcedure sproc)
             {
                 sproc.DatabaseSchema = databaseSchema;
             });
@@ -66,7 +67,7 @@ namespace DatabaseSchemaReader.DataSchema
             var deletedSprocs = new List<DatabaseStoredProcedure>();
             var deletedFuncs = new List<DatabaseFunction>();
             //find stored procedures that are in packages
-            databaseSchema.StoredProcedures.ForEach(delegate(DatabaseStoredProcedure sproc)
+            databaseSchema.StoredProcedures.ForEach(delegate (DatabaseStoredProcedure sproc)
             {
                 string name = sproc.Package;
                 if (name == null) return;
@@ -77,7 +78,7 @@ namespace DatabaseSchemaReader.DataSchema
                     deletedSprocs.Add(sproc);
                 }
             });
-            databaseSchema.Functions.ForEach(delegate(DatabaseFunction function)
+            databaseSchema.Functions.ForEach(delegate (DatabaseFunction function)
             {
                 string name = function.Package;
                 if (name == null) return;

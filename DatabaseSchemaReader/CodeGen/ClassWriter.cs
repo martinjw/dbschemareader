@@ -360,7 +360,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (column.IsPrimaryKey && column.IsForeignKey)
             {
                 //a foreign key will be written, so we need to avoid a collision
-                var refTable = column.ForeignKeyTable;
+                var refTable = FindForeignKeyTable(column);
                 var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
                 if (fkDataType == propertyName)
                 {
@@ -372,6 +372,21 @@ namespace DatabaseSchemaReader.CodeGen
             return propertyName;
         }
 
+        private static DatabaseTable FindForeignKeyTable(DatabaseColumn column)
+        {
+            var refTable = column.ForeignKeyTable;
+            if (refTable != null) return refTable;
+            //column may be in multiple fks, and the model may be broken
+            var table = column.Table;
+            if (table == null) return null;
+            //find the first foreign key containing this column
+            var fk = table.ForeignKeys.FirstOrDefault(c => c.Columns.Contains(column.Name));
+            if (fk != null)
+            {
+                refTable = fk.ReferencedTable(table.DatabaseSchema);
+            }
+            return refTable;
+        }
 
         /// <summary>
         /// KL:
