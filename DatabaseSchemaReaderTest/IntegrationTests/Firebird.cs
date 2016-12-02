@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
@@ -11,21 +12,23 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class Firebird
     {
+        // IMPORTANT: Path is for a 32 bit install of Firebird 3 (default example database) with default user/password
+        // In Firebird.conf, set WireCrypt = Enabled (.net provider doesn't support the default required mode)
+
         const string ProviderName = "FirebirdSql.Data.FirebirdClient";
-        const string Path = @"C:\Program Files\Firebird\Firebird_2_5\examples\empbuild\EMPLOYEE.FDB";
+        const string Path = @"C:\Program Files (86)\Firebird\Firebird_3_0\examples\empbuild\EMPLOYEE.FDB";
         const string ConnectionString = "User=SYSDBA;Password=masterkey;Database=" + Path + ";Server=localhost; Connection lifetime=15;Pooling=true";
         private DatabaseReader _dbReader;
 
         [ClassInitialize]
         public static void Config(TestContext context)
         {
+            //nuget install FirebirdSql.Data.FirebirdClient
             //  <system.data>
             //    <DbProviderFactories>
-            //      <add
-            //          name="Firebird Data Provider"
-            //          invariant="FirebirdSql.Data.FirebirdClient" description="Firebird"
-            //          type="FirebirdSql.Data.FirebirdClient.FirebirdClientFactory, FirebirdSql.Data.FirebirdClient, Version=2.5.2.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c"
-            //      />
+            //      <add name="FirebirdClient Data Provider" invariant="FirebirdSql.Data.FirebirdClient"
+            //           description = ".NET Framework Data Provider for Firebird" 
+            //           type = "FirebirdSql.Data.FirebirdClient.FirebirdClientFactory, FirebirdSql.Data.FirebirdClient" />
             //    </DbProviderFactories>
             //  </system.data>
 
@@ -42,13 +45,17 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod, TestCategory("Firebird")]
         public void ReadAll_OnFirebirdEmployeeDatabase_ShouldReturnTheCompleteSchema()
         {
+            if (!File.Exists(Path))
+            {
+                Assert.Inconclusive("Firebird example database not found " + Path);
+            }
             //Act
             var schema = _dbReader.ReadAll();
             //Assert
             Assert.AreEqual(10, schema.Tables.Count, "The example database contains 10 tables.");
             Assert.IsTrue(schema.Views.Any(s => s.Name == "PHONE_LIST"), "The example database contains PHONE_LIST view.");
             Assert.IsTrue(schema.StoredProcedures.Any(s => s.Name == "ADD_EMP_PROJ"), "The example database contains ADD_EMP_PROJ stored procedure.");
-            Assert.IsTrue(schema.Functions.Any(f => f.Name == "RDB$GET_CONTEXT"), "The example database contains RDB$GET_CONTEXT function.");
+            //Assert.IsTrue(schema.Functions.Any(f => f.Name == "RDB$GET_CONTEXT"), "The example database contains RDB$GET_CONTEXT function.");
             Assert.IsTrue(schema.Sequences.Any(s => s.Name == "EMP_NO_GEN"), "The example database contains EMP_NO_GEN sequence.");
             var employees = schema.FindTableByName("EMPLOYEE");
             AssertEmployeeTableValid(employees);
@@ -59,6 +66,10 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod, TestCategory("Firebird")]
         public void Table_OnEmployeeTable_ShouldReturnTheEmployeeTableInformation()
         {
+            if (!File.Exists(Path))
+            {
+                Assert.Inconclusive("Firebird example database not found " + Path);
+            }
             var employees = _dbReader.Table("EMPLOYEE");
             AssertEmployeeTableValid(employees);
         }
