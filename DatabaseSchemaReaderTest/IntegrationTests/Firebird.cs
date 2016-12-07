@@ -16,7 +16,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         // In Firebird.conf, set WireCrypt = Enabled (.net provider doesn't support the default required mode)
 
         const string ProviderName = "FirebirdSql.Data.FirebirdClient";
-        const string Path = @"C:\Program Files (86)\Firebird\Firebird_3_0\examples\empbuild\EMPLOYEE.FDB";
+        const string Path = @"C:\Program Files (x86)\Firebird\Firebird_3_0\examples\empbuild\EMPLOYEE.FDB";
         const string ConnectionString = "User=SYSDBA;Password=masterkey;Database=" + Path + ";Server=localhost; Connection lifetime=15;Pooling=true";
         private DatabaseReader _dbReader;
 

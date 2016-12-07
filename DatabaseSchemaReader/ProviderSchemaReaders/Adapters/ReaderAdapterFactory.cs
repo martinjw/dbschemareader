@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -58,10 +59,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                     //{
                     //    schemaReader = new Db2ISeriesSchemaReader(connectionString, providerName);
                     //}
-                    //else if (providerName.Equals("FirebirdSql.Data.FirebirdClient", StringComparison.OrdinalIgnoreCase))
-                    //{
-                    //    schemaReader = new FirebirdSqlSchemaReader(connectionString, providerName);
-                    //}
+                    if (schemaParameters.ProviderName.Equals("FirebirdSql.Data.FirebirdClient", StringComparison.OrdinalIgnoreCase))
+                    {
+                        schemaReader = new FirebirdAdapter(schemaParameters);
+                    }
 
                     break;
             }
