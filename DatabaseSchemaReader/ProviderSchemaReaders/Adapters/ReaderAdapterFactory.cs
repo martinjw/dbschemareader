@@ -59,7 +59,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                     //{
                     //    schemaReader = new Db2ISeriesSchemaReader(connectionString, providerName);
                     //}
-                    if (string.Equals(schemaParameters.ProviderName, "FirebirdSql.Data.FirebirdClient", StringComparison.OrdinalIgnoreCase)))
+                    if (string.Equals(schemaParameters.ProviderName, "FirebirdSql.Data.FirebirdClient", StringComparison.OrdinalIgnoreCase))
                     {
                         schemaReader = new FirebirdAdapter(schemaParameters);
                     }
