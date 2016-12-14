@@ -3,7 +3,7 @@
         "summary": "A simple, cross-database tool to read database metadata",
         "tags": [ "ADO", "Entity Framework Code First", "SQLServer", "SQLite", "Oracle", "MySQL", "PostgreSql", "Schema", "Database" ],
         "owners": [ "Martin Willey" ],
-        "releaseNotes": "2.2.0: Fix for Codegen, column.IsComputed, ODBC schemas, add InclusionFilter",
+        "releaseNotes": "2.3.0: Add Firebird support in .net Core; fix for Codegen",
         "projectUrl": "https://github.com/martinjw/dbschemareader",
         "licenseUrl": "http://www.microsoft.com/en-us/openness/licenses.aspx#MPL",
         "repository": {
@@ -11,7 +11,7 @@
             "url": "https://github.com/martinjw/dbschemareader"
         }
     },
-    "version": "2.2.0-*",
+    "version": "2.3.0-*",
     "authors": [ "Martin Willey" ],
     "description": "Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.",
     "title": "DatabaseSchemaReader",
