@@ -241,8 +241,14 @@ namespace DatabaseSchemaReader
             DatabaseSchema.Tables.AddRange(tables);
 
             UpdateReferences();
-            if (DatabaseSchema.DataTypes.Count > 0)
+            if (DatabaseSchema.DataTypes.Count == 0)
+            {
+                DataTypes(); //force load of datatypes
+            }
+            else
+            {
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
+            }
 
             return tables;
         }
