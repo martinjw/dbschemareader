@@ -55,6 +55,12 @@ namespace DatabaseSchemaReader.CodeGen
             var primaryKeyName = column.NetName;
             if (column.IsPrimaryKey && column.IsForeignKey)
             {
+                //if it's a composite key as well, always write an Id version
+                var table = column.Table;
+                if (table != null && table.HasCompositeKey)
+                {
+                    return primaryKeyName + "Id";
+                }
                 //a foreign key will be written, so we need to avoid a collision
                 var refTable = column.ForeignKeyTable;
                 var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
