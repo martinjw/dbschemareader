@@ -99,6 +99,7 @@
     <Compile Include="CodeGen\PluralizingNamer.cs" />
     <Compile Include="CodeGen\PrepareSchemaNames.cs" />
     <Compile Include="CodeGen\Procedures\ProcedureWriter.cs" />
+    <Compile Include="CodeGen\ProjectVersion.cs" />
     <Compile Include="CodeGen\ProjectWriter.cs" />
     <Compile Include="CodeGen\Procedures\SprocLogic.cs" />
     <Compile Include="CodeGen\Procedures\SprocResultType.cs" />

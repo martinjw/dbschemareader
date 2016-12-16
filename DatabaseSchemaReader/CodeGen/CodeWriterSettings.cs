@@ -129,6 +129,11 @@ namespace DatabaseSchemaReader.CodeGen
         /// <value><c>true</c> if to write project file; otherwise, <c>false</c>.</value>
         public bool WriteProjectFileNet35 { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to write a csproj project file for .Net 4.6 (VS 2015)
+        /// </summary>
+        /// <value><c>true</c> if to write project file; otherwise, <c>false</c>.</value>
+        public bool WriteProjectFileNet46 { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to include views.

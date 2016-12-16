@@ -43,7 +43,7 @@ namespace DatabaseSchemaViewer
             //if poco, write the sprocs - or if read the sprocs, we can generate
             settings.WriteStoredProcedures = (_readProcedures || CodeTarget == CodeTarget.Poco);
             settings.WriteUnitTest = Properties.Settings.Default.CodeGenWriteUnitTest;
-            settings.WriteProjectFile = Properties.Settings.Default.CodeGenWriteProjectFile;
+            settings.WriteProjectFileNet46 = Properties.Settings.Default.CodeGenWriteProjectFile;
             settings.IncludeViews = Properties.Settings.Default.CodeGenIncludeViews;
             settings.WriteCodeFirstIndexAttribute = Properties.Settings.Default.CodeGenWriteIndexAttribute;
             var cw = new CodeWriter(_databaseSchema, settings);

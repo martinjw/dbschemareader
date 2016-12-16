@@ -18,6 +18,7 @@ namespace DatabaseSchemaReader.CodeGen
         private string _mappingPath;
         private MappingNamer _mappingNamer;
         private readonly CodeWriterSettings _codeWriterSettings;
+        private readonly ProjectVersion _projectVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeWriter"/> class.
@@ -40,6 +41,12 @@ namespace DatabaseSchemaReader.CodeGen
 
             _schema = schema;
             _codeWriterSettings = codeWriterSettings;
+
+            var vs2010 = _codeWriterSettings.WriteProjectFile;
+            var vs2015 = _codeWriterSettings.WriteProjectFileNet46;
+            _projectVersion = vs2015 ? ProjectVersion.Vs2015 : vs2010 ? ProjectVersion.Vs2010 : ProjectVersion.Vs2008;
+            //cannot be .net 3.5
+            if (IsCodeFirst() && _projectVersion == ProjectVersion.Vs2008) _projectVersion = ProjectVersion.Vs2015;
 
             PrepareSchemaNames.Prepare(schema, codeWriterSettings.Namer);
         }
@@ -118,17 +125,13 @@ namespace DatabaseSchemaReader.CodeGen
         }
 
         /// <summary>
-        /// Creates the project writer, using either 2008 or 2010 format.
+        /// Creates the project writer, using either 2008 or 2010 or VS2015 format.
         /// </summary>
         /// <returns></returns>
         private ProjectWriter CreateProjectWriter()
         {
             var pw = new ProjectWriter(_codeWriterSettings.Namespace);
-            var vs2010 = _codeWriterSettings.WriteProjectFile;
-            var vs2008 = _codeWriterSettings.WriteProjectFileNet35;
-            if (IsCodeFirst()) vs2010 = true;
-            //you can specify 2008 AND 2010.
-            if (vs2010 && !vs2008) pw.UpgradeTo2010();
+            pw.Upgrade(_projectVersion);
             return pw;
         }
 
@@ -151,25 +154,16 @@ namespace DatabaseSchemaReader.CodeGen
             }
             var vs2010 = _codeWriterSettings.WriteProjectFile;
             var vs2008 = _codeWriterSettings.WriteProjectFileNet35;
+            var vs2015 = _codeWriterSettings.WriteProjectFileNet46;
             if (IsCodeFirst()) vs2008 = false;
-            if (!vs2010 && !vs2008) return;
+            //none selected, do nothing
+            if (!vs2010 && !vs2008 && !vs2015) return;
 
             var projectName = _codeWriterSettings.Namespace ?? "Project";
 
-            if (vs2008)
-            {
-                File.WriteAllText(
+            File.WriteAllText(
                     Path.Combine(directory.FullName, projectName + ".csproj"),
                     pw.Write());
-            }
-            if (vs2010)
-            {
-                pw.UpgradeTo2010();
-                if (vs2008) projectName += ".2010";
-                File.WriteAllText(
-                    Path.Combine(directory.FullName, projectName + ".csproj"),
-                    pw.Write());
-            }
         }
 
         private bool IsCodeFirst()
@@ -181,7 +175,7 @@ namespace DatabaseSchemaReader.CodeGen
         private bool FilterIneligible(DatabaseTable table)
         {
             if (!IsCodeFirst()) return false;
-            if (table.IsManyToManyTable()  && _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
+            if (table.IsManyToManyTable() && _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
                 return true;
             if (table.PrimaryKey == null)
                 return true;
@@ -237,21 +231,22 @@ namespace DatabaseSchemaReader.CodeGen
             if (!mapping.Exists) mapping.Create();
             _mappingPath = mapping.FullName;
 
+            var packWriter = new PackagesWriter(_projectVersion);
+            if (RequiresOracleManagedClient) packWriter.AddOracleManagedClient();
+
             //no need to reference NHibernate for HBMs
             switch (_codeWriterSettings.CodeTarget)
             {
                 case CodeTarget.PocoNHibernateFluent:
                     pw.AddNHibernateReference();
-                    var packs = _codeWriterSettings.WriteProjectFileNet35 ?
-                            PackagesWriter.WriteFluentNHibernateNet35() :
-                            PackagesWriter.WriteFluentNHibernateNet4();
+                    var packs = packWriter.WriteFluentNHibernate();
                     WritePackagesConfig(directory, pw, packs);
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
                 case CodeTarget.PocoRiaServices:
+                    pw.Upgrade(_projectVersion);
                     pw.AddEntityFrameworkReference();
-                    pw.UpgradeTo2010(); //you can only use 2010
-                    WritePackagesConfig(directory, pw, PackagesWriter.WriteEntityFrameworkNet4());
+                    WritePackagesConfig(directory, pw, packWriter.WriteEntityFramework());
                     break;
             }
         }
@@ -286,7 +281,7 @@ namespace DatabaseSchemaReader.CodeGen
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
                 case CodeTarget.PocoRiaServices:
-                    case CodeTarget.PocoEfCore:
+                case CodeTarget.PocoEfCore:
                     var cfmw = new CodeFirstMappingWriter(table, _codeWriterSettings, _mappingNamer);
                     var cfmap = cfmw.Write();
 
@@ -326,7 +321,17 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        private static void WriteStoredProcedure(string procedures, string directoryPath, string @namespace, DatabaseStoredProcedure sproc, ProjectWriter pw)
+        private bool RequiresOracleManagedClient
+        {
+            get
+            {
+                var provider = _schema.Provider;
+                if (provider == null) return false;
+                return provider.StartsWith("Oracle.ManagedDataAccess", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private void WriteStoredProcedure(string procedures, string directoryPath, string @namespace, DatabaseStoredProcedure sproc, ProjectWriter pw)
         {
             //if no .net classname, don't process
             if (string.IsNullOrEmpty(sproc.NetName)) return;
@@ -341,6 +346,8 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 if (sw.RequiresDevartOracleReference)
                     pw.AddDevartOracleReference();
+                else if (RequiresOracleManagedClient)
+                    pw.AddOracleManagedReference();
                 else
                     pw.AddOracleReference();
             }
