@@ -140,11 +140,12 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                 //    "//modelBuilder.Conventions.Remove<IncludeMetadataConvention>(); //EF 4.1-4.2 only, obsolete in EF 4.3");
                 if (IsOracle)
                 {
+                    //we comment them out for now
                     _cb.AppendLine("// Oracle devart configuration http://www.devart.com/dotconnect/oracle/docs/?EFProviderConfiguration.html");
-                    _cb.AppendLine("var config = Devart.Data.Oracle.Entity.Configuration.OracleEntityProviderConfig.Instance;");
-                    _cb.AppendLine("config.Workarounds.IgnoreSchemaName = true;");
+                    _cb.AppendLine("//var config = Devart.Data.Oracle.Entity.Configuration.OracleEntityProviderConfig.Instance;");
+                    _cb.AppendLine("//config.Workarounds.IgnoreSchemaName = true;");
                     // This option must be True for EF Code-First Migrations (EF v4.3.x and v5.x) to work correctly.
-                    _cb.AppendLine("config.Workarounds.ColumnTypeCasingConventionCompatibility = true;");
+                    _cb.AppendLine("//config.Workarounds.ColumnTypeCasingConventionCompatibility = true;");
                     // if it is set to false, you must turn off ColumnTypeCasingConvention explicitly for each DbContext ie this...
                     //_cb.AppendLine("modelBuilder.Conventions.Remove<System.Data.Entity.ModelConfiguration.Conventions.ColumnTypeCasingConvention>();");
                 }

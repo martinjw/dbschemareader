@@ -122,6 +122,7 @@
     <Compile Include="Codegen\ClassWriterAssociationTableTest.cs" />
     <Compile Include="Codegen\ClassWriterCompositeKeyTest2.cs" />
     <Compile Include="Codegen\OracleClassWriterTest.cs" />
+    <Compile Include="Codegen\ProjectWriterTest.cs" />
     <Compile Include="Compare\CompareResultFindTest.cs" />
     <Compile Include="Compare\CompareSchemaResultsTest.cs" />
     <Compile Include="Compare\CompareSchemasTest.cs" />
