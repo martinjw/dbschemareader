@@ -50,7 +50,8 @@ namespace DatabaseSchemaReader.CodeGen
             else if (CodeTarget == CodeTarget.PocoEntityCodeFirst || CodeTarget == CodeTarget.PocoRiaServices)
             {
                 //EF needs the default mapping type
-                dataType = dt.NetDataTypeCSharpName;
+                dataType = dt.NetCodeName(column);
+                //dataType = dt.NetDataTypeCSharpName;
             }
             else
             {
