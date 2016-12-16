@@ -344,6 +344,12 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             {
                 if (Type.GetType(dt.NetDataType) != typeof(decimal))
                     return; //short and long don't have precision either
+                var cst = dt.NetCodeName(column);
+                if (cst == "int" || cst == "short" || cst == "long")
+                {
+                    //we've decided it's an integer type, HasPrecision not valid
+                    return;
+                }
                 if (column.Precision != 18 || column.Scale != 0)
                 {
                     sb.AppendFormat(CultureInfo.InvariantCulture, ".HasPrecision({0}, {1})",

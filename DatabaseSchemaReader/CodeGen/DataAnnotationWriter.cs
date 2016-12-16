@@ -75,6 +75,12 @@ namespace DatabaseSchemaReader.CodeGen
             }
             else if (dt.GetNetType() == typeof(decimal))
             {
+                var cst = dt.NetCodeName(column);
+                if (cst == "int" || cst == "short" || cst == "long")
+                {
+                    //we've decided it's an integer type, decimal annotation not valid
+                    return;
+                }
                 //[Range(typeof(decimal),"0", "999")]
                 var max = column.Precision.GetValueOrDefault() - column.Scale.GetValueOrDefault();
                 if (max > 0 && max < 28)
