@@ -8,8 +8,7 @@ namespace DatabaseSchemaReaderTest.Codegen
     {
         private ProjectWriter CreateProjectWriter(string @namespace, ProjectVersion projectVersion)
         {
-            var pw = new ProjectWriter(@namespace);
-            pw.Upgrade(projectVersion);
+            var pw = new ProjectWriter(@namespace, projectVersion);
             return pw;
         }
 
