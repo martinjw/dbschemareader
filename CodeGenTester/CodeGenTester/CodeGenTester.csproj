@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DatabaseSchemaReader">
-      <HintPath>..\..\Bin\DatabaseSchemaReader.dll</HintPath>
+      <HintPath>..\..\Bin\net4\DatabaseSchemaReader.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Build" />

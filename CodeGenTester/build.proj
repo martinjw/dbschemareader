@@ -15,7 +15,7 @@
     <Exec Command="&quot;..\tools\NuGet.exe&quot; restore &quot;CodeGen.TestRunner.sln&quot;" />
   </Target>
   <Target Name="Build">
-	<Copy SourceFiles="..\bin\DatabaseSchemaReader.dll" DestinationFolder="$(OutputPath)" />
+	<Copy SourceFiles="..\bin\net4\DatabaseSchemaReader.dll" DestinationFolder="$(OutputPath)" />
     <Message Text="Building CodeGenTester" />
     <MSBuild Projects="CodeGenTester\CodeGenTester.csproj" 
 		Properties="OutputPath=$(OutputPath)"/>

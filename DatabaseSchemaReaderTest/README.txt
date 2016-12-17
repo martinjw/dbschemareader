@@ -1,8 +1,4 @@
-﻿This test project is a Visual Studio 2008/2010 MsTest project.
-You can easily convert it to NUnit:
-- delete reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework 
-- add reference to NUnit.framework
-- in properties, add the conditional compilation symbol NUNIT
+﻿This test project is a Visual Studio 2015 MsTest project.
 
 Many of these tests are INTEGRATION TESTS. They interact with the database, IO and .net ADO data providers.
 
