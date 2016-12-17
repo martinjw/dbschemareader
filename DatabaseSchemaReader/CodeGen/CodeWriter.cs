@@ -130,8 +130,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         private ProjectWriter CreateProjectWriter()
         {
-            var pw = new ProjectWriter(_codeWriterSettings.Namespace);
-            pw.Upgrade(_projectVersion);
+            var pw = new ProjectWriter(_codeWriterSettings.Namespace, _projectVersion);
             return pw;
         }
 
@@ -244,7 +243,6 @@ namespace DatabaseSchemaReader.CodeGen
                     break;
                 case CodeTarget.PocoEntityCodeFirst:
                 case CodeTarget.PocoRiaServices:
-                    pw.Upgrade(_projectVersion);
                     pw.AddEntityFrameworkReference();
                     WritePackagesConfig(directory, pw, packWriter.WriteEntityFramework());
                     break;
