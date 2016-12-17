@@ -25,7 +25,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //assert
             Assert.IsTrue(xml.Contains("<Project ToolsVersion=\"3.5\""), "VS2008 tools");
             Assert.IsTrue(xml.Contains("<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>"), "Targetting .net v3.5");
-            Assert.IsTrue(xml.Contains("<Reference Include=\"NHibernate\">"),"NHib ref included");
+            Assert.IsTrue(xml.Contains("<Reference Include=\"NHibernate"),"NHib ref included");
             Assert.IsTrue(xml.Contains("<None Include=\"packages.config\" />"), "Packages.config included");
             Assert.IsTrue(xml.Contains("<Compile Include=\"x.cs\" "),"Class included");
         }
