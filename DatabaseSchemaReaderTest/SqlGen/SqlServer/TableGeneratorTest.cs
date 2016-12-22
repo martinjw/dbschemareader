@@ -1,3 +1,4 @@
+using System;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen.SqlServer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -84,5 +85,23 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             Assert.IsTrue(ddl.Contains("'This is the primary key'"));
         }
 
+        [TestMethod]
+        public void TestSqlServerWithSysDateTime()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.SqlServer);
+            var table = schema.AddTable("Test");
+            table.AddColumn<int>("Id").AddPrimaryKey();
+            // [Update] DATETIME2(3)  NOT NULL DEFAULT (SYSDATETIME()),
+            var created = table.AddColumn<DateTime>("Created");
+            created.DefaultValue = "(SYSDATETIME())";
+            var tableGen = new TableGenerator(table);
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("DEFAULT (SYSDATETIME())"));
+        }
     }
 }

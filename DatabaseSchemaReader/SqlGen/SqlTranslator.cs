@@ -46,6 +46,11 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 value = value.Remove(getDate, 9).Insert(getDate, "current_timestamp");
             }
+            //SYSDATETIME, SYSUTCDATETIME and SYSDATETIMEOFFSET are datetime2s 
+            if (value.IndexOf("SYSDATETIME", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                return value;
+            }
             //Oracle SYSDATE is actually current_timestamp(3) in Oracle (timestamp includes seconds) 
             var sysDate = value.IndexOf("sysdate", StringComparison.OrdinalIgnoreCase);
             if (sysDate != -1)
