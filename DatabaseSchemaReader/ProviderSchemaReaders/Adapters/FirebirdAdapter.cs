@@ -21,7 +21,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseTable> Tables(string tableName)
         {
-            return new Tables(Owner, tableName)
+            return new Tables(Owner, tableName, Parameters.SchemaFactory)
                 .Execute(DbConnection);
         }
 

@@ -8,10 +8,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServerCe
     internal class Tables : SqlExecuter<DatabaseTable>
     {
         private readonly string _tableName;
+        private readonly SchemaFactory _factory;
 
-        public Tables(string owner, string tableName)
+        public Tables(string owner, string tableName, SchemaFactory factory)
         {
             _tableName = tableName;
+            _factory = factory;
             Owner = owner;
             Sql = @"select TABLE_SCHEMA, TABLE_NAME, DESCRIPTION 
 from INFORMATION_SCHEMA.TABLES 
@@ -41,12 +43,10 @@ where
         {
             var schema = record.GetString("TABLE_SCHEMA");
             var name = record["TABLE_NAME"].ToString();
-            var table = new DatabaseTable
-                        {
-                            Name = name,
-                            SchemaOwner = schema,
-                            Description = record.GetString("DESCRIPTION"),
-                        };
+            var table = _factory.CreateDatabaseTable();
+            table.Name = name;
+            table.SchemaOwner = schema;
+            table.Description = record.GetString("DESCRIPTION");
 
             Result.Add(table);
         }

@@ -14,6 +14,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             ConnectionString = dbConnection.ConnectionString;
             SqlType = ProviderToSqlType.Convert(ProviderName);
             Exclusions = new Exclusions();
+            SchemaFactory = new SchemaFactory();
         }
 
         public System.Data.Common.DbConnection DbConnection { get; private set; }
@@ -24,6 +25,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             ProviderName = ProviderToSqlType.Convert(sqlType);
             SqlType = sqlType;
             Exclusions = new Exclusions();
+            SchemaFactory = new SchemaFactory();
         }
 
         public SchemaParameters(string connectionString, string provider)
@@ -32,6 +34,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             ProviderName = provider;
             SqlType = ProviderToSqlType.Convert(ProviderName);
             Exclusions = new Exclusions();
+            SchemaFactory = new SchemaFactory();
         }
 #endif
 
@@ -56,5 +59,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         public string ProviderName { get; private set; }
 
         public DatabaseSchema DatabaseSchema { get; set; }
+
+        public SchemaFactory SchemaFactory { get; set; }
     }
 }

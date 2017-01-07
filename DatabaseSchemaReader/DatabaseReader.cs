@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 // ReSharper disable once RedundantUsingDirective
 using System.Threading;
+using DatabaseSchemaReader.Extenders;
 
 namespace DatabaseSchemaReader
 {
@@ -405,8 +406,36 @@ namespace DatabaseSchemaReader
             if (!_fixUp) return;
 
             DatabaseSchemaFixer.UpdateReferences(DatabaseSchema); //updates all references
+            //run any custom extender on schema
+            _readerAdapter.ExtendSchema(DatabaseSchema);
         }
 
+        /// <summary>
+        /// Adds a table extender.
+        /// </summary>
+        /// <param name="tableExtender">The table extender.</param>
+        protected void AddTableExtender(IExtendTable tableExtender)
+        {
+            if (tableExtender == null) throw new ArgumentNullException("tableExtender", "Table extender is null");
+            _readerAdapter.TableExtender = tableExtender;
+        }
+
+        protected void AddSchemaExtender(IExtendSchema schemaExtender)
+        {
+            if (schemaExtender == null) throw new ArgumentNullException("schemaExtender", "Table extender is null");
+            _readerAdapter.SchemaExtender = schemaExtender;
+        }
+
+        /// <summary>
+        /// Adds the schema factory.
+        /// </summary>
+        /// <param name="schemaFactory">The schema factory.</param>
+        /// <exception cref="System.ArgumentNullException">schemaFactory</exception>
+        protected void AddSchemaFactory(SchemaFactory schemaFactory)
+        {
+            if (schemaFactory == null) throw new ArgumentNullException(nameof(schemaFactory));
+            _schemaParameters.SchemaFactory = schemaFactory;
+        }
         #region Implementation of IDisposable
 
         /// <summary>

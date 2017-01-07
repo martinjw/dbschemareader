@@ -8,10 +8,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
     internal class Tables : SqlExecuter<DatabaseTable>
     {
         private readonly string _tableName;
+        private readonly SchemaFactory _factory;
 
-        public Tables(string tableName)
+        public Tables(string tableName, SchemaFactory factory)
         {
             _tableName = tableName;
+            _factory = factory;
             Sql = @"SELECT name FROM sqlite_master
 WHERE type='table' AND
     (name = @TABLE_NAME or (@TABLE_NAME is null))
@@ -34,11 +36,8 @@ ORDER BY name";
         protected override void Mapper(IDataRecord record)
         {
             var name = record["name"].ToString();
-            var table = new DatabaseTable
-                        {
-                            Name = name,
-                            SchemaOwner = null
-                        };
+            var table = _factory.CreateDatabaseTable();
+            table.Name = name;
 
             Result.Add(table);
         }

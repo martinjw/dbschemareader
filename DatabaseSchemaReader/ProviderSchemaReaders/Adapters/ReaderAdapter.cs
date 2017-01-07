@@ -2,6 +2,7 @@
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System.Collections.Generic;
 using System.Data.Common;
+using DatabaseSchemaReader.Extenders;
 using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
@@ -178,5 +179,24 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             //nothing
         }
+
+        public virtual void ExtendTable(DatabaseTable databaseTable)
+        {
+            if (TableExtender != null)
+            {
+                TableExtender.Execute(databaseTable, DbConnection);
+            }
+        }
+
+        public virtual void ExtendSchema(DatabaseSchema databaseSchema)
+        {
+            if (SchemaExtender != null)
+            {
+                SchemaExtender.Execute(databaseSchema, DbConnection);
+            }
+        }
+
+        public IExtendTable TableExtender { get; set; }
+        public IExtendSchema SchemaExtender { get; set; }
     }
 }

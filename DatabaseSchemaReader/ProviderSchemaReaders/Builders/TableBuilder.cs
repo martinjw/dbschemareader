@@ -68,11 +68,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var indexes = MergeIndexColumns(_readerAdapter.Indexes(tableName), _readerAdapter.IndexColumns(tableName));
             if (columns.Count == 0) return null;
 
-            var table = new DatabaseTable
-            {
-                SchemaOwner = _readerAdapter.Parameters.Owner,
-                Name = tableName
-            };
+            var table = tables.First();
             table.Columns.AddRange(columns);
             UpdateCheckConstraints(table, checkConstraints);
             UpdateIdentities(table.Columns, identityColumns);
@@ -86,6 +82,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             UpdateTableDescriptions(table, tableDescs);
             UpdateColumnDescriptions(table, colDescs);
             _readerAdapter.PostProcessing(table);
+            _readerAdapter.ExtendTable(table);
             return table;
         }
 
@@ -156,6 +153,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 UpdateTableDescriptions(table, tableDescs);
                 UpdateColumnDescriptions(table, colDescs);
                 _readerAdapter.PostProcessing(table);
+                _readerAdapter.ExtendTable(table);
             }
 
             return tables;

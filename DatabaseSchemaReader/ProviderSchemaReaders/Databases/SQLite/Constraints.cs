@@ -20,7 +20,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 
         public IList<DatabaseConstraint> Execute(DbConnection connection)
         {
-            var tables = new Tables(_tableName).Execute(connection);
+            var tables = new Tables(_tableName, new SchemaFactory()).Execute(connection);
 
             foreach (var table in tables)
             {

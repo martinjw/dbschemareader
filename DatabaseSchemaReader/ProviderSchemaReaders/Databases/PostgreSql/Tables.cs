@@ -8,10 +8,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
     internal class Tables : SqlExecuter<DatabaseTable>
     {
         private readonly string _tableName;
+        private readonly SchemaFactory _factory;
 
-        public Tables(string owner, string tableName)
+        public Tables(string owner, string tableName, SchemaFactory factory)
         {
             _tableName = tableName;
+            _factory = factory;
             Owner = owner;
             Sql = @"SELECT 
 table_schema, 
@@ -40,11 +42,9 @@ ORDER BY table_schema, table_name";
         {
             var schema = record["table_schema"].ToString();
             var name = record["table_name"].ToString();
-            var table = new DatabaseTable
-                        {
-                            Name = name,
-                            SchemaOwner = schema
-                        };
+            var table = _factory.CreateDatabaseTable();
+            table.Name = name;
+            table.SchemaOwner = schema;
 
             Result.Add(table);
         }

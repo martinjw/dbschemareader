@@ -8,10 +8,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
     internal class Tables : SqlExecuter<DatabaseTable>
     {
         private readonly string _tableName;
+        private readonly SchemaFactory _factory;
 
-        public Tables(string owner, string tableName)
+        public Tables(string owner, string tableName, SchemaFactory factory)
         {
             _tableName = tableName;
+            _factory = factory;
             Owner = owner;
             Sql = @"SELECT
  rdb$relation_name AS TABLE_NAME,
@@ -45,12 +47,10 @@ ORDER BY
             //Firebird doesn't have schemas, but it does have owners
             var schema = record["OWNER_NAME"].ToString();
             var name = record["TABLE_NAME"].ToString();
-            var table = new DatabaseTable
-                        {
-                            Name = name.Trim(),
-                            SchemaOwner = schema.Trim(),
-                            Description = record.GetString("DESCRIPTION"),
-                        };
+            var table = _factory.CreateDatabaseTable();
+            table.Name = name.Trim();
+            table.SchemaOwner = schema.Trim();
+            table.Description = record.GetString("DESCRIPTION");
 
             Result.Add(table);
         }

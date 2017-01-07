@@ -180,6 +180,7 @@
     <Compile Include="DataSchema\DatabaseView.cs" />
     <Compile Include="DataSchema\DataType.cs" />
     <Compile Include="DataSchema\NamedSchemaObject.cs" />
+    <Compile Include="DataSchema\SchemaFactory.cs" />
     <Compile Include="DataSchema\SqlType.cs" />
     <Compile Include="Data\Converter.cs" />
     <Compile Include="Data\DateConverter.cs" />
@@ -187,6 +188,17 @@
     <Compile Include="Data\ChangesWriter.cs" />
     <Compile Include="Data\Reader.cs" />
     <Compile Include="Data\ScriptWriter.cs" />
+    <Compile Include="Extenders\IExtendSchema.cs" />
+    <Compile Include="Extenders\IExtendTable.cs" />
+    <Compile Include="Extenders\SqlServer\DatabaseStatistics.cs" />
+    <Compile Include="Extenders\SqlServer\HekatonReader.cs" />
+    <Compile Include="Extenders\SqlServer\SqlServerDatabaseReader.cs" />
+    <Compile Include="Extenders\SqlServer\SqlServerSchema.cs" />
+    <Compile Include="Extenders\SqlServer\SqlServerSchemaExtender.cs" />
+    <Compile Include="Extenders\SqlServer\SqlServerSchemaFactory.cs" />
+    <Compile Include="Extenders\SqlServer\SqlServerTable.cs" />
+    <Compile Include="Extenders\SqlServer\SqlServerTableExtender.cs" />
+    <Compile Include="Extenders\SqlServer\StatisticsReader.cs" />
     <Compile Include="Filters\Exclusions.cs" />
     <Compile Include="Filters\InclusionFilter.cs" />
     <Compile Include="Filters\PrefixFilter.cs" />

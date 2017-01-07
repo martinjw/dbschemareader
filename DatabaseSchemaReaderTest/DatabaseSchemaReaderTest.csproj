@@ -151,6 +151,7 @@
     <Compile Include="InitSQLite.cs" />
     <Compile Include="IntegrationTests\Access.cs" />
     <Compile Include="IntegrationTests\TableExistsTests.cs" />
+    <Compile Include="IntegrationTests\ExtendedSqlServerReader.cs" />
     <Compile Include="IntegrationTests\VistaDb.cs" />
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
