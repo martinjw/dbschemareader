@@ -10,8 +10,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlServerDatabaseReader"/> class from a DbConnection.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        public SqlServerDatabaseReader(SqlConnection connection) : base(connection)
+        /// <param name="connection">The connection. Should be a SqlConnection.</param>
+        public SqlServerDatabaseReader(System.Data.Common.DbConnection connection) : base(connection)
         {
             AddExtenders();
         }

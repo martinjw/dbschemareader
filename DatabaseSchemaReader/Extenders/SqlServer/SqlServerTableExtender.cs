@@ -9,6 +9,11 @@ namespace DatabaseSchemaReader.Extenders.SqlServer
     /// <seealso cref="DatabaseSchemaReader.Extenders.IExtendTable" />
     public class SqlServerTableExtender : IExtendTable
     {
+        /// <summary>
+        /// Add additional information to database table.
+        /// </summary>
+        /// <param name="databaseTable"></param>
+        /// <param name="connection"></param>
         public void Execute(DatabaseTable databaseTable, DbConnection connection)
         {
             var sqlTable = databaseTable as SqlServerTable;

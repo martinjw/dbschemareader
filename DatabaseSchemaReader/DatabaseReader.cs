@@ -420,6 +420,11 @@ namespace DatabaseSchemaReader
             _readerAdapter.TableExtender = tableExtender;
         }
 
+        /// <summary>
+        /// Adds the schema extender.
+        /// </summary>
+        /// <param name="schemaExtender">The schema extender.</param>
+        /// <exception cref="ArgumentNullException">schemaExtender - Table extender is null</exception>
         protected void AddSchemaExtender(IExtendSchema schemaExtender)
         {
             if (schemaExtender == null) throw new ArgumentNullException("schemaExtender", "Table extender is null");
