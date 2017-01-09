@@ -21,7 +21,7 @@ WHERE
     (SPECIFIC_SCHEMA = @Owner OR (@Owner IS NULL))
     AND (SPECIFIC_NAME = @Name OR (@Name IS NULL))
     AND (ROUTINE_TYPE = 'FUNCTION')
-    AND ObjectProperty (Object_Id (INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME), 'IsMSShipped') = 0 and
+    AND ISNULL(ObjectProperty (Object_Id (INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME), 'IsMSShipped'),0) = 0 and
         (
             select 
                 major_id 
