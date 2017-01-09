@@ -147,6 +147,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                             x.PackageName == func.Package);
                 func.Arguments.Clear();
                 func.Arguments.AddRange(funcArgs);
+                func.CheckArgumentsForReturnType();
             }
         }
 
