@@ -14,23 +14,22 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
             Owner = owner;
 
             Sql = @"SELECT
-  so.name AS TRIGGER_NAME,
-  USER_NAME(so.uid) AS TRIGGER_SCHEMA,
-  USER_NAME(parent.uid) AS TABLE_SCHEMA,
-  OBJECT_NAME(so.parent_obj) AS TABLE_NAME,
-  OBJECTPROPERTY(so.id, 'ExecIsUpdateTrigger') AS IS_UPDATE,
-  OBJECTPROPERTY(so.id, 'ExecIsDeleteTrigger') AS IS_DELETE,
-  OBJECTPROPERTY(so.id, 'ExecIsInsertTrigger') AS IS_INSERT,
-  OBJECTPROPERTY(so.id, 'ExecIsAfterTrigger') AS IS_AFTER,
-  OBJECTPROPERTY(so.id, 'ExecIsInsteadOfTrigger') AS IS_INSTEADOF,
-  OBJECTPROPERTY(so.id, 'ExecIsTriggerDisabled') AS IS_DISABLED,
-  OBJECT_DEFINITION(so.id) AS TRIGGER_BODY
-FROM sysobjects AS so
-INNER JOIN sysobjects AS parent
-  ON so.parent_obj = parent.Id
-WHERE so.type = 'TR'
-    AND (USER_NAME(parent.uid) = @Owner or (@Owner is null)) 
-    AND (OBJECT_NAME(so.parent_obj) = @TABLE_NAME or (@TABLE_NAME is null)) 
+ tr.name AS TRIGGER_NAME,
+ SCHEMA_NAME(parent.schema_id) AS TRIGGER_SCHEMA,
+ SCHEMA_NAME(parent.schema_id) AS TABLE_SCHEMA,
+ parent.name AS TABLE_NAME,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsUpdateTrigger') AS IS_UPDATE,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsDeleteTrigger') AS IS_DELETE,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsInsertTrigger') AS IS_INSERT,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsAfterTrigger') AS IS_AFTER,
+ tr.is_instead_of_trigger AS IS_INSTEADOF,
+ tr.is_disabled AS IS_DISABLED,
+ OBJECT_DEFINITION(tr.object_id) AS TRIGGER_BODY
+FROM sys.triggers AS tr
+ INNER JOIN sys.tables AS parent
+  ON tr.parent_id = parent.object_id
+WHERE (SCHEMA_NAME(parent.schema_id) = @Owner or (@Owner is null)) 
+    AND (parent.name = @TABLE_NAME or (@TABLE_NAME is null)) 
 ";
 
         }
