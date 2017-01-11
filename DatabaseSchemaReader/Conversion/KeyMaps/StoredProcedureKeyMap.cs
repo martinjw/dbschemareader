@@ -31,7 +31,11 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "DATABASE";
             //Intersystems Cache
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "PROCEDURE_SCHEM";
-            IsDb2 = dt.Columns.Contains("PROCEDURE_MODULE");
+            IsDb2 = dt.Columns.Contains("PROCEDURE_MODULE") || dt.Columns.Contains("ROUTINESCHEMA");
+            //db2 iSeries
+            if (!dt.Columns.Contains(Key)) Key = "SPECIFICNAME";
+            if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "SPECIFICSCHEMA";
+
             RoutineTypeKey = RoutineTypeKey;
             PackageKey = PackageKey;
             Sql = Sql;
