@@ -62,6 +62,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 }
             }
 
+            if (ct.IsCancellationRequested) return views;
+            var indexes = _readerAdapter.ViewIndexes(null);
+
             //get full datatables for all tables, to minimize database calls
             if (ct.IsCancellationRequested) return views;
             RaiseReadingProgress(SchemaObjectType.ViewColumns);
@@ -83,6 +86,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     cols = viewColumns.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner);
                 }
                 v.Columns.AddRange(cols);
+                v.Indexes = indexes.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner).ToList();
             }
             return views;
         }
