@@ -301,6 +301,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\IdentityColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewIndexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Sequences.cs" />
