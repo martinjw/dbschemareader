@@ -10,20 +10,7 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</description>
 		<summary>A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.</summary>
-		<releaseNotes>
-##v2.0 
- * New: NetStandard support (some restrictions), plus .net 3.5, .net 4.0, .net 4.5
- * SqlServer, Oracle, SQLite, MySql, PostgreSql, SqlServer CE are optimised and work across all platforms.
- * Breaking Change: Properties previously marked Obsolete are deleted
- * Breaking Change: DatabaseTable constraints have changed collection type
- * New: DatabaseSchema is now XmlSerializable
-##v1.6 
- * New: CodeWriterSettings has a CodeInserter to insert custom code during codegen.
-##v1.5 
- * New: DatabaseReader has overloads supporting CancellationToken
- * New: DatabaseReader has a ReaderProgress event (thanks inqb)
- * New: Build for v4.5 as well as v3.5 and v4.0
-</releaseNotes>
+		<releaseNotes>v2.3 fixes reading Db2 iSeries, Oracle + PostgreSql materialized views, SqlServer indexed views; code writer using ints for Oracle, vs2015</releaseNotes>
 		<tags>ADO, Entity Framework Code First, SQL Server, SQLite, Oracle, MySQL, PostgreSql, Schema, Database</tags>
 	</metadata>
 	<files>
