@@ -3,6 +3,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql;
 using DatabaseSchemaReader.SqlGen.PostgreSql;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -79,8 +80,18 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseView> Views(string viewName)
         {
-            return new Views(Owner, viewName)
+            var views = new Views(Owner, viewName)
                 .Execute(DbConnection);
+            if (string.IsNullOrEmpty(viewName) || !views.Any())
+            {
+                var mviews = new MaterializedViews(Owner, viewName)
+                    .Execute(DbConnection);
+                foreach (var mview in mviews)
+                {
+                    views.Add(mview);
+                }
+            }
+            return views;
         }
 
         public override IList<DatabaseFunction> Functions(string name)
