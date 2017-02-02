@@ -1,3 +1,6 @@
 {
-    "projects": [ "DatabaseSchemaReader", "CoreTest" ]
+    "projects": [ "DatabaseSchemaReader", "CoreTest" ],
+    "sdk": {
+        "version": "1.0.0-preview2-003131"
+    }
 }
