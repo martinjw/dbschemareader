@@ -29,6 +29,10 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "TABLE_SCHEM";
 
             if (!dt.Columns.Contains(TypeKey)) TypeKey = null;
+
+            //db2 iSeries
+            if (!dt.Columns.Contains(Key)) Key = "VIEWNAME";
+            if (!dt.Columns.Contains(OwnerKey)) OwnerKey = "VIEWSCHEMA";
         }
 
         public string Key { get; private set; }

@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.KeyMaps;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.RowConverters;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
     internal class Columns : SqlExecuter<DatabaseColumn>
     {
         private readonly string _tableName;
-        private readonly ColumnRowConverter _converter;
 
         public Columns(string owner, string tableName)
         {
@@ -37,9 +36,6 @@ where
     TABLE_TYPE = 'BASE TABLE'
  order by 
     c.TABLE_SCHEMA, c.TABLE_NAME, ORDINAL_POSITION";
-
-            var keyMap = new ColumnsKeyMap();
-            _converter = new ColumnRowConverter(keyMap);
         }
 
         public IList<DatabaseColumn> Execute(DbConnection connection)
@@ -56,8 +52,34 @@ where
 
         protected override void Mapper(IDataRecord record)
         {
-            var col = _converter.Convert(record);
+            var col = Convert(record);
             Result.Add(col);
+        }
+
+        public static DatabaseColumn Convert(IDataRecord row)
+        {
+            var column = new DatabaseColumn
+            {
+                Name = row["COLUMN_NAME"].ToString(),
+                TableName = row["TABLE_NAME"].ToString(),
+                SchemaOwner = row["TABLE_SCHEMA"].ToString(),
+                Ordinal = System.Convert.ToInt32(row["ORDINAL_POSITION"], CultureInfo.CurrentCulture),
+                DbDataType = row["DATA_TYPE"].ToString(),
+                Nullable = row.GetBoolean("IS_NULLABLE"),
+                Length = row.GetNullableInt("CHARACTER_MAXIMUM_LENGTH"),
+                Precision = row.GetNullableInt("NUMERIC_PRECISION"),
+                Scale = row.GetNullableInt("NUMERIC_SCALE"),
+                DateTimePrecision = row.GetNullableInt("DATETIME_PRECISION")
+            };
+            AddColumnDefault(row, "COLUMN_DEFAULT", column);
+
+            return column;
+        }
+        private static void AddColumnDefault(IDataRecord row, string defaultKey, DatabaseColumn column)
+        {
+            if (string.IsNullOrEmpty(defaultKey)) return;
+            string d = row[defaultKey].ToString();
+            if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(new[] { ' ', '\'', '=' });
         }
     }
 }

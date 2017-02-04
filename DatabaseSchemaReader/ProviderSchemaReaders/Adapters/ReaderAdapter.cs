@@ -7,7 +7,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
-    class ReaderAdapter
+    internal class ReaderAdapter
     {
         public readonly SchemaParameters Parameters;
         private ConnectionAdapter _connectionAdapter;
@@ -131,6 +131,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         }
 
         public virtual IList<DatabaseIndex> IndexColumns(string tableName)
+        {
+            return new List<DatabaseIndex>();
+        }
+
+        public virtual IList<DatabaseIndex> ViewIndexes(string tableName)
         {
             return new List<DatabaseIndex>();
         }

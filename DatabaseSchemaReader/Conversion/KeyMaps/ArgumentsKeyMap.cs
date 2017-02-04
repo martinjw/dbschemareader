@@ -66,7 +66,7 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
 
         private void CheckDb2(DataTable arguments)
         {
-            IsDb2 = arguments.Columns.Contains("PROCEDURE_MODULE");
+            IsDb2 = arguments.Columns.Contains("PROCEDURE_MODULE") || arguments.Columns.Contains("ROUTINESCHEMA");
             if (!arguments.Columns.Contains(ParameterName)) ParameterName = "COLUMN_NAME";
             if (arguments.Columns.Contains("PROVIDER_TYPE_NAME")) DatatypeKey = "PROVIDER_TYPE_NAME";
             Db2ColumnTypeKey = null;
@@ -74,6 +74,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!arguments.Columns.Contains(LengthKey)) LengthKey = "COLUMN_SIZE";
             if (!arguments.Columns.Contains(PrecisionKey)) PrecisionKey = "COLUMN_SIZE";
             if (!arguments.Columns.Contains(ScaleKey)) ScaleKey = "DECIMAL_DIGITS";
+            if (!arguments.Columns.Contains(SprocName)) SprocName = "SPECIFICNAME";
+            if (!arguments.Columns.Contains(OwnerKey)) OwnerKey = "SPECIFICSCHEMA";
         }
 
         private void CheckDevart(DataTable arguments)

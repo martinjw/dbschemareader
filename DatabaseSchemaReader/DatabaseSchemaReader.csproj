@@ -262,6 +262,8 @@
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Functions.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\IdentityColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Indexes.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\Oracle\MaterializedViewColumns.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\Oracle\MaterializedViews.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\OracleSequenceTrigger.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\OracleSqlExecuter.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Packages.cs" />
@@ -274,6 +276,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Triggers.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Users.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\ViewColumns.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\Oracle\ViewIndexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Views.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\CheckConstraints.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\ColumnDescriptions.cs" />
@@ -282,6 +285,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\DataTypeList.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Columns.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\MaterializedViews.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\ProcedureArguments.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\TableDescriptions.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Triggers.cs" />
@@ -313,6 +317,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\IdentityColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewIndexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Sequences.cs" />

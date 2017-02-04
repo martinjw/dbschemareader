@@ -2,6 +2,7 @@ using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
@@ -91,13 +92,39 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseView> Views(string viewName)
         {
-            return new Views(Owner, viewName)
+            var views = new Views(Owner, viewName)
                 .Execute(DbConnection);
+            if (string.IsNullOrEmpty(viewName) || !views.Any())
+            {
+                var mviews = new MaterializedViews(Owner, viewName)
+                    .Execute(DbConnection);
+                foreach (var mview in mviews)
+                {
+                    views.Add(mview);
+                }
+            }
+            return views;
         }
 
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
-            return new ViewColumns(Owner, viewName)
+            var columns = new ViewColumns(Owner, viewName)
+                .Execute(DbConnection);
+            if (string.IsNullOrEmpty(viewName) || !columns.Any())
+            {
+                var mCols = new MaterializedViewColumns(Owner, viewName)
+                    .Execute(DbConnection);
+                foreach (var mcol in mCols)
+                {
+                    columns.Add(mcol);
+                }
+            }
+            return columns;
+        }
+
+        public override IList<DatabaseIndex> ViewIndexes(string tableName)
+        {
+            return new ViewIndexes(Owner, tableName)
                 .Execute(DbConnection);
         }
 

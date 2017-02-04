@@ -106,6 +106,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 .Execute(DbConnection);
         }
 
+        public override IList<DatabaseIndex> ViewIndexes(string tableName)
+        {
+            return new ViewIndexes(Owner, tableName)
+                .Execute(DbConnection);
+        }
+
         public override IList<DatabaseColumn> IdentityColumns(string tableName)
         {
             return new IdentityColumns(Owner, tableName)
