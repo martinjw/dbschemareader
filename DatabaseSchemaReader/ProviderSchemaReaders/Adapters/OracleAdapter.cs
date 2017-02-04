@@ -1,13 +1,12 @@
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
-using System;
+using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System.Collections.Generic;
 using System.Linq;
-using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
-    class OracleAdapter : ReaderAdapter
+    internal class OracleAdapter : ReaderAdapter
     {
         public OracleAdapter(SchemaParameters schemaParameters) : base(schemaParameters)
         {
