@@ -4,8 +4,16 @@ using System.Globalization;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 {
-    static class DataRecordExtensions
+    /// <summary>
+    /// Extensions to help read ADO
+    /// </summary>
+    public static class DataRecordExtensions
     {
+        /// <summary>
+        /// Gets a string, DbNull becomes null.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="fieldName">Name of the field.</param>
         public static string GetString(this IDataRecord record, string fieldName)
         {
             var value = record[fieldName];
@@ -13,6 +21,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             return value.ToString();
         }
 
+        /// <summary>
+        /// Gets a nullable int.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="fieldName">Name of the field.</param>
         public static int? GetNullableInt(this IDataRecord record, string fieldName)
         {
             var value = record[fieldName];
@@ -27,11 +40,21 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
+        /// <summary>
+        /// Gets a non-nullable int.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="fieldName">Name of the field.</param>
         public static int GetInt(this IDataRecord record, string fieldName)
         {
             return GetNullableInt(record, fieldName).GetValueOrDefault();
         }
 
+        /// <summary>
+        /// Gets a nullable long.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="fieldName">Name of the field.</param>
         public static long? GetNullableLong(this IDataRecord record, string fieldName)
         {
             var value = record[fieldName];
@@ -46,6 +69,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
+        /// <summary>
+        /// Gets a boolean (0/1, Y{es}/N{o}, T{rue}/F{alse}).
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="fieldName">Name of the field.</param>
         public static bool GetBoolean(this IDataRecord record, string fieldName)
         {
             var value = record[fieldName];
