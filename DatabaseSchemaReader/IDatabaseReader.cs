@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Filters;
 
 namespace DatabaseSchemaReader
 {
@@ -9,6 +10,14 @@ namespace DatabaseSchemaReader
     /// </summary>
     public interface IDatabaseReader : IDisposable
     {
+        /// <summary>
+        /// Exclude specified items when reading schema
+        /// </summary>
+        /// <value>
+        /// The exclusions.
+        /// </value>
+        Exclusions Exclusions { get; }
+
         /// <summary>
         /// Gets or sets the owner user. Always set it with Oracle (otherwise you'll get SYS, MDSYS etc...)
         /// </summary>
@@ -35,6 +44,11 @@ namespace DatabaseSchemaReader
         /// Gets all tables (just names, no columns).
         /// </summary>
         IList<DatabaseTable> TableList();
+
+        /// <summary>
+        /// Gets all views (just names, no columns).
+        /// </summary>
+        IList<DatabaseView> ViewList();
 
         /// <summary>
         /// Gets all tables (plus constraints, indexes and triggers).

@@ -212,7 +212,17 @@ namespace DatabaseSchemaReader
                 return _readerAdapter.Tables(null);
             }
         }
-
+        /// <summary>
+        /// Gets all views (just names, no columns).
+        /// </summary>
+        public IList<DatabaseView> ViewList()
+        {
+            RaiseReadingProgress(SchemaObjectType.Tables);
+            using (_readerAdapter.CreateConnection())
+            {
+                return _readerAdapter.Views(null);
+            }
+        }
         /// <summary>
         /// Gets all tables (plus constraints, indexes and triggers).
         /// </summary>

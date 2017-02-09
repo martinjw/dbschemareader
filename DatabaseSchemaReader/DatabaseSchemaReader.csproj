@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DatabaseSchemaReader</RootNamespace>
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -141,6 +141,7 @@
     <Compile Include="Conversion\Loaders\AllTablesLoader.cs" />
     <Compile Include="Conversion\Loaders\TableLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
+    <Compile Include="DataSchema\DatabaseColumn.cs" />
     <Compile Include="DataSchema\INamedSchemaObject.cs" />
     <Compile Include="DataSchema\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
@@ -161,7 +162,7 @@
     <Compile Include="DataSchema\INamedObject.cs" />
     <Compile Include="DataSchema\NamedObject.cs" />
     <Compile Include="DataSchema\DatabaseArgument.cs" />
-    <Compile Include="DataSchema\DatabaseColumn.cs" />
+    <Compile Include="0 Modify\DatabaseColumn_Modify.cs" />
     <Compile Include="DataSchema\DatabaseConstraint.cs" />
     <Compile Include="DataSchema\DatabaseFunction.cs" />
     <Compile Include="DataSchema\DatabaseIndex.cs" />
@@ -437,7 +438,12 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Lan\JCommon\JCommon.csproj">
+      <Project>{36a646f6-5900-42b2-862e-9b932f71ecbc}</Project>
+      <Name>JCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
