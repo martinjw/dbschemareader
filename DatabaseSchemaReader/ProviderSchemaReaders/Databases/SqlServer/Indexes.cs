@@ -64,7 +64,10 @@ ORDER BY
                 };
                 if (record.GetBoolean("IsPrimary"))
                 {
-                    index.IndexType = "PRIMARY";
+                    //by default SqlServer pks have clustered indexes. If they are not, we need to record it.
+                    index.IndexType = string.Equals("NONCLUSTERED", index.IndexType, StringComparison.OrdinalIgnoreCase) ? 
+                        "PRIMARY NONCLUSTERED" : 
+                        "PRIMARY";
                 }
                 Result.Add(index);
             }
