@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DatabaseSchemaReader.DataSchema;
+using System.Collections.Generic;
 using System.Linq;
-using DatabaseSchemaReader.DataSchema;
 
 namespace SqlServerSchemaReader.Schema
 {
@@ -16,6 +16,8 @@ namespace SqlServerSchemaReader.Schema
         /// <param name="connectionString">The connection string.</param>
         public SqlServerSchema(string connectionString) : base(connectionString, "System.Data.SqlClient")
         {
+            TableTypes = new List<TableType>();
+            AliasTypes = new List<AliasType>();
         }
 
         /// <summary>
@@ -25,5 +27,15 @@ namespace SqlServerSchemaReader.Schema
         /// The SQL server tables.
         /// </value>
         public IEnumerable<SqlServerTable> SqlServerTables { get { return Tables.OfType<SqlServerTable>(); } }
+
+        /// <summary>
+        ///User Defined table types.
+        /// </summary>
+        public List<TableType> TableTypes { get; set; }
+
+        /// <summary>
+        /// User Defined data types.
+        /// </summary>
+        public List<AliasType> AliasTypes { get; set; }
     }
 }

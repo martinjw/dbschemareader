@@ -206,3 +206,46 @@ INSERT INTO [Categories] (
 
 --this should add a Statistics
 SELECT * FROM [Categories] ORDER BY [CategoryName];
+
+CREATE TYPE [dbo].[SSN] FROM [varchar](11) NOT NULL;
+
+CREATE TYPE [dbo].[TestTableType] AS TABLE
+  (
+    Id1 int NOT NULL,
+    Id2 int NOT NULL,        
+    UniqueName nvarchar(40) UNIQUE,
+    Created DateTime,
+    DefaultedValue int NOT NULL DEFAULT -1,
+    CheckedValue int NOT NULL DEFAULT 1 CHECK (CheckedValue > 0),
+    ComputedValue AS DefaultedValue + CheckedValue,
+    PRIMARY KEY (Id1,Id2)	,
+    CHECK (CheckedValue > DefaultedValue)
+  );
+CREATE TABLE [dbo].[SsnTable]
+(
+    [Id] [nchar](10) NOT NULL,
+    [Ssn] [dbo].[SSN] NOT NULL,
+ CONSTRAINT [PK_SsnTable] PRIMARY KEY CLUSTERED 
+(
+    [Id] ASC
+));
+GO
+CREATE PROCEDURE FindSsn 
+    -- Add the parameters for the stored procedure here
+    @Ssn SSN = '12345678901'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT @SSN;
+END
+
+GO
+CREATE PROCEDURE [dbo].[Counting]  
+    @TVP [TestTableType] READONLY  
+    AS   
+    SET NOCOUNT ON  
+        SELECT COUNT(*)  
+        FROM  @TVP;  
+GO
+

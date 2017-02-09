@@ -43,12 +43,20 @@
     <Compile Include="Extenders\SqlServerSchemaExtender.cs" />
     <Compile Include="Extenders\SqlServerTableExtender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SchemaReaders\AliasTypeColumnReader.cs" />
+    <Compile Include="SchemaReaders\AliasTypeReader.cs" />
     <Compile Include="SchemaReaders\HekatonReader.cs" />
     <Compile Include="SchemaReaders\StatisticsReader.cs" />
+    <Compile Include="SchemaReaders\TableTypeCheckReader.cs" />
+    <Compile Include="SchemaReaders\TableTypeConstraintReader.cs" />
+    <Compile Include="SchemaReaders\TableTypeReader.cs" />
+    <Compile Include="SchemaReaders\UdtParameterReader.cs" />
+    <Compile Include="Schema\AliasType.cs" />
     <Compile Include="Schema\DatabaseStatistics.cs" />
     <Compile Include="Schema\SqlServerSchema.cs" />
     <Compile Include="Schema\SqlServerSchemaFactory.cs" />
     <Compile Include="Schema\SqlServerTable.cs" />
+    <Compile Include="Schema\TableType.cs" />
     <Compile Include="SqlServerDatabaseReader.cs" />
   </ItemGroup>
   <ItemGroup>
