@@ -12,8 +12,6 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
         }
 
-        #region Overrides of ConstraintWriterBase
-
         protected override ISqlFormatProvider SqlFormatProvider()
         {
             return new SqlFormatProvider();
@@ -33,20 +31,13 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var nonClustered = "";
             if (constraint.Columns.Count == 1)
             {
-                //UNIQUEIDENTIFIERs should have NON CLUSTERED indexes
-                var colName = constraint.Columns[0];
-                var col = Table.FindColumn(colName);
-                if (col != null)
+                //UNIQUEIDENTIFIERs may have NON CLUSTERED indexes
+                //the pk index will have IndexType of PRIMARY NONCLUSTERED
+                var pkIndex = Table.Indexes.Find(x => x.IndexType.IndexOf("PRIMARY", StringComparison.OrdinalIgnoreCase) != -1);
+                if (pkIndex != null &&
+                    pkIndex.IndexType.IndexOf("NONCLUSTERED", StringComparison.OrdinalIgnoreCase) != -1)
                 {
-                    colName = col.NetName;
-                    if (string.Equals(col.DbDataType, "UNIQUEIDENTIFIER", StringComparison.OrdinalIgnoreCase))
-                    {
-                        nonClustered = "NONCLUSTERED ";
-                    }
-                }
-                if ("guid".Equals(colName, StringComparison.OrdinalIgnoreCase))
-                {
-                    nonClustered = "NONCLUSTERED ";
+                    nonClustered = "NONCLUSTERED";
                 }
             }
 
@@ -68,8 +59,5 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                                  constraint.Expression,
                                  column) + SqlFormatProvider().LineEnding();
         }
-
-        #endregion
-
     }
 }
