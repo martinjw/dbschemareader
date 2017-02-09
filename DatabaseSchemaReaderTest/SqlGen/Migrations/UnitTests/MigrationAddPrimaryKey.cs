@@ -22,10 +22,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
                 .AddColumn<string>("Name")
                 .Table;
             var pk = new DatabaseConstraint
-                     {
-                         Name = "Test_PK",
-                         ConstraintType = ConstraintType.PrimaryKey
-                     };
+            {
+                Name = "Test_PK",
+                ConstraintType = ConstraintType.PrimaryKey
+            };
             pk.Columns.Add("Id");
 
             //act
@@ -53,12 +53,17 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
                 ConstraintType = ConstraintType.PrimaryKey
             };
             pk.Columns.Add("Id");
+            table.Indexes.Add(new DatabaseIndex
+            {
+                IndexType = "PRIMARY NONCLUSTERED",
+                Columns = { new DatabaseColumn { Name = "Id" } }
+            });
 
             //act
             var sql = migration.AddConstraint(table, pk);
 
             //assert
-            Assert.IsTrue(sql.IndexOf("ADD CONSTRAINT [Test_PK] PRIMARY KEY NONCLUSTERED ([Id])", StringComparison.OrdinalIgnoreCase) != -1, "adding a primary key");
+            Assert.IsTrue(sql.IndexOf("ADD CONSTRAINT [Test_PK] PRIMARY KEY NONCLUSTERED([Id])", StringComparison.OrdinalIgnoreCase) != -1, "adding a primary key");
         }
     }
 }
