@@ -31,5 +31,25 @@ namespace DatabaseSchemaReaderTest
                 Assert.NotEmpty(tableList);
             }
         }
+
+        [Fact]
+        public void RunTableListWithTransaction()
+        {
+            using (var connection = new SqlConnection(Northwind))
+            {
+                connection.Open();
+                using (var txn = connection.BeginTransaction())
+                {
+                    var dr = new DatabaseSchemaReader.DatabaseReader(txn);
+                    var schema = dr.ReadAll();
+                    var tableList = dr.TableList();
+                    var tables = dr.AllTables();
+                    var views = dr.AllViews();
+                    Assert.NotEmpty(tableList);
+
+                    txn.Rollback();
+                }
+            }
+        }
     }
 }

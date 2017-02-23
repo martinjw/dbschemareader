@@ -26,9 +26,9 @@ ORDER BY rdb$procedure_name
 
         }
 
-        public IList<DatabaseStoredProcedure> Execute(DbConnection connection)
+        public IList<DatabaseStoredProcedure> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

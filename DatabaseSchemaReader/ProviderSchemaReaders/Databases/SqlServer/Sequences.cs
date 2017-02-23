@@ -23,9 +23,9 @@ WHERE
 
         }
 
-        public IList<DatabaseSequence> Execute(DbConnection connection)
+        public IList<DatabaseSequence> Execute(DbConnection connection, DbTransaction transaction)
         {
-            var cmd = connection.CreateCommand();
+            var cmd = BuildCommand(connection, transaction);
             //step 1- check if there are any sequences (backwards compatible)
             cmd.CommandText = @"SELECT COUNT(*) 
 FROM sys.objects 
@@ -40,7 +40,7 @@ WHERE type= 'SO' AND
             //step 2- they have them
             //we can use the SqlServer 2012 sys.sequences catalog view
             //renamed for compatibility with Oracle's ALL_SEQUENCES
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

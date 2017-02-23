@@ -18,9 +18,9 @@ WHERE RDB$SYSTEM_FLAG=0";
 
         }
 
-        public IList<DatabaseSequence> Execute(DbConnection connection)
+        public IList<DatabaseSequence> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

@@ -26,14 +26,14 @@ VIRTUAL_COLUMN = 'YES' AND
 ORDER BY TABLE_NAME, COLUMN_NAME";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
             if (Version(connection) < 11)
             {
                 //only supported in 11g+
                 return new List<DatabaseColumn>();
             }
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

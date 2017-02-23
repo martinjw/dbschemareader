@@ -28,11 +28,11 @@ WHERE (o.type = N'P' OR o.type = N'FN' OR o.type = N'TF' OR o.type='PC' OR o.typ
 ORDER BY o.type;";
         }
 
-        public IList<ProcedureSource> Execute(DbConnection connection)
+        public IList<ProcedureSource> Execute(DbConnection connection, DbTransaction transaction)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connection, transaction);
             }
             catch (DbException exception)
             {

@@ -18,9 +18,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
         protected List<DatabaseConstraint> Result { get; } = new List<DatabaseConstraint>();
         public string PragmaSql { get; set; }
 
-        public IList<DatabaseConstraint> Execute(DbConnection connection)
+        public IList<DatabaseConstraint> Execute(DbConnection connection, DbTransaction transaction)
         {
-            var tables = new Tables(_tableName).Execute(connection);
+            var tables = new Tables(_tableName).Execute(connection, transaction);
 
             foreach (var table in tables)
             {

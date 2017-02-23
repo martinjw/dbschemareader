@@ -18,9 +18,9 @@ WHERE type='table' AND
 ORDER BY name";
         }
 
-        public IList<DatabaseTable> Execute(DbConnection connection)
+        public IList<DatabaseTable> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

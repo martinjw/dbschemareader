@@ -21,11 +21,11 @@ ORDER BY OWNER,OBJECT_NAME";
 
         }
 
-        public IList<DatabaseFunction> Execute(DbConnection connection)
+        public IList<DatabaseFunction> Execute(DbConnection connection, DbTransaction transaction)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connection, transaction);
             }
             catch (DbException ex)
             {

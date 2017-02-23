@@ -27,7 +27,7 @@ GENERATION_EXPRESSION  <> ''
 ORDER BY TABLE_SCHEMA,TABLE_NAME";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
             var hasGeneratedColumns = false; //introduced in MySQL 5.7.6
             var cmd = connection.CreateCommand();
@@ -54,7 +54,7 @@ LIMIT 1";
                 return new List<DatabaseColumn>();
             }
 
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

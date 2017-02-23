@@ -23,9 +23,9 @@ ORDER BY rdb$function_name
 
         }
 
-        public IList<DatabaseFunction> Execute(DbConnection connection)
+        public IList<DatabaseFunction> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

@@ -17,45 +17,45 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabaseTable> Tables(string tableName)
         {
             return new Tables(tableName)
-                .Execute(DbConnection);
+                .Execute(DbConnection, DbTransaction);
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)
         {
             return new Columns( tableName)
-                .Execute(DbConnection);
+                .Execute(DbConnection, DbTransaction);
         }
 
 
         public override IList<DatabaseIndex> Indexes(string tableName)
         {
             return new Indexes( tableName)
-                .Execute(DbConnection);
+                .Execute(DbConnection, DbTransaction);
         }
 
         public override IList<DatabaseConstraint> ForeignKeys(string tableName)
         {
             return new Constraints(tableName)
-                .Execute(DbConnection);
+                .Execute(DbConnection, DbTransaction);
         }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
             return new Triggers( tableName)
-                .Execute(DbConnection);
+                .Execute(DbConnection, DbTransaction);
         }
 
 
         public override IList<DatabaseView> Views(string viewName)
         {
             return new Views(viewName)
-               .Execute(DbConnection);
+               .Execute(DbConnection, DbTransaction);
         }
 
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
             return new ViewColumns(viewName)
-                .Execute(DbConnection);
+                .Execute(DbConnection, DbTransaction);
         }
     }
 }

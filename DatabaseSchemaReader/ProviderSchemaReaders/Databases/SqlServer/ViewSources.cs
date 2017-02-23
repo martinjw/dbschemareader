@@ -28,11 +28,11 @@ WHERE (o.type='V')
 ORDER BY o.type;";
         }
 
-        public IList<ProcedureSource> Execute(DbConnection connection)
+        public IList<ProcedureSource> Execute(DbConnection connection, DbTransaction transaction)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connection, transaction);
             }
             catch (DbException exception)
             {
