@@ -104,9 +104,9 @@ ORDER BY t.rdb$relation_name, t.rdb$trigger_name
             return triggerType;
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

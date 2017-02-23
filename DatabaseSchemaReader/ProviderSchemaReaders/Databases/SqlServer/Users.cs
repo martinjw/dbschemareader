@@ -26,9 +26,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
             Result.Add(constraint);
         }
 
-        public IList<DatabaseUser> Execute(DbConnection dbConnection)
+        public IList<DatabaseUser> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

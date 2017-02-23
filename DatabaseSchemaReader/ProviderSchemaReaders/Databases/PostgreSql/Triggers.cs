@@ -36,7 +36,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             Result.Add(trigger);
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
             var version = dbConnection.ServerVersion;
             string timing = "CONDITION_TIMING";
@@ -68,7 +68,7 @@ WHERE
 (EVENT_OBJECT_TABLE = :tableName OR :tableName IS NULL) AND 
 (TRIGGER_SCHEMA = :schemaOwner OR :schemaOwner IS NULL)";
 
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

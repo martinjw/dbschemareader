@@ -75,9 +75,9 @@ ORDER BY cols.TABLE_OWNER,
 
         }
 
-        public IList<DatabaseIndex> Execute(DbConnection dbConnection)
+        public IList<DatabaseIndex> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

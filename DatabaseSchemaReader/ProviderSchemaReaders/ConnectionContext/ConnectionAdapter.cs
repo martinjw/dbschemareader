@@ -16,6 +16,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
         }
 #if COREFX
         public DbConnection DbConnection => _parameters.DbConnection;
+
+        public DbTransaction DbTransaction => _parameters.DbTransaction;
+
 #else
 
         public DbConnection DbConnection
@@ -27,6 +30,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
                     CreateDbConnection();
                 }
                 return _dbConnection;
+            }
+        }
+
+        public DbTransaction DbTransaction
+        {
+            get
+            {
+                return null;
             }
         }
 

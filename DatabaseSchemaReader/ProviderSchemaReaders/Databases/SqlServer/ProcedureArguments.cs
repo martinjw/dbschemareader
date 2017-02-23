@@ -47,9 +47,9 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, PARAMETER_NAME";
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection)
+        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

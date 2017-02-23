@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 
@@ -15,6 +16,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             SqlType = ProviderToSqlType.Convert(ProviderName);
             Exclusions = new Exclusions();
         }
+
+        public SchemaParameters(System.Data.Common.DbTransaction dbTransaction) :this(dbTransaction.Connection)
+        {
+            DbTransaction = dbTransaction;
+        }
+
+        public System.Data.Common.DbTransaction DbTransaction { get; private set; }
 
         public System.Data.Common.DbConnection DbConnection { get; private set; }
 #else

@@ -42,9 +42,9 @@ ORDER BY
     n.nspname, t.relname, i.relname";
         }
 
-        public IList<DatabaseIndex> Execute(DbConnection connection)
+        public IList<DatabaseIndex> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

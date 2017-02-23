@@ -38,7 +38,7 @@ AND (matviewname = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY schemaname, matviewname";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection)
+        public IList<DatabaseView> Execute(DbConnection connection, DbTransaction transaction)
         {
             //or is there something on connection?
             try
@@ -54,7 +54,7 @@ ORDER BY schemaname, matviewname";
                 {
                     Sql = _sql93;
                 }
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connection, transaction);
             }
             catch (Exception exception)
             {

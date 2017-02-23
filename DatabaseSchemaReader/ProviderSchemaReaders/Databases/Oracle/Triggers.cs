@@ -49,9 +49,9 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )
             Result.Add(trigger);
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

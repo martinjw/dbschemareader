@@ -44,10 +44,10 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection)
+        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
         {
             _requiredDataTypes.Clear();
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
 
             //now lookup datatypes
             foreach (var key in _requiredDataTypes.Keys)

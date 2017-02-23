@@ -54,9 +54,9 @@ ORDER BY cons.table_name, cons.constraint_name";
             Result.Add(constraint);
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection)
+        public IList<DatabaseConstraint> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }
