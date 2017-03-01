@@ -42,9 +42,9 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbTransaction.
         /// </summary>
-        /// <param name="transaction"></param>
+        /// <param name="transaction">The transaction</param>
         public DatabaseReader(System.Data.Common.DbTransaction transaction) :
             this(transaction.Connection.GetType().Namespace, transaction.Connection.ConnectionString, new SchemaParameters(transaction))
         {   
