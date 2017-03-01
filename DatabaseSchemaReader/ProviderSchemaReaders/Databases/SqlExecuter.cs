@@ -11,7 +11,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
     {
 
         protected List<T> Result { get; } = new List<T>();
-        
     }
 
     abstract class SqlExecuter

@@ -21,10 +21,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         {
             DbTransaction = dbTransaction;
         }
+        
+        public System.Data.Common.DbConnection DbConnection { get; private set; }
 
         public System.Data.Common.DbTransaction DbTransaction { get; private set; }
-
-        public System.Data.Common.DbConnection DbConnection { get; private set; }
 #else
         public SchemaParameters(string connectionString, SqlType sqlType)
         {
