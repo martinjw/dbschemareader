@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
 {
@@ -32,11 +33,11 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, PARAMETER_NAME";
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseArgument> Execute(IConnectionAdapter connectionAdapter)
         {
             try
             {
-                ExecuteDbReader(connection, transaction);
+                ExecuteDbReader(connectionAdapter);
             }
             catch (Exception e)
             {

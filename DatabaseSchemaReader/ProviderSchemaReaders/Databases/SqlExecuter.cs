@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 {
@@ -20,16 +21,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 
         public string Owner { get; set; }
 
-        protected void ExecuteDbReader(DbConnection connection, DbTransaction transaction)
+        protected void ExecuteDbReader(IConnectionAdapter connectionAdapter)
         {
-            if (connection.State == ConnectionState.Closed)
-            {
-                connection.Open();
-            }
             Trace.WriteLine($"Sql: {Sql}");
-            using (var cmd = connection.CreateCommand())
+            using (var cmd = BuildCommand(connectionAdapter))
             {
-                cmd.Transaction = transaction;
                 cmd.CommandText = Sql;
                 AddParameters(cmd);
                 using (var dr = cmd.ExecuteReader())
@@ -42,9 +38,15 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
-        protected DbCommand BuildCommand(DbConnection connection, DbTransaction transaction)
+        protected DbCommand BuildCommand(IConnectionAdapter connectionAdapter)
         {
-            var cmd =  connection.CreateCommand();
+            var connection = connectionAdapter.DbConnection;
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+            var cmd = connection.CreateCommand();
+            var transaction = connectionAdapter.DbTransaction;
             if (transaction != null)
             {
                 cmd.Transaction = transaction;

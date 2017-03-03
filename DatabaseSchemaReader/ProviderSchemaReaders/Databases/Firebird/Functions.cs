@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
 {
@@ -23,9 +24,9 @@ ORDER BY rdb$function_name
 
         }
 
-        public IList<DatabaseFunction> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseFunction> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

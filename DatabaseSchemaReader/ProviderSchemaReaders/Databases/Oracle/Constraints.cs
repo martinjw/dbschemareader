@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -95,9 +96,9 @@ ORDER BY cols.constraint_name,cols.table_name, cols.position";
             constraint.Columns.Add(columnName);
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection, DbTransaction transaction)
+        public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

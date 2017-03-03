@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -32,9 +33,9 @@ WHERE
     (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)";
         }
 
-        public IList<DatabaseTable> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseTable> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

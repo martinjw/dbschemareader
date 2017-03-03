@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -82,9 +83,9 @@ ORDER BY
 
         }
 
-        public IList<DatabaseIndex> Execute(DbConnection dbConnection, DbTransaction transaction)
+        public IList<DatabaseIndex> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

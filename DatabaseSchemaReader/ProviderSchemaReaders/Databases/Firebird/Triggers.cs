@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
 {
@@ -104,9 +105,9 @@ ORDER BY t.rdb$relation_name, t.rdb$trigger_name
             return triggerType;
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection, DbTransaction transaction)
+        public IList<DatabaseTrigger> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

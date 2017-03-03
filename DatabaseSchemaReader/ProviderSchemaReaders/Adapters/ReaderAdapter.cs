@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return _connectionAdapter;
         }
 
-        protected DbConnection DbConnection
+        protected IConnectionAdapter ConnectionAdapter
         {
             get
             {
@@ -39,9 +39,21 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 {
                     _connectionAdapter = new ConnectionAdapter(Parameters);
                 }
-                return _connectionAdapter.DbConnection;
+                return _connectionAdapter;
             }
         }
+
+        //protected DbConnection DbConnection
+        //{
+        //    get
+        //    {
+        //        if (_connectionAdapter == null)
+        //        {
+        //            _connectionAdapter = new ConnectionAdapter(Parameters);
+        //        }
+        //        return _connectionAdapter.DbConnection;
+        //    }
+        //}
 
         protected DbTransaction DbTransaction
         {

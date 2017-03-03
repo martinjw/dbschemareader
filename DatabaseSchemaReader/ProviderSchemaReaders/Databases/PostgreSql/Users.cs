@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -12,9 +13,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             Sql = @"SELECT usename as user_name FROM pg_catalog.pg_user";
         }
 
-        public IList<DatabaseUser> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseUser> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

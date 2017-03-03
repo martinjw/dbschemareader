@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
 {
@@ -58,9 +59,9 @@ ORDER BY rfr.rdb$relation_name, rfr.rdb$field_position
 ";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 
