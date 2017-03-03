@@ -33,9 +33,9 @@ AND (TABLE_NAME  = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY OWNER, TABLE_NAME, COLUMN_ID";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

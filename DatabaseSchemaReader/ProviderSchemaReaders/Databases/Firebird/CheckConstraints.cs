@@ -57,9 +57,9 @@ ORDER BY rel.rdb$relation_name, chk.rdb$constraint_name
             }
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection)
+        public IList<DatabaseConstraint> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

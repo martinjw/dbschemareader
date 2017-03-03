@@ -17,9 +17,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
         protected List<DatabaseColumn> Result { get; } = new List<DatabaseColumn>();
         public string PragmaSql { get; set; }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
-            var tables = new Tables(_tableName).Execute(connection);
+            var tables = new Tables(_tableName).Execute(connection, transaction);
 
             foreach (var table in tables)
             {

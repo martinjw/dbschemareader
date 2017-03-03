@@ -37,9 +37,9 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME";
 
         }
 
-        public IList<DatabaseStoredProcedure> Execute(DbConnection connection)
+        public IList<DatabaseStoredProcedure> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

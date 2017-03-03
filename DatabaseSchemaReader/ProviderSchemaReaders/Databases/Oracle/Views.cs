@@ -24,9 +24,9 @@ AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTL
 ";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection)
+        public IList<DatabaseView> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

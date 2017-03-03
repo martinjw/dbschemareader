@@ -28,9 +28,9 @@ AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTL
 
         }
 
-        public IList<DatabaseStoredProcedure> Execute(DbConnection connection)
+        public IList<DatabaseStoredProcedure> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

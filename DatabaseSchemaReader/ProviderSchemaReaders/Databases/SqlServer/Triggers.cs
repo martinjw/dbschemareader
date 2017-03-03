@@ -74,9 +74,9 @@ WHERE (SCHEMA_NAME(parent.schema_id) = @Owner or (@Owner is null))
             Result.Add(trigger);
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }

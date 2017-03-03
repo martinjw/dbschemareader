@@ -50,9 +50,9 @@ ORDER BY pp.rdb$procedure_name, pp.rdb$parameter_type, pp.rdb$parameter_number
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection)
+        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

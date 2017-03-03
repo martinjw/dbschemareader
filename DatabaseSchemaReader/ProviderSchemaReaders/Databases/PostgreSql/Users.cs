@@ -12,9 +12,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             Sql = @"SELECT usename as user_name FROM pg_catalog.pg_user";
         }
 
-        public IList<DatabaseUser> Execute(DbConnection connection)
+        public IList<DatabaseUser> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

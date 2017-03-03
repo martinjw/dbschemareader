@@ -22,9 +22,9 @@ WHERE (OWNER = :OWNER OR :OWNER IS NULL)
 AND (MVIEW_NAME = :VIEWNAME OR :VIEWNAME IS NULL)";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection)
+        public IList<DatabaseView> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 
