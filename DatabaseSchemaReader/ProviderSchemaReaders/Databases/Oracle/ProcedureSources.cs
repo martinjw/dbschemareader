@@ -30,11 +30,11 @@ ORDER BY OWNER, NAME, TYPE, LINE";
 
         }
 
-        public IList<ProcedureSource> Execute(DbConnection connection)
+        public IList<ProcedureSource> Execute(DbConnection connection, DbTransaction transaction)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connection, transaction);
             }
             catch (DbException exception)
             {

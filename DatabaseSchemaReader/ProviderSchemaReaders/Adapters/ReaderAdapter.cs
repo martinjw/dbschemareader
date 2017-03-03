@@ -43,6 +43,19 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             }
         }
 
+        protected DbTransaction DbTransaction
+        {
+            get
+            {
+                if (_connectionAdapter == null)
+                {
+                    _connectionAdapter = new ConnectionAdapter(Parameters);
+                }
+                return _connectionAdapter.DbTransaction;
+
+            }
+        }
+
         public virtual string Owner
         {
             get { return Parameters.Owner; }

@@ -33,9 +33,9 @@ AND (OBJECT_NAME = :PROCEDURENAME OR :PROCEDURENAME IS NULL)
 ORDER BY OWNER, PACKAGE_NAME, OBJECT_NAME, POSITION";
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection)
+        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

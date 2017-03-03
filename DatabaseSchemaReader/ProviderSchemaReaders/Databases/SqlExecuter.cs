@@ -11,7 +11,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
     {
 
         protected List<T> Result { get; } = new List<T>();
-
     }
 
     abstract class SqlExecuter
@@ -21,7 +20,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 
         public string Owner { get; set; }
 
-        protected void ExecuteDbReader(DbConnection connection)
+        protected void ExecuteDbReader(DbConnection connection, DbTransaction transaction)
         {
             if (connection.State == ConnectionState.Closed)
             {
@@ -30,6 +29,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             Trace.WriteLine($"Sql: {Sql}");
             using (var cmd = connection.CreateCommand())
             {
+                cmd.Transaction = transaction;
                 cmd.CommandText = Sql;
                 AddParameters(cmd);
                 using (var dr = cmd.ExecuteReader())
@@ -40,6 +40,16 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
                     }
                 }
             }
+        }
+
+        protected DbCommand BuildCommand(DbConnection connection, DbTransaction transaction)
+        {
+            var cmd =  connection.CreateCommand();
+            if (transaction != null)
+            {
+                cmd.Transaction = transaction;
+            }
+            return cmd;
         }
 
         protected static DbParameter AddDbParameter(DbCommand command, string parameterName, object value, DbType? dbType = null)

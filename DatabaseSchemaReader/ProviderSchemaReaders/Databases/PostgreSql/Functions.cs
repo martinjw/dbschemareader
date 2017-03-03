@@ -31,11 +31,11 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
 
         }
 
-        public IList<DatabaseFunction> Execute(DbConnection connection)
+        public IList<DatabaseFunction> Execute(DbConnection connection, DbTransaction transaction)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connection, transaction);
             }
             catch (DbException ex)
             {

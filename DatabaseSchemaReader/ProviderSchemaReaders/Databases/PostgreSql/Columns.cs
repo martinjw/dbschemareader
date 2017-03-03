@@ -31,9 +31,9 @@ AND (table_name = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY table_schema, table_name, ordinal_position";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

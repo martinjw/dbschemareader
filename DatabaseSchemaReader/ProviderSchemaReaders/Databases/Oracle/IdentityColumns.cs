@@ -27,13 +27,13 @@ WHERE
 ORDER BY TABLE_NAME, COLUMN_NAME";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
             if (Version(connection) < 12)
             {
                 return new List<DatabaseColumn>();
             }
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

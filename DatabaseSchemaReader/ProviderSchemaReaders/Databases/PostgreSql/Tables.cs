@@ -22,9 +22,9 @@ AND (table_name = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY table_schema, table_name";
         }
 
-        public IList<DatabaseTable> Execute(DbConnection connection)
+        public IList<DatabaseTable> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

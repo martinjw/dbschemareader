@@ -38,9 +38,9 @@ where
     c.TABLE_SCHEMA, c.TABLE_NAME, ORDINAL_POSITION";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

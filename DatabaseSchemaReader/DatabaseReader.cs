@@ -36,11 +36,25 @@ namespace DatabaseSchemaReader
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbConnection.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        public DatabaseReader(System.Data.Common.DbConnection connection)
+        public DatabaseReader(System.Data.Common.DbConnection connection) :
+            this(connection.GetType().Namespace, connection.ConnectionString, new SchemaParameters(connection))
         {
-            var name = connection.GetType().Namespace;
-            _db = new DatabaseSchema(connection.ConnectionString, name);
-            _schemaParameters = new SchemaParameters(connection) {DatabaseSchema = _db};
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbTransaction.
+        /// </summary>
+        /// <param name="transaction">The transaction</param>
+        public DatabaseReader(System.Data.Common.DbTransaction transaction) :
+            this(transaction.Connection.GetType().Namespace, transaction.Connection.ConnectionString, new SchemaParameters(transaction))
+        {   
+        }
+
+        private DatabaseReader(string name, string connectionString, SchemaParameters schemaParameters)
+        {
+            _db = new DatabaseSchema(connectionString, name);
+            _schemaParameters = schemaParameters;
+            _schemaParameters.DatabaseSchema = _db;
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
         }
 #endif

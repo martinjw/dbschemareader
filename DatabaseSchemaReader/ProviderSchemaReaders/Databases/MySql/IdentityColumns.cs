@@ -24,9 +24,9 @@ WHERE EXTRA = 'auto_increment' AND
 (TABLE_SCHEMA = @schemaOwner OR @schemaOwner IS NULL)";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connection, transaction);
             return Result;
         }
 

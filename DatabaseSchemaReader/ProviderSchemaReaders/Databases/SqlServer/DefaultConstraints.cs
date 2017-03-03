@@ -68,9 +68,9 @@ ORDER BY s.name, o.name";
             constraint.Columns.Add(columnName);
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection)
+        public IList<DatabaseConstraint> Execute(DbConnection dbConnection, DbTransaction transaction)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(dbConnection, transaction);
             return Result;
         }
     }
