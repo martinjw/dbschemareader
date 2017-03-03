@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -33,9 +34,9 @@ AND (OBJECT_NAME = :PROCEDURENAME OR :PROCEDURENAME IS NULL)
 ORDER BY OWNER, PACKAGE_NAME, OBJECT_NAME, POSITION";
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseArgument> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

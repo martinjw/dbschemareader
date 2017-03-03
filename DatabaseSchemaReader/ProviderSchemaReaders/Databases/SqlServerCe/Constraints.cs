@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServerCe
 {
@@ -89,9 +90,9 @@ ORDER BY
             constraint.Columns.Add(columnName);
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection, DbTransaction transaction)
+        public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

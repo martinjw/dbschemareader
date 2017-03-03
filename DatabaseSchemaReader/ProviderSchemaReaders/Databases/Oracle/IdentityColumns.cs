@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -27,13 +28,13 @@ WHERE
 ORDER BY TABLE_NAME, COLUMN_NAME";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
-            if (Version(connection) < 12)
+            if (Version(connectionAdapter.DbConnection) < 12)
             {
                 return new List<DatabaseColumn>();
             }
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

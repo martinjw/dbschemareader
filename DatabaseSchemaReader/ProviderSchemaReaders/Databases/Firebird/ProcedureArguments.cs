@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
 {
@@ -50,9 +51,9 @@ ORDER BY pp.rdb$procedure_name, pp.rdb$parameter_type, pp.rdb$parameter_number
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseArgument> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection, transaction);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

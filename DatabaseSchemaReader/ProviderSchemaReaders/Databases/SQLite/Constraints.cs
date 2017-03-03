@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
@@ -18,14 +18,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
         protected List<DatabaseConstraint> Result { get; } = new List<DatabaseConstraint>();
         public string PragmaSql { get; set; }
 
-        public IList<DatabaseConstraint> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            var tables = new Tables(_tableName).Execute(connection, transaction);
+            var tables = new Tables(_tableName).Execute(connectionAdapter);
 
             foreach (var table in tables)
             {
                 var tableName = table.Name;
-                using (var cmd = connection.CreateCommand())
+                using (var cmd = connectionAdapter.DbConnection.CreateCommand())
                 {
                     cmd.CommandText = string.Format(PragmaSql, tableName);
                     using (var dr = cmd.ExecuteReader())

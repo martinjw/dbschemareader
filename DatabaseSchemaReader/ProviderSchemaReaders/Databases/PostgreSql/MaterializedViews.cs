@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -38,15 +39,13 @@ AND (matviewname = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY schemaname, matviewname";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection, DbTransaction transaction)
+        public IList<DatabaseView> Execute(IConnectionAdapter connectionAdapter)
         {
             //or is there something on connection?
             try
             {
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
                 //server_version_num available from 8.2 +
-                var cmd = connection.CreateCommand();
+                var cmd = BuildCommand(connectionAdapter);
                 cmd.CommandText = @"SELECT current_setting('server_version_num')"; //or SHOW server_version
                 //bizarrely, although this is version in a numeric format, it comes back as a string
                 var hasMatViewsTable = int.Parse((string)cmd.ExecuteScalar(), NumberStyles.Any) > 90300;
@@ -54,7 +53,7 @@ ORDER BY schemaname, matviewname";
                 {
                     Sql = _sql93;
                 }
-                ExecuteDbReader(connection, transaction);
+                ExecuteDbReader(connectionAdapter);
             }
             catch (Exception exception)
             {
