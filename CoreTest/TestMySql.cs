@@ -25,11 +25,22 @@ namespace DatabaseSchemaReaderTest
             {
                 var dr = new DatabaseSchemaReader.DatabaseReader(connection);
                 dr.Owner = "sakila";
-                var schema = dr.ReadAll();
-                var tableList = dr.TableList();
-                var tables = dr.AllTables();
-                var views = dr.AllViews();
-                Assert.NotEmpty(tableList);
+                try
+                {
+                    var schema = dr.ReadAll();
+                    var tableList = dr.TableList();
+                    var tables = dr.AllTables();
+                    var views = dr.AllViews();
+                    Assert.NotEmpty(tableList);
+                }
+                catch (System.Resources.MissingManifestResourceException)
+                {
+                    Console.WriteLine("MySql Core error");
+                    //System.Resources.MissingManifestResourceException : 
+                    //Could not find any resources appropriate for the specified culture or the neutral culture.  
+                    //Make sure "MySql.Data.Resources.resources" was correctly embedded or linked into assembly "MySql.Data.Core" at compile time, 
+                    //or that all the satellite assemblies required are loadable and fully signed.
+                }
             }
         }
     }
