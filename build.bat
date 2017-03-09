@@ -11,13 +11,16 @@ set pro="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\MSBuild\1
 set ent="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MsBuild.exe"
 
 if exist %community% (
+	%community% DatabaseSchemaReader.sln /t:restore
 	%community% build.proj /t:Release /fl /flp:Verbosity=normal
 	%community% DatabaseSchemaReader\DatabaseSchemaReader.csproj /t:Pack /p:Configuration=Release
 ) else (
 	if exist %ent% (
+		%ent% DatabaseSchemaReader.sln /t:restore
 		%ent% build.proj /t:Release /fl /flp:Verbosity=normal
 		%ent% DatabaseSchemaReader\DatabaseSchemaReader.csproj /t:Pack /p:Configuration=Release
 	) else (
+		%pro% DatabaseSchemaReader.sln /t:restore
 		%pro% build.proj /t:Release /fl /flp:Verbosity=normal
 		%pro% DatabaseSchemaReader\DatabaseSchemaReader.csproj /t:Pack /p:Configuration=Release
 	)
