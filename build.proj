@@ -48,7 +48,7 @@
   </Target>
   
   <Target Name="RestorePackages">
-    <Exec Command="&quot;.\tools\NuGet.exe&quot; restore &quot;DatabaseSchemaReader.sln&quot;" />
+    <!--<Exec Command="&quot;.\tools\NuGet.exe&quot; restore &quot;DatabaseSchemaReader.sln&quot;" />-->
   </Target>
   
   <Target Name="BuildCopyToSQLite">
