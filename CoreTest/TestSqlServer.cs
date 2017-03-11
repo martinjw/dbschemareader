@@ -2,7 +2,7 @@
 using System.Data.SqlClient;
 using Xunit;
 
-namespace DatabaseSchemaReaderTest
+namespace CoreTest
 {
     public class TestSqlServer
     {
@@ -12,7 +12,7 @@ namespace DatabaseSchemaReaderTest
             {
                 if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
                 {
-                    return @"Server=(local)\SQL2008R2SP2;Database=NorthwindDsr;User ID=sa;Password=Password12!";
+                    return @"Server=(local)\SQL2014;Database=NorthwindDsr;User ID=sa;Password=Password12!";
                 }
                 return @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
             }
