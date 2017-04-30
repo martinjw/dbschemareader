@@ -10,7 +10,7 @@
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
-    <PackageReleaseNotes>2.3.1: Added transaction support so connections with a local pending transaction can be used.</PackageReleaseNotes>
+    <PackageReleaseNotes>2.3.1: Added transaction support so connections with a local pending transaction can be used. Triggers on views (#34), Firebird 2.5 support (#35).</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
