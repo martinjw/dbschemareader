@@ -25,7 +25,10 @@ namespace DatabaseSchemaReader.Utilities
             //add vertices  
             for (var i = 0; i < tables.Count; i++)
             {
-                indexes[tables[i].Name] = sorter.AddVertex(i);
+                var name = tables[i].Name;
+                //shouldn't have empty name, but guard anyway
+                if (string.IsNullOrEmpty(name)) name = tables[i].GetHashCode().ToString();
+                indexes[name] = sorter.AddVertex(i);
             }
 
             //add edges  
@@ -33,6 +36,8 @@ namespace DatabaseSchemaReader.Utilities
             {
                 foreach (var t in tables[i].ForeignKeys)
                 {
+                    //broken model
+                    if (string.IsNullOrEmpty(t.RefersToTable)) continue;
                     //ignore cycles (not relevant here)
                     if (t.RefersToTable == tables[i].Name) continue;
                     //corrupt model
