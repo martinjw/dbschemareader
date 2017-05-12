@@ -38,7 +38,7 @@ ORDER BY o.name, c.name";
         protected override void AddParameters(DbCommand command)
         {
             AddDbParameter(command, "schemaOwner", Owner);
-            AddDbParameter(command, "TableName", _tableName);
+            AddDbParameter(command, "tableName", _tableName);
         }
 
         protected override void Mapper(IDataRecord record)
