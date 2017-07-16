@@ -10,7 +10,7 @@
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
-    <PackageReleaseNotes>2.3.2:   Fix #38 Incorrect mapping of Postgresql "int2"  Fix #36 Must declare the scalar variable "@tablename" Exception</PackageReleaseNotes>
+    <PackageReleaseNotes>2.3.3:   Fix #39 support for Firebird 2.53</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,7 +24,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.3.2</Version>
+    <Version>2.3.3</Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
