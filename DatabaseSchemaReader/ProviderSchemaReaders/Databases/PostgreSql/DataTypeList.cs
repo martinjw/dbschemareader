@@ -103,6 +103,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 ProviderDbType = 0,
                 CreateFormat = "",
             });
+            dts.Add(new DataType("float8", "System.Double")
+            {
+                ProviderDbType = 0,
+                CreateFormat = "",
+            });
             dts.Add(new DataType("int", "System.Int32")
             {
                 ProviderDbType = 0,
