@@ -10,7 +10,8 @@
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
-    <PackageReleaseNotes>2.3.3:   Fix #39 support for Firebird 2.53</PackageReleaseNotes>
+    <PackageReleaseNotes>2.3.3:   Fix #39 support for Firebird 2.53, SqlServer byte mapping, PostgreSQL float8 support
+</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
