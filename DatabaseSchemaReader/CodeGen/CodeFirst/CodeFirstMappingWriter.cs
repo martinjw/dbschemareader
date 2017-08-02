@@ -18,12 +18,9 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
         public CodeFirstMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            if (mappingNamer == null) throw new ArgumentNullException(nameof(mappingNamer));
-
             _codeWriterSettings = codeWriterSettings;
-            _mappingNamer = mappingNamer;
-            _table = table;
+            _mappingNamer = mappingNamer ?? throw new ArgumentNullException(nameof(mappingNamer));
+            _table = table ?? throw new ArgumentNullException(nameof(table));
             _cb = new ClassBuilder();
         }
 
@@ -363,14 +360,9 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             }
             if (dt.TypeName.Equals("timestamp", StringComparison.OrdinalIgnoreCase))
             {
-                if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore)
-                {
-                    sb.Append(".HasColumnType(\"timestamp\").ValueGeneratedOnAddOrUpdate().IsConcurrencyToken();");
-                }
-                else
-                {
-                    sb.Append(".IsConcurrencyToken().HasColumnType(\"timestamp\").HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed)");
-                }
+                sb.Append(_codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore
+                                                        ? ".HasColumnType(\"timestamp\").ValueGeneratedOnAddOrUpdate().IsConcurrencyToken();"
+                                                        : ".IsConcurrencyToken().HasColumnType(\"timestamp\").HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed)");
             }
         }
 

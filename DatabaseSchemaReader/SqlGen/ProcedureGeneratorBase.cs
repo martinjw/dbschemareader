@@ -25,8 +25,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="table">The table.</param>
         protected ProcedureGeneratorBase(DatabaseTable table)
         {
-            if (table == null) throw new ArgumentNullException(nameof(table), "table is null");
-            Table = table;
+            Table = table ?? throw new ArgumentNullException(nameof(table), "table is null");
             TableName = table.Name;
         }
 

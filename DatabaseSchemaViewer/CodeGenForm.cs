@@ -139,8 +139,7 @@ namespace DatabaseSchemaViewer
 
         private void RunCodeWriter(DirectoryInfo directory, string ns, bool readStoredProcedures, DatabaseSchemaReader.CodeGen.CodeTarget codeTarget)
         {
-            var runner =
-                new CodeWriterRunner(_databaseSchema, directory, ns, readStoredProcedures) {CodeTarget = codeTarget};
+            var runner = new CodeWriterRunner(_databaseSchema, directory, ns, readStoredProcedures) {CodeTarget = codeTarget};
             if (readStoredProcedures)
             {
                 toolStripStatusLabel1.Text = @"Reading stored procedures";

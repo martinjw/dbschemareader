@@ -149,8 +149,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestStringLengthWithErrorMessageFormat2()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.StringLengthErrorMessage = "{1} has maximum length of {0}";
+            var settings = new CodeWriterSettings {StringLengthErrorMessage = "{1} has maximum length of {0}"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -173,8 +172,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRange()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RangeErrorMessage = null;
+            var settings = new CodeWriterSettings {RangeErrorMessage = null};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -198,8 +196,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRangeWithErrorMessage()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RangeErrorMessage = "Outside of range";
+            var settings = new CodeWriterSettings {RangeErrorMessage = "Outside of range"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -223,8 +220,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRangeWithErrorMessageFormat1()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RangeErrorMessage = "Must be less than {0}";
+            var settings = new CodeWriterSettings {RangeErrorMessage = "Must be less than {0}"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -247,8 +243,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRangeWithErrorMessageFormat2()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RangeErrorMessage = "{1} must be less than {0}";
+            var settings = new CodeWriterSettings {RangeErrorMessage = "{1} must be less than {0}"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -272,8 +267,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestDecimalRange()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RangeErrorMessage = null;
+            var settings = new CodeWriterSettings {RangeErrorMessage = null};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -297,8 +291,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestDecimalRangeWithErrorMessage()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RangeErrorMessage = "{1} must be less than {0}";
+            var settings = new CodeWriterSettings {RangeErrorMessage = "{1} must be less than {0}"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -323,9 +316,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestIndex()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
-            settings.WriteCodeFirstIndexAttribute = true;
+            var settings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoEntityCodeFirst,
+                WriteCodeFirstIndexAttribute = true
+            };
 
             var classBuilder = new ClassBuilder();
             var table = new DatabaseTable { Name = "Test" };
@@ -348,9 +343,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestIndexUnique()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
-            settings.WriteCodeFirstIndexAttribute = true;
+            var settings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoEntityCodeFirst,
+                WriteCodeFirstIndexAttribute = true
+            };
 
             var classBuilder = new ClassBuilder();
             var table = new DatabaseTable { Name = "Test" };
@@ -372,9 +369,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestIndexMultiColumn()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
-            settings.WriteCodeFirstIndexAttribute = true;
+            var settings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoEntityCodeFirst,
+                WriteCodeFirstIndexAttribute = true
+            };
 
             var classBuilder = new ClassBuilder();
             var table = new DatabaseTable { Name = "Test" };
@@ -397,9 +396,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestIndexMultiColumnUnique()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
-            settings.WriteCodeFirstIndexAttribute = true;
+            var settings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoEntityCodeFirst,
+                WriteCodeFirstIndexAttribute = true
+            };
 
             var classBuilder = new ClassBuilder();
             var table = new DatabaseTable { Name = "Test" };
@@ -423,9 +424,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestIndexNotNeededForPrimaryKey()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.CodeTarget = CodeTarget.PocoEntityCodeFirst;
-            settings.WriteCodeFirstIndexAttribute = true;
+            var settings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.PocoEntityCodeFirst,
+                WriteCodeFirstIndexAttribute = true
+            };
 
             var classBuilder = new ClassBuilder();
             var table = new DatabaseTable { Name = "Test" };

@@ -126,21 +126,12 @@ namespace DatabaseSchemaReader.DataSchema
             databaseColumn.IsForeignKey = true;
 
             //add the inverse relationship
-            DatabaseTable fkTable;
-            if (string.IsNullOrEmpty(foreignTableSchemaOwner))
-            {
-                fkTable = table.DatabaseSchema.FindTableByName(foreignTableName);
-            }
-            else
-            {
-                fkTable = table.DatabaseSchema.FindTableByName(foreignTableName, foreignTableSchemaOwner);
+            var fkTable = string.IsNullOrEmpty(foreignTableSchemaOwner) ? table.DatabaseSchema.FindTableByName(foreignTableName) : table.DatabaseSchema.FindTableByName(foreignTableName, foreignTableSchemaOwner);
 
-            }
-            if (fkTable != null && !fkTable.ForeignKeyChildren.Contains(table))
-            {
-                fkTable.ForeignKeyChildren.Add(table);
-                databaseColumn.ForeignKeyTable = fkTable;
-            }
+            if (fkTable == null || fkTable.ForeignKeyChildren.Contains(table)) return databaseColumn;
+
+            fkTable.ForeignKeyChildren.Add(table);
+            databaseColumn.ForeignKeyTable = fkTable;
 
             return databaseColumn;
         }

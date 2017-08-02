@@ -28,9 +28,7 @@ namespace DatabaseSchemaReader
         /// <param name="sqlType">Type of the SQL.</param>
         public SqlWriter(DatabaseTable table, SqlType sqlType)
         {
-            if (table == null)
-                throw new ArgumentNullException(nameof(table));
-            _table = table;
+            _table = table ?? throw new ArgumentNullException(nameof(table));
             _sqlType = sqlType;
             _nameEscapeStart = null;
             _nameEscapeEnd = null;
@@ -602,11 +600,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         private string InsertSql(bool useOutputParameter, bool includeIdentityInInsert)
         {
             var sb = new StringBuilder();
-            string[] cols;
-            if (!includeIdentityInInsert)
-                cols = GetColumns(); //excluding identity and timestamps
-            else
-                cols = GetAllNoncomputedColumns(); //incl indentity
+            var cols = !includeIdentityInInsert ? GetColumns() : GetAllNoncomputedColumns();
 
             var values = new string[cols.Length];
             for (int i = 0; i < cols.Length; i++)

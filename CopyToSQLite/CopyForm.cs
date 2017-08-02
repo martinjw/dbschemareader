@@ -263,8 +263,7 @@ namespace CopyToSQLite
             //pass thru the event to background worker
             runner.ProgressChanged += (s1, e1) => backgroundWorker1.ReportProgress(e1.ProgressPercentage, e1.UserState);
             var result = runner.Execute();
-            if (!result) e.Result = runner.LastErrorMessage;
-            else e.Result = null;
+            e.Result = !result ? runner.LastErrorMessage : null;
             rdr.Dispose();
         }
 
@@ -280,10 +279,7 @@ namespace CopyToSQLite
             {
                 //it worked
                 var message = (string)e.Result;
-                if (string.IsNullOrEmpty(message))
-                    toolStripStatusLabel1.Text = @"Database created";
-                else
-                    toolStripStatusLabel1.Text = message;
+                toolStripStatusLabel1.Text = string.IsNullOrEmpty(message) ? @"Database created" : message;
             }
             StopWaiting();
         }

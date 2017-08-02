@@ -36,11 +36,8 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="codeWriterSettings">The code writer settings.</param>
         public CodeWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            if (schema == null) throw new ArgumentNullException(nameof(schema));
-            if (codeWriterSettings == null) throw new ArgumentNullException(nameof(codeWriterSettings));
-
-            _schema = schema;
-            _codeWriterSettings = codeWriterSettings;
+            _schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            _codeWriterSettings = codeWriterSettings ?? throw new ArgumentNullException(nameof(codeWriterSettings));
 
             var vs2010 = _codeWriterSettings.WriteProjectFile;
             var vs2015 = _codeWriterSettings.WriteProjectFileNet46;

@@ -61,9 +61,7 @@ namespace DatabaseSchemaReader.Utilities
                 throw new ArgumentNullException(nameof(edmx), "No edmx document");
 
             var root = edmx.Root;
-            if (root == null)
-                throw new ArgumentException("No root element found", nameof(edmx));
-            _edmx = root.GetNamespaceOfPrefix("edmx");
+            _edmx = root?.GetNamespaceOfPrefix("edmx") ?? throw new ArgumentException("No root element found", nameof(edmx));
 
             var storageModel =
                 root.Element(_edmx + "Runtime").Element(_edmx + "StorageModels");
@@ -87,8 +85,7 @@ namespace DatabaseSchemaReader.Utilities
 
             var doc = XDocument.Load(ssdlFilePath);
             if (doc == null) throw new ArgumentException("No xml in file", nameof(ssdlFilePath));
-            if (doc.Root == null) throw new ArgumentException("Invalid xml in file", nameof(ssdlFilePath));
-            _edmx = doc.Root.GetNamespaceOfPrefix("edmx");
+            _edmx = doc.Root?.GetNamespaceOfPrefix("edmx") ?? throw new ArgumentException("Invalid xml in file", nameof(ssdlFilePath));
             return ReadSsdl(doc);
         }
 
@@ -101,8 +98,7 @@ namespace DatabaseSchemaReader.Utilities
         {
             if (ssdlDocument == null) throw new ArgumentNullException(nameof(ssdlDocument));
             var storage = ssdlDocument.Root;
-            if (storage == null) throw new ArgumentException("Invalid document", nameof(ssdlDocument));
-            _edmx = storage.GetNamespaceOfPrefix("edmx");
+            _edmx = storage?.GetNamespaceOfPrefix("edmx") ?? throw new ArgumentException("Invalid document", nameof(ssdlDocument));
             if (storage.Name.LocalName != "Schema")
                 throw new InvalidOperationException("SSDL file does not have expected structure");
             _schema = storage.GetDefaultNamespace();
@@ -216,10 +212,10 @@ namespace DatabaseSchemaReader.Utilities
         {
             var tableName = table.Name;
             //get the related entity type
-            var entityType =
-                storageSchema.Elements(_schema + "EntityType")
-                    .Where(et => (string)et.Attribute("Name") == tableName)
-                    .FirstOrDefault();
+            var entityType = storageSchema
+                                .Elements(_schema + "EntityType")
+                                .FirstOrDefault(et => (string)et.Attribute("Name") == tableName);
+
             if (entityType == null) return;
 
             foreach (var property in entityType.Elements(_schema + "Property"))

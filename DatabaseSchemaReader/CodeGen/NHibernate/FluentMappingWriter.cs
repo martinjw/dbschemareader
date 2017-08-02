@@ -16,12 +16,9 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
         public FluentMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
-            if (table == null) throw new ArgumentNullException(nameof(table));
-            if (mappingNamer == null) throw new ArgumentNullException(nameof(mappingNamer));
-
             _codeWriterSettings = codeWriterSettings;
-            _mappingNamer = mappingNamer;
-            _table = table;
+            _mappingNamer = mappingNamer ?? throw new ArgumentNullException(nameof(mappingNamer));
+            _table = table ?? throw new ArgumentNullException(nameof(table));
             _cb = new ClassBuilder();
         }
 

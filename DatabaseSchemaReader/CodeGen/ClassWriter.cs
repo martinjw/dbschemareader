@@ -322,16 +322,12 @@ namespace DatabaseSchemaReader.CodeGen
 
             _codeWriterSettings.CodeInserter.WriteColumnAnnotations(_table, column, _cb);
 
-            var writeAnnotations = true;
-            if (column.IsPrimaryKey &&
+            bool writeAnnotations = !(column.IsPrimaryKey &&
                 _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore &&
-                _table.PrimaryKey.Columns.Count > 1)
-            {
-                //EF Core doesn't like [Key] annotations on composite keys
-                writeAnnotations = false;
-            }
-            if(writeAnnotations)
-            _dataAnnotationWriter.Write(_cb, column);
+                _table.PrimaryKey.Columns.Count > 1);
+
+            if(writeAnnotations) _dataAnnotationWriter.Write(_cb, column);
+
             //for code first, ordinary properties are non-virtual. 
             var useVirtual = !IsEntityFramework();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);

@@ -111,10 +111,9 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             if (_logic.HasRefCursors)
             {
                 //could also be ODP, Devart etc.
-                if (_logic.IsDevart)
-                    _cb.AppendLine("using Devart.Data.Oracle; //contains a Ref Cursor");
-                else
-                    _cb.AppendLine("using System.Data.OracleClient; //contains a Ref Cursor");
+                _cb.AppendLine(_logic.IsDevart
+                                        ? "using Devart.Data.Oracle; //contains a Ref Cursor"
+                                        : "using System.Data.OracleClient; //contains a Ref Cursor");
             }
             _cb.AppendLine("using System.Diagnostics;");
         }
