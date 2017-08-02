@@ -65,7 +65,6 @@ namespace DatabaseSchemaReader.DataSchema
         private static void UpdatePackages(DatabaseSchema databaseSchema)
         {
             var deletedSprocs = new List<DatabaseStoredProcedure>();
-            var deletedFuncs = new List<DatabaseFunction>();
             //find stored procedures that are in packages
             databaseSchema.StoredProcedures.ForEach(delegate (DatabaseStoredProcedure sproc)
             {
@@ -94,7 +93,7 @@ namespace DatabaseSchemaReader.DataSchema
                 //has been moved into a package
                 databaseSchema.StoredProcedures.Remove(deletedSproc);
             }
-            foreach (var deletedFunc in deletedFuncs)
+            foreach (var deletedFunc in new List<DatabaseFunction>())
             {
                 //has been moved into a package
                 databaseSchema.Functions.Remove(deletedFunc);
