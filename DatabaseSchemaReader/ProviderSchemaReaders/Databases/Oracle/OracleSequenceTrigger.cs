@@ -77,7 +77,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
         /// <value>
         /// The database trigger.
         /// </value>
-        public DatabaseTrigger DatabaseTrigger { get; private set; }
+        public DatabaseTrigger DatabaseTrigger { get; }
 
         /// <summary>
         /// Gets or sets the database sequence. Depending on trigger syntax, this may not be found.

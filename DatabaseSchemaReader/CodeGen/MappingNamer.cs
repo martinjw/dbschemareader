@@ -15,7 +15,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// <value>
         /// The entity names.
         /// </value>
-        public IList<string> EntityNames { get; private set; }
+        public IList<string> EntityNames { get; }
 
         /// <summary>
         /// Names the mapping class for an entity

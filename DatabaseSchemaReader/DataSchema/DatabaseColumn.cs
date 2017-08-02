@@ -53,7 +53,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The names of the foreign key table.
         /// </value>
-        public List<string> ForeignKeyTableNames { get; private set; }
+        public List<string> ForeignKeyTableNames { get; }
 
         /// <summary>
         /// Gets or sets the length if this is string (VARCHAR) or character (CHAR) type data. In SQLServer, a length of -1 indicates VARCHAR(MAX).
