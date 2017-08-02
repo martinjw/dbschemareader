@@ -105,9 +105,12 @@ namespace DatabaseSchemaReader
             if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema));
             if (databaseSchema.ConnectionString == null) throw new ArgumentException("No connectionString");
 
-            _schemaParameters = new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider);
-            _schemaParameters.DatabaseSchema = databaseSchema;
-            _schemaParameters.Owner = databaseSchema.Owner;
+            _schemaParameters =
+                new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider)
+                {
+                    DatabaseSchema = databaseSchema,
+                    Owner = databaseSchema.Owner
+                };
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
             DatabaseSchema = databaseSchema;
         }

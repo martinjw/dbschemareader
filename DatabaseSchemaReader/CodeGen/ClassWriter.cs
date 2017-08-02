@@ -448,8 +448,7 @@ namespace DatabaseSchemaReader.CodeGen
                     WriteColumn(column);
                 }
 
-                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
-                overrider.NetName = className + "Key";
+                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer) {NetName = className + "Key"};
                 overrider.AddOverrides();
             }
         }

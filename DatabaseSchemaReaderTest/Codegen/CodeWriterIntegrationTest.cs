@@ -244,8 +244,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             const string connectionString = ConnectionStrings.OracleHr;
             ProviderChecker.Check(providername, connectionString);
 
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "HR";
+            var dbReader = new DatabaseReader(connectionString, providername) {Owner = "HR"};
             DatabaseSchema schema = null;
             try
             {

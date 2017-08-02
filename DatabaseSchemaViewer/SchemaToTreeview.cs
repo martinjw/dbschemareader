@@ -134,8 +134,7 @@ namespace DatabaseSchemaViewer
             {
                 var name = view.Name;
                 if (!string.IsNullOrEmpty(view.SchemaOwner)) name = view.SchemaOwner + "." + name;
-                var viewNode = new TreeNode(name);
-                viewNode.Tag = view;
+                var viewNode = new TreeNode(name) {Tag = view};
                 viewRoot.Nodes.Add(viewNode);
                 foreach (var column in view.Columns)
                 {
@@ -146,18 +145,22 @@ namespace DatabaseSchemaViewer
 
         private static void FillTables(TreeNode treeRoot, DatabaseSchema schema)
         {
-            var tableRoot = new TreeNode("Tables");
-            tableRoot.Tag = schema;
-            tableRoot.ToolTipText = RightClickToScript;
+            var tableRoot = new TreeNode("Tables")
+            {
+                Tag = schema,
+                ToolTipText = RightClickToScript
+            };
             treeRoot.Nodes.Add(tableRoot);
 
             foreach (var table in schema.Tables.OrderBy(x => x.SchemaOwner).ThenBy(x => x.Name))
             {
                 var name = table.Name;
                 if (!string.IsNullOrEmpty(table.SchemaOwner)) name = table.SchemaOwner + "." + name;
-                var tableNode = new TreeNode(name);
-                tableNode.Tag = table;
-                tableNode.ToolTipText = RightClickToScript;
+                var tableNode = new TreeNode(name)
+                {
+                    Tag = table,
+                    ToolTipText = RightClickToScript
+                };
                 tableRoot.Nodes.Add(tableNode);
                 foreach (var column in table.Columns)
                 {
@@ -177,8 +180,7 @@ namespace DatabaseSchemaViewer
             tableNode.Nodes.Add(indexRoot);
             foreach (var index in table.Indexes)
             {
-                var node = new TreeNode(index.Name);
-                node.Tag = index;
+                var node = new TreeNode(index.Name) {Tag = index};
                 indexRoot.Nodes.Add(node);
                 foreach (var column in index.Columns)
                 {
@@ -216,9 +218,11 @@ namespace DatabaseSchemaViewer
 
         private static void AddConstraint(TreeNode constraintRoot, DatabaseConstraint constraint)
         {
-            var node = new TreeNode(constraint.Name);
-            node.Tag = constraint;
-            node.ToolTipText = RightClickToScript;
+            var node = new TreeNode(constraint.Name)
+            {
+                Tag = constraint,
+                ToolTipText = RightClickToScript
+            };
             constraintRoot.Nodes.Add(node);
             if (constraint.ConstraintType == ConstraintType.Check)
             {

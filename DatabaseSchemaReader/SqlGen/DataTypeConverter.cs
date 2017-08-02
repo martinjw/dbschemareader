@@ -222,8 +222,8 @@ namespace DatabaseSchemaReader.SqlGen
             if (sqlType == SqlType.SqlServer &&
                 dbType.StartsWith("TIMESTAMP(", StringComparison.OrdinalIgnoreCase))
             {
-                var dataType = new DataType(dbType, "System.Byte[]");
-                dataType.ProviderDbType = 19;// (int)SqlDbType.Timestamp;
+                var dataType = new DataType(dbType, "System.Byte[]") {ProviderDbType = 19};
+                // (int)SqlDbType.Timestamp;
                 dataTypeList.Add(dataType);
                 return dataType;
             }

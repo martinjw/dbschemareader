@@ -198,8 +198,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void WriteViewTest()
         {
             //arrange
-            var view = new DatabaseView();
-            view.Name = "AlphabeticNames";
+            var view = new DatabaseView {Name = "AlphabeticNames"};
             view.AddColumn("FirstName", typeof(string)).AddNullable()
                 .AddColumn("LastName", typeof(string)).AddNullable();
 

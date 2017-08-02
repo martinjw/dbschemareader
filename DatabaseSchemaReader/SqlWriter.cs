@@ -262,8 +262,7 @@ namespace DatabaseSchemaReader
                 else
                 {
                     //no pk constraint, assume first column
-                    var result = new List<string>();
-                    result.Add(_table.Columns[0].Name);
+                    var result = new List<string> {_table.Columns[0].Name};
                     _primaryKeys = result;
                 }
                 return _primaryKeys;

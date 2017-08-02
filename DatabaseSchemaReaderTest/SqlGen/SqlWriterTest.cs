@@ -19,8 +19,8 @@ namespace DatabaseSchemaReaderTest.SqlGen
             schema.AddTable("Category").AddColumn<int>("Id").AddPrimaryKey()
                 .AddColumn<string>("SecondName").AddLength(20)
                 .Table.SchemaOwner = "second";
-            var table = schema.FindTableByName("Category"); //this will find one of them
-            var writer = new SqlWriter(table, SqlType.SqlServer);
+            //var table = schema.FindTableByName("Category"); //this will find one of them
+            //var writer = new SqlWriter(table, SqlType.SqlServer);
 
             //act
             //var sql = writer.SelectAllSql();

@@ -38,7 +38,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
         private void CreateDbConnection()
         {
             System.Diagnostics.Trace.WriteLine($"Creating connection for {_parameters.ProviderName}");
-            var factory = DatabaseSchemaReader.Utilities.DbProvider.FactoryTools.GetFactory(_parameters.ProviderName);
+            var factory = Utilities.DbProvider.FactoryTools.GetFactory(_parameters.ProviderName);
             _dbConnection = factory.CreateConnection();
             try
             {

@@ -69,7 +69,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                 {
                     //access format names [table].[column].ValidationRule
                     //access expression doesn't have column name so take it from constraint name
-                    var columnName = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].", System.StringComparison.Ordinal) + 1)
+                    var columnName = checkConstraint.Name.Substring(0, checkConstraint.Name.LastIndexOf("].", StringComparison.Ordinal) + 1)
                         .Replace("[" + Table.Name + "].", "");
                     //must have braces
                     expression = "(" + columnName + " " + expression + ")";

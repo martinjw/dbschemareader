@@ -18,7 +18,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             var value = record[fieldName];
             try
             {
-                return (value != DBNull.Value) ? System.Convert.ToInt32(value, CultureInfo.CurrentCulture) : (int?)null;
+                return (value != DBNull.Value) ? Convert.ToInt32(value, CultureInfo.CurrentCulture) : (int?)null;
             }
             catch (OverflowException)
             {
@@ -37,7 +37,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             var value = record[fieldName];
             try
             {
-                return (value != DBNull.Value) ? System.Convert.ToInt64(value, CultureInfo.CurrentCulture) : (long?)null;
+                return (value != DBNull.Value) ? Convert.ToInt64(value, CultureInfo.CurrentCulture) : (long?)null;
             }
             catch (OverflowException)
             {

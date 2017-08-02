@@ -108,7 +108,7 @@ WHERE rfr.rdb$relation_name = 'Test'";
                     //ok, firebird 3.0
                 }*/
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //firebird 2.5 or earlier
                 UseFirebird25Sql();
