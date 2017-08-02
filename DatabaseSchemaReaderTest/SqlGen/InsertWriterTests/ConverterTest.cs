@@ -139,8 +139,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             //arrange
             var dt = new DateTime(2001, 3, 30, 10, 45, 30, 839);
             const SqlType sqlType = SqlType.Db2;
-            var dateTypes = new Dictionary<string, string>();
-            dateTypes.Add("StartDate", "TIMESTAMP");
+            var dateTypes = new Dictionary<string, string> {{"StartDate", "TIMESTAMP"}};
 
             var converter = new Converter(sqlType, dateTypes);
 

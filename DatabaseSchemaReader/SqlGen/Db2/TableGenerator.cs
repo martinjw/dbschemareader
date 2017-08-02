@@ -67,10 +67,12 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         protected override string ConstraintWriter()
         {
             var sb = new StringBuilder();
-            var constraintWriter = new ConstraintWriter(Table);
-            constraintWriter.IncludeSchema = IncludeSchema;
+            var constraintWriter = new ConstraintWriter(Table)
+            {
+                IncludeSchema = IncludeSchema,
+                TranslateCheckConstraint = TranslateCheckExpression
+            };
 
-            constraintWriter.TranslateCheckConstraint = TranslateCheckExpression;
 
             //single primary keys done inline
             if (Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count > 1)

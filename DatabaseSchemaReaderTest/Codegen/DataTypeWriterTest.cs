@@ -17,8 +17,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             var typewriter = new DataTypeWriter();
 
-            var column = new DatabaseColumn();
-            column.DataType = new DataType("NUMBER", "System.Int32");
+            var column = new DatabaseColumn {DataType = new DataType("NUMBER", "System.Int32")};
 
             var result = typewriter.Write(column);
 
@@ -30,9 +29,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             var typewriter = new DataTypeWriter();
 
-            var column = new DatabaseColumn();
-            column.DataType = new DataType("NUMBER", "System.Int32");
-            column.Nullable = true;
+            var column = new DatabaseColumn
+            {
+                DataType = new DataType("NUMBER", "System.Int32"),
+                Nullable = true
+            };
 
             var result = typewriter.Write(column);
 
@@ -44,8 +45,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             var typewriter = new DataTypeWriter();
 
-            var column = new DatabaseColumn();
-            column.DataType = new DataType("VARCHAR2", "System.String");
+            var column = new DatabaseColumn {DataType = new DataType("VARCHAR2", "System.String")};
 
             var result = typewriter.Write(column);
 
@@ -57,9 +57,11 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             var typewriter = new DataTypeWriter();
 
-            var column = new DatabaseColumn();
-            column.DataType = new DataType("VARCHAR2", "System.String");
-            column.Nullable = true;
+            var column = new DatabaseColumn
+            {
+                DataType = new DataType("VARCHAR2", "System.String"),
+                Nullable = true
+            };
 
             var result = typewriter.Write(column);
 

@@ -19,27 +19,33 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             //ARRANGE
 
-            var dict = new Dictionary<string, string>();
+            var dict = new Dictionary<string, string>
+            {
+                {"START_DATE", "StartDate"},
+                {"EMPLOYEE_ID", "EmployeeId"},
+                {"EMPLOYEE ID", "EmployeeId"},
+                {"CategoryId", "CategoryId"},
+                {"Cars", "Car"},
+                {"rates", "Rate"},
+                {"Boxes", "Box"},
+                {"Categories", "Category"},
+                {"queries", "Query"},
+                {"Statuses", "Status"},
+                {"People", "Person"},
+                {"les naufragés d'ythaq", "LesNaufragésDythaq"},
+                {"Database_IO", "DatabaseIO"},
+                {"CategoryID", "CategoryId"},
+                {"$NAME", "Name"}
+            };
             //pascalcase
-            dict.Add("START_DATE", "StartDate"); //underscore
-            dict.Add("EMPLOYEE_ID", "EmployeeId");
-            dict.Add("EMPLOYEE ID", "EmployeeId"); //spaces
-            dict.Add("CategoryId", "CategoryId"); //if mixed case, preserve it
+            //underscore
+            //spaces
+            //if mixed case, preserve it
             //singularization
-            dict.Add("Cars", "Car");
-            dict.Add("rates", "Rate");
-            dict.Add("Boxes", "Box");
-            dict.Add("Categories", "Category");
-            dict.Add("queries", "Query");
-            dict.Add("Statuses", "Status");
-            dict.Add("People", "Person");
             //complex titlecase
-            dict.Add("les naufragés d'ythaq", "LesNaufragésDythaq");
-            dict.Add("Database_IO", "DatabaseIO"); //mixed case with uppercase acronym
+            //mixed case with uppercase acronym
             //Id recognition
-            dict.Add("CategoryID", "CategoryId");
             //weird db names
-            dict.Add("$NAME", "Name");
 
             foreach (var item in dict)
             {
@@ -60,24 +66,30 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             //ARRANGE
 
-            var dict = new Dictionary<string, string>();
+            var dict = new Dictionary<string, string>
+            {
+                {"START_DATE", "startDate"},
+                {"EMPLOYEE_ID", "employeeId"},
+                {"EMPLOYEE ID", "employeeId"},
+                {"CategoryId", "categoryId"},
+                {"Cars", "cars"},
+                {"les naufragés d'ythaq", "lesNaufragésDythaq"},
+                {"Database_IO", "databaseIO"},
+                {"CategoryID", "categoryId"},
+                {"$NAME", "name"},
+                {"NAMESPACE", "@namespace"},
+                {"CLASS", "@class"}
+            };
             //pascalcase
-            dict.Add("START_DATE", "startDate"); //underscore
-            dict.Add("EMPLOYEE_ID", "employeeId");
-            dict.Add("EMPLOYEE ID", "employeeId"); //spaces
-            dict.Add("CategoryId", "categoryId"); //if mixed case, preserve it
+            //underscore
+            //spaces
+            //if mixed case, preserve it
             //no singularization
-            dict.Add("Cars", "cars");
             //complex titlecase
-            dict.Add("les naufragés d'ythaq", "lesNaufragésDythaq");
-            dict.Add("Database_IO", "databaseIO"); //mixed case with uppercase acronym
+            //mixed case with uppercase acronym
             //Id recognition
-            dict.Add("CategoryID", "categoryId");
             //weird db names
-            dict.Add("$NAME", "name");
             //c# keywords
-            dict.Add("NAMESPACE", "@namespace");
-            dict.Add("CLASS", "@class");
 
             foreach (var item in dict)
             {

@@ -14,8 +14,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         public void TestSqlServerInsert()
         {
             //arrange
-            var table = new DatabaseTable();
-            table.Name = "Categories";
+            var table = new DatabaseTable {Name = "Categories"};
             table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER" });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
@@ -24,13 +23,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             dt.Columns.Add("Name", typeof(string));
             dt.Rows.Add(1, "Hello");
 
-            var insertWriter = new InsertWriter(table, dt);
-            insertWriter.IncludeIdentity = true;
+            var insertWriter = new InsertWriter(table, dt) {IncludeIdentity = true};
 
-            //act
-            string txt = insertWriter.Write(SqlType.SqlServer);
             //we don't care about formatting
-            txt = RemoveLineBreaks(txt);
+            var txt = RemoveLineBreaks(insertWriter.Write(SqlType.SqlServer));
 
             //assert
             Assert.AreEqual("INSERT INTO [Categories] (  [Id],  [Name]) VALUES (1 ,N'Hello');", txt);
@@ -45,8 +41,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         public void TestOracleInsert()
         {
             //arrange
-            var table = new DatabaseTable();
-            table.Name = "Categories";
+            var table = new DatabaseTable {Name = "Categories"};
             table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER" });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
@@ -55,8 +50,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             dt.Columns.Add("Name", typeof(string));
             dt.Rows.Add(1, "Hello");
 
-            var insertWriter = new InsertWriter(table, dt);
-            insertWriter.IncludeIdentity = true;
+            var insertWriter = new InsertWriter(table, dt) {IncludeIdentity = true};
 
             //act
             string txt = insertWriter.Write(SqlType.Oracle);
@@ -71,8 +65,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         public void TestSqlServerInsertExcludeIdentity()
         {
             //arrange
-            var table = new DatabaseTable();
-            table.Name = "Categories";
+            var table = new DatabaseTable {Name = "Categories"};
             table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsAutoNumber = true });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
@@ -81,13 +74,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             dt.Columns.Add("Name", typeof(string));
             dt.Rows.Add(1, "Hello");
 
-            var insertWriter = new InsertWriter(table, dt);
-            insertWriter.IncludeIdentity = false;
+            var insertWriter = new InsertWriter(table, dt) {IncludeIdentity = false};
 
-            //act
-            string txt = insertWriter.Write(SqlType.SqlServer);
             //we don't care about formatting
-            txt = RemoveLineBreaks(txt);
+            var txt = RemoveLineBreaks(insertWriter.Write(SqlType.SqlServer));
 
             //assert
             Assert.AreEqual("INSERT INTO [Categories] (  [Name]) VALUES (N'Hello');", txt);
@@ -97,8 +87,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         public void TestSqlServerInsertIncludeIdentity()
         {
             //arrange
-            var table = new DatabaseTable();
-            table.Name = "Categories";
+            var table = new DatabaseTable {Name = "Categories"};
             table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsAutoNumber = true });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
@@ -107,13 +96,11 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             dt.Columns.Add("Name", typeof(string));
             dt.Rows.Add(1, "Hello");
 
-            var insertWriter = new InsertWriter(table, dt);
-            insertWriter.IncludeIdentity = true;
+            var insertWriter = new InsertWriter(table, dt) {IncludeIdentity = true};
 
             //act
-            string txt = insertWriter.Write(SqlType.SqlServer);
             //we don't care about formatting
-            txt = RemoveLineBreaks(txt);
+            var txt = RemoveLineBreaks(insertWriter.Write(SqlType.SqlServer));
 
             //assert
             Assert.IsTrue(txt.Contains("INSERT INTO [Categories] (  [Id],  [Name]) VALUES (1 ,N'Hello');"));
@@ -126,8 +113,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         public void TestOracleInsertExcludeIdentity()
         {
             //arrange
-            var table = new DatabaseTable();
-            table.Name = "Categories";
+            var table = new DatabaseTable {Name = "Categories"};
             table.Columns.Add(new DatabaseColumn { Name = "Id", DbDataType = "INTEGER", IsAutoNumber = true });
             table.Columns.Add(new DatabaseColumn { Name = "Name", DbDataType = "VARCHAR" });
 
@@ -136,8 +122,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             dt.Columns.Add("Name", typeof(string));
             dt.Rows.Add(1, "Hello");
 
-            var insertWriter = new InsertWriter(table, dt);
-            insertWriter.IncludeIdentity = false;
+            var insertWriter = new InsertWriter(table, dt) {IncludeIdentity = false};
 
             //act
             string txt = insertWriter.Write(SqlType.Oracle);
@@ -163,8 +148,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
             var rdr = new Reader(table, ConnectionString, Providername);
             var dt = rdr.Read();
 
-            var insertWriter = new InsertWriter(table, dt);
-            insertWriter.IncludeIdentity = true;
+            var insertWriter = new InsertWriter(table, dt) {IncludeIdentity = true};
 
             //act
             string txt = insertWriter.Write(SqlType.SqlServer);

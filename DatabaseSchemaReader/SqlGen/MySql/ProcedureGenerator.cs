@@ -9,9 +9,11 @@ namespace DatabaseSchemaReader.SqlGen.MySql
     {
         public ProcedureGenerator(DatabaseTable table) : base(table)
         {
-            SqlWriter = new SqlWriter(table, SqlType.MySql);
-            SqlWriter.InStoredProcedure = true;
-            SqlWriter.FormatParameter = x => "p_" + x;
+            SqlWriter = new SqlWriter(table, SqlType.MySql)
+            {
+                InStoredProcedure = true,
+                FormatParameter = x => "p_" + x
+            };
         }
         protected override IProcedureWriter CreateProcedureWriter(string procName)
         {

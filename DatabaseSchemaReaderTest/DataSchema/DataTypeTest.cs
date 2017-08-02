@@ -14,12 +14,14 @@ namespace DatabaseSchemaReaderTest.DataSchema
         public void StringNetCodeNameTest()
         {
             //arrange
-            var column = new DatabaseColumn();
-            column.Name = "TEST";
-            column.Length = 20;
-            column.DbDataType = "VARCHAR2";
+            var column = new DatabaseColumn
+            {
+                Name = "TEST",
+                Length = 20,
+                DbDataType = "VARCHAR2",
+                DataType = new DataType("VARCHAR2", "System.String")
+            };
 
-            column.DataType = new DataType("VARCHAR2", "System.String");
 
             //act
             var result = column.DataType.NetCodeName(column);
@@ -32,10 +34,12 @@ namespace DatabaseSchemaReaderTest.DataSchema
         public void DecimalTest()
         {
             //arrange
-            var column = new DatabaseColumn();
-            column.Name = "TEST";
-            column.Precision = 8;
-            column.Scale = 2;
+            var column = new DatabaseColumn
+            {
+                Name = "TEST",
+                Precision = 8,
+                Scale = 2
+            };
             AddNumberDataType(column);
 
             //act
@@ -50,10 +54,12 @@ namespace DatabaseSchemaReaderTest.DataSchema
         public void IntegerTest()
         {
             //arrange
-            var column = new DatabaseColumn();
-            column.Name = "TEST";
-            column.Precision = 6;
-            column.Scale = 0;
+            var column = new DatabaseColumn
+            {
+                Name = "TEST",
+                Precision = 6,
+                Scale = 0
+            };
             AddNumberDataType(column);
 
             //act
@@ -68,10 +74,12 @@ namespace DatabaseSchemaReaderTest.DataSchema
         public void LongTest()
         {
             //arrange
-            var column = new DatabaseColumn();
-            column.Name = "TEST";
-            column.Precision = 12;
-            column.Scale = 0;
+            var column = new DatabaseColumn
+            {
+                Name = "TEST",
+                Precision = 12,
+                Scale = 0
+            };
             AddNumberDataType(column);
 
             //act
@@ -85,10 +93,12 @@ namespace DatabaseSchemaReaderTest.DataSchema
         public void ShortTest()
         {
             //arrange
-            var column = new DatabaseColumn();
-            column.Name = "TEST";
-            column.Precision = 4;
-            column.Scale = 0;
+            var column = new DatabaseColumn
+            {
+                Name = "TEST",
+                Precision = 4,
+                Scale = 0
+            };
             AddNumberDataType(column);
 
             //act

@@ -104,13 +104,15 @@ namespace DatabaseSchemaReader.DataSchema
         {
             var package = databaseSchema.Packages.Find(
                 t2 => t2.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (package == null)
+
+            if (package != null) return package;
+
+            package = new DatabasePackage
             {
-                package = new DatabasePackage();
-                package.Name = name;
-                package.SchemaOwner = owner;
-                databaseSchema.Packages.Add(package);
-            }
+                Name = name,
+                SchemaOwner = owner
+            };
+            databaseSchema.Packages.Add(package);
             return package;
         }
 

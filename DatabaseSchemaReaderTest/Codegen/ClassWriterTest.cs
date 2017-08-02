@@ -111,8 +111,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var categoryTable = schema.FindTableByName("Categories");
 
-            var codeWriterSettings = new CodeWriterSettings();
-            codeWriterSettings.CodeTarget = CodeTarget.PocoNHibernateHbm;
+            var codeWriterSettings = new CodeWriterSettings {CodeTarget = CodeTarget.PocoNHibernateHbm};
             var cw = new ClassWriter(categoryTable, codeWriterSettings);
 
             //act

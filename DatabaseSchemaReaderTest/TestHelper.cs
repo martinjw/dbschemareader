@@ -53,8 +53,7 @@ namespace DatabaseSchemaReaderTest
             var connectionString = ConnectionStrings.Northwind;
             ProviderChecker.Check(providername, connectionString);
 
-            var northwindReader = new DatabaseReader(connectionString, providername);
-            northwindReader.Owner = "dbo";
+            var northwindReader = new DatabaseReader(connectionString, providername) {Owner = "dbo"};
             return northwindReader;
         }
     }

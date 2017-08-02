@@ -24,8 +24,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         {
             //arrange
             DatabaseSchema schema = PrepareModel();
-            var settings = new CodeWriterSettings();
-            settings.IncludeViews = true;
+            var settings = new CodeWriterSettings {IncludeViews = true};
             var target = new CodeFirstContextWriter(settings);
             var list = new List<DatabaseTable>(schema.Tables);
             list.AddRange(schema.Views.OfType<DatabaseTable>());

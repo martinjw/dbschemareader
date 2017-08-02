@@ -18,8 +18,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRequired()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RequiredErrorMessage = null;
+            var settings = new CodeWriterSettings {RequiredErrorMessage = null};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Important";
@@ -40,8 +39,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRequiredWithErrorMessage()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RequiredErrorMessage = "This is mandatory";
+            var settings = new CodeWriterSettings {RequiredErrorMessage = "This is mandatory"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Important";
@@ -63,8 +61,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestRequiredWithErrorMessageFormat()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.RequiredErrorMessage = "{0} is mandatory";
+            var settings = new CodeWriterSettings {RequiredErrorMessage = "{0} is mandatory"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Important";
@@ -85,8 +82,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestStringLength()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.StringLengthErrorMessage = null;
+            var settings = new CodeWriterSettings {StringLengthErrorMessage = null};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -109,8 +105,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestStringLengthWithErrorMessage()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.StringLengthErrorMessage = "Is not the correct length";
+            var settings = new CodeWriterSettings {StringLengthErrorMessage = "Is not the correct length"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";
@@ -132,8 +127,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void TestStringLengthWithErrorMessageFormat1()
         {
             //arrange
-            var settings = new CodeWriterSettings();
-            settings.StringLengthErrorMessage = "Maximum length is {0}";
+            var settings = new CodeWriterSettings {StringLengthErrorMessage = "Maximum length is {0}"};
             var classBuilder = new ClassBuilder();
             var column = new DatabaseColumn();
             column.Name = column.NetName = "Name";

@@ -23,14 +23,13 @@ namespace DatabaseSchemaReaderTest
         {
             using (var connection = new MySql.Data.MySqlClient.MySqlConnection(MySql))
             {
-                var dr = new DatabaseSchemaReader.DatabaseReader(connection);
-                dr.Owner = "sakila";
+                var dr = new DatabaseSchemaReader.DatabaseReader(connection) {Owner = "sakila"};
                 try
                 {
-                    var schema = dr.ReadAll();
+                    //var schema = dr.ReadAll();
                     var tableList = dr.TableList();
-                    var tables = dr.AllTables();
-                    var views = dr.AllViews();
+                    //var tables = dr.AllTables();
+                    //var views = dr.AllViews();
                     Assert.NotEmpty(tableList);
                 }
                 catch (System.Resources.MissingManifestResourceException)

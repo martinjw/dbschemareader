@@ -33,9 +33,13 @@ namespace DatabaseSchemaViewer
                 var sprocRunner = new DatabaseSchemaReader.Procedures.ResultSetReader(_databaseSchema);
                 sprocRunner.Execute();
             }
-            var settings = new CodeWriterSettings { Namespace = _ns, CodeTarget = CodeTarget };
+            var settings = new CodeWriterSettings
+            {
+                Namespace = _ns,
+                CodeTarget = CodeTarget,
+                UseForeignKeyIdProperties = Properties.Settings.Default.CodeGenUseForeignKeyIdProperties
+            };
             //these have no UI, but the user can edit the config.
-            settings.UseForeignKeyIdProperties = Properties.Settings.Default.CodeGenUseForeignKeyIdProperties;
             if (Properties.Settings.Default.CodeGenUsePluralizingNamer)
             {
                 settings.Namer = new PluralizingNamer();
