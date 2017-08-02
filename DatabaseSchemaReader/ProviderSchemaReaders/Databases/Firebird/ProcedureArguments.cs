@@ -103,10 +103,10 @@ FROM rdb$relation_fields rfr
 WHERE rfr.rdb$relation_name = 'Test'";
             try
             {
-                using (var rdr = cmd.ExecuteReader())
+                /*using (var rdr = cmd.ExecuteReader())
                 {
                     //ok, firebird 3.0
-                }
+                }*/
             }
             catch (Exception e)
             {

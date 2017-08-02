@@ -26,10 +26,10 @@ namespace DatabaseSchemaReaderTest
                 var dr = new DatabaseSchemaReader.DatabaseReader(connection);
                 try
                 {
-                    var schema = dr.ReadAll();
+                    //var schema = dr.ReadAll();
                     var tableList = dr.TableList();
-                    var tables = dr.AllTables();
-                    var views = dr.AllViews();
+                    //var tables = dr.AllTables();
+                    //var views = dr.AllViews();
                     Assert.NotEmpty(tableList);
                 }
                 catch (System.Net.Sockets.SocketException)

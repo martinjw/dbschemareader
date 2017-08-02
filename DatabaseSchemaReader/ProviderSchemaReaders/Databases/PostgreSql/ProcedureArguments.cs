@@ -98,9 +98,7 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
                 //That may be difficult for clients so we'll invent a name
                 if (string.IsNullOrEmpty(argName)) argName = "arg" + index;
 
-                string direction;
-                if (index >= modes.Length) direction = "IN";
-                else direction = ParseDirection(modes[index]);
+                var direction = index >= modes.Length ? "IN" : ParseDirection(modes[index]);
 
                 var arg = new DatabaseArgument
                 {
@@ -182,7 +180,7 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
             if (ar != null) return ar;
             var s = ReadString(o);
             if (s == null) return new string[] { };
-            s = s.Trim(new[] { '{', '}' });
+            s = s.Trim('{', '}');
             return s.Split(',');
         }
 
