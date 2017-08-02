@@ -13,10 +13,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         {
             return SqlFormatProvider().RunStatements();
         }
-        protected override string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1}"; }
-        }
+        protected override string AlterColumnFormat => "ALTER TABLE {0} ALTER COLUMN {1}";
+
         public override string AddFunction(DatabaseFunction databaseFunction)
         {
             return null; //doesn't support it

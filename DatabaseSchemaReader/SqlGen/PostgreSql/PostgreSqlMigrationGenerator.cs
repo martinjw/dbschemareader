@@ -11,10 +11,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         {
         }
 
-        protected override string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
-        }
+        protected override string AlterColumnFormat => "ALTER TABLE {0} ALTER COLUMN {1};";
+
         public override string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
         {
             //CREATE TRIGGER notify_dept AFTER INSERT OR UPDATE OR DELETE
@@ -108,8 +106,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                     AlterColumnFormat,
                     TableName(databaseTable),
                     columnDef.Replace("NOT NULL", String.Empty)) +
-               string.Format("\r\nALTER TABLE {0} ALTER COLUMN {1} {2} NOT NULL;",
-               TableName(databaseTable), Escape(databaseColumn.Name), (databaseColumn.Nullable ? "DROP" : "SET"));
+                   $"\r\nALTER TABLE {TableName(databaseTable)} ALTER COLUMN {Escape(databaseColumn.Name)} {(databaseColumn.Nullable ? "DROP" : "SET")} NOT NULL;";
         }
     }
 }

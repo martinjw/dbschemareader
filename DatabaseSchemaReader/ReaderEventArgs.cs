@@ -20,27 +20,27 @@ namespace DatabaseSchemaReader
         /// <summary>
         /// ProgressType (Reading, Processing)
         /// </summary>
-        public ProgressType ProgressType { get; private set; }
+        public ProgressType ProgressType { get; }
 
         /// <summary>
         /// Gets the type of the schema object.
         /// </summary>
-        public SchemaObjectType SchemaObjectType { get; private set; }
+        public SchemaObjectType SchemaObjectType { get; }
 
         /// <summary>
         /// Name of Tables/View/SP
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Index of current Name inside the collection if available
         /// </summary>
-        public int? Index { get; private set; }
+        public int? Index { get; }
 
         /// <summary>
         /// Count of entries if available
         /// </summary>
-        public int? Count { get; private set; }
+        public int? Count { get; }
 
         internal static void RaiseEvent(EventHandler<ReaderEventArgs> eventHandler,
             object sender,
@@ -57,10 +57,7 @@ namespace DatabaseSchemaReader
             string name, int? index, int? count)
         {
             var handler = eventHandler;
-            if (handler != null)
-            {
-                handler(sender, new ReaderEventArgs(progressType, schemaObjectType, name, index, count));
-            }
+            handler?.Invoke(sender, new ReaderEventArgs(progressType, schemaObjectType, name, index, count));
         }
     }
 

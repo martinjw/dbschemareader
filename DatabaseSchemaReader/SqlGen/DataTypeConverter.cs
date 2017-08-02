@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
 
@@ -165,9 +163,8 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="column">The column.</param>
         public static void AddDataType(DatabaseColumn column)
         {
-            if (column == null) return;
             //there is no data type at all
-            if (string.IsNullOrEmpty(column.DbDataType)) return;
+            if (string.IsNullOrEmpty(column?.DbDataType)) return;
             //a datatype already assigned
             if (column.DataType != null) return;
             //use upper case
@@ -176,16 +173,13 @@ namespace DatabaseSchemaReader.SqlGen
             if (string.IsNullOrEmpty(dbType)) return;
             var sqlType = SqlType.SqlServer;
             var dataTypeList = new List<DataType>();
-            if (column.Table != null)
+            //look up the full schema if it exists
+            var schema = column.Table?.DatabaseSchema;
+            if (schema != null)
             {
-                //look up the full schema if it exists
-                var schema = column.Table.DatabaseSchema;
-                if (schema != null)
-                {
-                    var provider = schema.Provider;
-                    sqlType = ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
-                    dataTypeList = schema.DataTypes;
-                }
+                var provider = schema.Provider;
+                sqlType = ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
+                dataTypeList = schema.DataTypes;
             }
             //does the schema data types contain this type? if so, assign it.
             var dataType = FindDataType(dbType, dataTypeList, sqlType, column.Length);
@@ -197,8 +191,8 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         public static DataType FindDataType(string dbType, ICollection<DataType> dataTypeList, SqlType sqlType, int? length)
         {
-            if (dbType == null) throw new ArgumentNullException("dbType");
-            if (dataTypeList == null) throw new ArgumentNullException("dataTypeList");
+            if (dbType == null) throw new ArgumentNullException(nameof(dbType));
+            if (dataTypeList == null) throw new ArgumentNullException(nameof(dataTypeList));
 
             var match = dataTypeList.FirstOrDefault(d => d.TypeName.Equals(dbType, StringComparison.OrdinalIgnoreCase));
             if (match != null)
@@ -228,8 +222,8 @@ namespace DatabaseSchemaReader.SqlGen
             if (sqlType == SqlType.SqlServer &&
                 dbType.StartsWith("TIMESTAMP(", StringComparison.OrdinalIgnoreCase))
             {
-                var dataType = new DataType(dbType, "System.Byte[]");
-                dataType.ProviderDbType = 19;// (int)SqlDbType.Timestamp;
+                var dataType = new DataType(dbType, "System.Byte[]") {ProviderDbType = 19};
+                // (int)SqlDbType.Timestamp;
                 dataTypeList.Add(dataType);
                 return dataType;
             }

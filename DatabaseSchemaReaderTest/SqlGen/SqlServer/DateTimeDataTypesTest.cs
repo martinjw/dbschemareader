@@ -69,8 +69,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             //arrange
             _column.DbDataType = "TIMESTAMP";
             _column.Precision = 18;
-            _column.DataType = new DataType("TIMESTAMP", "byte[]");
-            _column.DataType.ProviderDbType = (int)SqlDbType.Timestamp;
+            _column.DataType = new DataType("TIMESTAMP", "byte[]") {ProviderDbType = (int) SqlDbType.Timestamp};
 
             //act
             var result = _typeWriter.WriteDataType(_column);
@@ -84,8 +83,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
         {
             //arrange
             _column.DbDataType = "DATE";
-            _column.DataType = new DataType("DATE", "System.DateTime");
-            _column.DataType.ProviderDbType = (int)SqlDbType.Date;
+            _column.DataType = new DataType("DATE", "System.DateTime") {ProviderDbType = (int) SqlDbType.Date};
 
             //act
             var result = _typeWriter.WriteDataType(_column);

@@ -70,10 +70,12 @@ namespace DatabaseSchemaViewer
         {
             try
             {
-                var sw = new ScriptWriter();
-                sw.IncludeBlobs = false;
-                sw.IncludeIdentity = true;
-                sw.PageSize = 100;
+                var sw = new ScriptWriter
+                {
+                    IncludeBlobs = false,
+                    IncludeIdentity = true,
+                    PageSize = 100
+                };
                 var txt = sw.ReadTable(databaseTable, connectionString, providerName);
                 Clipboard.SetText(txt, TextDataFormat.UnicodeText);
             }

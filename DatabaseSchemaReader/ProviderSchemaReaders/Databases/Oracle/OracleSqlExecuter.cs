@@ -47,11 +47,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
             var bindByName =  command.GetType().GetProperty("BindByName");
 #else
             var bindByName = command.GetType().GetTypeInfo().GetDeclaredProperty("BindByName");
-#endif           
-            if (bindByName != null)
-            {
-                bindByName.SetValue(command, true, null);
-            }
+#endif
+            bindByName?.SetValue(command, true, null);
         }
     }
 }

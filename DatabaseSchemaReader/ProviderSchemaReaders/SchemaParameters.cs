@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data.Common;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
@@ -43,9 +41,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         }
 #endif
 
-        public string ConnectionString { get; private set; }
+        public string ConnectionString { get; }
 		
-        public SqlType? SqlType { get; private set; }
+        public SqlType? SqlType { get; }
 
         /// <summary>
         /// Exclude specified items when reading schema
@@ -53,7 +51,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         /// <value>
         /// The exclusions.
         /// </value>
-        public Exclusions Exclusions { get; private set; }
+        public Exclusions Exclusions { get; }
 
         /// <summary>
         /// Gets or sets the owner (for Oracle) /schema (for SqlServer) / database (MySql). Always set it with Oracle; if you use other than dbo in SqlServer you should also set it.
@@ -61,7 +59,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         /// </summary>
         public string Owner { get; set; }
 
-        public string ProviderName { get; private set; }
+        public string ProviderName { get; }
 
         public DatabaseSchema DatabaseSchema { get; set; }
     }

@@ -15,8 +15,7 @@ namespace DatabaseSchemaReaderTest.Utilities
             //arrange
             var schema = new DatabaseSchema(null, null);
 
-            var orders = new DatabaseTable();
-            orders.Name = "orders";
+            var orders = new DatabaseTable {Name = "orders"};
             var productsFk = new DatabaseConstraint
                                  {
                                      ConstraintType = ConstraintType.ForeignKey,
@@ -25,15 +24,15 @@ namespace DatabaseSchemaReaderTest.Utilities
             orders.AddConstraint(productsFk);
             schema.Tables.Add(orders);
 
-            var categories = new DatabaseTable();
-            categories.Name = "categories";
+            var categories = new DatabaseTable {Name = "categories"};
             schema.Tables.Add(categories);
 
-            var products = new DatabaseTable();
-            products.Name = "products";
-            var categoriesFk = new DatabaseConstraint();
-            categoriesFk.ConstraintType = ConstraintType.ForeignKey;
-            categoriesFk.RefersToTable = "categories";
+            var products = new DatabaseTable {Name = "products"};
+            var categoriesFk = new DatabaseConstraint
+            {
+                ConstraintType = ConstraintType.ForeignKey,
+                RefersToTable = "categories"
+            };
             products.AddConstraint(categoriesFk);
             schema.Tables.Add(products);
 
@@ -53,19 +52,21 @@ namespace DatabaseSchemaReaderTest.Utilities
             //arrange
             var schema = new DatabaseSchema(null, null);
 
-            var orders = new DatabaseTable();
-            orders.Name = "countries";
-            var productsFk = new DatabaseConstraint();
-            productsFk.ConstraintType = ConstraintType.ForeignKey;
-            productsFk.RefersToTable = "capitalcities";
+            var orders = new DatabaseTable {Name = "countries"};
+            var productsFk = new DatabaseConstraint
+            {
+                ConstraintType = ConstraintType.ForeignKey,
+                RefersToTable = "capitalcities"
+            };
             orders.AddConstraint(productsFk);
             schema.Tables.Add(orders);
 
-            var products = new DatabaseTable();
-            products.Name = "capitalcities";
-            var categoriesFk = new DatabaseConstraint();
-            categoriesFk.ConstraintType = ConstraintType.ForeignKey;
-            categoriesFk.RefersToTable = "countries";
+            var products = new DatabaseTable {Name = "capitalcities"};
+            var categoriesFk = new DatabaseConstraint
+            {
+                ConstraintType = ConstraintType.ForeignKey,
+                RefersToTable = "countries"
+            };
             products.AddConstraint(categoriesFk);
             schema.Tables.Add(products);
 

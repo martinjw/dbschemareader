@@ -38,10 +38,9 @@ namespace DatabaseSchemaReaderTest.Compare
             var target = new CompareViews(sb, writer);
 
             var baseViews = new List<DatabaseView> { CreateView() };
-            var compareViews = new List<DatabaseView>();
 
             //act
-            target.Execute(baseViews, compareViews);
+            target.Execute(baseViews, new List<DatabaseView>());
             var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert
@@ -56,11 +55,10 @@ namespace DatabaseSchemaReaderTest.Compare
             var writer = new ComparisonWriter(SqlType.SqlServer);
             var target = new CompareViews(sb, writer);
 
-            var baseViews = new List<DatabaseView>();
             var compareViews = new List<DatabaseView> { CreateView() };
 
             //act
-            target.Execute(baseViews, compareViews);
+            target.Execute(new List<DatabaseView>(), compareViews);
             var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
 
             //assert

@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaViewer
@@ -140,8 +139,7 @@ namespace DatabaseSchemaViewer
 
         private void RunCodeWriter(DirectoryInfo directory, string ns, bool readStoredProcedures, DatabaseSchemaReader.CodeGen.CodeTarget codeTarget)
         {
-            var runner = new CodeWriterRunner(_databaseSchema, directory, ns, readStoredProcedures);
-            runner.CodeTarget = codeTarget;
+            var runner = new CodeWriterRunner(_databaseSchema, directory, ns, readStoredProcedures) {CodeTarget = codeTarget};
             if (readStoredProcedures)
             {
                 toolStripStatusLabel1.Text = @"Reading stored procedures";

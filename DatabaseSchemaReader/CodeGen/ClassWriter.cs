@@ -158,7 +158,7 @@ namespace DatabaseSchemaReader.CodeGen
                     //code first composite key
                     foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
                     {
-                        WriteColumn(column, false);
+                        WriteColumn(column);
                     }
                 }
             }
@@ -308,12 +308,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
         }
 
-        private void WriteColumn(DatabaseColumn column)
-        {
-            WriteColumn(column, false);
-        }
-
-        private void WriteColumn(DatabaseColumn column, bool notNetName)
+        private void WriteColumn(DatabaseColumn column, bool notNetName = false)
         {
             var propertyName = PropertyName(column);
             var dataType = _dataTypeWriter.Write(column);
@@ -327,16 +322,12 @@ namespace DatabaseSchemaReader.CodeGen
 
             _codeWriterSettings.CodeInserter.WriteColumnAnnotations(_table, column, _cb);
 
-            var writeAnnotations = true;
-            if (column.IsPrimaryKey &&
+            bool writeAnnotations = !(column.IsPrimaryKey &&
                 _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore &&
-                _table.PrimaryKey.Columns.Count > 1)
-            {
-                //EF Core doesn't like [Key] annotations on composite keys
-                writeAnnotations = false;
-            }
-            if(writeAnnotations)
-            _dataAnnotationWriter.Write(_cb, column);
+                _table.PrimaryKey.Columns.Count > 1);
+
+            if(writeAnnotations) _dataAnnotationWriter.Write(_cb, column);
+
             //for code first, ordinary properties are non-virtual. 
             var useVirtual = !IsEntityFramework();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
@@ -355,7 +346,7 @@ namespace DatabaseSchemaReader.CodeGen
             // KL: Ensures that property name doesn't match class name
             if (propertyName == column.Table.NetName)
             {
-                propertyName = string.Format("{0}Column", propertyName);
+                propertyName = $"{propertyName}Column";
             }
             if (column.IsPrimaryKey && column.IsForeignKey)
             {
@@ -457,8 +448,7 @@ namespace DatabaseSchemaReader.CodeGen
                     WriteColumn(column);
                 }
 
-                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
-                overrider.NetName = className + "Key";
+                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer) {NetName = className + "Key"};
                 overrider.AddOverrides();
             }
         }

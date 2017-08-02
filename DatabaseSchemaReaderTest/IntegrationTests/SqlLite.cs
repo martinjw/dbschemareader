@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using DatabaseSchemaReader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -101,8 +101,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
         {
 
             //NamedSchemaObject = has a name and schemaOwner
-            var schema = new DatabaseSchema(null, null);
-            schema.Owner = "dbo";
+            var schema = new DatabaseSchema(null, null) {Owner = "dbo"};
             schema.AddTable("A").AddTable("A");
             var distinct = schema.Tables.Distinct().Count();
             Assert.AreEqual(1, distinct);

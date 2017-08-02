@@ -16,8 +16,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="tableName">Name of the table.</param>
         public static void RemoveTable(this DatabaseSchema databaseSchema, string tableName)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema", "databaseSchema must not be null");
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName", "tableName must not be null");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema), "databaseSchema must not be null");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName), "tableName must not be null");
 
             var table = databaseSchema.FindTableByName(tableName);
             RemoveTable(databaseSchema, table);
@@ -31,8 +31,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <exception cref="System.ArgumentNullException">databaseSchema;databaseSchema must not be null</exception>
         public static void RemoveTable(this DatabaseSchema databaseSchema, DatabaseTable table)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema", "databaseSchema must not be null");
-            if (table == null) throw new ArgumentNullException("table", "table must not be null");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema), "databaseSchema must not be null");
+            if (table == null) throw new ArgumentNullException(nameof(table), "table must not be null");
 
             foreach (var foreignKeyChild in table.ForeignKeyChildren)
             {
@@ -55,8 +55,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseTable AddTable(this DatabaseSchema databaseSchema, string tableName)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema", "databaseSchema must not be null");
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName", "tableName must not be null");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema), "databaseSchema must not be null");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName), "tableName must not be null");
 
             var table = new DatabaseTable { Name = tableName };
             databaseSchema.Tables.Add(table);
@@ -73,7 +73,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseTable AddTable(this DatabaseTable databaseTable, string tableName)
         {
-            if (databaseTable == null) throw new ArgumentNullException("databaseTable", "databaseTable must not be null");
+            if (databaseTable == null) throw new ArgumentNullException(nameof(databaseTable), "databaseTable must not be null");
             var schema = databaseTable.DatabaseSchema;
             return schema.AddTable(tableName);
         }
@@ -86,7 +86,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseTable AddTable(this DatabaseColumn databaseColumn, string tableName)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
             var table = databaseColumn.Table;
             return table.AddTable(tableName);
         }
@@ -100,7 +100,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <exception cref="System.ArgumentNullException">databaseColumn;databaseColumn must not be null</exception>
         public static DatabaseColumn AddIndex(this DatabaseColumn databaseColumn, string indexName)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
             var databaseTable = databaseColumn.Table;
             if (databaseTable == null) throw new ArgumentException("databaseColumn has no table");
 
@@ -130,8 +130,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseTable AddIndex(this DatabaseTable databaseTable, string indexName, IEnumerable<DatabaseColumn> columns)
         {
-            if (databaseTable == null) throw new ArgumentNullException("databaseTable", "databaseTable must not be null");
-            if (!columns.Any()) throw new ArgumentException("columns is empty", "columns");
+            if (databaseTable == null) throw new ArgumentNullException(nameof(databaseTable), "databaseTable must not be null");
+            if (!columns.Any()) throw new ArgumentException("columns is empty", nameof(columns));
             var index = new DatabaseIndex
                             {
                                 Name = indexName,
@@ -183,7 +183,7 @@ namespace DatabaseSchemaReader.DataSchema
             if (origin == null || destination == null) return false;
             var pk = origin.PrimaryKey;
             if (pk == null) return false;
-            var columns = pk.Columns.Select(x => origin.FindColumn(x));
+            var columns = pk.Columns.Select(origin.FindColumn);
             //the primary key of the origin is also a foreign key to this table
             var allFk = columns.All(c => c.ForeignKeyTableName == destination.Name);
             return allFk;
@@ -196,22 +196,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseTable FindInheritanceTable(this DatabaseTable table)
         {
-            if (table == null) return null;
-            if (table.PrimaryKeyColumn != null &&
-                table.Columns.Where(c => c.IsPrimaryKey).All(c => c.IsForeignKey))
-            {
-                //all the primary keys are foreign keys.
-                var fkTable = table.PrimaryKeyColumn.ForeignKeyTable;
-                if (fkTable != null)
-                {
-                    var count = fkTable.ForeignKeyChildren.Count(childTable => fkTable.IsSharedPrimaryKey(childTable));
-                    if (count > 1)
-                    {
-                        return fkTable;
-                    }
-                }
-            }
-            return null;
+            if (table?.PrimaryKeyColumn == null ||!table.Columns.Where(c => c.IsPrimaryKey).All(c => c.IsForeignKey)) return null;
+
+            //all the primary keys are foreign keys.
+            var fkTable = table.PrimaryKeyColumn.ForeignKeyTable;
+            var count = fkTable?.ForeignKeyChildren.Count(childTable => fkTable.IsSharedPrimaryKey(childTable));
+            return count > 1 ? fkTable : null;
         }
     }
 }

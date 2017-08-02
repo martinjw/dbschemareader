@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a database function (that is, a stored procedure that returns a value)
     /// </summary>
     [Serializable]
-    public partial class DatabaseFunction : DatabaseStoredProcedure
+    public class DatabaseFunction : DatabaseStoredProcedure
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string _returnType;
@@ -25,7 +25,7 @@ namespace DatabaseSchemaReader.DataSchema
                 CheckArgumentsForReturnType();
                 return _returnType;
             }
-            set { _returnType = value; }
+            set => _returnType = value;
         }
 
         /// <summary>

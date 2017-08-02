@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Globalization;
 using DatabaseSchemaReader.DataSchema;
 
@@ -18,8 +17,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public static string OracleDataTypeForParameter(DatabaseColumn column)
         {
-            if (column == null) return string.Empty;
-            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
+            if (string.IsNullOrEmpty(column?.DbDataType)) return string.Empty;
             var dataType = column.DbDataTypeStandard();
             int providerType = GetProviderType(column);
             var length = column.Length;
@@ -37,8 +35,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         /// <returns></returns>
         public static string OracleDataType(DatabaseColumn column)
         {
-            if (column == null) return string.Empty;
-            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
+            if (string.IsNullOrEmpty(column?.DbDataType)) return string.Empty;
             var dataType = column.DbDataTypeStandard();
             int providerType = GetProviderType(column);
 
@@ -118,8 +115,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public string WriteDataType(DatabaseColumn column)
         {
-            if (column == null) return string.Empty;
-            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
+            if (string.IsNullOrEmpty(column?.DbDataType)) return string.Empty;
             var sql = string.Empty;
 
             var dataType = column.DbDataTypeStandard();

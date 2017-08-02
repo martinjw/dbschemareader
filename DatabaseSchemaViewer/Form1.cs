@@ -10,7 +10,6 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaViewer
@@ -298,9 +297,8 @@ namespace DatabaseSchemaViewer
             var p = new Point(e.X, e.Y);
 
             var node = treeView1.GetNodeAt(p);
-            if (node == null) return;
 
-            var tag = node.Tag;
+            var tag = node?.Tag;
 
             if (tag == null) return;
 
@@ -440,7 +438,7 @@ namespace DatabaseSchemaViewer
 
         private void BuildTableMenu(ToolStrip menu, DatabaseTable table, SqlType sqlType)
         {
-            if (menu == null) throw new ArgumentNullException("menu");
+            if (menu == null) throw new ArgumentNullException(nameof(menu));
             var create = new ToolStripMenuItem("CREATE TABLE " + table.Name + " to clipboard");
             create.Click += (s, ea) => new SqlTasks(sqlType).BuildTableDdl(table);
             menu.Items.Add(create);
@@ -483,7 +481,7 @@ namespace DatabaseSchemaViewer
         private SqlType FindSqlType()
         {
             var sqlType = ProviderToSqlType.Convert(_databaseSchema.Provider);
-            return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
+            return sqlType ?? SqlType.SqlServer;
         }
 
         private void SaveSchemaClick(object sender, EventArgs e)

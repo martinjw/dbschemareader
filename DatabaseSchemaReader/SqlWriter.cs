@@ -28,9 +28,7 @@ namespace DatabaseSchemaReader
         /// <param name="sqlType">Type of the SQL.</param>
         public SqlWriter(DatabaseTable table, SqlType sqlType)
         {
-            if (table == null)
-                throw new ArgumentNullException("table");
-            _table = table;
+            _table = table ?? throw new ArgumentNullException(nameof(table));
             _sqlType = sqlType;
             _nameEscapeStart = null;
             _nameEscapeEnd = null;
@@ -77,7 +75,7 @@ namespace DatabaseSchemaReader
         /// <value><c>true</c> if in stored procedure; otherwise, <c>false</c>.</value>
         public bool InStoredProcedure
         {
-            get { return _inStoredProcedure; }
+            get => _inStoredProcedure;
             set
             {
                 if (_sqlType == SqlType.SqlServer) return; //always false
@@ -264,8 +262,7 @@ namespace DatabaseSchemaReader
                 else
                 {
                     //no pk constraint, assume first column
-                    var result = new List<string>();
-                    result.Add(_table.Columns[0].Name);
+                    var result = new List<string> {_table.Columns[0].Name};
                     _primaryKeys = result;
                 }
                 return _primaryKeys;
@@ -602,11 +599,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         private string InsertSql(bool useOutputParameter, bool includeIdentityInInsert)
         {
             var sb = new StringBuilder();
-            string[] cols;
-            if (!includeIdentityInInsert)
-                cols = GetColumns(); //excluding identity and timestamps
-            else
-                cols = GetAllNoncomputedColumns(); //incl indentity
+            var cols = !includeIdentityInInsert ? GetColumns() : GetAllNoncomputedColumns();
 
             var values = new string[cols.Length];
             for (int i = 0; i < cols.Length; i++)
@@ -619,71 +612,71 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
             sb.AppendLine(FormattedColumns(cols));
             sb.AppendLine(") VALUES (");
             sb.Append(" ");
-            sb.AppendLine(String.Join(joinString, values));
+            sb.AppendLine(string.Join(joinString, values));
             sb.Append(")");
-            if (_table.HasAutoNumberColumn)
+
+            if (!_table.HasAutoNumberColumn) return sb.ToString();
+
+            var identityParameter = FindIdentityParameter();
+            if (_sqlType == SqlType.Oracle && useOutputParameter)
             {
-                string identityParameter = FindIdentityParameter();
-                if (_sqlType == SqlType.Oracle && useOutputParameter)
+                //a primary key assigned from a sequence by a trigger
+                var pk = EscapedName(PrimaryKeys[0]);
+                sb.AppendLine(" RETURNING " + pk + " INTO " + identityParameter + "");
+            }
+            else if (_sqlType == SqlType.SqlServer)
+            {
+                sb.AppendLine(";");
+                if (useOutputParameter)
                 {
-                    //a primary key assigned from a sequence by a trigger
-                    var pk = EscapedName(PrimaryKeys[0]);
-                    sb.AppendLine(" RETURNING " + pk + " INTO " + identityParameter + "");
+                    sb.Append("SET " + identityParameter + " = SCOPE_IDENTITY();");
                 }
-                else if (_sqlType == SqlType.SqlServer)
+                else
                 {
-                    sb.AppendLine(";");
-                    if (useOutputParameter)
-                    {
-                        sb.Append("SET " + identityParameter + " = SCOPE_IDENTITY();");
-                    }
+                    sb.Append("SELECT  SCOPE_IDENTITY();");
+                }
+            }
+            else if (_sqlType == SqlType.MySql)
+            {
+                sb.AppendLine(";");
+                if (useOutputParameter)
+                {
+                    //sb.Append("SELECT LAST_INSERT_ID() INTO " + identityParameter + ";");
+                    sb.Append("SET " + identityParameter + " = LAST_INSERT_ID();");
+                }
+                else
+                {
+                    sb.Append("SELECT LAST_INSERT_ID();");
+                }
+            }
+            else if (_sqlType == SqlType.PostgreSql)
+            {
+                sb.AppendLine(";");
+                //default sequence name is tablename_colname_seq
+                var seq = _table.Name + "_" + _table.PrimaryKeyColumn?.Name + "_seq";
+                sb.Append("SELECT currval('" + seq + "');");
+            }
+            else if (_sqlType == SqlType.SQLite)
+            {
+                //SQLite doesn't have output parameters
+                sb.AppendLine(";");
+                sb.Append("SELECT last_insert_rowid();");
+            }
+            else if (_sqlType == SqlType.Db2)
+            {
+                sb.AppendLine(";");
+                var identity = FindIdentityColumn();
+                if (useOutputParameter)
+                {
+                    //may need to cast this to from decimal(13,0)
+                    if (identity.DbDataType.ToUpperInvariant() == "INTEGER")
+                        sb.AppendLine("VALUES INTEGER(IDENTITY_VAL_LOCAL()) INTO " + identityParameter + ";");
                     else
-                    {
-                        sb.Append("SELECT  SCOPE_IDENTITY();");
-                    }
+                        sb.AppendLine("VALUES IDENTITY_VAL_LOCAL() INTO " + identityParameter + ";");
                 }
-                else if (_sqlType == SqlType.MySql)
+                else
                 {
-                    sb.AppendLine(";");
-                    if (useOutputParameter)
-                    {
-                        //sb.Append("SELECT LAST_INSERT_ID() INTO " + identityParameter + ";");
-                        sb.Append("SET " + identityParameter + " = LAST_INSERT_ID();");
-                    }
-                    else
-                    {
-                        sb.Append("SELECT LAST_INSERT_ID();");
-                    }
-                }
-                else if (_sqlType == SqlType.PostgreSql)
-                {
-                    sb.AppendLine(";");
-                    //default sequence name is tablename_colname_seq
-                    var seq = _table.Name + "_" + ((_table.PrimaryKeyColumn != null) ? _table.PrimaryKeyColumn.Name : null) + "_seq";
-                    sb.Append("SELECT currval('" + seq + "');");
-                }
-                else if (_sqlType == SqlType.SQLite)
-                {
-                    //SQLite doesn't have output parameters
-                    sb.AppendLine(";");
-                    sb.Append("SELECT last_insert_rowid();");
-                }
-                else if (_sqlType == SqlType.Db2)
-                {
-                    sb.AppendLine(";");
-                    var identity = FindIdentityColumn();
-                    if (useOutputParameter)
-                    {
-                        //may need to cast this to from decimal(13,0)
-                        if (identity.DbDataType.ToUpperInvariant() == "INTEGER")
-                            sb.AppendLine("VALUES INTEGER(IDENTITY_VAL_LOCAL()) INTO " + identityParameter + ";");
-                        else
-                            sb.AppendLine("VALUES IDENTITY_VAL_LOCAL() INTO " + identityParameter + ";");
-                    }
-                    else
-                    {
-                        sb.AppendLine("SELECT IDENTITY_VAL_LOCAL() FROM SYSIBM.SYSDUMMY1;");
-                    }
+                    sb.AppendLine("SELECT IDENTITY_VAL_LOCAL() FROM SYSIBM.SYSDUMMY1;");
                 }
             }
 
@@ -696,19 +689,11 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         /// <returns></returns>
         private string FindIdentityParameter()
         {
-            DatabaseColumn identityColumn = FindIdentityColumn();
-            if (identityColumn == null) return null;
-            string identityParameter = ParameterName(identityColumn.Name);
-            return identityParameter;
+            var identityColumn = FindIdentityColumn();
+            return identityColumn == null ? null : ParameterName(identityColumn.Name);
         }
 
-        private DatabaseColumn FindIdentityColumn()
-        {
-            return _table.Columns.Find(delegate(DatabaseColumn col)
-                    {
-                        return col.IsAutoNumber;
-                    });
-        }
+        private DatabaseColumn FindIdentityColumn() => _table.Columns.Find(col => col.IsAutoNumber);
 
         /// <summary>
         /// SQL for update row.
@@ -716,18 +701,14 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
         /// <returns></returns>
         public string UpdateSql()
         {
-            var sb = new StringBuilder();
-
-            var cols = new List<string>();
-            foreach (string name in NonPrimaryKeyColumns)
-            {
-                cols.Add(EscapedName(name) + " = " + ParameterName(name));
-            }
             //no primary keys. Just select and ignore.
-            if (cols.Count == 0) return "SELECT 1";
+            if (!NonPrimaryKeyColumns.Any()) return "SELECT 1";
 
+            var cols = NonPrimaryKeyColumns.Select(name => EscapedName(name) + " = " + ParameterName(name));
+
+            var sb = new StringBuilder();
             sb.AppendLine("UPDATE " + EscapedTableName + " SET ");
-            sb.AppendLine(String.Join("," + Environment.NewLine + " ", cols.ToArray()));
+            sb.AppendLine(string.Join("," + Environment.NewLine + " ", cols.ToArray()));
             sb.Append(AddWhereWithConcurrency());
 
             return sb.ToString();

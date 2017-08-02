@@ -22,12 +22,12 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             gen.IncludeSchema = false;
 
             var pkSeqName = "Seq_PK_Generator";
-            var pkSeq = new DatabaseSequence()
+            /*var pkSeq = new DatabaseSequence()
             {
                 Name = pkSeqName,
                 MinimumValue = 1,
                 IncrementBy = 1,
-            };
+            };*/
 
             //gen.AddSequence(pkSeq).Replace(";", " CACHE;");
 

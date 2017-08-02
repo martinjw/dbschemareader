@@ -12,28 +12,22 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
         }
 
-        protected override string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
-        }
-        protected override bool AlterColumnIncludeDefaultValue { get { return false; } }
+        protected override string AlterColumnFormat => "ALTER TABLE {0} ALTER COLUMN {1};";
+        protected override bool AlterColumnIncludeDefaultValue => false;
 
         public override string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
         {
             var sb = new StringBuilder();
             var defaultName = "DF_" + databaseTable.Name + "_" + databaseColumn.Name;
-            if (originalColumn != null)
+            if (originalColumn?.DefaultValue != null)
             {
-                if (originalColumn.DefaultValue != null)
+                //have to drop default contraint
+                var df = FindDefaultConstraint(databaseTable, databaseColumn.Name);
+                if (df != null)
                 {
-                    //have to drop default contraint
-                    var df = FindDefaultConstraint(databaseTable, databaseColumn.Name);
-                    if (df != null)
-                    {
-                        defaultName = df.Name;
-                        sb.AppendLine("ALTER TABLE " + TableName(databaseTable)
-                                      + " DROP CONSTRAINT " + Escape(defaultName) + ";");
-                    }
+                    defaultName = df.Name;
+                    sb.AppendLine("ALTER TABLE " + TableName(databaseTable)
+                                  + " DROP CONSTRAINT " + Escape(defaultName) + ";");
                 }
             }
             //we could check if any of the properties are changed here

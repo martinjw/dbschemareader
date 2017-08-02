@@ -7,8 +7,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
     {
         public string WriteDataType(DatabaseColumn column)
         {
-            if (column == null) return string.Empty;
-            if (string.IsNullOrEmpty(column.DbDataType)) return string.Empty;
+            if (string.IsNullOrEmpty(column?.DbDataType)) return string.Empty;
             var dataType = column.DbDataTypeStandard();
 
             dataType = OtherDatabaseTypesToDb2(dataType, column);

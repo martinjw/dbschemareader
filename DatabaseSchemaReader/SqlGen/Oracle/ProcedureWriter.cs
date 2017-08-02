@@ -11,24 +11,13 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         private readonly StringBuilder _sig = new StringBuilder();
         private readonly IList<string> _parameters = new List<string>();
         private string _procedureName;
-        private string _cursorParameter = "result";
 
         public ProcedureWriter(string procName, string tableName)
         {
             Start(tableName, procName);
         }
 
-        public string CursorParameterName
-        {
-            get
-            {
-                return _cursorParameter;
-            }
-            set
-            {
-                _cursorParameter = value;
-            }
-        }
+        public string CursorParameterName { get; set; } = "result";
 
         #region Procedure Boilerplate
         private void Start(string tableName, string procName)

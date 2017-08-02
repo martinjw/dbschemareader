@@ -34,7 +34,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
                 .AddColumn(new DatabaseColumn { Name = "Price", DbDataType = "DECIMAL", Nullable = true })
                 //adding a fk
                 .AddColumn("CategoryId", "INT")
-                    .AddForeignKey("FK_CATEGORY", tables => tables.Where(x => x.Name == "Categories").First());
+                    .AddForeignKey("FK_CATEGORY", tables => tables.First(x => x.Name == "Categories"));
 
             //assert
             Assert.AreEqual(2, schema.Tables.Count);

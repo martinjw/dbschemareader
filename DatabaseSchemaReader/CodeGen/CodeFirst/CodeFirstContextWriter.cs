@@ -8,13 +8,12 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
     {
         private readonly CodeWriterSettings _codeWriterSettings;
         private readonly ClassBuilder _cb;
-        private readonly string _contextName;
 
         public CodeFirstContextWriter(CodeWriterSettings codeWriterSettings)
         {
             _codeWriterSettings = codeWriterSettings;
             _cb = new ClassBuilder();
-            _contextName = CreateContextName();
+            ContextName = CreateContextName();
         }
 
         private string CreateContextName()
@@ -29,10 +28,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             return name + "Context";
         }
 
-        public string ContextName
-        {
-            get { return _contextName; }
-        }
+        public string ContextName { get; }
 
         /// <summary>
         /// A flag if this is Oracle (Devart)

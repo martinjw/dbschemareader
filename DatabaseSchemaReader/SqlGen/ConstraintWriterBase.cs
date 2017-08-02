@@ -18,10 +18,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected abstract ISqlFormatProvider SqlFormatProvider();
 
-        protected string EscapeName(string name)
-        {
-            return SqlFormatProvider().Escape(name);
-        }
+        protected string EscapeName(string name) => SqlFormatProvider().Escape(name);
 
         public bool IncludeSchema { get; set; }
 
@@ -41,11 +38,8 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        public virtual string WritePrimaryKey()
-        {
-            if (Table.PrimaryKey == null) return null;
-            return WritePrimaryKey(Table.PrimaryKey);
-        }
+        public virtual string WritePrimaryKey() => Table.PrimaryKey == null ? null : WritePrimaryKey(Table.PrimaryKey);
+
         public virtual string WritePrimaryKey(DatabaseConstraint constraint)
         {
             if (constraint == null) return null;
@@ -70,10 +64,8 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        protected virtual string AddUniqueConstraintFormat
-        {
-            get { return "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})"; }
-        }
+        protected virtual string AddUniqueConstraintFormat => "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})";
+
         private string WriteUniqueKey(DatabaseConstraint uniqueKey)
         {
             var columnList = GetColumnList(uniqueKey.Columns);
@@ -220,19 +212,9 @@ namespace DatabaseSchemaReader.SqlGen
             return null;
         }
 
-        protected string TableName(DatabaseTable databaseTable)
-        {
-            return SchemaPrefix(databaseTable.SchemaOwner) + EscapeName(databaseTable.Name);
-        }
+        protected string TableName(DatabaseTable databaseTable) => SchemaPrefix(databaseTable.SchemaOwner) + EscapeName(databaseTable.Name);
 
-        private string SchemaPrefix(string schema)
-        {
-            if (IncludeSchema && !string.IsNullOrEmpty(schema))
-            {
-                return EscapeName(schema) + ".";
-            }
-            return string.Empty;
-        }
+        private string SchemaPrefix(string schema) => IncludeSchema && !string.IsNullOrEmpty(schema) ? EscapeName(schema) + "." : string.Empty;
 
         protected virtual string ConstraintName(DatabaseConstraint constraint)
         {
@@ -255,7 +237,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected string GetColumnList(IEnumerable<string> columns)
         {
-            var escapedColumnNames = columns.Select(x => EscapeName(x)).ToArray();
+            var escapedColumnNames = columns.Select(EscapeName).ToArray();
             return string.Join(", ", escapedColumnNames);
         }
     }

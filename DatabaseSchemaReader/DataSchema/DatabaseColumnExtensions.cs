@@ -16,15 +16,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static bool IsTimestamp(this DatabaseColumn column)
         {
-            if (column.DataType != null)
+            //if it's a timestamp, you can't insert it
+            if (column.DataType?.ProviderDbType == 19 //System.Data.SqlDbType.Timestamp
+                //double check as could be Oracle type with same provider code
+                && column.DataType.GetNetType() == typeof(byte[]))
             {
-                //if it's a timestamp, you can't insert it
-                if (column.DataType.ProviderDbType == 19 //System.Data.SqlDbType.Timestamp
-                    //double check as could be Oracle type with same provider code
-                    && column.DataType.GetNetType() == typeof(byte[]))
-                {
-                    return true;
-                }
+                return true;
             }
             return false;
         }
@@ -40,8 +37,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </remarks>
         internal static string DbDataTypeStandard(this DatabaseColumn column)
         {
-            if (column == null) return null;
-            if (String.IsNullOrEmpty(column.DbDataType)) return null;
+            if (String.IsNullOrEmpty(column?.DbDataType)) return null;
             var dataType = column.DbDataType.ToUpperInvariant();
             var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
             if (brace != -1) //timestamp(6)

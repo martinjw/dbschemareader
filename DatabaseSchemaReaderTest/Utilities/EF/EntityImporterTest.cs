@@ -81,13 +81,15 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
             XNamespace ssdlSchema = "http://schemas.microsoft.com/ado/2009/02/edm/ssdl";
 
             const string tableName = "Categories"; //it's pluralized here
-            var entityType = doc.Root.Elements(ssdlSchema + "EntityType")
-                .Where(et => (string) et.Attribute("Name") == tableName)
-                .FirstOrDefault();
+            var entityType = doc.Root
+                .Elements(ssdlSchema + "EntityType")
+                .FirstOrDefault(et => (string) et.Attribute("Name") == tableName);
+
             if (entityType == null)
                 Assert.Inconclusive("EDMX is changed");
-            var prop = entityType.Elements(ssdlSchema + "Property")
-                .Where(p => (string) p.Attribute("Name") == "CategoryName").First();
+            var prop = entityType
+                .Elements(ssdlSchema + "Property").First(p => (string) p.Attribute("Name") == "CategoryName");
+
             prop.SetAttributeValue("MaxLength", 100);
         }
     }

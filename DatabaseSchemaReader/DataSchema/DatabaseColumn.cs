@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A column in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseColumn : NamedSchemaObject<DatabaseColumn>
+    public class DatabaseColumn : NamedSchemaObject<DatabaseColumn>
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private DatabaseColumnIdentity _identityDefinition;
@@ -42,8 +42,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public string ForeignKeyTableName
         {
-            get { return ForeignKeyTableNames.FirstOrDefault(); }
-            set { ForeignKeyTableNames.Add(value); }
+            get => ForeignKeyTableNames.FirstOrDefault();
+            set => ForeignKeyTableNames.Add(value);
         }
 
 
@@ -53,7 +53,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The names of the foreign key table.
         /// </value>
-        public List<string> ForeignKeyTableNames { get; private set; }
+        public List<string> ForeignKeyTableNames { get; }
 
         /// <summary>
         /// Gets or sets the length if this is string (VARCHAR) or character (CHAR) type data. In SQLServer, a length of -1 indicates VARCHAR(MAX).
@@ -126,7 +126,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </summary>
         public DatabaseColumnIdentity IdentityDefinition
         {
-            get { return _identityDefinition; }
+            get => _identityDefinition;
             set
             {
                 _identityDefinition = value;
@@ -250,8 +250,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// <c>true</c> if this column is computed; otherwise, <c>false</c>.
         /// </value>
-        public bool IsComputed { get { return !string.IsNullOrEmpty(ComputedDefinition); } }
-
+        public bool IsComputed => !string.IsNullOrEmpty(ComputedDefinition);
 
 
         /// <summary>

@@ -76,16 +76,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 if (ct.IsCancellationRequested) return views;
                 DatabaseView v = views[index];
                 ReaderEventArgs.RaiseEvent(ReaderProgress, this, ProgressType.Processing, SchemaObjectType.ViewColumns, v.Name, index, count);
-                IEnumerable<DatabaseColumn> cols;
-                if (viewColumns.Count == 0)
-                {
-                    cols = _readerAdapter.ViewColumns(v.Name);
-                }
-                else
-                {
-                    cols = viewColumns.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner);
-                }
+
+                var cols = viewColumns.Count == 0 ? _readerAdapter.ViewColumns(v.Name) : viewColumns.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner);
                 v.Columns.AddRange(cols);
+
                 v.Indexes = indexes.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner).ToList();
             }
 

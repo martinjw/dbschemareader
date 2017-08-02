@@ -28,8 +28,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
 
             ProviderChecker.Check(ProviderName, ConnectionString);
 
-            var dbReader = new DatabaseReader(ConnectionString, ProviderName);
-            dbReader.Owner = "HR";
+            var dbReader = new DatabaseReader(ConnectionString, ProviderName) {Owner = "HR"};
             dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
             _regionsTable = dbReader.Table("REGIONS"); //this hits database for columns and constraints
             return _regionsTable;

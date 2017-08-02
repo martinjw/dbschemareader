@@ -68,8 +68,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             //arrange
             _column.DbDataType = "TIMESTAMP";
             _column.Precision = 18;
-            _column.DataType = new DataType("TIMESTAMP", "byte[]");
-            _column.DataType.ProviderDbType = (int)SqlDbType.Timestamp;
+            _column.DataType = new DataType("TIMESTAMP", "byte[]") {ProviderDbType = (int) SqlDbType.Timestamp};
 
             //act
             var result = _typeWriter.WriteDataType(_column);

@@ -194,10 +194,7 @@ namespace DatabaseSchemaViewer
         private void CompareForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.Cancel)
-            {
                 e.Cancel = false;
-                return;
-            }
         }
 
         private void OpenSavedClick(object sender, EventArgs e)

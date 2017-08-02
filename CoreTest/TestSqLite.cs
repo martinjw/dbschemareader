@@ -33,10 +33,10 @@ namespace DatabaseSchemaReaderTest
                 }
 
                 var databaseReader = new DatabaseSchemaReader.DatabaseReader(connection);
-                var schema = databaseReader.ReadAll();
+                //var schema = databaseReader.ReadAll();
                 var tableList = databaseReader.TableList();
-                var tables = databaseReader.AllTables();
-                var views = databaseReader.AllViews();
+                //var tables = databaseReader.AllTables();
+                //var views = databaseReader.AllViews();
                 Assert.NotEmpty(tableList);
             }
         }

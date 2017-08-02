@@ -59,10 +59,9 @@ namespace DatabaseSchemaReaderTest.Codegen
             var engine = new ProjectCollection();
 
             // Instantiate a new FileLogger to generate build log
-            var logger = new Microsoft.Build.Logging.FileLogger();
+            var logger = new Microsoft.Build.Logging.FileLogger {Parameters = @"logfile=" + logPath};
 
             // Set the logfile parameter to indicate the log destination
-            logger.Parameters = @"logfile=" + logPath;
 
             // Register the logger with the engine
             engine.RegisterLogger(logger);

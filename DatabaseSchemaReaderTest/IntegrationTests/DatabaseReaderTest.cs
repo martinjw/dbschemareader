@@ -49,8 +49,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             const string connectionString = ConnectionStrings.OracleHr;
             ProviderChecker.Check(providername, connectionString);
 
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "HR";
+            var dbReader = new DatabaseReader(connectionString, providername) {Owner = "HR"};
             var schema = dbReader.ReadAll();
             var employees = schema.FindTableByName("EMPLOYEES");
             Assert.AreEqual(11, employees.Columns.Count);

@@ -121,15 +121,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
         }
 
-        private bool IndexColumnsNotInTable(DatabaseIndex index)
-        {
-            foreach (var column in index.Columns)
-            {
-                if (!Table.Columns.Any(c => c.Name == column.Name))
-                    return true;
-            }
-            return false;
-        }
+        private bool IndexColumnsNotInTable(DatabaseIndex index) => index.Columns.Any(column => Table.Columns.All(c => c.Name != column.Name));
 
         protected override ISqlFormatProvider SqlFormatProvider()
         {
@@ -196,7 +188,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// <summary>
         /// Gets a value indicating whether supports "next value for [sequence]" (SQLServer 2012+). Not publicly changeable here, yet...
         /// </summary>
-        protected virtual bool SupportsNextValueForSequence { get { return true; } }
+        protected virtual bool SupportsNextValueForSequence => true;
 
         protected virtual string FixDefaultValue(string defaultValue)
         {

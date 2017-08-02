@@ -2,7 +2,6 @@
 using System.Data.Common;
 using System.Data.SqlClient;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Utilities;
 using DatabaseSchemaReader.Utilities.DbProvider;
 using DatabaseSchemaReaderTest.IntegrationTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -36,7 +35,7 @@ namespace DatabaseSchemaReaderTest.Utilities
                 Assert.AreEqual(description.AssemblyQualifiedName, desc.AssemblyQualifiedName);
 
                 //get a factory
-                var factory = repo.GetFactory(desc);
+                //var factory = repo.GetFactory(desc);
                 //may be null if not accessible
             }
 

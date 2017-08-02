@@ -36,11 +36,8 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="codeWriterSettings">The code writer settings.</param>
         public CodeWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            if (schema == null) throw new ArgumentNullException("schema");
-            if (codeWriterSettings == null) throw new ArgumentNullException("codeWriterSettings");
-
-            _schema = schema;
-            _codeWriterSettings = codeWriterSettings;
+            _schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            _codeWriterSettings = codeWriterSettings ?? throw new ArgumentNullException(nameof(codeWriterSettings));
 
             var vs2010 = _codeWriterSettings.WriteProjectFile;
             var vs2015 = _codeWriterSettings.WriteProjectFileNet46;
@@ -63,7 +60,7 @@ namespace DatabaseSchemaReader.CodeGen
         public void Execute(DirectoryInfo directory)
         {
             if (directory == null)
-                throw new ArgumentNullException("directory");
+                throw new ArgumentNullException(nameof(directory));
             if (!directory.Exists)
                 throw new InvalidOperationException("Directory does not exist: " + directory.FullName);
 

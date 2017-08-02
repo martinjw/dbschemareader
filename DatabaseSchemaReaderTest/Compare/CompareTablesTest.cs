@@ -13,8 +13,7 @@ namespace DatabaseSchemaReaderTest.Compare
     {
         private static DatabaseTable CreateTable()
         {
-            var table = new DatabaseTable();
-            table.Name = "Test";
+            var table = new DatabaseTable {Name = "Test"};
             table.AddColumn("A", DbType.Int32).AddPrimaryKey("PK_TEST")
                 .AddColumn("B", DbType.Int32)
                 .AddColumn("C", DbType.String).AddLength(10).AddNullable();

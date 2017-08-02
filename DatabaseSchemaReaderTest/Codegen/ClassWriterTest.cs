@@ -111,8 +111,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var schema = ArrangeSchema();
             var categoryTable = schema.FindTableByName("Categories");
 
-            var codeWriterSettings = new CodeWriterSettings();
-            codeWriterSettings.CodeTarget = CodeTarget.PocoNHibernateHbm;
+            var codeWriterSettings = new CodeWriterSettings {CodeTarget = CodeTarget.PocoNHibernateHbm};
             var cw = new ClassWriter(categoryTable, codeWriterSettings);
 
             //act
@@ -199,8 +198,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void WriteViewTest()
         {
             //arrange
-            var view = new DatabaseView();
-            view.Name = "AlphabeticNames";
+            var view = new DatabaseView {Name = "AlphabeticNames"};
             view.AddColumn("FirstName", typeof(string)).AddNullable()
                 .AddColumn("LastName", typeof(string)).AddNullable();
 

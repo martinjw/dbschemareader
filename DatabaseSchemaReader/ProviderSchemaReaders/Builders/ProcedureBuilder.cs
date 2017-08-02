@@ -64,8 +64,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             }
 
             //packages
-            var packFilter = _exclusions.PackageFilter;
-            if (packFilter == null) packFilter = new Filter();
+            var packFilter = _exclusions.PackageFilter ?? new Filter();
             var packs = _readerAdapter.Packages(null).ToList();
             packs.RemoveAll(p => packFilter.Exclude(p.Name));
 
@@ -176,11 +175,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             {
                 if (packFilter.Exclude(packName)) continue;
                 var packContents = functions.Where(x => x.Package == packName).ToList();
-                var package = packs.FirstOrDefault(x => string.Equals(x.Name, packName));
-                if (package == null)
-                {
-                    package = new DatabasePackage { Name = packName };
-                }
+                var package = packs.FirstOrDefault(x => string.Equals(x.Name, packName)) ?? new DatabasePackage { Name = packName };
                 package.Functions.AddRange(packContents);
                 _databaseSchema.Packages.Add(package);
             }
@@ -196,11 +191,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             {
                 if (packFilter.Exclude(packName)) continue;
                 var packContents = sprocs.Where(x => x.Package == packName).ToList();
-                var package = packs.FirstOrDefault(x => string.Equals(x.Name, packName));
-                if (package == null)
-                {
-                    package = new DatabasePackage { Name = packName };
-                }
+                var package = packs.FirstOrDefault(x => string.Equals(x.Name, packName)) ?? new DatabasePackage { Name = packName };
                 package.StoredProcedures.AddRange(packContents);
                 _databaseSchema.Packages.Add(package);
             }

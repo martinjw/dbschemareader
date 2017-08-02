@@ -11,7 +11,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// XmlSerializater won't work because TypeName and NetDataType are private
     /// </remarks>
     [Serializable]
-    public partial class DataType
+    public class DataType
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool? _isString;
@@ -66,13 +66,13 @@ namespace DatabaseSchemaReader.DataSchema
         ///<summary>
         ///The provider-specific data type name.
         ///</summary>
-        public string TypeName { get { return _typeName; } }
+        public string TypeName => _typeName;
 
 
         ///<summary>
         ///The name of the .NET Framework type of the data type.
         ///</summary>
-        public string NetDataType { get { return _netDataType; } }
+        public string NetDataType => _netDataType;
 
         /// <summary>
         /// Gets the name of the C# net data type.
@@ -114,10 +114,7 @@ namespace DatabaseSchemaReader.DataSchema
 
                 return _netDataTypeCSharpName;
             }
-            set
-            {
-                _netDataTypeCSharpName = value;
-            }
+            set => _netDataTypeCSharpName = value;
         }
 
         /// <summary>

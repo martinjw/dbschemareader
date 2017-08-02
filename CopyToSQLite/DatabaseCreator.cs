@@ -12,8 +12,7 @@ namespace CopyToSQLite
         public DatabaseCreator(string filePath)
         {
             SQLiteConnection.CreateFile(filePath);
-            var csb = new SQLiteConnectionStringBuilder();
-            csb.DataSource = filePath;
+            var csb = new SQLiteConnectionStringBuilder {DataSource = filePath};
             _connectionString = csb.ConnectionString;
         }
 

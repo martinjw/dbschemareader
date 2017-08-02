@@ -7,9 +7,11 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         public ProcedureGenerator(DatabaseTable table)
             : base(table)
         {
-            SqlWriter = new SqlWriter(table, SqlType.Db2);
-            SqlWriter.InStoredProcedure = true;
-            SqlWriter.FormatParameter = x => { return "p_" + x; };
+            SqlWriter = new SqlWriter(table, SqlType.Db2)
+            {
+                InStoredProcedure = true,
+                FormatParameter = x => "p_" + x
+            };
             FormatParameter = SqlWriter.FormatParameter;
         }
         protected override IProcedureWriter CreateProcedureWriter(string procName)

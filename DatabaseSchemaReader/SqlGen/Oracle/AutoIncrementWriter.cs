@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle

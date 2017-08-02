@@ -8,21 +8,18 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
     class SprocLogic
     {
         private readonly DatabaseStoredProcedure _storedProcedure;
-        private readonly string _className;
         private bool? _hasOutputParameters;
 
         public SprocLogic(DatabaseStoredProcedure storedProcedure)
         {
             _storedProcedure = storedProcedure;
-            _className = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
+            ClassName = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
         }
 
-        public string ClassName { get { return _className; } }
+        public string ClassName { get; }
 
-        public string ResultClassName
-        {
-            get { return ClassName + "Result"; }
-        }
+        public string ResultClassName => ClassName + "Result";
+
         public SprocResultType ResultType
         {
             get
@@ -58,20 +55,15 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             }
         }
 
-        public bool ReturnEnumerable
-        {
-            get { return !HasOutputParameters && _storedProcedure.ResultSets.Count == 1; }
-        }
+        public bool ReturnEnumerable => !HasOutputParameters && _storedProcedure.ResultSets.Count == 1;
 
         public bool IsDevart
         {
             get
             {
                 var databaseSchema = _storedProcedure.DatabaseSchema;
-                if (databaseSchema == null) return false;
-                var provider = databaseSchema.Provider;
-                if (provider == null) return false;
-                return provider.StartsWith("Devart", StringComparison.OrdinalIgnoreCase);
+                var provider = databaseSchema?.Provider;
+                return provider != null && provider.StartsWith("Devart", StringComparison.OrdinalIgnoreCase);
             }
         }
 

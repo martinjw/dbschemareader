@@ -19,8 +19,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var connectionString = ConnectionStrings.MySql;
             ProviderChecker.Check(providername, connectionString);
 
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "sakila";
+            var dbReader = new DatabaseReader(connectionString, providername) {Owner = "sakila"};
             var schema = dbReader.ReadAll();
             var country = schema.FindTableByName("country");
             Assert.AreEqual(3, country.Columns.Count);
@@ -72,8 +71,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             ProviderChecker.Check(providername, connectionString);
 
             DiscoverProviderFactory.Discover(connectionString, providername);
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "sakila";
+            var dbReader = new DatabaseReader(connectionString, providername) {Owner = "sakila"};
             var schema = dbReader.ReadAll();
             var country = schema.FindTableByName("country");
             Assert.AreEqual(3, country.Columns.Count);

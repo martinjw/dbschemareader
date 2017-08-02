@@ -33,18 +33,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
             }
         }
 
-        public DbTransaction DbTransaction
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public DbTransaction DbTransaction => null;
 
         private void CreateDbConnection()
         {
             System.Diagnostics.Trace.WriteLine($"Creating connection for {_parameters.ProviderName}");
-            var factory = DatabaseSchemaReader.Utilities.DbProvider.FactoryTools.GetFactory(_parameters.ProviderName);
+            var factory = Utilities.DbProvider.FactoryTools.GetFactory(_parameters.ProviderName);
             _dbConnection = factory.CreateConnection();
             try
             {

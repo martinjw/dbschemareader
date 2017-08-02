@@ -25,8 +25,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="table">The table.</param>
         protected ProcedureGeneratorBase(DatabaseTable table)
         {
-            if (table == null) throw new ArgumentNullException("table", "table is null");
-            Table = table;
+            Table = table ?? throw new ArgumentNullException(nameof(table), "table is null");
             TableName = table.Name;
         }
 
@@ -81,7 +80,7 @@ namespace DatabaseSchemaReader.SqlGen
         public void WriteToFolder(string path)
         {
             if (string.IsNullOrEmpty(path))
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             if (!Directory.Exists(path))
                 throw new ArgumentException("Path does not exist", path);
 
@@ -98,7 +97,7 @@ namespace DatabaseSchemaReader.SqlGen
         public void WriteToScript(string scriptPath)
         {
             if (string.IsNullOrEmpty(scriptPath))
-                throw new ArgumentNullException("scriptPath");
+                throw new ArgumentNullException(nameof(scriptPath));
             // ReSharper disable AssignNullToNotNullAttribute
             if (!Directory.Exists(Path.GetDirectoryName(scriptPath)))
                 // ReSharper restore AssignNullToNotNullAttribute

@@ -23,9 +23,7 @@ namespace DatabaseSchemaReaderTest.DataSchema
             dataTable.Columns.Add("ColumnName");
             dataTable.Columns.Add("IDENTITY_OPTIONS");
             dataTable.Columns.Add("GENERATION_TYPE");
-            dataTable.Rows.Add(new object[] {"Demo", "ID", 
-                "START WITH: 1, INCREMENT BY: 1, MAX_VALUE: 9999999999999999999999999999, MIN_VALUE: 1, CYCLE_FLAG: N, CACHE_SIZE: 20, ORDER_FLAG: N",
-                "BY DEFAULT"});
+            dataTable.Rows.Add("Demo", "ID", "START WITH: 1, INCREMENT BY: 1, MAX_VALUE: 9999999999999999999999999999, MIN_VALUE: 1, CYCLE_FLAG: N, CACHE_SIZE: 20, ORDER_FLAG: N", "BY DEFAULT");
 
             //act
             SchemaConstraintConverter.AddIdentity(dataTable, table);

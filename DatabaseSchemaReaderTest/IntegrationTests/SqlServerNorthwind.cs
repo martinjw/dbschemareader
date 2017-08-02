@@ -211,11 +211,11 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var procedures = dbReader.AllStoredProcedures();
 
             var proc = procedures.First(x => x.Name == "CustOrderHist");
-            var argsNumber = proc.Arguments.Count();
+            var argsNumber = proc.Arguments.Count;
 
             dbReader.AllStoredProcedures();
             Assert.AreEqual(argsNumber,
-                            proc.Arguments.Count(),
+                            proc.Arguments.Count,
                             "Number of args changed");
         }
     }

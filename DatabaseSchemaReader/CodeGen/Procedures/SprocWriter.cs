@@ -33,19 +33,10 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             _cb = new ClassBuilder();
         }
 
-        public bool HasResultClass
-        {
-            get { return _sprocResultType != SprocResultType.Void; }
-        }
+        public bool HasResultClass => _sprocResultType != SprocResultType.Void;
 
-        public bool RequiresOracleReference
-        {
-            get { return _logic.HasRefCursors; }
-        }
-        public bool RequiresDevartOracleReference
-        {
-            get { return _logic.HasRefCursors && _logic.IsDevart; }
-        }
+        public bool RequiresOracleReference => _logic.HasRefCursors;
+        public bool RequiresDevartOracleReference => _logic.HasRefCursors && _logic.IsDevart;
 
         public string Write()
         {
@@ -120,10 +111,9 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             if (_logic.HasRefCursors)
             {
                 //could also be ODP, Devart etc.
-                if (_logic.IsDevart)
-                    _cb.AppendLine("using Devart.Data.Oracle; //contains a Ref Cursor");
-                else
-                    _cb.AppendLine("using System.Data.OracleClient; //contains a Ref Cursor");
+                _cb.AppendLine(_logic.IsDevart
+                                        ? "using Devart.Data.Oracle; //contains a Ref Cursor"
+                                        : "using System.Data.OracleClient; //contains a Ref Cursor");
             }
             _cb.AppendLine("using System.Diagnostics;");
         }

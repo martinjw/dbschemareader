@@ -5,6 +5,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 // ReSharper disable once RedundantUsingDirective
 using System.Threading;
 
@@ -22,7 +23,6 @@ namespace DatabaseSchemaReader
         private readonly ReaderAdapter _readerAdapter;
 
         //private readonly SchemaExtendedReader _schemaReader;
-        private readonly DatabaseSchema _db;
 
         private bool _fixUp = true;
 
@@ -77,12 +77,12 @@ namespace DatabaseSchemaReader
         /// <param name="sqlType">Type of the SQL.</param>
         public DatabaseReader(string connectionString, SqlType sqlType)
         {
-            if (connectionString == null) throw new ArgumentNullException("connectionString");
+            if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
             _schemaParameters = new SchemaParameters(connectionString, sqlType);
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
             //_schemaReader = SchemaReaderFactory.Create(connectionString, sqlType);
-            _db = new DatabaseSchema(connectionString, _schemaParameters.ProviderName);
-            _schemaParameters.DatabaseSchema = _db;
+            DatabaseSchema = new DatabaseSchema(connectionString, _schemaParameters.ProviderName);
+            _schemaParameters.DatabaseSchema = DatabaseSchema;
         }
 
         /// <summary>
@@ -102,14 +102,17 @@ namespace DatabaseSchemaReader
         /// <param name="databaseSchema">The database schema. Can be a subclassed version.</param>
         public DatabaseReader(DatabaseSchema databaseSchema)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema));
             if (databaseSchema.ConnectionString == null) throw new ArgumentException("No connectionString");
 
-            _schemaParameters = new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider);
-            _schemaParameters.DatabaseSchema = databaseSchema;
-            _schemaParameters.Owner = databaseSchema.Owner;
+            _schemaParameters =
+                new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider)
+                {
+                    DatabaseSchema = databaseSchema,
+                    Owner = databaseSchema.Owner
+                };
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
-            _db = databaseSchema;
+            DatabaseSchema = databaseSchema;
         }
 
 #endif
@@ -130,7 +133,7 @@ namespace DatabaseSchemaReader
         /// <value>
         /// The exclusions.
         /// </value>
-        public Exclusions Exclusions { get { return _schemaParameters.Exclusions; } }
+        public Exclusions Exclusions => _schemaParameters.Exclusions;
 
         /// <summary>
         /// Gets or sets the owner user. Always set it with Oracle (otherwise you'll get SYS, MDSYS etc...)
@@ -138,17 +141,14 @@ namespace DatabaseSchemaReader
         /// <value>The user.</value>
         public string Owner
         {
-            get { return _readerAdapter.Owner; }
-            set { _readerAdapter.Owner = value; }
+            get => _readerAdapter.Owner;
+            set => _readerAdapter.Owner = value;
         }
 
         /// <summary>
         /// Gets the database schema. Only call AFTER calling <see cref="ReadAll()"/> or one or more other methods such as <see cref="AllTables()"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
-        public DatabaseSchema DatabaseSchema
-        {
-            get { return _db; }
-        }
+        public DatabaseSchema DatabaseSchema { get; }
 
         /// <summary>
         /// Gets all of the schema in one call.
@@ -167,28 +167,28 @@ namespace DatabaseSchemaReader
             _fixUp = false;
             using (_readerAdapter.CreateConnection())
             {
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 DataTypes();
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllUsers();
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllTables(ct);
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllViews(ct);
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllStoredProcedures(ct);
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllSequences();
             }
             _fixUp = true;
             UpdateReferences();
 
-            return _db;
+            return DatabaseSchema;
         }
 
         private void AllSequences()
@@ -233,6 +233,55 @@ namespace DatabaseSchemaReader
         public IList<DatabaseTable> AllTables()
         {
             return AllTables(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Execute a SQL command on the table
+        /// </summary>
+        public DbDataReader RunSQL(DatabaseTable table, string cmd)
+        {
+            using (var conncAdapter = _readerAdapter.CreateConnection())
+            {
+                conncAdapter.DbConnection.Open();
+                var command = conncAdapter.DbConnection.CreateCommand();
+
+                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
+
+                command.CommandText = sqlWriter.SelectAllSql();
+                return command.ExecuteReader();
+            }
+        }
+
+        /// <summary>
+        /// Read all values inside the table
+        /// </summary>
+        public IEnumerable<Dictionary<string, object>> ReadTable(DatabaseTable table, CancellationToken ct)
+        {
+            using (var conncAdapter = _readerAdapter.CreateConnection())
+            {
+                conncAdapter.DbConnection.Open();
+                var command = conncAdapter.DbConnection.CreateCommand();
+
+                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
+
+                command.CommandText = sqlWriter.SelectAllSql();
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if(ct.IsCancellationRequested) yield break;
+
+                    var item = new Dictionary<string,object>();
+
+                    for (int i = 0; i < table.Columns.Count; i++)
+                    {
+                        item.Add(table.Columns[i].Name,reader[i]);
+                    }
+
+                    yield return item;
+                }
+                conncAdapter.DbConnection.Close();
+            }
         }
 
         /// <summary>
@@ -309,7 +358,7 @@ namespace DatabaseSchemaReader
         /// <exception cref="System.ArgumentNullException">tableName</exception>
         public bool TableExists(string tableName)
         {
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             using (_readerAdapter.CreateConnection())
             {
                 var tables = _readerAdapter.Tables(tableName);
@@ -333,7 +382,7 @@ namespace DatabaseSchemaReader
         /// <param name="ct">The ct.</param>
         public DatabaseTable Table(string tableName, CancellationToken ct)
         {
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
             DatabaseTable table;
             using (_readerAdapter.CreateConnection())

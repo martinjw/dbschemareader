@@ -5,7 +5,6 @@ using System.Data.Common;
 using System.IO;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace CopyToSQLite
@@ -255,11 +254,7 @@ namespace CopyToSQLite
             Update();
         }
 
-        private SqlType OriginSqlType()
-        {
-            var sqlType = ProviderToSqlType.Convert(_providerName);
-            return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
-        }
+        private SqlType OriginSqlType() => ProviderToSqlType.Convert(_providerName) ?? SqlType.SqlServer;
 
         private void BackgroundDoWork(object sender, DoWorkEventArgs e)
         {
@@ -268,8 +263,7 @@ namespace CopyToSQLite
             //pass thru the event to background worker
             runner.ProgressChanged += (s1, e1) => backgroundWorker1.ReportProgress(e1.ProgressPercentage, e1.UserState);
             var result = runner.Execute();
-            if (!result) e.Result = runner.LastErrorMessage;
-            else e.Result = null;
+            e.Result = !result ? runner.LastErrorMessage : null;
             rdr.Dispose();
         }
 
@@ -285,10 +279,7 @@ namespace CopyToSQLite
             {
                 //it worked
                 var message = (string)e.Result;
-                if (string.IsNullOrEmpty(message))
-                    toolStripStatusLabel1.Text = @"Database created";
-                else
-                    toolStripStatusLabel1.Text = message;
+                toolStripStatusLabel1.Text = string.IsNullOrEmpty(message) ? @"Database created" : message;
             }
             StopWaiting();
         }
@@ -340,13 +331,13 @@ namespace CopyToSQLite
             ChangeExtension(".sdf", ".db");
         }
 
-        private void ChangeExtension(string @from, string to)
+        private void ChangeExtension(string from, string to)
         {
             var filePath = txtFilePath.Text.Trim();
             if (string.IsNullOrEmpty(filePath)) return;
             var dir = Path.GetDirectoryName(filePath);
             if (dir == null) return;
-            if (Path.GetExtension(filePath).Equals(@from, StringComparison.OrdinalIgnoreCase))
+            if (Path.GetExtension(filePath).Equals(from, StringComparison.OrdinalIgnoreCase))
             {
                 filePath = Path.Combine(dir, Path.GetFileNameWithoutExtension(filePath) + to);
                 txtFilePath.Text = filePath;

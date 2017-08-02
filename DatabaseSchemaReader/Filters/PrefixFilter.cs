@@ -9,19 +9,17 @@ namespace DatabaseSchemaReader.Filters
     /// </summary>
     public class PrefixFilter : IFilter
     {
-        private readonly IList<string> _filterExclusions = new List<string>();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PrefixFilter"/> class.
         /// </summary>
         /// <param name="prefix">The prefix.</param>
         public PrefixFilter(params string[] prefix)
         {
-            if (prefix == null) throw new ArgumentNullException("prefix");
+            if (prefix == null) throw new ArgumentNullException(nameof(prefix));
 
             foreach (var s in prefix)
             {
-                _filterExclusions.Add(s);
+                FilterExclusions.Add(s);
             }
         }
 
@@ -31,10 +29,7 @@ namespace DatabaseSchemaReader.Filters
         /// <value>
         /// The exclusions.
         /// </value>
-        public IList<string> FilterExclusions
-        {
-            get { return _filterExclusions; }
-        }
+        public IList<string> FilterExclusions { get; } = new List<string>();
 
         /// <summary>
         /// Excludes the specified name with any of the prefixes.

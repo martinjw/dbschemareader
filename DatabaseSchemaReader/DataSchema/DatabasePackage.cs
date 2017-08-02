@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a package in the database (in Oracle, a collection of stored procedures and functions)
     /// </summary>
     [Serializable]
-    public partial class DatabasePackage : NamedSchemaObject<DatabasePackage>
+    public class DatabasePackage : NamedSchemaObject<DatabasePackage>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabasePackage"/> class.
@@ -39,7 +39,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The stored procedures.
         /// </value>
-        public List<DatabaseStoredProcedure> StoredProcedures { get; private set; }
+        public List<DatabaseStoredProcedure> StoredProcedures { get; }
 
         /// <summary>
         /// Gets or sets the functions.
@@ -47,7 +47,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The functions.
         /// </value>
-        public List<DatabaseFunction> Functions { get; private set; }
+        public List<DatabaseFunction> Functions { get; }
 
         /// <summary>
         /// Gets or sets the name for a .Net class representing this specific package

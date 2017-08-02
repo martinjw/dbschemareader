@@ -16,12 +16,9 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
 
         public FluentMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
-            if (table == null) throw new ArgumentNullException("table");
-            if (mappingNamer == null) throw new ArgumentNullException("mappingNamer");
-
             _codeWriterSettings = codeWriterSettings;
-            _mappingNamer = mappingNamer;
-            _table = table;
+            _mappingNamer = mappingNamer ?? throw new ArgumentNullException(nameof(mappingNamer));
+            _table = table ?? throw new ArgumentNullException(nameof(table));
             _cb = new ClassBuilder();
         }
 
@@ -284,7 +281,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 return;
             }
 
-            var cols = foreignKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+            var cols = foreignKey.Columns.Select(x => $"\"{x}\"").ToArray();
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
@@ -335,7 +332,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 // If composite key, generate .KeyColumns(...) with array of keys
                 else
                 {
-                    var cols = fk.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+                    var cols = fk.Columns.Select(x => $"\"{x}\"").ToArray();
                     sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumns.Add(new string[] {{ {0} }})",
                                     String.Join(", ", cols));
                 }

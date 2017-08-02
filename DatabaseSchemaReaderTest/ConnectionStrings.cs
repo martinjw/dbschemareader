@@ -24,13 +24,7 @@ namespace DatabaseSchemaReaderTest
             }
         }
 
-        public static string MySql
-        {
-            get
-            {
-                return MySqlDevart + "Allow User Variables=True;";
-            }
-        }
+        public static string MySql => MySqlDevart + "Allow User Variables=True;";
 
         public static string MySqlDevart
         {
@@ -56,14 +50,8 @@ namespace DatabaseSchemaReaderTest
             }
         }
 
-        public static string SqLiteFilePath
-        {
-            get { return Path.Combine(Environment.CurrentDirectory, "northwind.db"); }
-        }
+        public static string SqLiteFilePath => Path.Combine(Environment.CurrentDirectory, "northwind.db");
 
-        public static string SqlServerCeFilePath
-        {
-            get { return Path.Combine(Environment.CurrentDirectory, "northwind.sdf"); }
-        }
+        public static string SqlServerCeFilePath => Path.Combine(Environment.CurrentDirectory, "northwind.sdf");
     }
 }

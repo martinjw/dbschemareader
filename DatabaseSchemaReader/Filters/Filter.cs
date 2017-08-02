@@ -7,18 +7,13 @@ namespace DatabaseSchemaReader.Filters
     /// </summary>
     public class Filter : IFilter
     {
-        private readonly IList<string> _filterExclusions = new List<string>();
-
         /// <summary>
         /// An exclusions list. The implementation may use simple names, regex strings, or not use this list at all.
         /// </summary>
         /// <value>
         /// The exclusions.
         /// </value>
-        public IList<string> FilterExclusions
-        {
-            get { return _filterExclusions; }
-        }
+        public IList<string> FilterExclusions { get; } = new List<string>();
 
 
         /// <summary>

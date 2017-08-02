@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
@@ -80,7 +79,7 @@ where
         {
             if (string.IsNullOrEmpty(defaultKey)) return;
             string d = row[defaultKey].ToString();
-            if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(new[] { ' ', '\'', '=' });
+            if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(' ', '\'', '=');
         }
     }
 }

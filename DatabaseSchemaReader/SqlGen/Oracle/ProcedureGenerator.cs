@@ -17,8 +17,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
         public ProcedureGenerator(DatabaseTable table)
             : base(table)
         {
-            SqlWriter = new SqlWriter(table, SqlType.Oracle);
-            SqlWriter.InStoredProcedure = true;
+            SqlWriter = new SqlWriter(table, SqlType.Oracle) {InStoredProcedure = true};
             PackageName = "PACK_" + TableName;
         }
 

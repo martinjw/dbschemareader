@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Identity properties for a database column
     /// </summary>
     [Serializable]
-    public partial class DatabaseColumnIdentity
+    public class DatabaseColumnIdentity
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseColumnIdentity"/> class.

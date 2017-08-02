@@ -70,11 +70,6 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            if (string.IsNullOrEmpty(Name)) return base.GetHashCode(); //transient instance
-            return Name.GetHashCode();
-        }
-
+        public override int GetHashCode() => string.IsNullOrEmpty(Name) ? base.GetHashCode() : Name.GetHashCode();
     }
 }
