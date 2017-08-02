@@ -308,12 +308,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
         }
 
-        private void WriteColumn(DatabaseColumn column)
-        {
-            WriteColumn(column, false);
-        }
-
-        private void WriteColumn(DatabaseColumn column, bool notNetName)
+        private void WriteColumn(DatabaseColumn column, bool notNetName = false)
         {
             var propertyName = PropertyName(column);
             var dataType = _dataTypeWriter.Write(column);
