@@ -158,7 +158,7 @@ namespace DatabaseSchemaReader.CodeGen
                     //code first composite key
                     foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
                     {
-                        WriteColumn(column, false);
+                        WriteColumn(column);
                     }
                 }
             }
