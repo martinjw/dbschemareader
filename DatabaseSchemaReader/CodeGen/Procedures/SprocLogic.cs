@@ -8,16 +8,15 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
     class SprocLogic
     {
         private readonly DatabaseStoredProcedure _storedProcedure;
-        private readonly string _className;
         private bool? _hasOutputParameters;
 
         public SprocLogic(DatabaseStoredProcedure storedProcedure)
         {
             _storedProcedure = storedProcedure;
-            _className = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
+            ClassName = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
         }
 
-        public string ClassName { get { return _className; } }
+        public string ClassName { get; }
 
         public string ResultClassName
         {

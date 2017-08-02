@@ -183,7 +183,7 @@ namespace DatabaseSchemaReader.DataSchema
             if (origin == null || destination == null) return false;
             var pk = origin.PrimaryKey;
             if (pk == null) return false;
-            var columns = pk.Columns.Select(x => origin.FindColumn(x));
+            var columns = pk.Columns.Select(origin.FindColumn);
             //the primary key of the origin is also a foreign key to this table
             var allFk = columns.All(c => c.ForeignKeyTableName == destination.Name);
             return allFk;

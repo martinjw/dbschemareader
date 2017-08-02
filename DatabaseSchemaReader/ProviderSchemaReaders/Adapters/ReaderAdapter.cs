@@ -33,14 +33,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         protected IConnectionAdapter ConnectionAdapter
         {
-            get
-            {
-                if (_connectionAdapter == null)
-                {
-                    _connectionAdapter = new ConnectionAdapter(Parameters);
-                }
-                return _connectionAdapter;
-            }
+            get { return _connectionAdapter ?? (_connectionAdapter = new ConnectionAdapter(Parameters)); }
         }
 
         //protected DbConnection DbConnection

@@ -24,7 +24,6 @@ namespace DatabaseSchemaReader
         private readonly ReaderAdapter _readerAdapter;
 
         //private readonly SchemaExtendedReader _schemaReader;
-        private readonly DatabaseSchema _db;
 
         private bool _fixUp = true;
 
@@ -83,8 +82,8 @@ namespace DatabaseSchemaReader
             _schemaParameters = new SchemaParameters(connectionString, sqlType);
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
             //_schemaReader = SchemaReaderFactory.Create(connectionString, sqlType);
-            _db = new DatabaseSchema(connectionString, _schemaParameters.ProviderName);
-            _schemaParameters.DatabaseSchema = _db;
+            DatabaseSchema = new DatabaseSchema(connectionString, _schemaParameters.ProviderName);
+            _schemaParameters.DatabaseSchema = DatabaseSchema;
         }
 
         /// <summary>
@@ -111,7 +110,7 @@ namespace DatabaseSchemaReader
             _schemaParameters.DatabaseSchema = databaseSchema;
             _schemaParameters.Owner = databaseSchema.Owner;
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
-            _db = databaseSchema;
+            DatabaseSchema = databaseSchema;
         }
 
 #endif
@@ -147,10 +146,7 @@ namespace DatabaseSchemaReader
         /// <summary>
         /// Gets the database schema. Only call AFTER calling <see cref="ReadAll()"/> or one or more other methods such as <see cref="AllTables()"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
-        public DatabaseSchema DatabaseSchema
-        {
-            get { return _db; }
-        }
+        public DatabaseSchema DatabaseSchema { get; }
 
         /// <summary>
         /// Gets all of the schema in one call.
@@ -169,28 +165,28 @@ namespace DatabaseSchemaReader
             _fixUp = false;
             using (_readerAdapter.CreateConnection())
             {
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 DataTypes();
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllUsers();
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllTables(ct);
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllViews(ct);
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllStoredProcedures(ct);
 
-                if (ct.IsCancellationRequested) return _db;
+                if (ct.IsCancellationRequested) return DatabaseSchema;
                 AllSequences();
             }
             _fixUp = true;
             UpdateReferences();
 
-            return _db;
+            return DatabaseSchema;
         }
 
         private void AllSequences()
@@ -247,7 +243,7 @@ namespace DatabaseSchemaReader
                 conncAdapter.DbConnection.Open();
                 var command = conncAdapter.DbConnection.CreateCommand();
 
-                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(_db.Provider) ?? SqlType.SqlServer);
+                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
 
                 command.CommandText = sqlWriter.SelectAllSql();
                 return command.ExecuteReader();
@@ -264,7 +260,7 @@ namespace DatabaseSchemaReader
                 conncAdapter.DbConnection.Open();
                 var command = conncAdapter.DbConnection.CreateCommand();
 
-                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(_db.Provider) ?? SqlType.SqlServer);
+                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
 
                 command.CommandText = sqlWriter.SelectAllSql();
                 var reader = command.ExecuteReader();

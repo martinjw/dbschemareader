@@ -13,14 +13,13 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
         private readonly string _namespace;
         private readonly ClassBuilder _cb;
         private readonly SprocLogic _logic;
-        private readonly string _resultClassName;
 
         public SprocResultWriter(DatabaseStoredProcedure storedProcedure, string ns)
         {
             _namespace = ns;
             _storedProcedure = storedProcedure;
             _logic = new SprocLogic(_storedProcedure);
-            _resultClassName = _logic.ResultClassName;
+            ClassName = _logic.ResultClassName;
             _cb = new ClassBuilder();
         }
         internal SprocResultWriter(DatabaseStoredProcedure storedProcedure, string ns, ClassBuilder classBuilder)
@@ -28,10 +27,10 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             _namespace = ns;
             _storedProcedure = storedProcedure;
             _logic = new SprocLogic(_storedProcedure);
-            _resultClassName = _logic.ResultClassName;
+            ClassName = _logic.ResultClassName;
             _cb = classBuilder;
         }
-        public string ClassName { get { return _resultClassName; } }
+        public string ClassName { get; }
 
         public string Write()
         {
@@ -57,7 +56,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
         /// </summary>
         internal void WriteClasses()
         {
-            using (_cb.BeginNest("public class " + _resultClassName, "Class representing result of " + _storedProcedure.FullName + " stored procedure"))
+            using (_cb.BeginNest("public class " + ClassName, "Class representing result of " + _storedProcedure.FullName + " stored procedure"))
             {
                 if (_logic.ResultType == SprocResultType.Enumerable)
                 {
@@ -82,7 +81,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
             {
                 var result = _storedProcedure.ResultSets[i];
-                var name = result.NetName ?? _resultClassName + i;
+                var name = result.NetName ?? ClassName + i;
                 using (_cb.BeginNest("public class " + name, "Result set " + i + " for " + _logic.ClassName))
                 {
                     WriteProperties(result);
@@ -97,12 +96,12 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             //constructor
             if (_storedProcedure.ResultSets.Count > 0)
             {
-                using (_cb.BeginNest("public " + _resultClassName + "()"))
+                using (_cb.BeginNest("public " + ClassName + "()"))
                 {
                     for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
                     {
                         var rs = _storedProcedure.ResultSets[i];
-                        var name = rs.NetName ?? _resultClassName + i;
+                        var name = rs.NetName ?? ClassName + i;
                         var dataType = "List<" + name + ">();";
                         _cb.AppendLine(name + " = new " + dataType);
                     }
@@ -113,7 +112,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             for (int i = 0; i < _storedProcedure.ResultSets.Count; i++)
             {
                 var rs = _storedProcedure.ResultSets[i];
-                var name = rs.NetName ?? _resultClassName + i;
+                var name = rs.NetName ?? ClassName + i;
                 var dataType = "IList<" + name + ">";
                 _cb.AppendAutomaticCollectionProperty(dataType, name);
             }
