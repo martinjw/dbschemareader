@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ResultModels
 
         public override string ToString()
         {
-            return string.Format("Source for {0}.{1} {2}", SchemaOwner, Name, SourceType);
+            return $"Source for {SchemaOwner}.{Name} {SourceType}";
         }
     }
 }

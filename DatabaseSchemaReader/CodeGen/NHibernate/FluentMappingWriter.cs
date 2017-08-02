@@ -284,7 +284,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 return;
             }
 
-            var cols = foreignKey.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+            var cols = foreignKey.Columns.Select(x => $"\"{x}\"").ToArray();
 
             var sb = new StringBuilder();
             sb.AppendFormat(CultureInfo.InvariantCulture, "References(x => x.{0})", propertyName);
@@ -335,7 +335,7 @@ namespace DatabaseSchemaReader.CodeGen.NHibernate
                 // If composite key, generate .KeyColumns(...) with array of keys
                 else
                 {
-                    var cols = fk.Columns.Select(x => string.Format("\"{0}\"", x)).ToArray();
+                    var cols = fk.Columns.Select(x => $"\"{x}\"").ToArray();
                     sb.AppendFormat(CultureInfo.InvariantCulture, ".KeyColumns.Add(new string[] {{ {0} }})",
                                     String.Join(", ", cols));
                 }

@@ -108,8 +108,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                     AlterColumnFormat,
                     TableName(databaseTable),
                     columnDef.Replace("NOT NULL", String.Empty)) +
-               string.Format("\r\nALTER TABLE {0} ALTER COLUMN {1} {2} NOT NULL;",
-               TableName(databaseTable), Escape(databaseColumn.Name), (databaseColumn.Nullable ? "DROP" : "SET"));
+                   $"\r\nALTER TABLE {TableName(databaseTable)} ALTER COLUMN {Escape(databaseColumn.Name)} {(databaseColumn.Nullable ? "DROP" : "SET")} NOT NULL;";
         }
     }
 }

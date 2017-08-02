@@ -355,7 +355,7 @@ namespace DatabaseSchemaReader.CodeGen
             // KL: Ensures that property name doesn't match class name
             if (propertyName == column.Table.NetName)
             {
-                propertyName = string.Format("{0}Column", propertyName);
+                propertyName = $"{propertyName}Column";
             }
             if (column.IsPrimaryKey && column.IsForeignKey)
             {
