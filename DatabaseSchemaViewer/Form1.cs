@@ -481,7 +481,7 @@ namespace DatabaseSchemaViewer
         private SqlType FindSqlType()
         {
             var sqlType = ProviderToSqlType.Convert(_databaseSchema.Provider);
-            return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
+            return sqlType ?? SqlType.SqlServer;
         }
 
         private void SaveSchemaClick(object sender, EventArgs e)
