@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data.Common;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders

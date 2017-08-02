@@ -5,7 +5,6 @@ using System.Data.Common;
 using System.IO;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 
 namespace CopyToSQLite

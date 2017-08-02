@@ -1,5 +1,4 @@
-﻿using System;
-using DatabaseSchemaReader.CodeGen;
+﻿using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

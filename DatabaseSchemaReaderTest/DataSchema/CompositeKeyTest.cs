@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

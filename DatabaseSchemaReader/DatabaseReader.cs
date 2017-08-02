@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 // ReSharper disable once RedundantUsingDirective
 using System.Threading;
-using Microsoft.SqlServer.Server;
 
 namespace DatabaseSchemaReader
 {

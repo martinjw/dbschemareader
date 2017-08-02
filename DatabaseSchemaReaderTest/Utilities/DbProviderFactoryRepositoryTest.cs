@@ -2,7 +2,6 @@
 using System.Data.Common;
 using System.Data.SqlClient;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Utilities;
 using DatabaseSchemaReader.Utilities.DbProvider;
 using DatabaseSchemaReaderTest.IntegrationTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

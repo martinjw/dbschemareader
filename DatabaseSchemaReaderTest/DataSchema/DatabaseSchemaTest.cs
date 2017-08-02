@@ -1,4 +1,3 @@
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

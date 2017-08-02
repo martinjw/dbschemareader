@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DatabaseSchemaReader.SqlGen.SqlServer
+﻿namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
     class SqlFormatProvider : ISqlFormatProvider
     {
