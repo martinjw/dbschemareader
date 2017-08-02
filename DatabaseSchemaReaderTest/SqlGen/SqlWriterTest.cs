@@ -23,7 +23,7 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var writer = new SqlWriter(table, SqlType.SqlServer);
 
             //act
-            var sql = writer.SelectAllSql();
+            //var sql = writer.SelectAllSql();
 
             //assert
 

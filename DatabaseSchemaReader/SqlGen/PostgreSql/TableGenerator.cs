@@ -158,7 +158,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             }
             else if (column.DataType != null && column.DataType.GetNetType() == typeof(bool))
             {
-                var d = defaultValue.Trim(new[] { '(', ')' });
+                var d = defaultValue.Trim('(', ')');
                 defaultValue = defaultConstraint + (d == "1" ? "TRUE" : "FALSE");
             }
             else //numeric default

@@ -72,7 +72,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Converters.RowConverters
         {
             if (string.IsNullOrEmpty(defaultKey)) return;
             string d = row[defaultKey].ToString();
-            if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(new[] { ' ', '\'', '=' });
+            if (!string.IsNullOrEmpty(d)) column.DefaultValue = d.Trim(' ', '\'', '=');
         }
     }
 }
