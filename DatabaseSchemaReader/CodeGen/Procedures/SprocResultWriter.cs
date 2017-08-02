@@ -180,7 +180,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
 
         private void AddToString(IList<DatabaseColumn> columns)
         {
-            if (columns.Count() == 0) return;
+            if (!columns.Any()) return;
             var column = columns[0];
             using (_cb.BeginNest("public override string ToString()"))
             {
