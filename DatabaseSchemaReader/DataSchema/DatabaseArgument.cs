@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// An argument (in or out parameter) to a stored procedure or function.
     /// </summary>
     [Serializable]
-    public partial class DatabaseArgument : NamedObject<DatabaseArgument>
+    public class DatabaseArgument : NamedObject<DatabaseArgument>
     {
 
         /// <summary>

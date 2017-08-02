@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// We don't capture if this is a UNIQUE or NONCLUSTERED index.
     /// </remarks>
     [Serializable]
-    public partial class DatabaseIndex : NamedSchemaObject<DatabaseIndex>
+    public class DatabaseIndex : NamedSchemaObject<DatabaseIndex>
     {
         #region Fields
         //backing fields

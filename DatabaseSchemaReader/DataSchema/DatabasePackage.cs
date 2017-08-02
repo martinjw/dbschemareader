@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a package in the database (in Oracle, a collection of stored procedures and functions)
     /// </summary>
     [Serializable]
-    public partial class DatabasePackage : NamedSchemaObject<DatabasePackage>
+    public class DatabasePackage : NamedSchemaObject<DatabasePackage>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabasePackage"/> class.

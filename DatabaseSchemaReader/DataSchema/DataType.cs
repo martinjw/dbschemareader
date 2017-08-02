@@ -11,7 +11,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// XmlSerializater won't work because TypeName and NetDataType are private
     /// </remarks>
     [Serializable]
-    public partial class DataType
+    public class DataType
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool? _isString;

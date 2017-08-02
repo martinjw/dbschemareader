@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a result set of a stored procedure
     /// </summary>
     [Serializable]
-    public partial class DatabaseResultSet
+    public class DatabaseResultSet
     {
         #region Fields
         //backing fields

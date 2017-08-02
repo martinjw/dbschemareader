@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents a user in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseUser : NamedObject<DatabaseUser>
+    public class DatabaseUser : NamedObject<DatabaseUser>
     {
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
