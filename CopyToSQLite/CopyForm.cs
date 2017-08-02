@@ -339,13 +339,13 @@ namespace CopyToSQLite
             ChangeExtension(".sdf", ".db");
         }
 
-        private void ChangeExtension(string @from, string to)
+        private void ChangeExtension(string from, string to)
         {
             var filePath = txtFilePath.Text.Trim();
             if (string.IsNullOrEmpty(filePath)) return;
             var dir = Path.GetDirectoryName(filePath);
             if (dir == null) return;
-            if (Path.GetExtension(filePath).Equals(@from, StringComparison.OrdinalIgnoreCase))
+            if (Path.GetExtension(filePath).Equals(from, StringComparison.OrdinalIgnoreCase))
             {
                 filePath = Path.Combine(dir, Path.GetFileNameWithoutExtension(filePath) + to);
                 txtFilePath.Text = filePath;
