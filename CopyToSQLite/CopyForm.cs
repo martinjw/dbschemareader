@@ -254,11 +254,7 @@ namespace CopyToSQLite
             Update();
         }
 
-        private SqlType OriginSqlType()
-        {
-            var sqlType = ProviderToSqlType.Convert(_providerName);
-            return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
-        }
+        private SqlType OriginSqlType() => ProviderToSqlType.Convert(_providerName) ?? SqlType.SqlServer;
 
         private void BackgroundDoWork(object sender, DoWorkEventArgs e)
         {
