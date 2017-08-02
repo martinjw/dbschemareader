@@ -5,8 +5,10 @@ using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 // ReSharper disable once RedundantUsingDirective
 using System.Threading;
+using Microsoft.SqlServer.Server;
 
 namespace DatabaseSchemaReader
 {
@@ -233,6 +235,55 @@ namespace DatabaseSchemaReader
         public IList<DatabaseTable> AllTables()
         {
             return AllTables(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Execute a SQL command on the table
+        /// </summary>
+        public DbDataReader RunSQL(DatabaseTable table, string cmd)
+        {
+            using (var conncAdapter = _readerAdapter.CreateConnection())
+            {
+                conncAdapter.DbConnection.Open();
+                var command = conncAdapter.DbConnection.CreateCommand();
+
+                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(_db.Provider) ?? SqlType.SqlServer);
+
+                command.CommandText = sqlWriter.SelectAllSql();
+                return command.ExecuteReader();
+            }
+        }
+
+        /// <summary>
+        /// Read all values inside the table
+        /// </summary>
+        public IEnumerable<Dictionary<string, object>> ReadTable(DatabaseTable table, CancellationToken ct)
+        {
+            using (var conncAdapter = _readerAdapter.CreateConnection())
+            {
+                conncAdapter.DbConnection.Open();
+                var command = conncAdapter.DbConnection.CreateCommand();
+
+                var sqlWriter = new SqlWriter(table, ProviderToSqlType.Convert(_db.Provider) ?? SqlType.SqlServer);
+
+                command.CommandText = sqlWriter.SelectAllSql();
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if(ct.IsCancellationRequested) yield break;
+
+                    var item = new Dictionary<string,object>();
+
+                    for (int i = 0; i < table.Columns.Count; i++)
+                    {
+                        item.Add(table.Columns[i].Name,reader[i]);
+                    }
+
+                    yield return item;
+                }
+                conncAdapter.DbConnection.Close();
+            }
         }
 
         /// <summary>

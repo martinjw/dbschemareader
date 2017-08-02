@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A table in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseTable : NamedSchemaObject<DatabaseTable>
+    public class DatabaseTable : NamedSchemaObject<DatabaseTable>
     {
         #region Fields
 

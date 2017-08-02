@@ -13,7 +13,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Use <see cref="DatabaseSchemaFixer.UpdateReferences" /> to link things up
     /// </remarks>
     [Serializable]
-    public partial class DatabaseSchema
+    public class DatabaseSchema
     {
         #region Fields
         //backing fields

@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// A column in the database
     /// </summary>
     [Serializable]
-    public partial class DatabaseColumn : NamedSchemaObject<DatabaseColumn>
+    public class DatabaseColumn : NamedSchemaObject<DatabaseColumn>
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private DatabaseColumnIdentity _identityDefinition;
