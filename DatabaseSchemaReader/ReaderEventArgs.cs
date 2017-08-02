@@ -57,10 +57,7 @@ namespace DatabaseSchemaReader
             string name, int? index, int? count)
         {
             var handler = eventHandler;
-            if (handler != null)
-            {
-                handler(sender, new ReaderEventArgs(progressType, schemaObjectType, name, index, count));
-            }
+            handler?.Invoke(sender, new ReaderEventArgs(progressType, schemaObjectType, name, index, count));
         }
     }
 

@@ -163,9 +163,8 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="column">The column.</param>
         public static void AddDataType(DatabaseColumn column)
         {
-            if (column == null) return;
             //there is no data type at all
-            if (string.IsNullOrEmpty(column.DbDataType)) return;
+            if (string.IsNullOrEmpty(column?.DbDataType)) return;
             //a datatype already assigned
             if (column.DataType != null) return;
             //use upper case
@@ -174,16 +173,13 @@ namespace DatabaseSchemaReader.SqlGen
             if (string.IsNullOrEmpty(dbType)) return;
             var sqlType = SqlType.SqlServer;
             var dataTypeList = new List<DataType>();
-            if (column.Table != null)
+            //look up the full schema if it exists
+            var schema = column.Table?.DatabaseSchema;
+            if (schema != null)
             {
-                //look up the full schema if it exists
-                var schema = column.Table.DatabaseSchema;
-                if (schema != null)
-                {
-                    var provider = schema.Provider;
-                    sqlType = ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
-                    dataTypeList = schema.DataTypes;
-                }
+                var provider = schema.Provider;
+                sqlType = ProviderToSqlType.Convert(provider) ?? SqlType.SqlServer;
+                dataTypeList = schema.DataTypes;
             }
             //does the schema data types contain this type? if so, assign it.
             var dataType = FindDataType(dbType, dataTypeList, sqlType, column.Length);

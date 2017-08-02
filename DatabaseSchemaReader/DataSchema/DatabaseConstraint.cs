@@ -142,9 +142,7 @@ namespace DatabaseSchemaReader.DataSchema
                 }
             }
 
-            if (referencedTable.PrimaryKey == null) return null; //No primary key defined! 
-            var refColumnList = referencedTable.PrimaryKey.Columns;
-            return refColumnList;
+            return referencedTable.PrimaryKey?.Columns;
         }
 
         /// <summary>

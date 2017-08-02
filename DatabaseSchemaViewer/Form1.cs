@@ -297,9 +297,8 @@ namespace DatabaseSchemaViewer
             var p = new Point(e.X, e.Y);
 
             var node = treeView1.GetNodeAt(p);
-            if (node == null) return;
 
-            var tag = node.Tag;
+            var tag = node?.Tag;
 
             if (tag == null) return;
 

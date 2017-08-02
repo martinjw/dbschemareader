@@ -334,14 +334,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// 	<c>true</c> if this instance has a composite key; otherwise, <c>false</c>.
         /// </value>
-        public bool HasCompositeKey
-        {
-            get
-            {
-                if (PrimaryKey == null) return false;
-                return PrimaryKey.Columns.Count > 1;
-            }
-        }
+        public bool HasCompositeKey => PrimaryKey?.Columns.Count > 1;
 
         /// <summary>
         /// Gets a value indicating whether this table has an autonumber column (identity or equivalent).

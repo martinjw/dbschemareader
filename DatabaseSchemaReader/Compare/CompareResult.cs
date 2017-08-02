@@ -89,9 +89,8 @@ namespace DatabaseSchemaReader.Compare
                     constraint = table.CheckConstraints.FindByName(Name);
                     if (constraint != null) return constraint;
                     constraint = table.UniqueKeys.FindByName(Name);
-                    if (constraint != null) return constraint;
+                    return constraint;
                     //shouldn't fall through to here
-                    return null;
                 case SchemaObjectType.Index:
                     if (string.IsNullOrEmpty(TableName)) throw new InvalidOperationException("TableName required");
                     table = databaseSchema.FindTableByName(TableName, SchemaOwner);
