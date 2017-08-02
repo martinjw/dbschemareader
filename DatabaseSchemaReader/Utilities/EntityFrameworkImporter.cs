@@ -41,9 +41,9 @@ namespace DatabaseSchemaReader.Utilities
         public DatabaseSchema ReadEdmx(string edmxFilePath)
         {
             if (string.IsNullOrEmpty(edmxFilePath))
-                throw new ArgumentNullException("edmxFilePath", @"No ssdl/edmx path");
+                throw new ArgumentNullException(nameof(edmxFilePath), @"No ssdl/edmx path");
             if (!File.Exists(edmxFilePath))
-                throw new ArgumentException(@"File does not exist", "edmxFilePath");
+                throw new ArgumentException(@"File does not exist", nameof(edmxFilePath));
 
             var doc = XDocument.Load(edmxFilePath);
             return ReadEdmx(doc);
@@ -58,11 +58,11 @@ namespace DatabaseSchemaReader.Utilities
         public DatabaseSchema ReadEdmx(XDocument edmx)
         {
             if (edmx == null)
-                throw new ArgumentNullException("edmx", "No edmx document");
+                throw new ArgumentNullException(nameof(edmx), "No edmx document");
 
             var root = edmx.Root;
             if (root == null)
-                throw new ArgumentException("No root element found", "edmx");
+                throw new ArgumentException("No root element found", nameof(edmx));
             _edmx = root.GetNamespaceOfPrefix("edmx");
 
             var storageModel =
@@ -80,14 +80,14 @@ namespace DatabaseSchemaReader.Utilities
         public DatabaseSchema ReadSsdl(string ssdlFilePath)
         {
             if (string.IsNullOrEmpty(ssdlFilePath))
-                throw new ArgumentNullException("ssdlFilePath", @"No ssdl/edmx path");
+                throw new ArgumentNullException(nameof(ssdlFilePath), @"No ssdl/edmx path");
             if (!File.Exists(ssdlFilePath))
-                throw new ArgumentException(@"File does not exist", "ssdlFilePath");
+                throw new ArgumentException(@"File does not exist", nameof(ssdlFilePath));
 
 
             var doc = XDocument.Load(ssdlFilePath);
-            if (doc == null) throw new ArgumentException("No xml in file", "ssdlFilePath");
-            if (doc.Root == null) throw new ArgumentException("Invalid xml in file", "ssdlFilePath");
+            if (doc == null) throw new ArgumentException("No xml in file", nameof(ssdlFilePath));
+            if (doc.Root == null) throw new ArgumentException("Invalid xml in file", nameof(ssdlFilePath));
             _edmx = doc.Root.GetNamespaceOfPrefix("edmx");
             return ReadSsdl(doc);
         }
@@ -99,9 +99,9 @@ namespace DatabaseSchemaReader.Utilities
         /// <returns>A <see cref="DatabaseSchema"/></returns>
         public DatabaseSchema ReadSsdl(XDocument ssdlDocument)
         {
-            if (ssdlDocument == null) throw new ArgumentNullException("ssdlDocument");
+            if (ssdlDocument == null) throw new ArgumentNullException(nameof(ssdlDocument));
             var storage = ssdlDocument.Root;
-            if (storage == null) throw new ArgumentException("Invalid document", "ssdlDocument");
+            if (storage == null) throw new ArgumentException("Invalid document", nameof(ssdlDocument));
             _edmx = storage.GetNamespaceOfPrefix("edmx");
             if (storage.Name.LocalName != "Schema")
                 throw new InvalidOperationException("SSDL file does not have expected structure");

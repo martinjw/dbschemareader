@@ -169,7 +169,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="con">The constraint.</param>
         public void AddConstraint(DatabaseConstraint con)
         {
-            if (con == null) throw new ArgumentNullException("con");
+            if (con == null) throw new ArgumentNullException(nameof(con));
 
             switch (con.ConstraintType)
             {
@@ -245,7 +245,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <exception cref="System.InvalidOperationException">Must be a foreign key</exception>
         internal void RemoveForeignKey(DatabaseConstraint foreignKey)
         {
-            if (foreignKey == null) throw new ArgumentNullException("foreignKey", "foreignkey cannot be null");
+            if (foreignKey == null) throw new ArgumentNullException(nameof(foreignKey), "foreignkey cannot be null");
             if (foreignKey.ConstraintType != ConstraintType.ForeignKey) throw new InvalidOperationException("Must be a foreign key");
             if (!_foreignKeys.Contains(foreignKey)) throw new InvalidOperationException("Foreign key not for this table or already removed");
             _foreignKeys.Remove(foreignKey);

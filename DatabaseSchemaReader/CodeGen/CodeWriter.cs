@@ -36,8 +36,8 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="codeWriterSettings">The code writer settings.</param>
         public CodeWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            if (schema == null) throw new ArgumentNullException("schema");
-            if (codeWriterSettings == null) throw new ArgumentNullException("codeWriterSettings");
+            if (schema == null) throw new ArgumentNullException(nameof(schema));
+            if (codeWriterSettings == null) throw new ArgumentNullException(nameof(codeWriterSettings));
 
             _schema = schema;
             _codeWriterSettings = codeWriterSettings;
@@ -63,7 +63,7 @@ namespace DatabaseSchemaReader.CodeGen
         public void Execute(DirectoryInfo directory)
         {
             if (directory == null)
-                throw new ArgumentNullException("directory");
+                throw new ArgumentNullException(nameof(directory));
             if (!directory.Exists)
                 throw new InvalidOperationException("Directory does not exist: " + directory.FullName);
 

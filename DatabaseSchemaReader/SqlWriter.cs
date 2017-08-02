@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader
         public SqlWriter(DatabaseTable table, SqlType sqlType)
         {
             if (table == null)
-                throw new ArgumentNullException("table");
+                throw new ArgumentNullException(nameof(table));
             _table = table;
             _sqlType = sqlType;
             _nameEscapeStart = null;

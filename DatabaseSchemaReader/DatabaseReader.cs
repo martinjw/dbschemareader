@@ -77,7 +77,7 @@ namespace DatabaseSchemaReader
         /// <param name="sqlType">Type of the SQL.</param>
         public DatabaseReader(string connectionString, SqlType sqlType)
         {
-            if (connectionString == null) throw new ArgumentNullException("connectionString");
+            if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
             _schemaParameters = new SchemaParameters(connectionString, sqlType);
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
             //_schemaReader = SchemaReaderFactory.Create(connectionString, sqlType);
@@ -102,7 +102,7 @@ namespace DatabaseSchemaReader
         /// <param name="databaseSchema">The database schema. Can be a subclassed version.</param>
         public DatabaseReader(DatabaseSchema databaseSchema)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema));
             if (databaseSchema.ConnectionString == null) throw new ArgumentException("No connectionString");
 
             _schemaParameters = new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider);
@@ -355,7 +355,7 @@ namespace DatabaseSchemaReader
         /// <exception cref="System.ArgumentNullException">tableName</exception>
         public bool TableExists(string tableName)
         {
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             using (_readerAdapter.CreateConnection())
             {
                 var tables = _readerAdapter.Tables(tableName);
@@ -379,7 +379,7 @@ namespace DatabaseSchemaReader
         /// <param name="ct">The ct.</param>
         public DatabaseTable Table(string tableName, CancellationToken ct)
         {
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
             DatabaseTable table;
             using (_readerAdapter.CreateConnection())

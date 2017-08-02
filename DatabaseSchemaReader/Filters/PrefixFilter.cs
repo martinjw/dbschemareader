@@ -15,7 +15,7 @@ namespace DatabaseSchemaReader.Filters
         /// <param name="prefix">The prefix.</param>
         public PrefixFilter(params string[] prefix)
         {
-            if (prefix == null) throw new ArgumentNullException("prefix");
+            if (prefix == null) throw new ArgumentNullException(nameof(prefix));
 
             foreach (var s in prefix)
             {

@@ -438,7 +438,7 @@ namespace DatabaseSchemaViewer
 
         private void BuildTableMenu(ToolStrip menu, DatabaseTable table, SqlType sqlType)
         {
-            if (menu == null) throw new ArgumentNullException("menu");
+            if (menu == null) throw new ArgumentNullException(nameof(menu));
             var create = new ToolStripMenuItem("CREATE TABLE " + table.Name + " to clipboard");
             create.Click += (s, ea) => new SqlTasks(sqlType).BuildTableDdl(table);
             menu.Items.Add(create);
