@@ -121,15 +121,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
         }
 
-        private bool IndexColumnsNotInTable(DatabaseIndex index)
-        {
-            foreach (var column in index.Columns)
-            {
-                if (!Table.Columns.Any(c => c.Name == column.Name))
-                    return true;
-            }
-            return false;
-        }
+        private bool IndexColumnsNotInTable(DatabaseIndex index) => index.Columns.Any(column => Table.Columns.All(c => c.Name != column.Name));
 
         protected override ISqlFormatProvider SqlFormatProvider()
         {
