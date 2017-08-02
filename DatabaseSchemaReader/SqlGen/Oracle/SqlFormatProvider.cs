@@ -20,9 +20,6 @@
         }
 
 
-        public int MaximumNameLength
-        {
-            get { return 30; }
-        }
+        public int MaximumNameLength => 30;
     }
 }

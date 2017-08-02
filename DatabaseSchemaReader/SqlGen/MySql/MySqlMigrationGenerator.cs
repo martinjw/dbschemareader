@@ -12,18 +12,10 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         {
         }
 
-        protected override string DropForeignKeyFormat
-        {
-            get { return "ALTER TABLE {0} DROP FOREIGN KEY {1};"; }
-        }
-        protected override string DropUniqueFormat
-        {
-            get { return "ALTER TABLE {0} DROP INDEX {1};"; }
-        }
-        protected override string DropTriggerFormat
-        {
-            get { return "DROP IF EXISTS TRIGGER {0}{1};"; }
-        }
+        protected override string DropForeignKeyFormat => "ALTER TABLE {0} DROP FOREIGN KEY {1};";
+        protected override string DropUniqueFormat => "ALTER TABLE {0} DROP INDEX {1};";
+
+        protected override string DropTriggerFormat => "DROP IF EXISTS TRIGGER {0}{1};";
 
         public override string AddProcedure(DatabaseStoredProcedure procedure)
         {

@@ -77,11 +77,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the arguments.
         /// </summary>
-        public List<DatabaseArgument> Arguments { get { return _arguments; } }
+        public List<DatabaseArgument> Arguments => _arguments;
+
         /// <summary>
         /// Gets the result sets.
         /// </summary>
-        public List<DatabaseResultSet> ResultSets { get { return _resultSets; } }
+        public List<DatabaseResultSet> ResultSets => _resultSets;
 
         /// <summary>
         /// Gets or sets the database schema. Used by SprocWriter to detect if devart or not.

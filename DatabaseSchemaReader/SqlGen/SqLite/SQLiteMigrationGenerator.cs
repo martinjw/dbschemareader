@@ -16,8 +16,8 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             return "DROP TABLE " + databaseTable.Name + ";";
         }
 
-        protected override bool SupportsAlterColumn { get { return false; } }
-        protected override bool SupportsDropColumn { get { return false; } }
+        protected override bool SupportsAlterColumn => false;
+        protected override bool SupportsDropColumn => false;
 
         public override string AddConstraint(DatabaseTable databaseTable, DatabaseConstraint constraint)
         {
@@ -44,10 +44,8 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
             return null; //doesn't support it
         }
 
-        protected override string DropTriggerFormat
-        {
-            get { return "DROP IF EXISTS TRIGGER {1};"; }
-        }
+        protected override string DropTriggerFormat => "DROP IF EXISTS TRIGGER {1};";
+
         public override string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
         {
             //sqlite: 

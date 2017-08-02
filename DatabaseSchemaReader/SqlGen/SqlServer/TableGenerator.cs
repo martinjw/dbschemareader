@@ -188,7 +188,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         /// <summary>
         /// Gets a value indicating whether supports "next value for [sequence]" (SQLServer 2012+). Not publicly changeable here, yet...
         /// </summary>
-        protected virtual bool SupportsNextValueForSequence { get { return true; } }
+        protected virtual bool SupportsNextValueForSequence => true;
 
         protected virtual string FixDefaultValue(string defaultValue)
         {

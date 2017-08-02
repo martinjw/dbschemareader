@@ -10,10 +10,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         {
         }
 
-        protected override string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
-        }
+        protected override string AlterColumnFormat => "ALTER TABLE {0} ALTER COLUMN {1};";
 
         public override string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {

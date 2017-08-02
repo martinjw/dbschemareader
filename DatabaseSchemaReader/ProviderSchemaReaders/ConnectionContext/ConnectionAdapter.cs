@@ -33,13 +33,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
             }
         }
 
-        public DbTransaction DbTransaction
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public DbTransaction DbTransaction => null;
 
         private void CreateDbConnection()
         {

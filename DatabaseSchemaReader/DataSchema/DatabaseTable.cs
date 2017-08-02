@@ -88,7 +88,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the columns.
         /// </summary>
-        public List<DatabaseColumn> Columns { get { return _columns; } }
+        public List<DatabaseColumn> Columns => _columns;
 
         /// <summary>
         /// Gets or sets the primary key column (assuming this isn't a composite key- check PrimaryKey.Columns.Count)
@@ -109,7 +109,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public DatabaseConstraint PrimaryKey
         {
-            get { return _primaryKey; }
+            get => _primaryKey;
             set
             {
                 _primaryKey = value;
@@ -123,10 +123,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The foreign keys.
         /// </value>
-        public List<DatabaseConstraint> ForeignKeys
-        {
-            get { return _foreignKeys; }
-        }
+        public List<DatabaseConstraint> ForeignKeys => _foreignKeys;
 
         /// <summary>
         /// Gets or sets the unique keys.
@@ -134,10 +131,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The unique keys.
         /// </value>
-        public List<DatabaseConstraint> UniqueKeys
-        {
-            get { return _uniqueKeys; }
-        }
+        public List<DatabaseConstraint> UniqueKeys => _uniqueKeys;
 
         /// <summary>
         /// Gets or sets the check constraints.
@@ -145,10 +139,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The check constraints.
         /// </value>
-        public List<DatabaseConstraint> CheckConstraints
-        {
-            get { return _checkConstraints; }
-        }
+        public List<DatabaseConstraint> CheckConstraints => _checkConstraints;
 
         /// <summary>
         /// Gets the default constraints.
@@ -156,10 +147,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The default constraints.
         /// </value>
-        public List<DatabaseConstraint> DefaultConstraints
-        {
-            get { return _defaultConstraints; }
-        }
+        public List<DatabaseConstraint> DefaultConstraints => _defaultConstraints;
 
         /// <summary>
         /// Adds the constraints of any type (primary key, foreign key, unique key, check)
@@ -277,12 +265,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// Gets the foreign key children.
         /// </summary>
         [XmlIgnore]
-        public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren; } }
+        public List<DatabaseTable> ForeignKeyChildren => _foreignKeyChildren;
 
         /// <summary>
         /// Gets the triggers.
         /// </summary>
-        public List<DatabaseTrigger> Triggers { get { return _triggers; } }
+        public List<DatabaseTrigger> Triggers => _triggers;
 
         /// <summary>
         /// Gets or sets the indexes.
@@ -292,8 +280,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public List<DatabaseIndex> Indexes
         {
-            get { return _indexes; }
-            set { value.ForEach(AddIndex); }
+            get => _indexes;
+            set => value.ForEach(AddIndex);
         }
 
         /// <summary>

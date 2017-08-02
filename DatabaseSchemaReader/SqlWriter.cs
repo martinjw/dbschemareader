@@ -77,7 +77,7 @@ namespace DatabaseSchemaReader
         /// <value><c>true</c> if in stored procedure; otherwise, <c>false</c>.</value>
         public bool InStoredProcedure
         {
-            get { return _inStoredProcedure; }
+            get => _inStoredProcedure;
             set
             {
                 if (_sqlType == SqlType.SqlServer) return; //always false
@@ -659,7 +659,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
                 {
                     sb.AppendLine(";");
                     //default sequence name is tablename_colname_seq
-                    var seq = _table.Name + "_" + ((_table.PrimaryKeyColumn != null) ? _table.PrimaryKeyColumn.Name : null) + "_seq";
+                    var seq = _table.Name + "_" + _table.PrimaryKeyColumn?.Name + "_seq";
                     sb.Append("SELECT currval('" + seq + "');");
                 }
                 else if (_sqlType == SqlType.SQLite)
@@ -702,13 +702,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
             return identityParameter;
         }
 
-        private DatabaseColumn FindIdentityColumn()
-        {
-            return _table.Columns.Find(delegate(DatabaseColumn col)
-                    {
-                        return col.IsAutoNumber;
-                    });
-        }
+        private DatabaseColumn FindIdentityColumn() => _table.Columns.Find(col => col.IsAutoNumber);
 
         /// <summary>
         /// SQL for update row.

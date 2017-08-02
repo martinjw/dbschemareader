@@ -17,9 +17,6 @@
             return string.Empty;
         }
 
-        public int MaximumNameLength
-        {
-            get { return 256; } //there is no hard limit in SQLite
-        }
+        public int MaximumNameLength => 256;
     }
 }

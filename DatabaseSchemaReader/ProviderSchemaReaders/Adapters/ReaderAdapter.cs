@@ -31,10 +31,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return _connectionAdapter;
         }
 
-        protected IConnectionAdapter ConnectionAdapter
-        {
-            get { return _connectionAdapter ?? (_connectionAdapter = new ConnectionAdapter(Parameters)); }
-        }
+        protected IConnectionAdapter ConnectionAdapter => _connectionAdapter ?? (_connectionAdapter = new ConnectionAdapter(Parameters));
 
         //protected DbConnection DbConnection
         //{
@@ -63,8 +60,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public virtual string Owner
         {
-            get { return Parameters.Owner; }
-            set { Parameters.Owner = value; }
+            get => Parameters.Owner;
+            set => Parameters.Owner = value;
         }
 
         public virtual IList<DataType> DataTypes()

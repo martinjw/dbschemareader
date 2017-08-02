@@ -18,9 +18,6 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             return string.Empty;
         }
 
-        public int MaximumNameLength
-        {
-            get { return 63; }
-        }
+        public int MaximumNameLength => 63;
     }
 }

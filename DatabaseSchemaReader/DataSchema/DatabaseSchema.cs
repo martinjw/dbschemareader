@@ -75,42 +75,42 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the data types.
         /// </summary>
-        public List<DataType> DataTypes { get { return _dataTypes; } }
+        public List<DataType> DataTypes => _dataTypes;
 
         /// <summary>
         /// Gets the stored procedures.
         /// </summary>
-        public List<DatabaseStoredProcedure> StoredProcedures { get { return _storedProcedures; } }
+        public List<DatabaseStoredProcedure> StoredProcedures => _storedProcedures;
 
         /// <summary>
         /// Gets the packages.
         /// </summary>
-        public List<DatabasePackage> Packages { get { return _packages; } }
+        public List<DatabasePackage> Packages => _packages;
 
         /// <summary>
         /// Gets the tables.
         /// </summary>
-        public List<DatabaseTable> Tables { get { return _tables; } }
+        public List<DatabaseTable> Tables => _tables;
 
         /// <summary>
         /// Gets the views.
         /// </summary>
-        public List<DatabaseView> Views { get { return _views; } }
+        public List<DatabaseView> Views => _views;
 
         /// <summary>
         /// Gets the users.
         /// </summary>
-        public List<DatabaseUser> Users { get { return _users; } }
+        public List<DatabaseUser> Users => _users;
 
         /// <summary>
         /// Gets the functions.
         /// </summary>
-        public List<DatabaseFunction> Functions { get { return _functions; } }
+        public List<DatabaseFunction> Functions => _functions;
 
         /// <summary>
         /// Gets the sequences.
         /// </summary>
-        public List<DatabaseSequence> Sequences { get { return _sequences; } }
+        public List<DatabaseSequence> Sequences => _sequences;
 
         /// <summary>
         /// Gets or sets the provider.

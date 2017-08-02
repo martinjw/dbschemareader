@@ -18,10 +18,8 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
 
         public string ClassName { get; }
 
-        public string ResultClassName
-        {
-            get { return ClassName + "Result"; }
-        }
+        public string ResultClassName => ClassName + "Result";
+
         public SprocResultType ResultType
         {
             get
@@ -57,10 +55,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             }
         }
 
-        public bool ReturnEnumerable
-        {
-            get { return !HasOutputParameters && _storedProcedure.ResultSets.Count == 1; }
-        }
+        public bool ReturnEnumerable => !HasOutputParameters && _storedProcedure.ResultSets.Count == 1;
 
         public bool IsDevart
         {

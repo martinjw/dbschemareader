@@ -2,27 +2,12 @@
 {
     class SqlFormatProvider : ISqlFormatProvider
     {
-        public string Escape(string name)
-        {
-            return "[" + name + "]";
-        }
+        public string Escape(string name) => "[" + name + "]";
 
-        public virtual string LineEnding()
-        {
-            return ";";
-        }
+        public virtual string LineEnding() => ";";
 
+        public string RunStatements() => "\r\nGO\r\n";
 
-        public string RunStatements()
-        {
-            return @"
-GO
-"; ;
-        }
-
-        public int MaximumNameLength
-        {
-            get { return 128; }
-        }
+        public int MaximumNameLength => 128;
     }
 }

@@ -84,7 +84,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the columns. A check constraint has no columns.
         /// </summary>
-        public List<string> Columns { get { return _columns; } }
+        public List<string> Columns => _columns;
 
         /// <summary>
         /// Gets or sets the expression (check constraints only).

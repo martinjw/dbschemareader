@@ -130,7 +130,7 @@ namespace DatabaseSchemaReader
         /// <value>
         /// The exclusions.
         /// </value>
-        public Exclusions Exclusions { get { return _schemaParameters.Exclusions; } }
+        public Exclusions Exclusions => _schemaParameters.Exclusions;
 
         /// <summary>
         /// Gets or sets the owner user. Always set it with Oracle (otherwise you'll get SYS, MDSYS etc...)
@@ -138,8 +138,8 @@ namespace DatabaseSchemaReader
         /// <value>The user.</value>
         public string Owner
         {
-            get { return _readerAdapter.Owner; }
-            set { _readerAdapter.Owner = value; }
+            get => _readerAdapter.Owner;
+            set => _readerAdapter.Owner = value;
         }
 
         /// <summary>

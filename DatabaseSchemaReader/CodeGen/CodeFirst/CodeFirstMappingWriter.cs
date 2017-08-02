@@ -72,10 +72,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             return _cb.ToString();
         }
 
-        private string Builder
-        {
-            get { return _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore ? "b." : ""; }
-        }
+        private string Builder => _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore ? "b." : "";
 
         private void WriteForeignKeys()
         {
