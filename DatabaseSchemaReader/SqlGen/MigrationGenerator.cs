@@ -506,7 +506,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         private string GetColumnList(IEnumerable<string> columns)
         {
-            var escapedColumnNames = columns.Select(column => Escape(column)).ToArray();
+            var escapedColumnNames = columns.Select(Escape).ToArray();
             return string.Join(", ", escapedColumnNames);
         }
     }
