@@ -41,7 +41,7 @@ namespace DatabaseSchemaReader.CodeGen
         /// </value>
         public INamer Namer
         {
-            get { return _namer; }
+            get => _namer;
             set
             {
                 if (value == null) throw new ArgumentNullException();

@@ -22,7 +22,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         public void WriteToFolder(string path, IEnumerable<DatabaseTable> tables)
         {
             if (string.IsNullOrEmpty(path))
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             if (!Directory.Exists(path))
                 throw new ArgumentException("Path does not exist", path);
 
@@ -35,7 +35,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         public void WriteToScript(string scriptPath, IEnumerable<DatabaseTable> tables)
         {
             if (string.IsNullOrEmpty(scriptPath))
-                throw new ArgumentNullException("scriptPath");
+                throw new ArgumentNullException(nameof(scriptPath));
             if (!Directory.Exists(Path.GetDirectoryName(scriptPath)))
                 throw new ArgumentException("Path does not exist", scriptPath);
 

@@ -17,7 +17,7 @@ namespace DatabaseSchemaReader.Filters
         /// <param name="prefix">The prefix.</param>
         public PrefixFilter(params string[] prefix)
         {
-            if (prefix == null) throw new ArgumentNullException("prefix");
+            if (prefix == null) throw new ArgumentNullException(nameof(prefix));
 
             foreach (var s in prefix)
             {
@@ -31,10 +31,7 @@ namespace DatabaseSchemaReader.Filters
         /// <value>
         /// The exclusions.
         /// </value>
-        public IList<string> FilterExclusions
-        {
-            get { return _filterExclusions; }
-        }
+        public IList<string> FilterExclusions => _filterExclusions;
 
         /// <summary>
         /// Excludes the specified name with any of the prefixes.

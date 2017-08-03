@@ -22,9 +22,6 @@ GO
 "; ;
         }
 
-        public int MaximumNameLength
-        {
-            get { return 128; }
-        }
+        public int MaximumNameLength => 128;
     }
 }

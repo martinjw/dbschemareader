@@ -77,7 +77,7 @@ namespace DatabaseSchemaReader
         /// <param name="sqlType">Type of the SQL.</param>
         public DatabaseReader(string connectionString, SqlType sqlType)
         {
-            if (connectionString == null) throw new ArgumentNullException("connectionString");
+            if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
             _schemaParameters = new SchemaParameters(connectionString, sqlType);
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
             //_schemaReader = SchemaReaderFactory.Create(connectionString, sqlType);
@@ -102,7 +102,7 @@ namespace DatabaseSchemaReader
         /// <param name="databaseSchema">The database schema. Can be a subclassed version.</param>
         public DatabaseReader(DatabaseSchema databaseSchema)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema));
             if (databaseSchema.ConnectionString == null) throw new ArgumentException("No connectionString");
 
             _schemaParameters = new SchemaParameters(databaseSchema.ConnectionString, databaseSchema.Provider);
@@ -130,7 +130,7 @@ namespace DatabaseSchemaReader
         /// <value>
         /// The exclusions.
         /// </value>
-        public Exclusions Exclusions { get { return _schemaParameters.Exclusions; } }
+        public Exclusions Exclusions => _schemaParameters.Exclusions;
 
         /// <summary>
         /// Gets or sets the owner user. Always set it with Oracle (otherwise you'll get SYS, MDSYS etc...)
@@ -138,17 +138,14 @@ namespace DatabaseSchemaReader
         /// <value>The user.</value>
         public string Owner
         {
-            get { return _readerAdapter.Owner; }
-            set { _readerAdapter.Owner = value; }
+            get => _readerAdapter.Owner;
+            set => _readerAdapter.Owner = value;
         }
 
         /// <summary>
         /// Gets the database schema. Only call AFTER calling <see cref="ReadAll()"/> or one or more other methods such as <see cref="AllTables()"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
-        public DatabaseSchema DatabaseSchema
-        {
-            get { return _db; }
-        }
+        public DatabaseSchema DatabaseSchema => _db;
 
         /// <summary>
         /// Gets all of the schema in one call.
@@ -309,7 +306,7 @@ namespace DatabaseSchemaReader
         /// <exception cref="System.ArgumentNullException">tableName</exception>
         public bool TableExists(string tableName)
         {
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             using (_readerAdapter.CreateConnection())
             {
                 var tables = _readerAdapter.Tables(tableName);
@@ -333,7 +330,7 @@ namespace DatabaseSchemaReader
         /// <param name="ct">The ct.</param>
         public DatabaseTable Table(string tableName, CancellationToken ct)
         {
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
             DatabaseTable table;
             using (_readerAdapter.CreateConnection())
@@ -356,6 +353,8 @@ namespace DatabaseSchemaReader
             if (DatabaseSchema.DataTypes.Count > 0)
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
 
+            table.DatabaseSchema = DatabaseSchema;
+            table.ReaderAdapter = _readerAdapter;
             return table;
         }
 

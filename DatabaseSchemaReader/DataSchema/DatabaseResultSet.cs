@@ -27,7 +27,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the columns.
         /// </summary>
-        public List<DatabaseColumn> Columns { get { return _columns; } }
+        public List<DatabaseColumn> Columns => _columns;
 
         /// <summary>
         /// Gets or sets the result set name in .Net (C#) compatible format.

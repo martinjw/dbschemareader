@@ -57,7 +57,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the indexed columns.
         /// </summary>
-        public List<DatabaseColumn> Columns { get { return _columns; } }
+        public List<DatabaseColumn> Columns => _columns;
 
         /// <summary>
         /// Returns the columns of the parent table that are indexed.

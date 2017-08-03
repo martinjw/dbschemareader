@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.SqlGen
     {
         public static DataTypeMapper DataTypeMapper(DatabaseTable databaseTable)
         {
-            if (databaseTable == null) throw new ArgumentNullException("databaseTable", "databaseTable must not be null");
+            if (databaseTable == null) throw new ArgumentNullException(nameof(databaseTable), "databaseTable must not be null");
             var schema = databaseTable.DatabaseSchema;
             SqlType? type = SqlType.SqlServer;
             if (schema != null)
@@ -35,7 +35,7 @@ namespace DatabaseSchemaReader.SqlGen
                 case SqlType.Db2:
                      return new Db2.Db2DataTypeMapper();
                 default:
-                    throw new ArgumentOutOfRangeException("sqlType");
+                    throw new ArgumentOutOfRangeException(nameof(sqlType));
             }
         }
     }

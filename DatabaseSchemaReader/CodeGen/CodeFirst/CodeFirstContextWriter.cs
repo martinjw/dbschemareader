@@ -29,10 +29,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             return name + "Context";
         }
 
-        public string ContextName
-        {
-            get { return _contextName; }
-        }
+        public string ContextName => _contextName;
 
         /// <summary>
         /// A flag if this is Oracle (Devart)

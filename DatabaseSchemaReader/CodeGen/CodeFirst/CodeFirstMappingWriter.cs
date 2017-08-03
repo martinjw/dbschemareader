@@ -18,8 +18,8 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
 
         public CodeFirstMappingWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings, MappingNamer mappingNamer)
         {
-            if (table == null) throw new ArgumentNullException("table");
-            if (mappingNamer == null) throw new ArgumentNullException("mappingNamer");
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            if (mappingNamer == null) throw new ArgumentNullException(nameof(mappingNamer));
 
             _codeWriterSettings = codeWriterSettings;
             _mappingNamer = mappingNamer;
@@ -72,10 +72,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
             return _cb.ToString();
         }
 
-        private string Builder
-        {
-            get { return _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore ? "b." : ""; }
-        }
+        private string Builder => _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore ? "b." : "";
 
         private void WriteForeignKeys()
         {

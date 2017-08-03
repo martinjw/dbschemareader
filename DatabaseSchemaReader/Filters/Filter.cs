@@ -15,10 +15,7 @@ namespace DatabaseSchemaReader.Filters
         /// <value>
         /// The exclusions.
         /// </value>
-        public IList<string> FilterExclusions
-        {
-            get { return _filterExclusions; }
-        }
+        public IList<string> FilterExclusions => _filterExclusions;
 
 
         /// <summary>

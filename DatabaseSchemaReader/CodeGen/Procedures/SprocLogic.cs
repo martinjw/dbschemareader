@@ -17,12 +17,10 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             _className = _storedProcedure.NetName ?? (_storedProcedure.NetName = NameFixer.ToPascalCase(_storedProcedure.Name));
         }
 
-        public string ClassName { get { return _className; } }
+        public string ClassName => _className;
 
-        public string ResultClassName
-        {
-            get { return ClassName + "Result"; }
-        }
+        public string ResultClassName => ClassName + "Result";
+
         public SprocResultType ResultType
         {
             get
@@ -58,10 +56,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             }
         }
 
-        public bool ReturnEnumerable
-        {
-            get { return !HasOutputParameters && _storedProcedure.ResultSets.Count == 1; }
-        }
+        public bool ReturnEnumerable => !HasOutputParameters && _storedProcedure.ResultSets.Count == 1;
 
         public bool IsDevart
         {

@@ -29,8 +29,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             SchemaObjectType schemaObjectType,
             string name, int? index, int? count)
         {
-            ReaderEventArgs.RaiseEvent(ReaderProgress, this, progressType, schemaObjectType,
-    name, index, count);
+            ReaderEventArgs.RaiseEvent(ReaderProgress, this, progressType, schemaObjectType, name, index, count);
         }
 
         private IList<DatabaseTable> EmptyList()
@@ -121,13 +120,15 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             for (var i = 0; i < tablesCount; i++)
             {
                 var table = tables[i];
+                table.ReaderAdapter = _readerAdapter;
+
                 var tableName = table.Name;
                 var schemaName = table.SchemaOwner;
 
                 if (ct.IsCancellationRequested) return tables;
-                RaiseProgress(ProgressType.Processing, SchemaObjectType.Tables,
-                    tableName, i, tablesCount);
+                RaiseProgress(ProgressType.Processing, SchemaObjectType.Tables,tableName, i, tablesCount);
                 IEnumerable<DatabaseColumn> tableCols;
+
                 if (columns.Count == 0)
                 {
                     tableCols = _readerAdapter.Columns(tableName);

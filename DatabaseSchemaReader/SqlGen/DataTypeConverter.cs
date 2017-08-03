@@ -197,8 +197,8 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         public static DataType FindDataType(string dbType, ICollection<DataType> dataTypeList, SqlType sqlType, int? length)
         {
-            if (dbType == null) throw new ArgumentNullException("dbType");
-            if (dataTypeList == null) throw new ArgumentNullException("dataTypeList");
+            if (dbType == null) throw new ArgumentNullException(nameof(dbType));
+            if (dataTypeList == null) throw new ArgumentNullException(nameof(dataTypeList));
 
             var match = dataTypeList.FirstOrDefault(d => d.TypeName.Equals(dbType, StringComparison.OrdinalIgnoreCase));
             if (match != null)

@@ -70,8 +70,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public virtual string Owner
         {
-            get { return Parameters.Owner; }
-            set { Parameters.Owner = value; }
+            get => Parameters.Owner;
+            set => Parameters.Owner = value;
         }
 
         public virtual IList<DataType> DataTypes()

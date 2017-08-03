@@ -20,14 +20,8 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         public string CursorParameterName
         {
-            get
-            {
-                return _cursorParameter;
-            }
-            set
-            {
-                _cursorParameter = value;
-            }
+            get => _cursorParameter;
+            set => _cursorParameter = value;
         }
 
         #region Procedure Boilerplate
