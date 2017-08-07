@@ -361,6 +361,15 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Execute a SQL command on the table, executing the action on every result row
         /// </summary>
+        public void ForEach(Action<object[]> forEach)
+        {
+            var sqlWriter = new SqlWriter(this, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
+            QueryReader(sqlWriter.SelectAllSql(),forEach);
+        }
+
+        /// <summary>
+        /// Execute a SQL command on the table, executing the action on every result row
+        /// </summary>
         public void QueryReader(string sql, Action<object[]> forEach)
         {
             RunCommand(sql, command =>
@@ -375,6 +384,7 @@ namespace DatabaseSchemaReader.DataSchema
                 }
             });
         }
+
 
         /// <summary>
         /// Execute a SQL command on the table and return a scalar
