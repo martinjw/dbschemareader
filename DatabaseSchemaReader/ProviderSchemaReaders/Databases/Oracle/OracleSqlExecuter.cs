@@ -43,10 +43,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
         {
             //Oracle.DataAccess.Client only binds first parameter match unless BindByName=true
             //so we violate LiskovSP (in reflection to avoid dependency on ODP)
-#if !COREFX
-            var bindByName =  command.GetType().GetProperty("BindByName");
-#else
+#if NETSTANDARD1_5
             var bindByName = command.GetType().GetTypeInfo().GetDeclaredProperty("BindByName");
+#else
+            //netstandard 2.0 and traditional .net
+            var bindByName = command.GetType().GetProperty("BindByName");
 #endif           
             if (bindByName != null)
             {
