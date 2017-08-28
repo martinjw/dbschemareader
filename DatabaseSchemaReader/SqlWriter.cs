@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader
         public SqlWriter(DatabaseTable table, SqlType sqlType)
         {
             if (table == null)
-                throw new ArgumentNullException("table");
+                throw new ArgumentNullException(nameof(table));
             _table = table;
             _sqlType = sqlType;
             _nameEscapeStart = null;
@@ -77,7 +77,7 @@ namespace DatabaseSchemaReader
         /// <value><c>true</c> if in stored procedure; otherwise, <c>false</c>.</value>
         public bool InStoredProcedure
         {
-            get { return _inStoredProcedure; }
+            get => _inStoredProcedure;
             set
             {
                 if (_sqlType == SqlType.SqlServer) return; //always false

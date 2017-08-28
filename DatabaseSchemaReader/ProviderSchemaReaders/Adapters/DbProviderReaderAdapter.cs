@@ -21,7 +21,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override string Owner
         {
-            get { return base.Owner; }
+            get => base.Owner;
             set
             {
                 base.Owner = value;

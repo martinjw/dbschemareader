@@ -66,7 +66,7 @@ namespace DatabaseSchemaReader.Compare
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         public INamedObject Find(DatabaseSchema databaseSchema)
         {
-            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema");
+            if (databaseSchema == null) throw new ArgumentNullException(nameof(databaseSchema));
             if (string.IsNullOrEmpty(Name)) throw new InvalidOperationException("Name required");
             DatabaseTable table;
             switch (SchemaObjectType)

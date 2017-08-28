@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseColumn AddPrimaryKey(this DatabaseColumn databaseColumn, string primaryKeyName)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
             var table = databaseColumn.Table;
             if (table.PrimaryKey == null)
             {
@@ -61,7 +61,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseColumn AddIdentity(this DatabaseColumn databaseColumn)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
             var table = databaseColumn.Table;
             if (table.HasAutoNumberColumn && !databaseColumn.IsAutoNumber)
             {
@@ -107,8 +107,8 @@ namespace DatabaseSchemaReader.DataSchema
             string foreignTableName,
             string foreignTableSchemaOwner)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
-            if (string.IsNullOrEmpty(foreignTableName)) throw new ArgumentNullException("foreignTableName", "foreignTableName must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
+            if (string.IsNullOrEmpty(foreignTableName)) throw new ArgumentNullException(nameof(foreignTableName), "foreignTableName must not be null");
             var table = databaseColumn.Table;
             if (string.IsNullOrEmpty(foreignKeyName)) //no fk name, so we'll invent one (it may be too long e.g. for Oracle)
             {
@@ -168,8 +168,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseColumn AddForeignKey(this DatabaseColumn databaseColumn, string foreignKeyName, Func<IEnumerable<DatabaseTable>, DatabaseTable> foreignTable)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
-            if (foreignTable == null) throw new ArgumentNullException("foreignTable", "foreignTable must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
+            if (foreignTable == null) throw new ArgumentNullException(nameof(foreignTable), "foreignTable must not be null");
             var table = databaseColumn.Table;
             var fkTable = foreignTable(table.DatabaseSchema.Tables);
             return databaseColumn.AddForeignKey(foreignKeyName, fkTable.Name, fkTable.SchemaOwner);
@@ -204,7 +204,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns></returns>
         public static DatabaseColumn AddUniqueKey(this DatabaseColumn databaseColumn, string uniqueKeyName)
         {
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn", "databaseColumn must not be null");
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn), "databaseColumn must not be null");
             var table = databaseColumn.Table;
             var uk = new DatabaseConstraint
              {
@@ -227,8 +227,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// <exception cref="System.ArgumentNullException">databaseConstraint</exception>
         public static DatabaseConstraint AddColumn(this DatabaseConstraint databaseConstraint, DatabaseColumn databaseColumn)
         {
-            if (databaseConstraint == null) throw new ArgumentNullException("databaseConstraint");
-            if (databaseColumn == null) throw new ArgumentNullException("databaseColumn");
+            if (databaseConstraint == null) throw new ArgumentNullException(nameof(databaseConstraint));
+            if (databaseColumn == null) throw new ArgumentNullException(nameof(databaseColumn));
             if (databaseColumn.TableName != databaseConstraint.TableName) throw new InvalidOperationException("Constraint and column must belong to same table");
 
             databaseConstraint.Columns.Add(databaseColumn.Name);

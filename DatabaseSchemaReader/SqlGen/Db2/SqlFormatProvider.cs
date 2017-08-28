@@ -17,9 +17,6 @@
             return ";";
         }
 
-        public int MaximumNameLength
-        {
-            get { return 30; } //just 18 on OS/390 and AS/400 
-        }
+        public int MaximumNameLength => 30;
     }
 }

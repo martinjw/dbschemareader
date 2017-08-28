@@ -12,11 +12,8 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
         }
 
-        protected override string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
-        }
-        protected override bool AlterColumnIncludeDefaultValue { get { return false; } }
+        protected override string AlterColumnFormat => "ALTER TABLE {0} ALTER COLUMN {1};";
+        protected override bool AlterColumnIncludeDefaultValue => false;
 
         public override string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
         {

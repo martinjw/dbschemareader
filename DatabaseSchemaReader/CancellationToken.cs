@@ -12,10 +12,7 @@
         ///   Gets an empty token.
         /// </summary>
         /// 
-        public static CancellationToken None
-        {
-            get { return _none; }
-        }
+        public static CancellationToken None => _none;
 
         /// <summary>
         ///   Gets or sets a value indicating whether cancellation has been requested.

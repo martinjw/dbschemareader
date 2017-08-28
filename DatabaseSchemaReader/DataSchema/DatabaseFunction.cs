@@ -25,7 +25,7 @@ namespace DatabaseSchemaReader.DataSchema
                 CheckArgumentsForReturnType();
                 return _returnType;
             }
-            set { _returnType = value; }
+            set => _returnType = value;
         }
 
         /// <summary>

@@ -42,8 +42,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public string ForeignKeyTableName
         {
-            get { return ForeignKeyTableNames.FirstOrDefault(); }
-            set { ForeignKeyTableNames.Add(value); }
+            get => ForeignKeyTableNames.FirstOrDefault();
+            set => ForeignKeyTableNames.Add(value);
         }
 
 
@@ -126,7 +126,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </summary>
         public DatabaseColumnIdentity IdentityDefinition
         {
-            get { return _identityDefinition; }
+            get => _identityDefinition;
             set
             {
                 _identityDefinition = value;
@@ -250,8 +250,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// <c>true</c> if this column is computed; otherwise, <c>false</c>.
         /// </value>
-        public bool IsComputed { get { return !string.IsNullOrEmpty(ComputedDefinition); } }
-
+        public bool IsComputed => !string.IsNullOrEmpty(ComputedDefinition);
 
 
         /// <summary>

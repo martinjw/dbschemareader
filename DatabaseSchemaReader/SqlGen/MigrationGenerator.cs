@@ -76,15 +76,13 @@ namespace DatabaseSchemaReader.SqlGen
                 addColumn) + LineEnding();
         }
 
-        protected virtual string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} MODIFY {1};"; }
-        }
-        protected virtual bool SupportsAlterColumn { get { return true; } }
+        protected virtual string AlterColumnFormat => "ALTER TABLE {0} MODIFY {1};";
+        protected virtual bool SupportsAlterColumn => true;
+
         /// <summary>
         /// Sql Server cannot change default values in ALTER COLUMN statements (they are constraints)
         /// </summary>
-        protected virtual bool AlterColumnIncludeDefaultValue { get { return true; } }
+        protected virtual bool AlterColumnIncludeDefaultValue => true;
 
         public virtual string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
         {
@@ -313,10 +311,8 @@ namespace DatabaseSchemaReader.SqlGen
                 trigger.TriggerEvent,
                 TableName(databaseTable));
         }
-        protected virtual string DropTriggerFormat
-        {
-            get { return "DROP TRIGGER {0}{1};"; }
-        }
+        protected virtual string DropTriggerFormat => "DROP TRIGGER {0}{1};";
+
         public string DropTrigger(DatabaseTrigger trigger)
         {
             return string.Format(CultureInfo.InvariantCulture,
@@ -372,16 +368,11 @@ namespace DatabaseSchemaReader.SqlGen
                 GetColumnList(index.Columns.Select(i => i.Name))) + LineEnding();
         }
 
-        protected virtual string DropForeignKeyFormat
-        {
-            get { return "ALTER TABLE {0} DROP CONSTRAINT {1}"; }
-        }
-        protected virtual string DropUniqueFormat
-        {
-            get { return DropForeignKeyFormat; }
-        }
+        protected virtual string DropForeignKeyFormat => "ALTER TABLE {0} DROP CONSTRAINT {1}";
 
-        protected virtual bool SupportsDropColumn { get { return true; } }
+        protected virtual string DropUniqueFormat => DropForeignKeyFormat;
+
+        protected virtual bool SupportsDropColumn => true;
 
         public virtual string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {

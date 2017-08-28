@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader.CodeGen.Procedures
             _resultClassName = _logic.ResultClassName;
             _cb = classBuilder;
         }
-        public string ClassName { get { return _resultClassName; } }
+        public string ClassName => _resultClassName;
 
         public string Write()
         {

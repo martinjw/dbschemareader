@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Serialization;
+using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -41,6 +44,8 @@ namespace DatabaseSchemaReader.DataSchema
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseConstraint> _defaultConstraints;
+
+        internal ReaderAdapter ReaderAdapter;
 
         #endregion
 
@@ -88,7 +93,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Gets the columns.
         /// </summary>
-        public List<DatabaseColumn> Columns { get { return _columns; } }
+        public List<DatabaseColumn> Columns => _columns;
 
         /// <summary>
         /// Gets or sets the primary key column (assuming this isn't a composite key- check PrimaryKey.Columns.Count)
@@ -109,7 +114,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public DatabaseConstraint PrimaryKey
         {
-            get { return _primaryKey; }
+            get => _primaryKey;
             set
             {
                 _primaryKey = value;
@@ -123,10 +128,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The foreign keys.
         /// </value>
-        public List<DatabaseConstraint> ForeignKeys
-        {
-            get { return _foreignKeys; }
-        }
+        public List<DatabaseConstraint> ForeignKeys => _foreignKeys;
 
         /// <summary>
         /// Gets or sets the unique keys.
@@ -134,10 +136,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The unique keys.
         /// </value>
-        public List<DatabaseConstraint> UniqueKeys
-        {
-            get { return _uniqueKeys; }
-        }
+        public List<DatabaseConstraint> UniqueKeys => _uniqueKeys;
 
         /// <summary>
         /// Gets or sets the check constraints.
@@ -145,10 +144,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The check constraints.
         /// </value>
-        public List<DatabaseConstraint> CheckConstraints
-        {
-            get { return _checkConstraints; }
-        }
+        public List<DatabaseConstraint> CheckConstraints => _checkConstraints;
 
         /// <summary>
         /// Gets the default constraints.
@@ -156,10 +152,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// The default constraints.
         /// </value>
-        public List<DatabaseConstraint> DefaultConstraints
-        {
-            get { return _defaultConstraints; }
-        }
+        public List<DatabaseConstraint> DefaultConstraints => _defaultConstraints;
 
         /// <summary>
         /// Adds the constraints of any type (primary key, foreign key, unique key, check)
@@ -181,7 +174,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="con">The constraint.</param>
         public void AddConstraint(DatabaseConstraint con)
         {
-            if (con == null) throw new ArgumentNullException("con");
+            if (con == null) throw new ArgumentNullException(nameof(con));
 
             switch (con.ConstraintType)
             {
@@ -257,7 +250,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <exception cref="System.InvalidOperationException">Must be a foreign key</exception>
         internal void RemoveForeignKey(DatabaseConstraint foreignKey)
         {
-            if (foreignKey == null) throw new ArgumentNullException("foreignKey", "foreignkey cannot be null");
+            if (foreignKey == null) throw new ArgumentNullException(nameof(foreignKey), "foreignkey cannot be null");
             if (foreignKey.ConstraintType != ConstraintType.ForeignKey) throw new InvalidOperationException("Must be a foreign key");
             if (!_foreignKeys.Contains(foreignKey)) throw new InvalidOperationException("Foreign key not for this table or already removed");
             _foreignKeys.Remove(foreignKey);
@@ -277,12 +270,12 @@ namespace DatabaseSchemaReader.DataSchema
         /// Gets the foreign key children.
         /// </summary>
         [XmlIgnore]
-        public List<DatabaseTable> ForeignKeyChildren { get { return _foreignKeyChildren; } }
+        public List<DatabaseTable> ForeignKeyChildren => _foreignKeyChildren;
 
         /// <summary>
         /// Gets the triggers.
         /// </summary>
-        public List<DatabaseTrigger> Triggers { get { return _triggers; } }
+        public List<DatabaseTrigger> Triggers => _triggers;
 
         /// <summary>
         /// Gets or sets the indexes.
@@ -292,8 +285,8 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public List<DatabaseIndex> Indexes
         {
-            get { return _indexes; }
-            set { value.ForEach(AddIndex); }
+            get => _indexes;
+            set => value.ForEach(AddIndex);
         }
 
         /// <summary>
@@ -304,16 +297,14 @@ namespace DatabaseSchemaReader.DataSchema
         {
             Indexes.Add(index);
 
-            foreach (DatabaseColumn column in index.Columns)
+            foreach (var column in index.Columns)
             {
                 string name = column.Name;
-                foreach (DatabaseColumn col in Columns)
+                foreach (var col in Columns)
                 {
-                    if (col.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        col.IsIndexed = true;
-                        break;
-                    }
+                    if (!col.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) continue;
+                    col.IsIndexed = true;
+                    break;
                 }
             }
         }
@@ -334,14 +325,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// 	<c>true</c> if this instance has a composite key; otherwise, <c>false</c>.
         /// </value>
-        public bool HasCompositeKey
-        {
-            get
-            {
-                if (PrimaryKey == null) return false;
-                return PrimaryKey.Columns.Count > 1;
-            }
-        }
+        public bool HasCompositeKey => PrimaryKey?.Columns.Count > 1;
 
         /// <summary>
         /// Gets a value indicating whether this table has an autonumber column (identity or equivalent).
@@ -349,10 +333,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <value>
         /// 	<c>true</c> if this table has an autonumber column; otherwise, <c>false</c>.
         /// </value>
-        public bool HasAutoNumberColumn
-        {
-            get { return Columns.Any(x => x.IsAutoNumber); }
-        }
+        public bool HasAutoNumberColumn => Columns.Any(x => x.IsAutoNumber);
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -360,9 +341,75 @@ namespace DatabaseSchemaReader.DataSchema
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString()
+        public override string ToString() => Name;
+
+        private void RunCommand(string sql, Action<DbCommand> runOnCommand)
         {
-            return Name;
+            using (var conncAdapter = ReaderAdapter.CreateConnection())
+            {
+                if (conncAdapter.DbConnection.State == ConnectionState.Closed) conncAdapter.DbConnection.Open();
+
+                var command = conncAdapter.DbConnection.CreateCommand();
+                command.CommandText = sql;
+
+                runOnCommand(command);
+
+                if (conncAdapter.DbConnection.State == ConnectionState.Open) conncAdapter.DbConnection.Close();
+            }
+        }
+
+        /// <summary>
+        /// Execute a SQL command on the table, executing the action on every result row
+        /// </summary>
+        public void ForEach(Action<object[]> forEach)
+        {
+            var sqlWriter = new SqlWriter(this, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
+            QueryReader(sqlWriter.SelectAllSql(),forEach);
+        }
+
+        /// <summary>
+        /// Execute a SQL command on the table, executing the action on every result row
+        /// </summary>
+        public void QueryReader(string sql, Action<object[]> forEach)
+        {
+            RunCommand(sql, command =>
+            {
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var values = new object[reader.FieldCount];
+                    reader.GetValues(values);
+                    forEach(values);
+                }
+            });
+        }
+
+
+        /// <summary>
+        /// Execute a SQL command on the table and return a scalar
+        /// </summary>
+        public object QueryScalar(string sql)
+        {
+            object obj = null;
+            RunCommand(sql, command =>
+            {
+                obj = command.ExecuteScalar();
+            });
+            return obj;
+        }
+
+        /// <summary>
+        /// Number of element in the table
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                var sqlWriter = new SqlWriter(this, ProviderToSqlType.Convert(DatabaseSchema.Provider) ?? SqlType.SqlServer);
+                var res = QueryScalar(sqlWriter.CountSql());
+                return (int) res;
+            }
         }
     }
 }

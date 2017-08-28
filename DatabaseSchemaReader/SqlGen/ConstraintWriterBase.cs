@@ -70,10 +70,8 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        protected virtual string AddUniqueConstraintFormat
-        {
-            get { return "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})"; }
-        }
+        protected virtual string AddUniqueConstraintFormat => "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})";
+
         private string WriteUniqueKey(DatabaseConstraint uniqueKey)
         {
             var columnList = GetColumnList(uniqueKey.Columns);

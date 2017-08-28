@@ -63,7 +63,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServerCe
         /// <summary>
         /// Gets a value indicating whether supports "next value for [sequence]" (SQLServer 2012+). 
         /// </summary>
-        protected override bool SupportsNextValueForSequence { get { return false; } }
+        protected override bool SupportsNextValueForSequence => false;
 
         protected override IMigrationGenerator CreateMigrationGenerator()
         {
