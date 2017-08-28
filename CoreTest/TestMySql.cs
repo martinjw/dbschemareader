@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DatabaseSchemaReader.Procedures;
 
 namespace CoreTest
 {
@@ -44,5 +46,27 @@ namespace CoreTest
                 }
             }
         }
+
+        //August 2017- MySql client is still at 1.6, so this won't work yet
+        //[TestMethod]
+        //public void ReadResultSets()
+        //{
+        //    using (var connection = new MySql.Data.MySqlClient.MySqlConnection(MySql))
+        //    {
+        //        connection.Open();
+        //        var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+        //        dr.AllStoredProcedures();
+        //        var schema = dr.DatabaseSchema;
+
+        //        var rsr = new ResultSetReader(schema);
+        //        rsr.Execute(connection);
+
+        //        var sproc = schema.StoredProcedures.Find(x => x.Name == "SalesByCategory");
+        //        Assert.IsNotNull(sproc);
+        //        var rs = sproc.ResultSets.First();
+        //        Assert.IsNotNull(rs, "Stored procedure should return a result");
+
+        //    }
+        //}
     }
 }
