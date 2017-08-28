@@ -1,8 +1,9 @@
 ﻿using System;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace DatabaseSchemaReaderTest
+namespace CoreTest
 {
+    [TestClass]
     public class TestPostgreSql
     {
         public static string PostgreSql
@@ -17,7 +18,7 @@ namespace DatabaseSchemaReaderTest
             }
         }
 
-        [Fact]
+        [TestMethod]
         public void RunTableList()
         {
             //couldn't get package to restore.
@@ -30,7 +31,7 @@ namespace DatabaseSchemaReaderTest
                     var tableList = dr.TableList();
                     var tables = dr.AllTables();
                     var views = dr.AllViews();
-                    Assert.NotEmpty(tableList);
+                    Assert.IsTrue(tableList.Count > 0);
                 }
                 catch (System.Net.Sockets.SocketException)
                 {

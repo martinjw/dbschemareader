@@ -1,11 +1,12 @@
 ﻿using Microsoft.Data.Sqlite;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace DatabaseSchemaReaderTest
+namespace CoreTest
 {
+    [TestClass]
     public class TestSqLite
     {
-        [Fact]
+        [TestMethod]
         public void RunSqlite()
         {
             using (var connection = new SqliteConnection("Data Source=:memory:"))
@@ -37,7 +38,7 @@ namespace DatabaseSchemaReaderTest
                 var tableList = databaseReader.TableList();
                 var tables = databaseReader.AllTables();
                 var views = databaseReader.AllViews();
-                Assert.NotEmpty(tableList);
+                Assert.IsTrue(tableList.Count > 0);
             }
         }
     }
