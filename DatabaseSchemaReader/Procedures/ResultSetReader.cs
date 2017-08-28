@@ -43,12 +43,8 @@ namespace DatabaseSchemaReader.Procedures
         {
             if (dbConnection == null)
                 throw new ArgumentNullException("dbConnection");
-            //since .net 2, there's been a protected virtual property on DbConnection for the factory
-            //it's still in netstandard2, and it's still not public.
             //we need the factory to create a DataAdapter (there seems no other generic way to create one)
-            var prop = dbConnection.GetType().GetProperty("DbProviderFactory",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            _factory = (DbProviderFactory)prop.GetValue(dbConnection);
+            _factory = Data.FactoryFinder.FindFactory(dbConnection) ;
 
 #else
         /// <summary>

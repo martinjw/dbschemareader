@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -71,8 +73,51 @@ namespace CoreTest
                 var sproc = schema.StoredProcedures.Find(x => x.Name == "SalesByCategory");
                 Assert.IsNotNull(sproc);
                 var rs = sproc.ResultSets.First();
+                foreach (var rsColumn in rs.Columns)
+                {
+                    Console.WriteLine(rsColumn.Name);
+                    Console.WriteLine(rsColumn.DbDataType);
+                }
                 Assert.IsNotNull(rs, "Stored procedure should return a result");
 
+            }
+        }
+
+        [TestMethod]
+        public void ReadData()
+        {
+            using (var connection = new SqlConnection(Northwind))
+            {
+                connection.Open();
+                var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+                var table = dr.Table("Categories");
+
+                var reader = new DatabaseSchemaReader.Data.Reader(table);
+                var dt = reader.Read(connection);
+                Assert.IsTrue(dt.Rows.Count > 0);
+            }
+        }
+
+        [TestMethod]
+        public void ReadDataWithFunc()
+        {
+            using (var connection = new SqlConnection(Northwind))
+            {
+                connection.Open();
+                var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+                var table = dr.Table("Categories");
+
+                var reader = new DatabaseSchemaReader.Data.Reader(table);
+
+                var names = new List<string>();
+
+                reader.Read(connection, dataRecord =>
+                {
+                    var name = dataRecord["CategoryName"].ToString();
+                    names.Add(name);
+                    return true;
+                });
+                Assert.IsTrue(names.Count > 0);
             }
         }
     }
