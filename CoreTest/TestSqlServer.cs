@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Data.SqlClient;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CoreTest
 {
+    [TestClass]
     public class TestSqlServer
     {
         public static string Northwind
@@ -18,7 +19,7 @@ namespace CoreTest
             }
         }
 
-        [Fact]
+        [TestMethod]
         public void RunTableList()
         {
             using (var connection = new SqlConnection(Northwind))
@@ -28,11 +29,11 @@ namespace CoreTest
                 var tableList = dr.TableList();
                 var tables = dr.AllTables();
                 var views = dr.AllViews();
-                Assert.NotEmpty(tableList);
+                Assert.IsTrue(tableList.Count > 0);
             }
         }
 
-        [Fact]
+        [TestMethod]
         public void RunTableListWithTransaction()
         {
             using (var connection = new SqlConnection(Northwind))
@@ -45,7 +46,7 @@ namespace CoreTest
                     var tableList = dr.TableList();
                     var tables = dr.AllTables();
                     var views = dr.AllViews();
-                    Assert.NotEmpty(tableList);
+                    Assert.IsTrue(tableList.Count > 0);
 
                     txn.Rollback();
                 }

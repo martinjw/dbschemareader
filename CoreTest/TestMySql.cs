@@ -1,8 +1,9 @@
 ﻿using System;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace DatabaseSchemaReaderTest
+namespace CoreTest
 {
+    [TestClass]
     public class TestMySql
     {
         public static string MySql
@@ -18,7 +19,7 @@ namespace DatabaseSchemaReaderTest
             }
         }
 
-        [Fact]
+        [TestMethod]
         public void RunTableList()
         {
             using (var connection = new MySql.Data.MySqlClient.MySqlConnection(MySql))
@@ -31,7 +32,7 @@ namespace DatabaseSchemaReaderTest
                     var tableList = dr.TableList();
                     var tables = dr.AllTables();
                     var views = dr.AllViews();
-                    Assert.NotEmpty(tableList);
+                    Assert.IsTrue(tableList.Count > 0);
                 }
                 catch (System.Resources.MissingManifestResourceException)
                 {
