@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DatabaseSchemaReader.Procedures;
 
 namespace CoreTest
 {
@@ -50,6 +52,27 @@ namespace CoreTest
 
                     txn.Rollback();
                 }
+            }
+        }
+
+        [TestMethod]
+        public void ReadResultSets()
+        {
+            using (var connection = new SqlConnection(Northwind))
+            {
+                connection.Open();
+                var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+                dr.AllStoredProcedures();
+                var schema = dr.DatabaseSchema;
+
+                var rsr = new ResultSetReader(schema);
+                rsr.Execute(connection);
+
+                var sproc = schema.StoredProcedures.Find(x => x.Name == "SalesByCategory");
+                Assert.IsNotNull(sproc);
+                var rs = sproc.ResultSets.First();
+                Assert.IsNotNull(rs, "Stored procedure should return a result");
+
             }
         }
     }

@@ -56,8 +56,12 @@
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' Or '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
     <Compile Remove="DbSchemaReader\**\*.cs;ProviderSchemaReaders\DbProviders\**\*.cs;Conversion\**\*.cs;Data\**\*.cs;Procedures\**\*.cs;Utilities\DbProvider\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Remove="DbSchemaReader\**\*.cs;ProviderSchemaReaders\DbProviders\**\*.cs;Conversion\**\*.cs;Data\**\*.cs;Utilities\DbProvider\**\*.cs" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35' ">
