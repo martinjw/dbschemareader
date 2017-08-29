@@ -17,36 +17,6 @@ namespace DatabaseSchemaReader.Procedures
         private DbProviderFactory _factory;
         private readonly bool _isOracle;
 
-#if NETSTANDARD2_0
-/// <summary>
-/// Initializes a new instance of the <see cref="ResultSetReader"/> class.
-/// </summary>
-/// <param name="schema">The schema.</param>
-        public ResultSetReader(DatabaseSchema schema)
-        {
-            if (schema == null)
-                throw new ArgumentNullException("schema");
-            if (string.IsNullOrEmpty(schema.ConnectionString) ||
-                string.IsNullOrEmpty(schema.Provider))
-            {
-                throw new InvalidOperationException("Schema with connection details required");
-            }
-
-            _schema = schema;
-            _isOracle = (schema.Provider.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1);
-        }
-
-        /// <summary>
-        /// Calls each procedure to find the result type.
-        /// </summary>
-        public void Execute(DbConnection dbConnection)
-        {
-            if (dbConnection == null)
-                throw new ArgumentNullException("dbConnection");
-            //we need the factory to create a DataAdapter (there seems no other generic way to create one)
-            _factory = Data.FactoryFinder.FindFactory(dbConnection) ;
-
-#else
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultSetReader"/> class.
         /// </summary>
@@ -62,10 +32,10 @@ namespace DatabaseSchemaReader.Procedures
             }
 
             _schema = schema;
-            _factory = DbProviderFactories.GetFactory(schema.Provider);
             _isOracle = (schema.Provider.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+#if !NETSTANDARD2_0
         /// <summary>
         /// Calls each procedure to find the result type.
         /// </summary>
@@ -75,23 +45,37 @@ namespace DatabaseSchemaReader.Procedures
             {
                 dbConnection.ConnectionString = _schema.ConnectionString;
                 dbConnection.Open();
+                Execute(dbConnection);
+            }
+        }
+
 #endif
 
-                foreach (var procedure in _schema.StoredProcedures)
+        /// <summary>
+        /// Calls each procedure to find the result type.
+        /// </summary>
+        public void Execute(DbConnection dbConnection)
+        {
+            if (dbConnection == null)
+                throw new ArgumentNullException("dbConnection");
+            //we need the factory to create a DataAdapter (there seems no other generic way to create one)
+#if NETSTANDARD2_0
+            _factory = Data.FactoryFinder.FindFactory(dbConnection);
+#else
+            _factory = DbProviderFactories.GetFactory(_schema.Provider);
+#endif
+
+            foreach (var procedure in _schema.StoredProcedures)
+            {
+                ExecuteProcedure(procedure, dbConnection);
+            }
+            foreach (var package in _schema.Packages)
+            {
+                foreach (var procedure in package.StoredProcedures)
                 {
                     ExecuteProcedure(procedure, dbConnection);
                 }
-                foreach (var package in _schema.Packages)
-                {
-                    foreach (var procedure in package.StoredProcedures)
-                    {
-                        ExecuteProcedure(procedure, dbConnection);
-                    }
-                }
-#if !NETSTANDARD2_0
-            } //close connection
-#endif
-
+            }
         }
 
 #if !NETSTANDARD2_0
