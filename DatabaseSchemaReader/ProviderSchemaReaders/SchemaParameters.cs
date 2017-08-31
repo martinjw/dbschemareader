@@ -7,7 +7,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
     class SchemaParameters
     {
-#if COREFX
+//#if COREFX
         public SchemaParameters(System.Data.Common.DbConnection dbConnection)
         {
             DbConnection = dbConnection;
@@ -25,7 +25,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         public System.Data.Common.DbConnection DbConnection { get; private set; }
 
         public System.Data.Common.DbTransaction DbTransaction { get; private set; }
-#else
+//#else
         public SchemaParameters(string connectionString, SqlType sqlType)
         {
             ConnectionString = connectionString;
@@ -41,7 +41,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             SqlType = ProviderToSqlType.Convert(ProviderName);
             Exclusions = new Exclusions();
         }
-#endif
+//#endif
 
         public string ConnectionString { get; private set; }
 		

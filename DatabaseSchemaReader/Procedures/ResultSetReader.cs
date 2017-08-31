@@ -41,6 +41,7 @@ namespace DatabaseSchemaReader.Procedures
         /// </summary>
         public void Execute()
         {
+            _factory = DbProviderFactories.GetFactory(_schema.Provider);
             using (var dbConnection = _factory.CreateConnection())
             {
                 dbConnection.ConnectionString = _schema.ConnectionString;
@@ -62,7 +63,7 @@ namespace DatabaseSchemaReader.Procedures
 #if NETSTANDARD2_0
             _factory = Data.FactoryFinder.FindFactory(dbConnection);
 #else
-            _factory = DbProviderFactories.GetFactory(_schema.Provider);
+            if (_factory != null) _factory = DbProviderFactories.GetFactory(_schema.Provider);
 #endif
 
             foreach (var procedure in _schema.StoredProcedures)

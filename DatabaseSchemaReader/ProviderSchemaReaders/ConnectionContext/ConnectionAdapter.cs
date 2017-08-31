@@ -6,20 +6,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
     class ConnectionAdapter : IConnectionAdapter
     {
         private readonly SchemaParameters _parameters;
-#if !COREFX
         private DbConnection _dbConnection;
-#endif
 
         public ConnectionAdapter(SchemaParameters parameters)
         {
             _parameters = parameters;
+            _dbConnection = _parameters.DbConnection;
+            DbTransaction = _parameters.DbTransaction;
         }
-#if COREFX
-        public DbConnection DbConnection => _parameters.DbConnection;
-
-        public DbTransaction DbTransaction => _parameters.DbTransaction;
-
-#else
 
         public DbConnection DbConnection
         {
@@ -33,16 +27,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
             }
         }
 
-        public DbTransaction DbTransaction
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public DbTransaction DbTransaction { get; }
 
         private void CreateDbConnection()
         {
+#if !COREFX
             System.Diagnostics.Trace.WriteLine($"Creating connection for {_parameters.ProviderName}");
             var factory = DatabaseSchemaReader.Utilities.DbProvider.FactoryTools.GetFactory(_parameters.ProviderName);
             _dbConnection = factory.CreateConnection();
@@ -54,8 +43,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
             {
                 throw new InvalidOperationException("Invalid connection string " + _parameters.ConnectionString, argumentException);
             }
-        }
 #endif
+        }
 
         #region Implementation of IDisposable
 
@@ -79,7 +68,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
             if (disposing)
             {
                 // may have created it's own dbconnection
-                if (_dbConnection != null)
+                if (_dbConnection != null && _dbConnection != _parameters.DbConnection)
                 {
                     System.Diagnostics.Trace.WriteLine("Closing connection");
                     _dbConnection.Dispose();

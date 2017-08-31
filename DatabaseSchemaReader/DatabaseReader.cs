@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader
         /// </summary>
         public event EventHandler<ReaderEventArgs> ReaderProgress;
 
-#if COREFX
+//#if COREFX
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbConnection.
         /// </summary>
@@ -57,7 +57,7 @@ namespace DatabaseSchemaReader
             _schemaParameters.DatabaseSchema = _db;
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
         }
-#endif
+//#endif
 #if !COREFX
 
         /// <summary>

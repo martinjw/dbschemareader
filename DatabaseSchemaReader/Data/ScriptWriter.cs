@@ -50,7 +50,7 @@ namespace DatabaseSchemaReader.Data
             return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
         }
 
-#if NETSTANDARD2_0
+//#if !NETSTANDARD2_0
         /// <summary>
         /// Reads the table schema and data and returns the INSERT statements
         /// </summary>
@@ -75,7 +75,11 @@ namespace DatabaseSchemaReader.Data
         /// <returns></returns>
         public string ReadTable(DatabaseTable databaseTable, DbConnection connection)
         {
+#if NETSTANDARD2_0
             var r = new Reader(databaseTable);
+#else
+            var r = new Reader(databaseTable, connection.ConnectionString, connection.GetType().Namespace);
+#endif
             r.PageSize = PageSize;
             var dt = r.Read(connection);
             var w = new InsertWriter(databaseTable, dt);
@@ -94,8 +98,12 @@ namespace DatabaseSchemaReader.Data
         public void ReadTable(DatabaseTable databaseTable, DbConnection connection,
                               Func<string, bool> processRecord)
         {
-            var r = new Reader(databaseTable);
             var providerName = connection.GetType().Namespace;
+#if NETSTANDARD2_0
+            var r = new Reader(databaseTable);
+#else
+            var r = new Reader(databaseTable, connection.ConnectionString, providerName);
+#endif
             var w = new InsertWriter(databaseTable, FindSqlType(providerName));
             r.Read(connection, record =>
                        {
@@ -104,14 +112,15 @@ namespace DatabaseSchemaReader.Data
                        });
 
         }
-#else
-        /// <summary>
-        /// Reads the table data and returns the INSERT statements
-        /// </summary>
-        /// <param name="databaseTable">The database table.</param>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="providerName">Name of the provider.</param>
-        /// <returns></returns>
+        //#else
+#if !NETSTANDARD2_0
+            /// <summary>
+            /// Reads the table data and returns the INSERT statements
+            /// </summary>
+            /// <param name="databaseTable">The database table.</param>
+            /// <param name="connectionString">The connection string.</param>
+            /// <param name="providerName">Name of the provider.</param>
+            /// <returns></returns>
         public string ReadTable(DatabaseTable databaseTable, string connectionString, string providerName)
         {
             var r = new Reader(databaseTable, connectionString, providerName);
