@@ -10,7 +10,7 @@
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
-    <PackageReleaseNotes>2.3.4:  Add netstandard2.0</PackageReleaseNotes>
+    <PackageReleaseNotes>2.4.0:  Add netstandard2.0, dbConnection ctors available in full .net + netstandard</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,7 +24,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.3.4</Version>
+    <Version>2.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
