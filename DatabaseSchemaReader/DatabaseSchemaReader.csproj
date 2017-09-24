@@ -52,8 +52,12 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>TRACE;DEBUG;NET4</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' Or '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;COREFX;NETSTANDARD2_0;</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
