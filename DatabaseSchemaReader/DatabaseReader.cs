@@ -5,6 +5,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 // ReSharper disable once RedundantUsingDirective
 using System.Threading;
 
@@ -225,6 +226,40 @@ namespace DatabaseSchemaReader
             {
                 return _readerAdapter.Tables(null);
             }
+        }
+
+        /// <summary>
+        /// Gets all tables with columns and datatypes but nothing else (no constraints, indexes or triggers).
+        /// </summary>
+        public IList<DatabaseTable> TablesQuickView()
+        {
+            RaiseReadingProgress(SchemaObjectType.Tables);
+            IList<DatabaseTable> tables;
+            using (_readerAdapter.CreateConnection())
+            {
+                tables = _readerAdapter.Tables(null);
+            }
+            DatabaseSchema.Tables.Clear();
+            DatabaseSchema.Tables.AddRange(tables);
+
+            RaiseReadingProgress(SchemaObjectType.Columns);
+            IList<DatabaseColumn> columns;
+            using (_readerAdapter.CreateConnection())
+            {
+                columns = _readerAdapter.Columns(null);
+            }
+
+            foreach (var table in DatabaseSchema.Tables)
+            {
+                table.Columns.Clear();
+                table.Columns.AddRange(
+                    columns.Where(x => string.Equals(x.TableName, table.Name, StringComparison.OrdinalIgnoreCase)
+                                       && string.Equals(x.SchemaOwner, table.SchemaOwner, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            DataTypes();
+
+            return DatabaseSchema.Tables;
         }
 
         /// <summary>
