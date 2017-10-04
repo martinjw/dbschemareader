@@ -42,7 +42,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                                 //type will be like "nvarchar(32)".
                                 //Lengths /precisions could be parsed out (nb remember this is Sqlite)
                                 DbDataType = dr.GetString("type"),
-                                Nullable = dr.GetBoolean("notnull"),
+                                Nullable = !dr.GetBoolean("notnull"),
                                 DefaultValue = dr.GetString("dflt_value"),
                                 IsPrimaryKey = dr.GetBoolean("pk"),
                             };
