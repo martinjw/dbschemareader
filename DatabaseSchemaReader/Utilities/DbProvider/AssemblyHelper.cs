@@ -16,26 +16,27 @@ namespace DatabaseSchemaReader.Utilities
         /// <returns></returns>
         public static Type LoadTypeFrom(string assemblyQualifiedName)
         {
-            // This will return null
-            // Just here to test that the simple GetType overload can't return the actual type
-            var t0 = Type.GetType(assemblyQualifiedName);
+            // load type from assembly
+            var type = Type.GetType(assemblyQualifiedName);
 
-			#if NET4
-            // Throws exception is type was not found
-            return Type.GetType(
-                assemblyQualifiedName,
-                name =>
-                {
-                    // Returns the assembly of the type by enumerating loaded assemblies
-                    // in the app domain            
-                    return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName)
-                        .FirstOrDefault();
-                },
-                null,
-                true);
-            #else
-            return t0;
-            #endif
+#if NET4
+            if (type == null)
+            {
+                // load type from assembly with custom assembly resolver
+                type = Type.GetType(
+                    assemblyQualifiedName,
+                    name =>
+                    {
+                        // Returns the assembly of the type by enumerating loaded assemblies
+                        // in the app domain            
+                        return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName)
+                            .FirstOrDefault();
+                    },
+                    null,
+                    false);  
+            }
+#endif
+            return type;
         }
     }
 }
