@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 
-namespace DatabaseSchemaReader.Utilities
+namespace DatabaseSchemaReader.Utilities.DbProvider
 {
     /// <summary>
     ///     Helper class for assembly access.
     /// </summary>
-    public static class AssemblyHelper
+    internal static class AssemblyHelper
     {
         /// <summary>
         ///     Loads the type from an assembly qualified name. This allows loading types also if there are loaded dynamically
@@ -29,8 +29,8 @@ namespace DatabaseSchemaReader.Utilities
                     {
                         // Returns the assembly of the type by enumerating loaded assemblies
                         // in the app domain            
-                        return AppDomain.CurrentDomain.GetAssemblies().Where(z => z.FullName == name.FullName)
-                            .FirstOrDefault();
+                        return AppDomain.CurrentDomain.GetAssemblies()
+                            .FirstOrDefault(z => z.FullName == name.FullName);
                     },
                     null,
                     false);  
