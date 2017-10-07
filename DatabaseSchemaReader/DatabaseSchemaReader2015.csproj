@@ -46,7 +46,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Net4\</OutputPath>
-    <DefineConstants>TRACE;Net4</DefineConstants>
+    <DefineConstants>TRACE;NET4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Net4\DatabaseSchemaReader.xml</DocumentationFile>
@@ -57,7 +57,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45|AnyCPU'">
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <OutputPath>bin\net45\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NET4</DefineConstants>
     <DocumentationFile>bin\Release\DatabaseSchemaReader.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -375,6 +375,7 @@
     <Compile Include="SqlGen\SqlServer\SqlServerDataTypeMapper.cs" />
     <Compile Include="SqlGen\SqlTranslator.cs" />
     <Compile Include="CancellationToken.cs" />
+    <Compile Include="Utilities\DbProvider\AssemblyHelper.cs" />
     <Compile Include="Utilities\DbProvider\DbProviderFactoryDescription.cs" />
     <Compile Include="Utilities\DbProvider\DbProviderFactoryRepository.cs" />
     <Compile Include="Utilities\DbProvider\DiscoverProviderFactory.cs" />
