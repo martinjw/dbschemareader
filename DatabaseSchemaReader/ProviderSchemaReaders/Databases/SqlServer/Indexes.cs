@@ -37,7 +37,7 @@ WHERE
     (SCHEMA_NAME(t.schema_id) = @schemaOwner OR @schemaOwner IS NULL) AND 
 	 t.is_ms_shipped = 0 
 ORDER BY 
-     t.name, ind.name, col.name";
+     t.name, ind.name, ic.index_column_id";
 
         }
 
