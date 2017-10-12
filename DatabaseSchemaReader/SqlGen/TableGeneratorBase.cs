@@ -38,11 +38,10 @@ namespace DatabaseSchemaReader.SqlGen
 
         public bool IncludeDefaultValues { get; set; }
 
-        public virtual string Write()
+        public virtual string Write(string prefix)
         {
             var sb = new StringBuilder();
-
-            sb.AppendLine("CREATE TABLE " + SchemaTableName(Table));
+            sb.AppendLine("CREATE TABLE " + SchemaTableName(Table).Replace(Table.Name, prefix + Table.Name));
             sb.AppendLine("(");
             var columnList = new List<string>();
             foreach (var column in Table.Columns)
@@ -63,6 +62,11 @@ namespace DatabaseSchemaReader.SqlGen
             }
 
             return sb.ToString();
+        }
+
+        public virtual string Write()
+        {
+            return Write("");
         }
 
         protected string SchemaTableName(DatabaseTable databaseTable)

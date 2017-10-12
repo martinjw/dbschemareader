@@ -19,6 +19,7 @@ namespace DatabaseSchemaReader.Compare
         public void Execute(DatabaseTable baseTable, DatabaseTable compareTable)
         {
             //find new columns (in compare, but not in base)
+            var copy = baseTable.Clone();
             foreach (var column in compareTable.Columns)
             {
                 var name = column.Name;
@@ -26,18 +27,19 @@ namespace DatabaseSchemaReader.Compare
                 if (match != null) continue;
                 var script = "-- ADDED TABLE " + column.TableName + " COLUMN " + name + Environment.NewLine +
                  _writer.AddColumn(compareTable, column);
+                copy.AddColumn(column);
                 CreateResult(ResultType.Add, baseTable, name, script);
             }
 
             //find dropped and existing columns
+            var toDrop = new Dictionary<string, DatabaseColumn>();
             foreach (var column in baseTable.Columns)
             {
                 var name = column.Name;
                 var match = compareTable.Columns.FirstOrDefault(t => t.Name == name);
                 if (match == null)
                 {
-                    CreateResult(ResultType.Delete, baseTable, name,
-                        _writer.DropColumn(baseTable, column));
+                    toDrop.Add(name, column);
                     continue;
                 }
 
@@ -56,20 +58,29 @@ namespace DatabaseSchemaReader.Compare
                 CreateResult(ResultType.Change, baseTable, name,
                     _writer.AlterColumn(baseTable, match, column));
             }
+
+            //write drops as last step to ensure valid drops
+            foreach (var kv in toDrop)
+            {
+                copy.Columns.Remove(kv.Value);
+                CreateResult(ResultType.Delete, baseTable, kv.Key,
+                    _writer.DropColumn(copy, kv.Value));
+                continue;
+            }
         }
 
 
         private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
-                {
-                    SchemaObjectType = SchemaObjectType.Column,
-                    ResultType = resultType,
-                    TableName = table.Name,
-                    SchemaOwner = table.SchemaOwner,
-                    Name = name,
-                    Script = script
-                };
+            {
+                SchemaObjectType = SchemaObjectType.Column,
+                ResultType = resultType,
+                TableName = table.Name,
+                SchemaOwner = table.SchemaOwner,
+                Name = name,
+                Script = script
+            };
             _results.Add(result);
         }
     }
