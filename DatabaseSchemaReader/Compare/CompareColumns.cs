@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaReader.Compare
 {
@@ -33,6 +34,7 @@ namespace DatabaseSchemaReader.Compare
 
             //find dropped and existing columns
             var toDrop = new Dictionary<string, DatabaseColumn>();
+            var toAlter = new Dictionary<string, DatabaseColumn[]>();
             foreach (var column in baseTable.Columns)
             {
                 var name = column.Name;
@@ -54,12 +56,16 @@ namespace DatabaseSchemaReader.Compare
                     //we don't check IDENTITY
                     continue; //the same, no action
                 }
-
-                CreateResult(ResultType.Change, baseTable, name,
-                    _writer.AlterColumn(baseTable, match, column));
+                toAlter.Add(name, new[] { match, column });
             }
 
-            //write drops as last step to ensure valid drops
+            //write drops and alters as last step to ensure valid queries
+            foreach (var kv in toAlter)
+            {
+                CreateResult(ResultType.Change, baseTable, kv.Key,
+                    _writer.AlterColumn(copy, kv.Value[0], kv.Value[1]));
+            }
+
             foreach (var kv in toDrop)
             {
                 copy.Columns.Remove(kv.Value);
