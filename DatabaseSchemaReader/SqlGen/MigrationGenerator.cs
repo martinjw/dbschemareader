@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen.SqLite;
+using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaReader.SqlGen
 {
@@ -12,14 +13,12 @@ namespace DatabaseSchemaReader.SqlGen
     {
         private readonly ISqlFormatProvider _sqlFormatProvider;
         private readonly DdlGeneratorFactory _ddlFactory;
-        private readonly SqlType _sqlType;
 
         public MigrationGenerator(SqlType sqlType)
         {
             _sqlFormatProvider = SqlFormatFactory.Provider(sqlType);
             _ddlFactory = new DdlGeneratorFactory(sqlType);
             IncludeSchema = (sqlType != SqlType.SqlServerCe && sqlType != SqlType.SQLite);
-            _sqlType = sqlType;
         }
 
         /// <summary>
@@ -120,17 +119,12 @@ namespace DatabaseSchemaReader.SqlGen
             if (!SupportsAlterColumn)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine(string.Format("--TO CHANGE COLUMN {0} to {1}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), originalDefinition, columnDefinition));
 
-                DatabaseTable tempTable = databaseTable.Clone();
+                DatabaseTable tempTable = databaseTable.Clone("bkup1903_" + databaseTable.Name);
                 tempTable.Columns.Remove(tempTable.FindColumn(originalColumn.Name));
                 tempTable.Columns.Add(databaseColumn);
-                var gen = new TableGenerator(tempTable);
-                sb.AppendLine(gen.Write("bkup1903_"));
-                sb.AppendFormat("INSERT INTO bkup1903_{0} SELECT {1} FROM {0};{2}", tempTable.Name,
-                    string.Join(",", tempTable.Columns.Select(s => s.Name).ToArray()), Environment.NewLine);
-                sb.AppendFormat("DROP TABLE {0};{1}", tempTable.Name, Environment.NewLine);
-                sb.AppendFormat("ALTER TABLE bkup1903_{0} RENAME TO {0};{1}", tempTable.Name, Environment.NewLine);
+                sb.Append(BackupAndUpdateTable(databaseTable, tempTable));
+                sb.AppendLine(string.Format("--TO CHANGE COLUMN {0} to {1}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), originalDefinition, columnDefinition));
                 return sb.ToString();
             }
             if (databaseColumn.IsPrimaryKey || databaseColumn.IsForeignKey)
@@ -154,6 +148,34 @@ namespace DatabaseSchemaReader.SqlGen
                     AlterColumnFormat,
                     TableName(databaseTable),
                     columnDefinition);
+        }
+
+        /// <summary>
+        /// Generates a migration SQL statement for a table
+        /// by backing up previous data and reconstructing table structure
+        /// </summary>
+        /// <param name="databaseTable">The original DatabasTable</param>
+        /// <param name="newTable">A DatabaseTable that reflects the new state of the table after migration</param>
+        /// <returns>Generated sql statement</returns>
+        protected string BackupAndUpdateTable(DatabaseTable databaseTable, DatabaseTable newTable)
+        {
+            StringBuilder sb = new StringBuilder();
+            var gen = new TableGenerator(newTable);
+            sb.AppendLine(gen.Write());
+            string newColumns = newTable.GetFormattedColumnList();
+            string originalColumns = databaseTable.GetFormattedColumnList();
+            string selectColumns = newColumns;
+            if(!newColumns.Equals(originalColumns))
+            {
+                //if column names don't match, must be a rename
+                //so we select from old table to new table
+                selectColumns = originalColumns;
+            }
+            sb.AppendFormat("INSERT INTO {0} ({4}) SELECT {1} FROM {2};{3}", newTable.Name,
+                selectColumns, databaseTable.Name, Environment.NewLine, newColumns);
+            sb.AppendFormat("DROP TABLE {0};{1}", newTable.Name, Environment.NewLine);
+            sb.AppendFormat("ALTER TABLE {0} RENAME TO {1};{2}", newTable.Name, databaseTable.Name, Environment.NewLine);
+            return sb.ToString();
         }
 
         /// <summary>
@@ -367,15 +389,8 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        public string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        public virtual string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
-            if(_sqlType == SqlType.SQLite)
-            {
-                if(index.Name.StartsWith("sqlite_autoindex_"))
-                {
-                    return "--skipping reserved index: " + index.Name;
-                }
-            }
             if (index.Columns.Count == 0)
             {
                 //IndexColumns errors 
@@ -433,14 +448,9 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 sb.AppendLine(string.Format("--TO DROP COLUMN {0}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), Escape(databaseColumn.Name)));
 
-                DatabaseTable tempTable = databaseTable.Clone();
+                DatabaseTable tempTable = databaseTable.Clone("bkup1903_" + databaseTable.Name);
                 tempTable.Columns.Remove(tempTable.FindColumn(databaseColumn.Name));
-                var gen = new TableGenerator(tempTable);
-                sb.AppendLine(gen.Write("bkup1903_"));
-                sb.AppendFormat("INSERT INTO bkup1903_{0} SELECT {1} FROM {0};{2}", tempTable.Name,
-                    string.Join(",", tempTable.Columns.Select(s => s.Name).ToArray()), Environment.NewLine);
-                sb.AppendFormat("DROP TABLE {0};{1}", tempTable.Name, Environment.NewLine);
-                sb.AppendFormat("ALTER TABLE bkup1903_{0} RENAME TO {0};{1}", tempTable.Name, Environment.NewLine);
+                sb.Append(BackupAndUpdateTable(databaseTable, tempTable));
             }
             else
             {

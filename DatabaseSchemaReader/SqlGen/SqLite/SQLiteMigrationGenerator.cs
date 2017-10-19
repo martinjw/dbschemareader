@@ -69,6 +69,15 @@ ON {3}
                 trigger.TriggerBody);
         }
 
+        public override string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        {
+            if (index.Name.StartsWith("sqlite_autoindex_"))
+            {
+                return "--skipping reserved index: " + index.Name;
+            }
+            return base.AddIndex(databaseTable, index);
+        }
+
         public override string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
             //no "ON table" syntax

@@ -12,18 +12,6 @@ namespace DatabaseSchemaReader.DataSchema
     [Serializable]
     public partial class DatabaseTable : NamedSchemaObject<DatabaseTable>
     {
-        /// <summary>
-        /// Clones the DatabaseTable object and returns a copy
-        /// </summary>
-        /// <returns>A DatabaseTable copy instance</returns>
-        public DatabaseTable Clone()
-        {
-            var t = new DatabaseTable(Columns.ToList(), Triggers.ToList(), Indexes.ToList(), ForeignKeys.ToList(), ForeignKeyChildren.ToList(), UniqueKeys.ToList(), CheckConstraints.ToList(), DefaultConstraints.ToList());
-            t.Name = this.Name;
-            t.PrimaryKey = this.PrimaryKey;
-            return t;
-        }
-
         #region Fields
 
         //backing fields and initialize collections
@@ -55,36 +43,6 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly List<DatabaseConstraint> _defaultConstraints;
 
         #endregion
-        /// <summary>
-        /// Initializes table using known members
-        /// </summary>
-        /// <param name="columns">Columns</param>
-        /// <param name="triggers">Triggers</param>
-        /// <param name="indexes">Indexes</param>
-        /// <param name="fKeys">Foreign Keys</param>
-        /// <param name="fkeyChildren">Foreign Key Children</param>
-        /// <param name="uniques">Unique Keys</param>
-        /// <param name="checks">Check Constraints</param>
-        /// <param name="defaults">Default Constraints</param>
-        public DatabaseTable(List<DatabaseColumn> columns,
-            List<DatabaseTrigger> triggers,
-            List<DatabaseIndex> indexes,
-            List<DatabaseConstraint> fKeys,
-            List<DatabaseTable> fkeyChildren,
-            List<DatabaseConstraint> uniques,
-            List<DatabaseConstraint> checks,
-            List<DatabaseConstraint> defaults)
-        {
-            _columns = columns;
-            _triggers = triggers;
-            _indexes = indexes;
-
-            _foreignKeys = fKeys;
-            _foreignKeyChildren = fkeyChildren;
-            _uniqueKeys = uniques;
-            _checkConstraints = checks;
-            _defaultConstraints = defaults;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseTable"/> class.
