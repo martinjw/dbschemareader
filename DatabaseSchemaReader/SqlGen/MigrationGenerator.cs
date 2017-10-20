@@ -127,7 +127,7 @@ namespace DatabaseSchemaReader.SqlGen
                 sb.AppendLine(string.Format("--TO CHANGE COLUMN {0} to {1}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), originalDefinition, columnDefinition));
 
                 DatabaseTable tempTable = databaseTable.Clone("bkup1903_" + databaseTable.Name);
-                tempTable.Columns.Remove(tempTable.FindColumn(originalColumn.Name));
+                tempTable.Columns.Remove(tempTable.FindColumn(originalColumn == null ? databaseColumn.Name : originalColumn.Name));
                 tempTable.Columns.Add(databaseColumn);
                 sb.Append(BackupAndUpdateTable(databaseTable, tempTable));
                 return sb.ToString();
