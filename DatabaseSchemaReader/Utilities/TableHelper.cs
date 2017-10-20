@@ -40,10 +40,9 @@ namespace DatabaseSchemaReader.Utilities
         /// <param name="table">The table to generate query for</param>
         /// <param name="sqlType">Optionally specify the sql type of the table DB</param>
         /// <returns>A string with the table select statement</returns>
-        public static string SelectAll(this DatabaseTable table, SqlType? sqlType = null)
+        public static string SelectAll(this DatabaseTable table, SqlType sqlType)
         {
-            return new SqlWriter(table, sqlType ?? (SqlType)ProviderToSqlType
-                .Convert(table.DatabaseSchema.Provider)).SelectAllSql();
+            return new SqlWriter(table, sqlType).SelectAllSql();
         }
 
         /// <summary>
@@ -60,11 +59,11 @@ namespace DatabaseSchemaReader.Utilities
         /// Gets a delimiter separated/formatted list of the current DatabaseTable's columns
         /// </summary>
         /// <param name="table">The table to get formatted list of columns from</param>
+        /// <param name="sqlType">The SqlType</param>
         /// <returns>A formatted string containing the table's columns</returns>
-        public static string GetFormattedColumnList(this DatabaseTable table)
+        public static string GetFormattedColumnList(this DatabaseTable table, SqlType sqlType)
         {
-            return new SqlWriter(table, (SqlType)ProviderToSqlType
-                .Convert(table.DatabaseSchema.Provider)).FormattedColumns(table.GetColumnList());
+            return new SqlWriter(table, sqlType).FormattedColumns(table.GetColumnList());
         }
     }
 }

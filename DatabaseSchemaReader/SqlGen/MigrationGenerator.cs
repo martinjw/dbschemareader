@@ -116,15 +116,20 @@ namespace DatabaseSchemaReader.SqlGen
                 databaseTable.Name,
                 originalDefinition,
                 columnDefinition);
+            if (originalDefinition.Equals(columnDefinition))
+            {
+                //most likely faulty sql db structure, skip
+                return "-- skipping alter of " + comment.Substring(2);
+            }
             if (!SupportsAlterColumn)
             {
                 StringBuilder sb = new StringBuilder();
+                sb.AppendLine(string.Format("--TO CHANGE COLUMN {0} to {1}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), originalDefinition, columnDefinition));
 
                 DatabaseTable tempTable = databaseTable.Clone("bkup1903_" + databaseTable.Name);
                 tempTable.Columns.Remove(tempTable.FindColumn(originalColumn.Name));
                 tempTable.Columns.Add(databaseColumn);
                 sb.Append(BackupAndUpdateTable(databaseTable, tempTable));
-                sb.AppendLine(string.Format("--TO CHANGE COLUMN {0} to {1}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), originalDefinition, columnDefinition));
                 return sb.ToString();
             }
             if (databaseColumn.IsPrimaryKey || databaseColumn.IsForeignKey)
@@ -157,25 +162,9 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="databaseTable">The original DatabasTable</param>
         /// <param name="newTable">A DatabaseTable that reflects the new state of the table after migration</param>
         /// <returns>Generated sql statement</returns>
-        protected string BackupAndUpdateTable(DatabaseTable databaseTable, DatabaseTable newTable)
+        public virtual string BackupAndUpdateTable(DatabaseTable databaseTable, DatabaseTable newTable)
         {
-            StringBuilder sb = new StringBuilder();
-            var gen = new TableGenerator(newTable);
-            sb.AppendLine(gen.Write());
-            string newColumns = newTable.GetFormattedColumnList();
-            string originalColumns = databaseTable.GetFormattedColumnList();
-            string selectColumns = newColumns;
-            if(!newColumns.Equals(originalColumns))
-            {
-                //if column names don't match, must be a rename
-                //so we select from old table to new table
-                selectColumns = originalColumns;
-            }
-            sb.AppendFormat("INSERT INTO {0} ({4}) SELECT {1} FROM {2};{3}", newTable.Name,
-                selectColumns, databaseTable.Name, Environment.NewLine, newColumns);
-            sb.AppendFormat("DROP TABLE {0};{1}", newTable.Name, Environment.NewLine);
-            sb.AppendFormat("ALTER TABLE {0} RENAME TO {1};{2}", newTable.Name, databaseTable.Name, Environment.NewLine);
-            return sb.ToString();
+            throw new NotImplementedException();
         }
 
         /// <summary>
