@@ -62,6 +62,8 @@ namespace DatabaseSchemaReader.Compare
             //write drops and alters as last step to ensure valid queries
             foreach (var kv in toAlter)
             {
+                copy.Columns.Remove(kv.Value[1]);
+                copy.Columns.Add(kv.Value[0]);
                 CreateResult(ResultType.Change, baseTable, kv.Key,
                     _writer.AlterColumn(copy, kv.Value[0], kv.Value[1]));
             }
