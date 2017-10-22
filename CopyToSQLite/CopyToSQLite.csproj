@@ -11,7 +11,8 @@
     <RootNamespace>CopyToSQLite</RootNamespace>
     <AssemblyName>CopyToSQLite</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>http://localhost/CopyToSqLite/</PublishUrl>
     <Install>true</Install>
@@ -45,6 +46,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -54,6 +56,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45|x86'">
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -64,6 +67,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -121,16 +125,24 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2015.csproj" Condition="$(MSBuildToolsVersion) &lt; 15">
-      <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
-      <Name>DatabaseSchemaReader</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj" Condition="$(MSBuildToolsVersion) &gt; 14">
-      <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
-      <Name>DatabaseSchemaReader</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <Choose>
+    <When Condition="$(MSBuildToolsVersion) &lt; 15.0">
+      <ItemGroup>
+        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2015.csproj">
+          <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
+          <Name>DatabaseSchemaReader</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(MSBuildToolsVersion) &gt; 14.0">
+      <ItemGroup>
+        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
+          <Project>{8280afb4-9066-4656-a80e-23b859e5299c}</Project>
+          <Name>DatabaseSchemaReader</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
       <Visible>False</Visible>

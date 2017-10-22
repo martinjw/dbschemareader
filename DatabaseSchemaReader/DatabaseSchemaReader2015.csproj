@@ -384,6 +384,7 @@
     <Compile Include="Utilities\DbProvider\FactoryTools.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />
+    <Compile Include="Utilities\TableHelper.cs" />
     <Compile Include="Utilities\TopologicalSorter.cs" />
     <Compile Include="Procedures\ResultSetReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />

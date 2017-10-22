@@ -8,12 +8,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.Data.EntityClient;
 using System.Data.Objects;
 using System.Data.Objects.DataClasses;
-using System.Data.EntityClient;
-using System.ComponentModel;
-using System.Xml.Serialization;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 [assembly: EdmSchemaAttribute()]
 #region EDM Relationship Metadata
@@ -103,6 +104,7 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         private ObjectSet<Product> _Products;
 
         #endregion
+
         #region AddTo Methods
     
         /// <summary>
@@ -122,11 +124,11 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         }
 
         #endregion
+
     }
-    
 
     #endregion
-    
+
     #region Entities
     
     /// <summary>
@@ -153,6 +155,7 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -231,6 +234,7 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         partial void OnDescriptionChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -257,6 +261,7 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -287,6 +292,7 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -509,6 +515,7 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         partial void OnVersionChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -551,8 +558,10 @@ namespace DatabaseSchemaReaderTest.Utilities.EF
         }
 
         #endregion
+
     }
 
     #endregion
+
     
 }
