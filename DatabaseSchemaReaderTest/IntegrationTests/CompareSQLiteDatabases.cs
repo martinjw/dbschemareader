@@ -38,7 +38,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             //-- TODO: change manually (no ALTER COLUMN)
 
             Assert.IsTrue(result.Contains("ALTER TABLE [Products] ADD [Cost]"));
-            Assert.IsTrue(result.Contains("-- TODO: change manually (no ALTER COLUMN)"));
+            Assert.IsTrue(result.Contains("TO CHANGE COLUMN"));
         }
 
 
