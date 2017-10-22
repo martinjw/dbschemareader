@@ -276,12 +276,12 @@
     <Content Include="Utilities\EF\Catalog.edmx.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2015.csproj" Condition="$(MSBuildToolsVersion) &lt; 15">
+    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj" Condition="$(MSBuildToolsVersion) &gt; 14">
       <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
       <Name>DatabaseSchemaReader</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj" Condition="$(MSBuildToolsVersion) &gt; 14">
-      <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
+    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
+      <Project>{8280afb4-9066-4656-a80e-23b859e5299c}</Project>
       <Name>DatabaseSchemaReader</Name>
     </ProjectReference>
   </ItemGroup>
