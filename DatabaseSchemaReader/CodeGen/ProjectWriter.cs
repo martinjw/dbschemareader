@@ -139,16 +139,16 @@ namespace DatabaseSchemaReader.CodeGen
             var element = new XElement(_xmlns + "Reference", new XAttribute("Include", "EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"),
                 new XElement(_xmlns + "Private", "True"),
                 new XElement(_xmlns + "HintPath", (_projectVersion == ProjectVersion.Vs2010 ?
-                @"..\packages\EntityFramework.6.1.3\lib\net40\EntityFramework.dll" :
-                @"..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll")));
+                @"..\packages\EntityFramework.6.2.0\lib\net40\EntityFramework.dll" :
+                @"..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll")));
             reference.AddAfterSelf(element);
             var efSqlServer = new XElement(_xmlns + "Reference",
                 new XAttribute("Include",
                     "EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"),
                 new XElement(_xmlns + "Private", "True"),
                 new XElement(_xmlns + "HintPath", (_projectVersion == ProjectVersion.Vs2010
-                    ? @"..\packages\EntityFramework.6.1.3\lib\net40\EntityFramework.SqlServer.dll"
-                    : @"..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll")));
+                    ? @"..\packages\EntityFramework.6.2.0\lib\net40\EntityFramework.SqlServer.dll"
+                    : @"..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll")));
             reference.AddAfterSelf(efSqlServer);
         }
 
