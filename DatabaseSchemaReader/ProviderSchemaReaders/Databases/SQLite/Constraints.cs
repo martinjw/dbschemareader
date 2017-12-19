@@ -40,6 +40,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                                 con = new DatabaseConstraint
                                 {
                                     TableName = tableName,
+                                    SchemaOwner = "",
                                     ConstraintType = ConstraintType.ForeignKey,
                                     RefersToTable = refersToTable,
                                     UpdateRule = dr.GetString("on_update"),
@@ -50,6 +51,60 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                             con.Columns.Add(dr.GetString("from"));
 
                         }
+                    }
+                }
+            }
+
+            return Result;
+        }
+    }
+
+
+    class PkConstraints
+    {
+        private readonly string _tableName;
+
+        public PkConstraints(string tableName)
+        {
+            _tableName = tableName;
+            PragmaSql = @"PRAGMA table_info('{0}')";
+        }
+
+        protected List<DatabaseConstraint> Result { get; } = new List<DatabaseConstraint>();
+        public string PragmaSql { get; set; }
+
+        public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
+        {
+            var tables = new Tables(_tableName).Execute(connectionAdapter);
+
+            foreach (var table in tables)
+            {
+                var tableName = table.Name;
+                using (var cmd = connectionAdapter.DbConnection.CreateCommand())
+                {
+                    cmd.CommandText = string.Format(PragmaSql, tableName);
+                    int ordinal = 0;
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        List<string> columns = new List<string>();
+                        while (dr.Read())
+                        {
+                            var colName = dr.GetString("name");
+                            bool isPrimaryKey = dr.GetBoolean("pk");
+                            if (isPrimaryKey == false)
+                                continue;
+
+                            columns.Add(colName);
+                        }
+
+                        DatabaseConstraint con = new DatabaseConstraint
+                        {
+                            TableName = tableName,
+                            SchemaOwner = "",
+                            ConstraintType = ConstraintType.PrimaryKey,
+                        };
+                        con.Columns.AddRange(columns);
+                        Result.Add(con);
                     }
                 }
             }
