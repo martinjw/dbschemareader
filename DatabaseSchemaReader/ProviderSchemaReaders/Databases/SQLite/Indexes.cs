@@ -42,7 +42,7 @@ ORDER BY tbl_name, name";
             {
                 index = new DatabaseIndex
                 {
-                    SchemaOwner = null,
+                    SchemaOwner = "",
                     TableName = tableName,
                     Name = name,
                 };
@@ -69,6 +69,7 @@ ORDER BY tbl_name, name";
                             var col = new DatabaseColumn
                             {
                                 Name = colName,
+                                SchemaOwner = "",
                                 Ordinal = ordinal,
                             };
                             index.Columns.Add(col);

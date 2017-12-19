@@ -38,7 +38,7 @@ ORDER BY name";
             var table = new DatabaseTable
                         {
                             Name = name,
-                            SchemaOwner = null
+                            SchemaOwner = ""
                         };
 
             Result.Add(table);

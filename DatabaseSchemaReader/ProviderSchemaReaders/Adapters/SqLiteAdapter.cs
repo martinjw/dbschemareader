@@ -38,6 +38,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new Constraints(tableName)
                 .Execute(ConnectionAdapter);
         }
+        public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
+        {
+            return new PkConstraints(tableName)
+                .Execute(ConnectionAdapter);
+        }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
