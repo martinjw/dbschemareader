@@ -38,6 +38,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                             {
                                 TableName = tableName,
                                 Name = colName,
+                                SchemaOwner = "",
                                 Ordinal = ordinal,
                                 //type will be like "nvarchar(32)".
                                 //Lengths /precisions could be parsed out (nb remember this is Sqlite)
