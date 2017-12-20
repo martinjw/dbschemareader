@@ -37,6 +37,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                             var col = new DatabaseColumn
                                       {
                                           TableName = viewName,
+                                          SchemaOwner = "",
                                           Name = colName,
                                           Ordinal = ordinal,
                                           //type will be like "nvarchar(32)".
