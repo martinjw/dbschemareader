@@ -72,6 +72,7 @@ namespace DatabaseSchemaReader.DataSchema
             _tables = new List<DatabaseTable>();
             _storedProcedures = new List<DatabaseStoredProcedure>();
             _dataTypes = new List<DataType>();
+            _schemas = new List<DatabaseDbSchema>();
         }
 
         /// <summary>
