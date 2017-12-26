@@ -102,5 +102,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             return new Users().Execute(ConnectionAdapter);
         }
+
+        public override IList<DatabaseDbSchema> Schemas()
+        {
+            return new Schemas().Execute(ConnectionAdapter);
+        }
     }
 }
