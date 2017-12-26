@@ -141,6 +141,7 @@
     <Compile Include="Conversion\Loaders\AllTablesLoader.cs" />
     <Compile Include="Conversion\Loaders\TableLoader.cs" />
     <Compile Include="Conversion\PrimaryKeyLogic.cs" />
+    <Compile Include="DataSchema\DatabaseDbSchema.cs" />
     <Compile Include="DataSchema\INamedSchemaObject.cs" />
     <Compile Include="DataSchema\ProviderToSqlType.cs" />
     <Compile Include="Conversion\SchemaConstraintConverter.cs" />
@@ -234,6 +235,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\MySql\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\MySql\Functions.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\MySql\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\MySql\Schemas.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\MySql\StoredProcedures.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\MySql\Tables.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\MySql\Triggers.cs" />
@@ -257,6 +259,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Packages.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\ProcedureArguments.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\ProcedureSources.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\Oracle\Schemas.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\Sequences.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\StoredProcedures.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\Oracle\TableDescriptions.cs" />
@@ -275,6 +278,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Columns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\MaterializedViews.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Schemas.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\TableDescriptions.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Triggers.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\PostgreSql\Users.cs" />
@@ -305,6 +309,7 @@
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\IdentityColumns.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Indexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureArguments.cs" />
+    <Compile Include="ProviderSchemaReaders\Databases\SqlServer\Schemas.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewIndexes.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ViewSources.cs" />
     <Compile Include="ProviderSchemaReaders\Databases\SqlServer\ProcedureSources.cs" />
