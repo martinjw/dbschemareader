@@ -212,6 +212,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new Users().Execute(ConnectionAdapter);
         }
 
+        public override IList<DatabaseDbSchema> Schemas()
+        {
+            return new Schemas().Execute(ConnectionAdapter);
+        }
+
         public override void PostProcessing(DatabaseTable databaseTable)
         {
             if (databaseTable == null) return;
