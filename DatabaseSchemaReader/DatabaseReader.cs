@@ -217,6 +217,22 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Gets the schemas (of supported db engines)
+        /// </summary>
+        public IList<DatabaseDbSchema> AllSchemas()
+        {
+            RaiseReadingProgress(SchemaObjectType.Schemas);
+            IList<DatabaseDbSchema> schemas;
+            using (_readerAdapter.CreateConnection())
+            {
+                schemas = _readerAdapter.Schemas();
+            }
+            DatabaseSchema.Schemas.Clear();
+            DatabaseSchema.Schemas.AddRange(schemas);
+            return schemas;
+        }
+
+        /// <summary>
         /// Gets all tables (just names, no columns).
         /// </summary>
         public IList<DatabaseTable> TableList()

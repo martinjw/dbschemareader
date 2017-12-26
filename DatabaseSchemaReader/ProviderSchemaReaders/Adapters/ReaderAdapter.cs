@@ -204,6 +204,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new List<DatabaseUser>();
         }
 
+        public virtual IList<DatabaseDbSchema> Schemas()
+        {
+            return new List<DatabaseDbSchema>();
+        }
+
         public virtual void PostProcessing(DatabaseTable databaseTable)
         {
             //nothing

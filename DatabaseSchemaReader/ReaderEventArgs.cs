@@ -133,5 +133,9 @@ namespace DatabaseSchemaReader
         /// The sequences
         /// </summary>
         Sequences,
+        /// <summary>
+        /// The schemas
+        /// </summary>
+        Schemas,
     }
 }
