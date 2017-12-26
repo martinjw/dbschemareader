@@ -162,6 +162,7 @@
     <Compile Include="IntegrationTests\Access.cs" />
     <Compile Include="IntegrationTests\TableExistsTests.cs" />
     <Compile Include="IntegrationTests\DbConnectionTests.cs" />
+    <Compile Include="IntegrationTests\SqlServerDbSchemas.cs" />
     <Compile Include="IntegrationTests\VistaDb.cs" />
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
