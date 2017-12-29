@@ -211,6 +211,11 @@ namespace DatabaseSchemaReader
             return CreateDataTable(DefaultConstraintCollectionName);
         }
 
+        public virtual IList<DatabaseDbSchema> Schemas()
+        {
+            return new List<DatabaseDbSchema>();
+        }
+
         #region protected helpers
 
         protected virtual DataTable CommandForTable(string tableName, DbConnection conn, string collectionName, string sqlCommand)
