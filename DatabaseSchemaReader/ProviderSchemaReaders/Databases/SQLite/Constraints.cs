@@ -83,10 +83,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                 using (var cmd = connectionAdapter.DbConnection.CreateCommand())
                 {
                     cmd.CommandText = string.Format(PragmaSql, tableName);
-                    int ordinal = 0;
                     using (var dr = cmd.ExecuteReader())
                     {
-                        List<string> columns = new List<string>();
+                        var columns = new List<string>();
                         while (dr.Read())
                         {
                             var colName = dr.GetString("name");
@@ -97,7 +96,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                             columns.Add(colName);
                         }
 
-                        DatabaseConstraint con = new DatabaseConstraint
+                        var con = new DatabaseConstraint
                         {
                             TableName = tableName,
                             SchemaOwner = "",
