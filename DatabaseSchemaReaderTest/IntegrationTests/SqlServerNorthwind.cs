@@ -29,6 +29,16 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsTrue(schema.Tables.Count > 0);
         }
 
+        [TestMethod, TestCategory("SqlServer")]
+        public void ReadNorthwindSchema()
+        {
+            var dbReader = TestHelper.GetNorthwindReader();
+            dbReader.AllSchemas();
+            var schema = dbReader.DatabaseSchema;
+            
+            Assert.AreEqual(ConnectionStrings.Northwind, schema.ConnectionString, "Connection string is in the schema");
+            Assert.AreEqual("dbo", schema.Owner, "Schema/owner is in the schema");
+        }
 
         [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindProducts()
