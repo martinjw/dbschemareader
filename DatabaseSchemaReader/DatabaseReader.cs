@@ -140,7 +140,11 @@ namespace DatabaseSchemaReader
         public string Owner
         {
             get { return _readerAdapter.Owner; }
-            set { _readerAdapter.Owner = value; }
+            set
+            {
+                _readerAdapter.Owner = value;
+                _db.Owner = value;
+            }
         }
 
         /// <summary>
