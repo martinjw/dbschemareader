@@ -35,7 +35,8 @@ INNER JOIN
 WHERE 
     (t.name = @TableName OR @TableName IS NULL) AND 
     (SCHEMA_NAME(t.schema_id) = @schemaOwner OR @schemaOwner IS NULL) AND 
-	 t.is_ms_shipped = 0 
+	 t.is_ms_shipped = 0 AND
+     ind.is_included_column = 0
 ORDER BY 
      t.name, ind.name, ic.index_column_id";
 
