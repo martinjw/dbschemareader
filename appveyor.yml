@@ -1,5 +1,6 @@
-version: 1.6.0.{build}
+version: 2.4.1.{build}
 skip_tags: true
+image: Visual Studio 2017
 configuration: Release
 clone_depth: 2
 assembly_info:
@@ -9,26 +10,27 @@ assembly_info:
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
 services:
-- mssql2008r2sp2
-- postgresql93
-install:
-- cmd: net start MySQL57
+- mssql2016
+- postgresql
+- mysql
+before_build:
+- cmd: msbuild /t:restore DatabaseSchemaReader.sln
 build:
   project: build.proj
   verbosity: minimal
 after_build:
-- cmd: tools\nuget pack DatabaseSchemaReader\DatabaseSchemaReader.nuspec -Version "%APPVEYOR_BUILD_VERSION%"
+- cmd: msbuild /t:pack DatabaseSchemaReader\DatabaseSchemaReader.csproj /p:Configuration=Release
 before_test:
 - cmd: >-
-    sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_database_northwind.sql"
+    sqlcmd -S "(local)\SQL2016" -U "sa" -P "Password12!" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_database_northwind.sql"
 
-    sqlcmd -S "(local)\SQL2008R2SP2" -U "sa" -P "Password12!" -d "NorthwindDsr" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_schema_northwind.sql"
+    sqlcmd -S "(local)\SQL2016" -U "sa" -P "Password12!" -d "NorthwindDsr" -i "DatabaseSchemaReaderTest\DatabaseScripts\create_schema_northwind.sql"
 
     set pgpassword=Password12!
 
-    "C:\Program Files\PostgreSQL\9.3\bin\psql.exe" -h localhost -U postgres -c "CREATE DATABASE world"
+    "C:\Program Files\PostgreSQL\9.5\bin\psql.exe" -h localhost -U postgres -c "CREATE DATABASE world"
 
-    "C:\Program Files\PostgreSQL\9.3\bin\psql.exe" -h localhost -U postgres world < "DatabaseSchemaReaderTest\DatabaseScripts\postgres_world.sql"
+    "C:\Program Files\PostgreSQL\9.5\bin\psql.exe" -h localhost -U postgres world < "DatabaseSchemaReaderTest\DatabaseScripts\postgres_world.sql"
 
     "C:\Program Files\MySQL\MySQL Server 5.7\bin\mysql.exe" --user=root --password=Password12! -e "create database sakila"
 
@@ -55,7 +57,7 @@ test:
     - Sybase
     - VistaDb
 artifacts:
+- path: DatabaseSchemaReader\bin\Release\*.nupkg
+  name: Nuget
 - path: bin
   name: DatabaseSchemaReader
-- path: '*.nupkg'
-  name: Nuget

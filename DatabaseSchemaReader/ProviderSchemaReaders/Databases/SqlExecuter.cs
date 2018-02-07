@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 {
@@ -11,7 +12,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
     {
 
         protected List<T> Result { get; } = new List<T>();
-
     }
 
     /// <summary>
@@ -34,14 +34,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
         /// Executes a database reader.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        protected void ExecuteDbReader(DbConnection connection)
+        protected void ExecuteDbReader(IConnectionAdapter connection)
         {
-            if (connection.State == ConnectionState.Closed)
-            {
-                connection.Open();
-            }
             Trace.WriteLine($"Sql: {Sql}");
-            using (var cmd = connection.CreateCommand())
+            using (var cmd = BuildCommand(connectionAdapter))
             {
                 cmd.CommandText = Sql;
                 AddParameters(cmd);
@@ -53,6 +49,22 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
                     }
                 }
             }
+        }
+
+        protected DbCommand BuildCommand(IConnectionAdapter connectionAdapter)
+        {
+            var connection = connectionAdapter.DbConnection;
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+            var cmd = connection.CreateCommand();
+            var transaction = connectionAdapter.DbTransaction;
+            if (transaction != null)
+            {
+                cmd.Transaction = transaction;
+            }
+            return cmd;
         }
 
         /// <summary>

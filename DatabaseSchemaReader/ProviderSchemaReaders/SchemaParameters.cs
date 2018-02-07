@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Filters;
 
@@ -6,7 +7,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
     class SchemaParameters
     {
-#if COREFX
+//#if COREFX
         public SchemaParameters(System.Data.Common.DbConnection dbConnection)
         {
             DbConnection = dbConnection;
@@ -17,8 +18,15 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             SchemaFactory = new SchemaFactory();
         }
 
+        public SchemaParameters(System.Data.Common.DbTransaction dbTransaction) :this(dbTransaction.Connection)
+        {
+            DbTransaction = dbTransaction;
+        }
+        
         public System.Data.Common.DbConnection DbConnection { get; private set; }
-#else
+
+        public System.Data.Common.DbTransaction DbTransaction { get; private set; }
+//#else
         public SchemaParameters(string connectionString, SqlType sqlType)
         {
             ConnectionString = connectionString;
@@ -36,7 +44,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             Exclusions = new Exclusions();
             SchemaFactory = new SchemaFactory();
         }
-#endif
+//#endif
 
         public string ConnectionString { get; private set; }
 		

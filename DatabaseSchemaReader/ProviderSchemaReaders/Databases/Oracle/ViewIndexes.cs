@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -75,9 +76,9 @@ ORDER BY cols.TABLE_OWNER,
 
         }
 
-        public IList<DatabaseIndex> Execute(DbConnection dbConnection)
+        public IList<DatabaseIndex> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

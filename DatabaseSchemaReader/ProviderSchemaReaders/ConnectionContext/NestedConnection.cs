@@ -8,9 +8,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext
         public NestedConnection(IConnectionAdapter connectionAdapter)
         {
             DbConnection = connectionAdapter.DbConnection;
+            DbTransaction = connectionAdapter.DbTransaction;
         }
 
         public DbConnection DbConnection { get; }
+        public DbTransaction DbTransaction { get; }
 
         #region Implementation of IDisposable
 

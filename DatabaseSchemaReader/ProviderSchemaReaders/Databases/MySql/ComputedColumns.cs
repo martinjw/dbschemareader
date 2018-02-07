@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
 {
@@ -27,10 +28,10 @@ GENERATION_EXPRESSION  <> ''
 ORDER BY TABLE_SCHEMA,TABLE_NAME";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
             var hasGeneratedColumns = false; //introduced in MySQL 5.7.6
-            var cmd = connection.CreateCommand();
+            var cmd = BuildCommand(connectionAdapter);
             //step 1- check what's in info schema (backwards compatible)
             cmd.CommandText = @"SELECT * 
 FROM INFORMATION_SCHEMA.COLUMNS 
@@ -54,7 +55,7 @@ LIMIT 1";
                 return new List<DatabaseColumn>();
             }
 
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

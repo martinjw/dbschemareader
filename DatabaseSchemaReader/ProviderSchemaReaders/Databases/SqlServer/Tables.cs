@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -25,9 +26,9 @@ where
     TABLE_SCHEMA, TABLE_NAME";
         }
 
-        public IList<DatabaseTable> Execute(DbConnection connection)
+        public IList<DatabaseTable> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

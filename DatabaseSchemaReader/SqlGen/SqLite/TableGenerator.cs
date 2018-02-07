@@ -28,7 +28,8 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
                 type += " PRIMARY KEY";
                 if (column.IsAutoNumber) //must be integer primary key
                 {
-                    return "INTEGER PRIMARY KEY AUTOINCREMENT";
+                    //an sqlite auto increment may be nullable
+                    return "INTEGER PRIMARY KEY AUTOINCREMENT" + (!column.Nullable ? " NOT NULL" : "");
                 }
             }
             if (!column.Nullable) type += " NOT NULL";

@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -26,14 +27,14 @@ VIRTUAL_COLUMN = 'YES' AND
 ORDER BY TABLE_NAME, COLUMN_NAME";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
-            if (Version(connection) < 11)
+            if (Version(connectionAdapter.DbConnection) < 11)
             {
                 //only supported in 11g+
                 return new List<DatabaseColumn>();
             }
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

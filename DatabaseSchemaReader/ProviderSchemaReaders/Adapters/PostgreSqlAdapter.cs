@@ -21,71 +21,71 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabaseTable> Tables(string tableName)
         {
             return new Tables(Owner, tableName, Parameters.SchemaFactory)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)
         {
             return new Columns(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.PrimaryKey)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> UniqueKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.UniqueKey)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> ForeignKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.ForeignKey)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseIndex> Indexes(string tableName)
         {
             return new Indexes(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
             return new Triggers(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> CheckConstraints(string tableName)
         {
             return new CheckConstraints(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTable> ColumnDescriptions(string tableName)
         {
             return new ColumnDescriptions(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTable> TableDescriptions(string tableName)
         {
             return new TableDescriptions(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseView> Views(string viewName)
         {
             var views = new Views(Owner, viewName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
             if (string.IsNullOrEmpty(viewName) || !views.Any())
             {
                 var mviews = new MaterializedViews(Owner, viewName)
-                    .Execute(DbConnection);
+                    .Execute(ConnectionAdapter);
                 foreach (var mview in mviews)
                 {
                     views.Add(mview);
@@ -97,17 +97,22 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabaseFunction> Functions(string name)
         {
             return new Functions(Owner)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseArgument> ProcedureArguments(string name)
         {
             return new ProcedureArguments(Owner, name)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
         public override IList<DatabaseUser> Users()
         {
-            return new Users().Execute(DbConnection);
+            return new Users().Execute(ConnectionAdapter);
+        }
+
+        public override IList<DatabaseDbSchema> Schemas()
+        {
+            return new Schemas().Execute(ConnectionAdapter);
         }
 
         public override void PostProcessing(DatabaseTable databaseTable)

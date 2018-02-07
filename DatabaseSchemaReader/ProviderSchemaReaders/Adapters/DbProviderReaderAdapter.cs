@@ -206,6 +206,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             var dt = _schemaReader.Functions();
             return SchemaProcedureConverter.Functions(dt);
         }
+
+        public override IList<DatabaseDbSchema> Schemas()
+        {
+            return _schemaReader.Schemas();
+        }
     }
 }
 #endif

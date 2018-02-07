@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -22,9 +23,9 @@ WHERE (OWNER = :OWNER OR :OWNER IS NULL)
 AND (MVIEW_NAME = :VIEWNAME OR :VIEWNAME IS NULL)";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection)
+        public IList<DatabaseView> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

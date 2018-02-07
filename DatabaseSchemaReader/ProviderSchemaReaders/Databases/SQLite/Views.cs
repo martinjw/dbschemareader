@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
@@ -18,9 +19,9 @@ WHERE type='view' AND
 ORDER BY name";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection)
+        public IList<DatabaseView> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 
@@ -36,7 +37,7 @@ ORDER BY name";
             var table = new DatabaseView
                         {
                             Name = name,
-                            SchemaOwner = null,
+                            SchemaOwner = "",
 							Sql = record.GetString("sql"),
                         };
 

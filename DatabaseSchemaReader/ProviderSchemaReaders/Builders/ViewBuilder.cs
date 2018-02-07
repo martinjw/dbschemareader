@@ -88,7 +88,22 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                 v.Columns.AddRange(cols);
                 v.Indexes = indexes.Where(x => x.TableName == v.Name && x.SchemaOwner == v.SchemaOwner).ToList();
             }
+
+            var triggers = _readerAdapter.Triggers(null);
+            foreach (var view in views)
+            {
+                UpdateTriggers(view, triggers);
+            }
+
             return views;
+        }
+
+        private void UpdateTriggers(DatabaseView view, IList<DatabaseTrigger> triggers)
+        {
+            var viewTriggers = triggers.Where(x => x.SchemaOwner == view.SchemaOwner &&
+                                                   x.TableName == view.Name);
+            view.Triggers.Clear();
+            view.Triggers.AddRange(viewTriggers);
         }
     }
 }

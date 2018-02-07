@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
@@ -41,7 +42,7 @@ ORDER BY tbl_name, name";
             {
                 index = new DatabaseIndex
                 {
-                    SchemaOwner = null,
+                    SchemaOwner = "",
                     TableName = tableName,
                     Name = name,
                 };
@@ -49,14 +50,14 @@ ORDER BY tbl_name, name";
             }
         }
 
-        public IList<DatabaseIndex> Execute(DbConnection dbConnection)
+        public IList<DatabaseIndex> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
 
             foreach (var index in Result)
             {
                 var name = index.Name;
-                using (var cmd = dbConnection.CreateCommand())
+                using (var cmd = BuildCommand(connectionAdapter))
                 {
                     cmd.CommandText = string.Format(PragmaSql, name);
                     int ordinal = 0;
@@ -68,6 +69,7 @@ ORDER BY tbl_name, name";
                             var col = new DatabaseColumn
                             {
                                 Name = colName,
+                                SchemaOwner = "",
                                 Ordinal = ordinal,
                             };
                             index.Columns.Add(col);

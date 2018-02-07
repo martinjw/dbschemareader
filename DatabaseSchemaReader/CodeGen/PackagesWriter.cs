@@ -15,7 +15,7 @@
             var targetFramework = _projectVersion == ProjectVersion.Vs2010 ? "net40" : "net461";
             return @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""EntityFramework"" version=""6.1.3"" targetFramework=""" + targetFramework + @""" />
+  <package id=""EntityFramework"" version=""6.2.0"" targetFramework=""" + targetFramework + @""" />
 " + _providerReference + @"
 </packages>";
         }

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
+    <PackageReference Include="Npgsql" Version="3.2.6" />
+    <PackageReference Include="MySql.Data.Core" Version="7.0.4-IR-19" />
+  </ItemGroup>
+
+</Project>

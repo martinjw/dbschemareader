@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.SqlGen.SqLite;
+using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaReader.SqlGen
 {
@@ -108,17 +110,27 @@ namespace DatabaseSchemaReader.SqlGen
                     columnDefinition += " NULL";
                 }
             }
-
             //add a nice comment
             var comment = string.Format(CultureInfo.InvariantCulture,
                 "-- {0} from {1} to {2}",
                 databaseTable.Name,
                 originalDefinition,
                 columnDefinition);
+            if (originalDefinition.Equals(columnDefinition))
+            {
+                //most likely faulty sql db structure, skip
+                return "-- skipping alter of " + comment.Substring(2);
+            }
             if (!SupportsAlterColumn)
             {
-                //SQLite does not have modify column
-                return comment + Environment.NewLine + "-- TODO: change manually (no ALTER COLUMN)";
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(string.Format("--TO CHANGE COLUMN {0} to {1}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), originalDefinition, columnDefinition));
+
+                DatabaseTable tempTable = databaseTable.Clone("bkup1903_" + databaseTable.Name);
+                tempTable.Columns.Remove(tempTable.FindColumn(originalColumn == null ? databaseColumn.Name : originalColumn.Name));
+                tempTable.Columns.Add(databaseColumn);
+                sb.Append(BackupAndUpdateTable(databaseTable, tempTable));
+                return sb.ToString();
             }
             if (databaseColumn.IsPrimaryKey || databaseColumn.IsForeignKey)
             {
@@ -141,6 +153,18 @@ namespace DatabaseSchemaReader.SqlGen
                     AlterColumnFormat,
                     TableName(databaseTable),
                     columnDefinition);
+        }
+
+        /// <summary>
+        /// Generates a migration SQL statement for a table
+        /// by backing up previous data and reconstructing table structure
+        /// </summary>
+        /// <param name="databaseTable">The original DatabasTable</param>
+        /// <param name="newTable">A DatabaseTable that reflects the new state of the table after migration</param>
+        /// <returns>Generated sql statement</returns>
+        public virtual string BackupAndUpdateTable(DatabaseTable databaseTable, DatabaseTable newTable)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -354,7 +378,7 @@ namespace DatabaseSchemaReader.SqlGen
             return sb.ToString();
         }
 
-        public string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        public virtual string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
             if (index.Columns.Count == 0)
             {
@@ -385,11 +409,6 @@ namespace DatabaseSchemaReader.SqlGen
 
         public virtual string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
-            if (!SupportsDropColumn)
-            {
-                //SQLite does not have drop or modify column. We could create the new table and select into it, but not on this first version
-                return "-- " + databaseTable.Name + " column " + databaseColumn.Name + " should be dropped";
-            }
             var sb = new StringBuilder();
             if (databaseColumn.IsForeignKey)
             {
@@ -414,7 +433,18 @@ namespace DatabaseSchemaReader.SqlGen
                         Escape(uniqueKey.Name)));
                 }
             }
-            sb.AppendLine("ALTER TABLE " + TableName(databaseTable) + " DROP COLUMN " + Escape(databaseColumn.Name) + LineEnding());
+            if (!SupportsDropColumn)
+            {
+                sb.AppendLine(string.Format("--TO DROP COLUMN {0}, WE CREATE BACKUP, MOVE CONTENT AND RENAME TABLE " + LineEnding(), Escape(databaseColumn.Name)));
+
+                DatabaseTable tempTable = databaseTable.Clone("bkup1903_" + databaseTable.Name);
+                tempTable.Columns.Remove(tempTable.FindColumn(databaseColumn.Name));
+                sb.Append(BackupAndUpdateTable(databaseTable, tempTable));
+            }
+            else
+            {
+                sb.AppendLine("ALTER TABLE " + TableName(databaseTable) + " DROP COLUMN " + Escape(databaseColumn.Name) + LineEnding());
+            }
             return sb.ToString();
         }
 

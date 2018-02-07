@@ -70,3 +70,13 @@ There are two simple UIs.
  - comparing the schema to another database.
 
 * CopyToSQLite. It reads all the schema and creates a new SQLite database file with the same tables and data. If Sql Server CE 4.0 is detected, it can do the same for that database. These databases do not have the full range of data types as other databases, so creating tables may fail (e.g. SqlServer CE 4 does not have VARCHAR(MAX)). In addition, copying data may violate foreign key constraints (especially for identity primary keys) and will fail.
+
+## Building the Source
+
+* If you use Visual Studio *2017* open DatabaseSchemaReader.sln (includes .net Core)
+  * You can also use the command line "build.bat" (msbuild)
+  * You cannot use the command line "dotnet build" because Core tooling cannot build v3.5 (see https://github.com/Microsoft/msbuild/issues/1333)
+* If you use Visual Studio *2015* open DatabaseSchemaReader2015.sln (does not include .net Core; v3.5-v4.6 only)
+
+
+

@@ -43,7 +43,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
                 ProviderDbType = 2,
                 CreateFormat = "bit",
             });
-            dts.Add(new DataType("tinyint", "System.SByte")
+            dts.Add(new DataType("tinyint", "System.Byte")
             {
                 ProviderDbType = 20,
                 CreateFormat = "tinyint",

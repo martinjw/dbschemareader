@@ -5,6 +5,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
 using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 // ReSharper disable once RedundantUsingDirective
 using System.Threading;
 using DatabaseSchemaReader.Extenders;
@@ -32,19 +33,33 @@ namespace DatabaseSchemaReader
         /// </summary>
         public event EventHandler<ReaderEventArgs> ReaderProgress;
 
-#if COREFX
+//#if COREFX
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbConnection.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        public DatabaseReader(System.Data.Common.DbConnection connection)
+        public DatabaseReader(System.Data.Common.DbConnection connection) :
+            this(connection.GetType().Namespace, connection.ConnectionString, new SchemaParameters(connection))
         {
-            var name = connection.GetType().Namespace;
-            _db = new DatabaseSchema(connection.ConnectionString, name);
-            _schemaParameters = new SchemaParameters(connection) {DatabaseSchema = _db};
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbTransaction.
+        /// </summary>
+        /// <param name="transaction">The transaction</param>
+        public DatabaseReader(System.Data.Common.DbTransaction transaction) :
+            this(transaction.Connection.GetType().Namespace, transaction.Connection.ConnectionString, new SchemaParameters(transaction))
+        {   
+        }
+
+        private DatabaseReader(string name, string connectionString, SchemaParameters schemaParameters)
+        {
+            _db = new DatabaseSchema(connectionString, name);
+            _schemaParameters = schemaParameters;
+            _schemaParameters.DatabaseSchema = _db;
             _readerAdapter = ReaderAdapterFactory.Create(_schemaParameters);
         }
-#endif
+//#endif
 #if !COREFX
 
         /// <summary>
@@ -126,7 +141,11 @@ namespace DatabaseSchemaReader
         public string Owner
         {
             get { return _readerAdapter.Owner; }
-            set { _readerAdapter.Owner = value; }
+            set
+            {
+                _readerAdapter.Owner = value;
+                _db.Owner = value;
+            }
         }
 
         /// <summary>
@@ -203,6 +222,22 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Gets the schemas (of supported db engines)
+        /// </summary>
+        public IList<DatabaseDbSchema> AllSchemas()
+        {
+            RaiseReadingProgress(SchemaObjectType.Schemas);
+            IList<DatabaseDbSchema> schemas;
+            using (_readerAdapter.CreateConnection())
+            {
+                schemas = _readerAdapter.Schemas();
+            }
+            DatabaseSchema.Schemas.Clear();
+            DatabaseSchema.Schemas.AddRange(schemas);
+            return schemas;
+        }
+
+        /// <summary>
         /// Gets all tables (just names, no columns).
         /// </summary>
         public IList<DatabaseTable> TableList()
@@ -212,6 +247,40 @@ namespace DatabaseSchemaReader
             {
                 return _readerAdapter.Tables(null);
             }
+        }
+
+        /// <summary>
+        /// Gets all tables with columns and datatypes but nothing else (no constraints, indexes or triggers).
+        /// </summary>
+        public IList<DatabaseTable> TablesQuickView()
+        {
+            RaiseReadingProgress(SchemaObjectType.Tables);
+            IList<DatabaseTable> tables;
+            using (_readerAdapter.CreateConnection())
+            {
+                tables = _readerAdapter.Tables(null);
+            }
+            DatabaseSchema.Tables.Clear();
+            DatabaseSchema.Tables.AddRange(tables);
+
+            RaiseReadingProgress(SchemaObjectType.Columns);
+            IList<DatabaseColumn> columns;
+            using (_readerAdapter.CreateConnection())
+            {
+                columns = _readerAdapter.Columns(null);
+            }
+
+            foreach (var table in DatabaseSchema.Tables)
+            {
+                table.Columns.Clear();
+                table.Columns.AddRange(
+                    columns.Where(x => string.Equals(x.TableName, table.Name, StringComparison.OrdinalIgnoreCase)
+                                       && string.Equals(x.SchemaOwner, table.SchemaOwner, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            DataTypes();
+
+            return DatabaseSchema.Tables;
         }
 
         /// <summary>
