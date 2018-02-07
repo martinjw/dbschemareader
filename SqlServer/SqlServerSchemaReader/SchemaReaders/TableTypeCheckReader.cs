@@ -5,6 +5,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace SqlServerSchemaReader.SchemaReaders
 {
@@ -34,7 +35,7 @@ WHERE (SCHEMA_NAME(tt.schema_id) = @schema OR @schema IS NULL)";
         /// <summary>
         /// Use this for schema level (i.e. all tables)
         /// </summary>
-        public void Execute(SqlServerSchema schema, DbConnection connection)
+        public void Execute(SqlServerSchema schema, IConnectionAdapter connection)
         {
             _schema = schema;
             ExecuteDbReader(connection);

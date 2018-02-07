@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Extenders;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using SqlServerSchemaReader.Schema;
 
 namespace SqlServerSchemaReader.Extenders
@@ -16,7 +17,7 @@ namespace SqlServerSchemaReader.Extenders
         /// </summary>
         /// <param name="databaseTable"></param>
         /// <param name="connection"></param>
-        public void Execute(DatabaseTable databaseTable, DbConnection connection)
+        public void Execute(DatabaseTable databaseTable, IConnectionAdapter connection)
         {
             var sqlTable = databaseTable as SqlServerTable;
             if (sqlTable == null) return;

@@ -75,7 +75,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 
         public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            var tables = new Tables(_tableName).Execute(connectionAdapter);
+            var tables = new Tables(_tableName, new SchemaFactory()).Execute(connectionAdapter);
 
             foreach (var table in tables)
             {

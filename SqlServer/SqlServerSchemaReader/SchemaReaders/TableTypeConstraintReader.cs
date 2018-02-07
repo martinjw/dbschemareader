@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace SqlServerSchemaReader.SchemaReaders
 {
@@ -45,7 +46,7 @@ ORDER BY tt.name, con.name, con.type, ic.key_ordinal
         /// <summary>
         /// Use this for schema level (i.e. all tables)
         /// </summary>
-        public void Execute(SqlServerSchema schema, DbConnection connection)
+        public void Execute(SqlServerSchema schema, IConnectionAdapter connection)
         {
             _schema = schema;
             ExecuteDbReader(connection);

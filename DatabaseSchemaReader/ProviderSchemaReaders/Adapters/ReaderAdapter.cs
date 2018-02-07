@@ -44,18 +44,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             }
         }
 
-        //protected DbConnection DbConnection
-        //{
-        //    get
-        //    {
-        //        if (_connectionAdapter == null)
-        //        {
-        //            _connectionAdapter = new ConnectionAdapter(Parameters);
-        //        }
-        //        return _connectionAdapter.DbConnection;
-        //    }
-        //}
-
         protected DbTransaction DbTransaction
         {
             get
@@ -219,7 +207,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             if (TableExtender != null)
             {
-                TableExtender.Execute(databaseTable, DbConnection);
+                TableExtender.Execute(databaseTable, ConnectionAdapter);
             }
         }
 
@@ -227,7 +215,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             if (SchemaExtender != null)
             {
-                SchemaExtender.Execute(databaseSchema, DbConnection);
+                SchemaExtender.Execute(databaseSchema, ConnectionAdapter);
             }
         }
 

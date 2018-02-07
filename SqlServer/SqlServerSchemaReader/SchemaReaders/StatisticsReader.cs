@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases;
 using SqlServerSchemaReader.Schema;
 
@@ -55,7 +56,7 @@ ORDER BY
         /// </summary>
         /// <param name="dbConnection">The database connection.</param>
         /// <returns></returns>
-        public IList<DatabaseStatistics> Execute(DbConnection dbConnection)
+        public IList<DatabaseStatistics> Execute(IConnectionAdapter dbConnection)
         {
             ExecuteDbReader(dbConnection);
             return Result;

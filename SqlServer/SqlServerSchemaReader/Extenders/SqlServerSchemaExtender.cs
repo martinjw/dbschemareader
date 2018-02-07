@@ -4,6 +4,7 @@ using SqlServerSchemaReader.Schema;
 using SqlServerSchemaReader.SchemaReaders;
 using System.Data.Common;
 using System.Linq;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace SqlServerSchemaReader.Extenders
 {
@@ -18,7 +19,7 @@ namespace SqlServerSchemaReader.Extenders
         /// </summary>
         /// <param name="databaseSchema"></param>
         /// <param name="connection"></param>
-        public void Execute(DatabaseSchema databaseSchema, DbConnection connection)
+        public void Execute(DatabaseSchema databaseSchema, IConnectionAdapter connection)
         {
             var schema = databaseSchema as SqlServerSchema;
             if (schema == null) return;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases;
 using SqlServerSchemaReader.Schema;
 
@@ -32,7 +33,7 @@ AND (name = @tableName OR @tableName IS NULL)";
         /// <summary>
         /// Use this for schema level (i.e. all tables)
         /// </summary>
-        public void Execute(SqlServerSchema schema, DbConnection connection)
+        public void Execute(SqlServerSchema schema, IConnectionAdapter connection)
         {
             if (!HasHekaton(connection)) return;
 
@@ -40,8 +41,9 @@ AND (name = @tableName OR @tableName IS NULL)";
             ExecuteDbReader(connection);
         }
 
-        private static bool HasHekaton(DbConnection connection)
+        private static bool HasHekaton(IConnectionAdapter connectionAdapter)
         {
+            var connection = connectionAdapter.DbConnection;
             var cmd = connection.CreateCommand();
             //step 1- check if there are any sequences (backwards compatible)
             cmd.CommandText = @"select COL_LENGTH('sys.tables','is_memory_optimized')";
@@ -56,7 +58,7 @@ AND (name = @tableName OR @tableName IS NULL)";
         /// <summary>
         /// Use this for a specific table
         /// </summary>
-        public void Execute(SqlServerTable table, DbConnection connection)
+        public void Execute(SqlServerTable table, IConnectionAdapter connection)
         {
             if (!HasHekaton(connection)) return;
 

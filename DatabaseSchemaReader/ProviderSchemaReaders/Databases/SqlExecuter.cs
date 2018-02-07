@@ -33,8 +33,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
         /// <summary>
         /// Executes a database reader.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        protected void ExecuteDbReader(IConnectionAdapter connection)
+        /// <param name="connectionAdapter">The connection.</param>
+        protected void ExecuteDbReader(IConnectionAdapter connectionAdapter)
         {
             Trace.WriteLine($"Sql: {Sql}");
             using (var cmd = BuildCommand(connectionAdapter))
@@ -51,6 +51,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
+        /// <summary>
+        /// Builds the command.
+        /// </summary>
+        /// <param name="connectionAdapter">The connection adapter.</param>
+        /// <returns></returns>
         protected DbCommand BuildCommand(IConnectionAdapter connectionAdapter)
         {
             var connection = connectionAdapter.DbConnection;

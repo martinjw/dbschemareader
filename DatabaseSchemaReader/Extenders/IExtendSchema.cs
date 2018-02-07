@@ -1,5 +1,5 @@
-﻿using System.Data.Common;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.Extenders
 {
@@ -11,6 +11,6 @@ namespace DatabaseSchemaReader.Extenders
         /// <summary>
         /// Add additional information to database schema.
         /// </summary>
-        void Execute(DatabaseSchema databaseSchema, DbConnection connection);
+        void Execute(DatabaseSchema databaseSchema, IConnectionAdapter connection);
     }
 }
