@@ -3,7 +3,7 @@
 namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
-    /// Represents a user in the database
+    /// Represents a schema in the database
     /// </summary>
     [Serializable]
     public partial class DatabaseDbSchema : NamedObject<DatabaseDbSchema>
