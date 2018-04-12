@@ -50,7 +50,7 @@ namespace DatabaseSchemaReader.DataSchema
         {
             get
             {
-                if (_entityName.IsNullOrEmptyStr())
+                if (_entityName.IsNullOrEmpty())
                 {
                     _entityName = Name;
                 }

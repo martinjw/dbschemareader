@@ -1,4 +1,5 @@
 {
+  "locked": false,
   "version": 1,
   "targets": {
     ".NETFramework,Version=v3.5": {},
@@ -3883,8 +3884,5 @@
       "System.Diagnostics.TraceSource >= 4.0.0",
       "System.Xml.XmlSerializer >= 4.0.11"
     ]
-  },
-  "packageFolders": {
-    "C:\\Users\\Administrator\\.nuget\\packages\\": {}
   }
 }
