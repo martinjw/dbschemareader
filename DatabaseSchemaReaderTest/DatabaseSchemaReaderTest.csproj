@@ -257,6 +257,7 @@
     <Compile Include="Utilities\EF\EntityImporterTest.cs" />
     <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
     <Compile Include="Utilities\DbProviderFactoryRepositoryTest.cs" />
+    <Compile Include="Utilities\QueryReaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DatabaseScripts\create_database_northwind.sql" />

@@ -160,6 +160,25 @@ namespace DatabaseSchemaReader.DataSchema
             }
         }
 
+        /// <summary>
+        /// Updates the datatypes of specific column list
+        /// </summary>
+        public static void UpdateDataTypes(IList<DataType> types, IList<DatabaseColumn> columns)
+        {
+            //check if no datatypes loaded
+            if (types.Count == 0) return;
+
+            //quickly lookup the datatypes
+            var dataTypes = new Dictionary<string, DataType>();
+            foreach (DataType type in types)
+            {
+                //just in case there are duplicate names
+                if (!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
+            }
+
+            UpdateColumnDataTypes(dataTypes, columns);
+        }
+
         private static void UpdateArgumentDataTypes(IDictionary<string, DataType> dataTypes, DatabaseStoredProcedure sproc)
         {
             foreach (DatabaseArgument arg in sproc.Arguments)
