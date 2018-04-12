@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 
 namespace DatabaseSchemaReader.Conversion.KeyMaps
 {
@@ -41,6 +41,8 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             CheckDb2(dt);
             //Intersystems Cache
             if (dt.Columns.Contains("TYPE_NAME")) DatatypeKey = "TYPE_NAME";
+            //Get​Schema​Table
+            CheckGet​Schema​Table(dt);
             //sybase ultralite
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = "default";
             if (!dt.Columns.Contains(NullableKey)) NullableKey = "nulls";
@@ -93,6 +95,20 @@ namespace DatabaseSchemaReader.Conversion.KeyMaps
             if (!dt.Columns.Contains(UniqueKey)) UniqueKey = "isunique";
             if (!dt.Columns.Contains(DefaultKey)) DefaultKey = "defaultvalue";
             if (!dt.Columns.Contains(SchemaKey)) SchemaKey = "schema";
+        }
+        private void CheckGet​Schema​Table(DataTable dt)
+        {
+            if (string.IsNullOrEmpty(SchemaKey) || !dt.Columns.Contains(SchemaKey)) SchemaKey = "BaseSchemaName";
+            if (string.IsNullOrEmpty(TableKey) || !dt.Columns.Contains(TableKey)) TableKey = "BaseTableName";
+            if (string.IsNullOrEmpty(Key) || !dt.Columns.Contains(Key)) Key = "ColumnName";
+            if (string.IsNullOrEmpty(OrdinalKey) || !dt.Columns.Contains(OrdinalKey)) OrdinalKey = "ColumnOrdinal";
+            // ProviderType is a number which corresponds to the ProviderDbType 
+            // returned by connection.GetSchema(DbMetaDataCollectionNames.DataTypes)
+            if (dt.Columns.Contains("ProviderType")) DatatypeKey = "ProviderType";
+            if (!dt.Columns.Contains(NullableKey)) NullableKey = "AllowDBNull";
+            if (string.IsNullOrEmpty(LengthKey) || !dt.Columns.Contains(LengthKey)) LengthKey = "ColumnSize";
+            if (!dt.Columns.Contains(PrecisionKey)) PrecisionKey = "NumericPrecision";
+            if (!dt.Columns.Contains(ScaleKey)) ScaleKey = "NumericScale";
         }
 
         public string DefaultKey { get; private set; }

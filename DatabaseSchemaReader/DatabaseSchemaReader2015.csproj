@@ -387,6 +387,7 @@
     <Compile Include="Utilities\DummyDataCreator.cs" />
     <Compile Include="Utilities\EntityFrameworkImporter.cs" />
     <Compile Include="Utilities\DbProvider\FactoryTools.cs" />
+    <Compile Include="Utilities\QueryReader.cs" />
     <Compile Include="Utilities\SchemaTablesSorter.cs" />
     <Compile Include="Utilities\ScriptTools.cs" />
     <Compile Include="Utilities\TableHelper.cs" />
