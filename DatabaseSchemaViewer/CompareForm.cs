@@ -26,6 +26,8 @@ namespace DatabaseSchemaViewer
         private void CompareFormLoad(object sender, EventArgs e)
         {
             labOriginDatabase.Text = _databaseSchema.ConnectionString;
+            ConnectionString.Text = _databaseSchema.ConnectionString;
+            SchemaOwner.Text = _databaseSchema.Owner;
 
             contextMenuStrip1.Items.Clear();
             contextMenuStrip1.Items.Add(_databaseSchema.ConnectionString).Click += (s, ev) => ConnectionString.Text = _databaseSchema.ConnectionString;
@@ -117,7 +119,7 @@ namespace DatabaseSchemaViewer
             }
             var providerName = _databaseSchema.Provider;
             var rdr = new DatabaseReader(connectionString, providerName);
-            var owner = _databaseSchema.Owner;
+            var owner = SchemaOwner.Text.Trim();
             if (!string.IsNullOrEmpty(owner))
                 rdr.Owner = owner;
 
@@ -230,6 +232,7 @@ namespace DatabaseSchemaViewer
                     if (_compareSchema != null)
                     {
                         ConnectionString.Text = _databaseSchema.ConnectionString;
+                        SchemaOwner.Text = _databaseSchema.Owner;
                         RunCompare();
                     }
                 }

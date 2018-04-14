@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -49,9 +50,9 @@ TRIGGER_NAME NOT IN ( SELECT object_name FROM USER_RECYCLEBIN )
             Result.Add(trigger);
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

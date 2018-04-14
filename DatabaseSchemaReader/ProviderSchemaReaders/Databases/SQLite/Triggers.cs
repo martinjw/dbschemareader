@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
@@ -30,16 +31,16 @@ ORDER BY tbl_name, name";
             var trigger = new DatabaseTrigger
             {
                 Name = record.GetString("name"),
-                SchemaOwner = null,
+                SchemaOwner = "",
                 TableName = record.GetString("tbl_name"),
                 TriggerBody = record.GetString("sql"),
             };
             Result.Add(trigger);
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

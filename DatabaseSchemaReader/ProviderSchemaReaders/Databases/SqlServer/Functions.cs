@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -21,7 +22,7 @@ WHERE
     (SPECIFIC_SCHEMA = @Owner OR (@Owner IS NULL))
     AND (SPECIFIC_NAME = @Name OR (@Name IS NULL))
     AND (ROUTINE_TYPE = 'FUNCTION')
-    AND ObjectProperty (Object_Id (INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME), 'IsMSShipped') = 0 and
+    AND ISNULL(ObjectProperty (Object_Id (INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME), 'IsMSShipped'),0) = 0 and
         (
             select 
                 major_id 
@@ -37,9 +38,9 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME";
 
         }
 
-        public IList<DatabaseFunction> Execute(DbConnection connection)
+        public IList<DatabaseFunction> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

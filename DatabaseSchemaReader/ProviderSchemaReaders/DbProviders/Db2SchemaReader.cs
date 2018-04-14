@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
@@ -115,6 +117,32 @@ WHERE
 
                 return CommandForTable(tableName, connection, ColumnDescriptionCollectionName, sqlCommand);
             }
+        }
+
+        public override IList<DatabaseDbSchema> Schemas()
+        {
+            const string sql = "SELECT SCHEMANAME FROM SYSCAT.SCHEMATA";
+            var result = new List<DatabaseDbSchema>();
+            using (DbConnection connection = Factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = sql;
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            var name = dr[0].ToString();
+                            result.Add(new DatabaseDbSchema { Name = name });
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

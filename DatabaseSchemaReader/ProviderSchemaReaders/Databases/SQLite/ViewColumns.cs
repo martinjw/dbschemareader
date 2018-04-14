@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
@@ -17,14 +18,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
         protected List<DatabaseColumn> Result { get; } = new List<DatabaseColumn>();
         public string PragmaSql { get; set; }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
-            var views = new Views(_viewName).Execute(connection);
+            var views = new Views(_viewName).Execute(connectionAdapter);
 
             foreach (var view in views)
             {
                 var viewName = view.Name;
-                using (var cmd = connection.CreateCommand())
+                using (var cmd = connectionAdapter.DbConnection.CreateCommand())
                 {
                     cmd.CommandText = string.Format(PragmaSql, viewName);
                     int ordinal = 0;
@@ -36,6 +37,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                             var col = new DatabaseColumn
                                       {
                                           TableName = viewName,
+                                          SchemaOwner = "",
                                           Name = colName,
                                           Ordinal = ordinal,
                                           //type will be like "nvarchar(32)".

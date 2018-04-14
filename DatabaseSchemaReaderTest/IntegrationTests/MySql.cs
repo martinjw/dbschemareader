@@ -31,6 +31,19 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
         [TestMethod, TestCategory("MySql")]
+        public void MySqlSchemasTest()
+        {
+            const string providername = "MySql.Data.MySqlClient";
+            var connectionString = ConnectionStrings.MySql;
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            dbReader.Owner = "sakila";
+            var schemas = dbReader.AllSchemas();
+            Assert.IsTrue(schemas.Count > 0, "Schemas should contain sakila");
+        }
+
+        [TestMethod, TestCategory("MySql")]
         public void MySqlTableTest()
         {
             const string providername = "MySql.Data.MySqlClient";

@@ -157,12 +157,24 @@
     <Compile Include="SqlTasks.cs" />
     <Compile Include="TaskRunner.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
-      <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
-      <Name>DatabaseSchemaReader</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <Choose>
+    <When Condition="$(MSBuildToolsVersion) &lt; 15.0">
+      <ItemGroup>
+        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2015.csproj">
+          <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
+          <Name>DatabaseSchemaReader</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(MSBuildToolsVersion) &gt; 14.0">
+      <ItemGroup>
+        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
+          <Project>{8280afb4-9066-4656-a80e-23b859e5299c}</Project>
+          <Name>DatabaseSchemaReader</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>

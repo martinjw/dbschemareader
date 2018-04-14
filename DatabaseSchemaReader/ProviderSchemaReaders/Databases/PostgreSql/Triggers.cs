@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -36,9 +37,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             Result.Add(trigger);
         }
 
-        public IList<DatabaseTrigger> Execute(DbConnection dbConnection)
+        public IList<DatabaseTrigger> Execute(IConnectionAdapter connectionAdapter)
         {
-            var version = dbConnection.ServerVersion;
+            var version = connectionAdapter.DbConnection.ServerVersion;
             string timing = "CONDITION_TIMING";
             if (version != null)
             {
@@ -68,7 +69,7 @@ WHERE
 (EVENT_OBJECT_TABLE = :tableName OR :tableName IS NULL) AND 
 (TRIGGER_SCHEMA = :schemaOwner OR :schemaOwner IS NULL)";
 
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

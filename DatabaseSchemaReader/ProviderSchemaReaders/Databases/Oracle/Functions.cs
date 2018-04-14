@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -21,11 +22,11 @@ ORDER BY OWNER,OBJECT_NAME";
 
         }
 
-        public IList<DatabaseFunction> Execute(DbConnection connection)
+        public IList<DatabaseFunction> Execute(IConnectionAdapter connectionAdapter)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connectionAdapter);
             }
             catch (DbException ex)
             {

@@ -37,11 +37,14 @@ namespace DatabaseSchemaReader.SqlGen
         public bool IncludeSchema { get; set; }
 
         public bool IncludeDefaultValues { get; set; }
-
+        
+        /// <summary>
+        /// Generates a create table statement for the current Table
+        /// </summary>
+        /// <returns>A string with the appropriate SQL create statement</returns>
         public virtual string Write()
         {
             var sb = new StringBuilder();
-
             sb.AppendLine("CREATE TABLE " + SchemaTableName(Table));
             sb.AppendLine("(");
             var columnList = new List<string>();

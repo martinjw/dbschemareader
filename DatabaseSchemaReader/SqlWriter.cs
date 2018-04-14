@@ -138,7 +138,12 @@ namespace DatabaseSchemaReader
             return _nameEscapeStart + name + _nameEscapeEnd;
         }
 
-        private string FormattedColumns(string[] cols)
+        /// <summary>
+        /// Generates a list of columns in separated by an appropriate delimiter
+        /// </summary>
+        /// <param name="cols">An array of the columns to format</param>
+        /// <returns>A formatted/escaped string</returns>
+        public string FormattedColumns(string[] cols)
         {
             string joinString = _nameEscapeEnd + "," + Environment.NewLine + "  " + _nameEscapeStart;
 

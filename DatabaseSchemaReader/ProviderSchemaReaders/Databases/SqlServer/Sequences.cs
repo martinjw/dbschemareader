@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -23,9 +24,9 @@ WHERE
 
         }
 
-        public IList<DatabaseSequence> Execute(DbConnection connection)
+        public IList<DatabaseSequence> Execute(IConnectionAdapter connectionAdapter)
         {
-            var cmd = connection.CreateCommand();
+            var cmd = BuildCommand(connectionAdapter);
             //step 1- check if there are any sequences (backwards compatible)
             cmd.CommandText = @"SELECT COUNT(*) 
 FROM sys.objects 
@@ -40,7 +41,7 @@ WHERE type= 'SO' AND
             //step 2- they have them
             //we can use the SqlServer 2012 sys.sequences catalog view
             //renamed for compatibility with Oracle's ALL_SEQUENCES
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 
