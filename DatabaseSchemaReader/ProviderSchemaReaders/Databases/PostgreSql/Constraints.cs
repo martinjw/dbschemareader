@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -41,7 +42,7 @@ FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
     LEFT OUTER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons2
         ON (cons2.constraint_catalog = refs.constraint_catalog
             OR cons2.constraint_catalog IS NULL) AND
-        cons2.constraint_schema = refs.constraint_schema AND
+        --cons2.constraint_schema = refs.constraint_schema AND
         cons2.constraint_name = refs.unique_constraint_name
 WHERE 
     (keycolumns.table_name = :tableName OR :tableName IS NULL) AND 
@@ -106,9 +107,9 @@ ORDER BY
             constraint.Columns.Add(columnName);
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection)
+        public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

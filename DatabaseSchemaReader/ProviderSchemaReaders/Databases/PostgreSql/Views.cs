@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -23,9 +24,9 @@ AND (table_name = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY table_schema, table_name";
         }
 
-        public IList<DatabaseView> Execute(DbConnection connection)
+        public IList<DatabaseView> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

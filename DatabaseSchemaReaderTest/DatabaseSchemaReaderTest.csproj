@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DatabaseSchemaReaderTest</RootNamespace>
     <AssemblyName>DatabaseSchemaReaderTest</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <SccProjectName>SAK</SccProjectName>
@@ -20,6 +20,7 @@
     <SccProvider>SAK</SccProvider>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +39,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45|AnyCPU'">
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -47,14 +50,23 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=5.6.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
-      <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.5.6.0\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=5.12.1.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
+      <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.5.12.1\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.168.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <Private>False</Private>
     </Reference>
@@ -62,17 +74,15 @@
       <HintPath>..\packages\Npgsql.2.2.7\lib\net40\Mono.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\MySql.Data.6.9.9\lib\net40\MySql.Data.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MySql.Data, Version=6.9.10.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.6.9.10\lib\net45\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=2.2.7.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\packages\Npgsql.2.2.7\lib\net40\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
-      <HintPath>..\packages\Oracle.ManagedDataAccess.12.1.24160719\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.12.2.1100\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -82,10 +92,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Entity" />
-    <Reference Include="System.Data.SQLite, Version=1.0.103.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Data.SQLite.Core.1.0.103\lib\net40\System.Data.SQLite.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Data.SQLite, Version=1.0.106.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Core.1.0.106.0\lib\net45\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Transactions" />
@@ -151,6 +161,8 @@
     <Compile Include="InitSQLite.cs" />
     <Compile Include="IntegrationTests\Access.cs" />
     <Compile Include="IntegrationTests\TableExistsTests.cs" />
+    <Compile Include="IntegrationTests\DbConnectionTests.cs" />
+    <Compile Include="IntegrationTests\SqlServerDbSchemas.cs" />
     <Compile Include="IntegrationTests\VistaDb.cs" />
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
@@ -258,12 +270,24 @@
     <Content Include="README.txt" />
     <Content Include="Utilities\EF\Catalog.edmx.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
-      <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
-      <Name>DatabaseSchemaReader</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <Choose>
+    <When Condition="$(MSBuildToolsVersion) &lt; 15.0">
+      <ItemGroup>
+        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2015.csproj">
+          <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
+          <Name>DatabaseSchemaReader</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(MSBuildToolsVersion) &gt; 14.0">
+      <ItemGroup>
+        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
+          <Project>{8280afb4-9066-4656-a80e-23b859e5299c}</Project>
+          <Name>DatabaseSchemaReader</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
@@ -282,13 +306,15 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\System.Data.SQLite.Core.1.0.103\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.103\build\net40\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.103\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.103\build\net40\System.Data.SQLite.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net45\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.106.0\build\net45\System.Data.SQLite.Core.targets'))" />
   </Target>
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net45\System.Data.SQLite.Core.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

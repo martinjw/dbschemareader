@@ -6,7 +6,7 @@ using System.Globalization;
 namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
-    /// The parent of all schema objects.
+    /// The parent of all schema objects. May contain one or many <see cref="DatabaseDbSchema">schemas</a>
     /// </summary>
     /// <remarks>
     /// When initially populated, many of the objects (tables, stored procedures) are not linked.
@@ -33,6 +33,8 @@ namespace DatabaseSchemaReader.DataSchema
         private readonly List<DatabaseFunction> _functions;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<DatabaseUser> _users;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly List<DatabaseDbSchema> _schemas;
         #endregion
 
 
@@ -70,6 +72,7 @@ namespace DatabaseSchemaReader.DataSchema
             _tables = new List<DatabaseTable>();
             _storedProcedures = new List<DatabaseStoredProcedure>();
             _dataTypes = new List<DataType>();
+            _schemas = new List<DatabaseDbSchema>();
         }
 
         /// <summary>
@@ -101,6 +104,11 @@ namespace DatabaseSchemaReader.DataSchema
         /// Gets the users.
         /// </summary>
         public List<DatabaseUser> Users { get { return _users; } }
+
+        /// <summary>
+        /// Gets the schemas.
+        /// </summary>
+        public List<DatabaseDbSchema> Schemas { get { return _schemas; } }
 
         /// <summary>
         /// Gets the functions.

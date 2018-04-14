@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
 {
@@ -108,9 +109,9 @@ ORDER BY
             constraint.Columns.Add(columnName);
         }
 
-        public IList<DatabaseConstraint> Execute(DbConnection dbConnection)
+        public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

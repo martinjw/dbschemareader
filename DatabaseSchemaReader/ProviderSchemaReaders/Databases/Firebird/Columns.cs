@@ -2,12 +2,14 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
 {
     internal class Columns : SqlExecuter<DatabaseColumn>
     {
         private readonly string _tableName;
+        private bool _isFirebird3 = true;
 
         public Columns(string owner, string tableName)
         {
@@ -58,9 +60,62 @@ ORDER BY rfr.rdb$relation_name, rfr.rdb$field_position
 ";
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        private void Firebird2Sql()
         {
-            ExecuteDbReader(connection);
+            Sql = @"SELECT
+     rel.rdb$owner_name AS OWNER_NAME,
+     rfr.rdb$relation_name AS TABLE_NAME,
+     rfr.rdb$field_name AS COLUMN_NAME,
+     fld.rdb$field_type AS FIELD_TYPE,
+     CASE fld.rdb$field_type
+          WHEN 261 THEN 'BLOB'
+          WHEN 14 THEN 'CHAR'
+          WHEN 40 THEN 'CSTRING'
+          WHEN 11 THEN 'D_FLOAT'
+          WHEN 27 THEN 'DOUBLE'
+          WHEN 10 THEN 'FLOAT'
+          WHEN 16 THEN 'INT64'
+          WHEN 8 THEN 'INTEGER'
+          WHEN 9 THEN 'QUAD'
+          WHEN 7 THEN 'SMALLINT'
+          WHEN 12 THEN 'DATE'
+          WHEN 13 THEN 'TIME'
+          WHEN 35 THEN 'TIMESTAMP'
+          WHEN 37 THEN 'VARCHAR'
+          ELSE ''
+        END AS DATA_TYPE,
+     fld.rdb$field_sub_type AS COLUMN_SUB_TYPE,
+     CAST(fld.rdb$field_length AS integer) AS COLUMN_SIZE,
+     CAST(fld.rdb$field_precision AS integer) AS NUMERIC_PRECISION,
+     CAST(fld.rdb$field_scale AS integer) AS NUMERIC_SCALE,
+     CAST(fld.rdb$character_length AS integer) AS CHARACTER_MAXIMUM_LENGTH,
+     CAST(fld.rdb$field_length AS integer) AS CHARACTER_OCTET_LENGTH,
+     rfr.rdb$field_position AS ORDINAL_POSITION,
+     rfr.rdb$default_source AS COLUMN_DEFAULT,
+     fld.rdb$computed_source AS COMPUTED_SOURCE,
+     coalesce(fld.rdb$null_flag, rfr.rdb$null_flag) AS IS_NULLABLE,
+     rfr.rdb$description AS DESCRIPTION
+FROM rdb$relation_fields rfr
+     LEFT JOIN rdb$relations rel ON rfr.rdb$relation_name = rel.rdb$relation_name
+     LEFT JOIN rdb$fields fld ON rfr.rdb$field_source = fld.rdb$field_name
+WHERE 
+  rfr.rdb$system_flag = 0 AND
+  (@Owner IS NULL OR @Owner = rel.rdb$owner_name) AND
+  (@TABLE_NAME IS NULL OR @TABLE_NAME = rfr.rdb$relation_name)
+ORDER BY rfr.rdb$relation_name, rfr.rdb$field_position
+";
+        }
+
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
+        {
+            var sv = connectionAdapter.DbConnection.ServerVersion;
+            if (!sv.Contains("Firebird 3"))
+            {
+                _isFirebird3 = false;
+                Firebird2Sql();
+            }
+
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 
@@ -91,11 +146,14 @@ ORDER BY rfr.rdb$relation_name, rfr.rdb$field_position
                 ComputedDefinition = record.GetString("COMPUTED_SOURCE"),
                 
             };
-            var seq = record.GetString("SEQUENCE");
-            if (!string.IsNullOrEmpty(seq))
+            if (_isFirebird3)
             {
-                col.IsAutoNumber = true;
-                col.IdentityDefinition = new DatabaseColumnIdentity();
+                var seq = record.GetString("SEQUENCE");
+                if (!string.IsNullOrEmpty(seq))
+                {
+                    col.IsAutoNumber = true;
+                    col.IdentityDefinition = new DatabaseColumnIdentity();
+                }
             }
             Result.Add(col);
         }

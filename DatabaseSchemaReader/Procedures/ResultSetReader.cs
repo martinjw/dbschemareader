@@ -14,7 +14,7 @@ namespace DatabaseSchemaReader.Procedures
     public class ResultSetReader
     {
         private readonly DatabaseSchema _schema;
-        private readonly DbProviderFactory _factory;
+        private DbProviderFactory _factory;
         private readonly bool _isOracle;
 
         /// <summary>
@@ -32,34 +32,79 @@ namespace DatabaseSchemaReader.Procedures
             }
 
             _schema = schema;
-            _factory = DbProviderFactories.GetFactory(schema.Provider);
             _isOracle = (schema.Provider.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+#if !NETSTANDARD2_0
         /// <summary>
         /// Calls each procedure to find the result type.
         /// </summary>
         public void Execute()
         {
+            _factory = DbProviderFactories.GetFactory(_schema.Provider);
+            using (var dbConnection = _factory.CreateConnection())
+            {
+                dbConnection.ConnectionString = _schema.ConnectionString;
+                dbConnection.Open();
+                Execute(dbConnection);
+            }
+        }
+
+#endif
+
+        /// <summary>
+        /// Calls each procedure to find the result type.
+        /// </summary>
+        public void Execute(DbConnection dbConnection)
+        {
+            if (dbConnection == null)
+                throw new ArgumentNullException("dbConnection");
+            //we need the factory to create a DataAdapter (there seems no other generic way to create one)
+#if NETSTANDARD2_0
+            _factory = Data.FactoryFinder.FindFactory(dbConnection);
+#else
+            if (_factory != null) _factory = DbProviderFactories.GetFactory(_schema.Provider);
+#endif
+
             foreach (var procedure in _schema.StoredProcedures)
             {
-                ExecuteProcedure(procedure);
+                ExecuteProcedure(procedure, dbConnection);
             }
             foreach (var package in _schema.Packages)
             {
                 foreach (var procedure in package.StoredProcedures)
                 {
-                    ExecuteProcedure(procedure);
+                    ExecuteProcedure(procedure, dbConnection);
                 }
             }
         }
 
+#if !NETSTANDARD2_0
         /// <summary>
         /// Calls the specified procedure to find the result type.
         /// </summary>
         /// <param name="procedure">The procedure.</param>
         public void ExecuteProcedure(DatabaseStoredProcedure procedure)
         {
+            using (var dbConnection = _factory.CreateConnection())
+            {
+                dbConnection.ConnectionString = _schema.ConnectionString;
+                dbConnection.Open();
+                ExecuteProcedure(procedure, dbConnection);
+            }
+        }
+#endif
+
+        /// <summary>
+        /// Calls the specified procedure to find the result type.
+        /// </summary>
+        /// <param name="procedure">The procedure.</param>
+        /// <param name="connection">The database connection</param>
+        public void ExecuteProcedure(DatabaseStoredProcedure procedure, DbConnection connection)
+        {
+            //if we can't find the factory, we can't use the data adapter
+            if (_factory == null) return;
+
             var executionName = procedure.Name;
             if (!string.IsNullOrEmpty(procedure.Package))
                 executionName = procedure.Package + "." + procedure.Name;
@@ -70,47 +115,44 @@ namespace DatabaseSchemaReader.Procedures
 
             using (var resultSet = new DataSet { Locale = CultureInfo.InvariantCulture })
             {
-                using (DbConnection connection = _factory.CreateConnection())
+                using (var command = connection.CreateCommand())
                 {
-                    connection.ConnectionString = _schema.ConnectionString;
-                    using (var command = _factory.CreateCommand())
-                    {
-                        command.Connection = connection;
-                        command.CommandText = executionName;
-                        command.CommandTimeout = 5;
-                        command.CommandType = CommandType.StoredProcedure;
+                    command.Connection = connection;
+                    command.CommandText = executionName;
+                    command.CommandTimeout = 5;
+                    command.CommandType = CommandType.StoredProcedure;
 
-                        AddParameters(procedure, command);
+                    AddParameters(procedure, command);
 
+                    if (connection.State == ConnectionState.Closed)
                         connection.Open();
-                        using (DbTransaction tx = connection.BeginTransaction())
+
+                    using (var tx = connection.BeginTransaction())
+                    {
+                        command.Transaction = tx;
+                        using (DbDataAdapter adapter = _factory.CreateDataAdapter())
                         {
-                            command.Transaction = tx;
+                            adapter.SelectCommand = command;
 
-                            using (DbDataAdapter adapter = _factory.CreateDataAdapter())
+                            try
                             {
-                                adapter.SelectCommand = command;
-
-                                try
-                                {
-                                    adapter.FillSchema(resultSet, SchemaType.Source);
-                                }
-                                catch (DbException exception)
-                                {
-                                    //ignore any db exceptions
-                                    Debug.WriteLine(executionName + Environment.NewLine
-                                                    + exception.Message);
-                                }
-                                catch (Exception exception) //for exceptions that don't derive from DbException
-                                {
-                                    //ignore any db exceptions
-                                    Debug.WriteLine(executionName + Environment.NewLine
-                                                    + exception.Message);
-                                }
-
+                                adapter.FillSchema(resultSet, SchemaType.Source);
                             }
-                            tx.Rollback();
+                            catch (DbException exception)
+                            {
+                                //ignore any db exceptions
+                                Debug.WriteLine(executionName + Environment.NewLine
+                                                + exception.Message);
+                            }
+                            catch (Exception exception) //for exceptions that don't derive from DbException
+                            {
+                                //ignore any db exceptions
+                                Debug.WriteLine(executionName + Environment.NewLine
+                                                + exception.Message);
+                            }
+
                         }
+                        tx.Rollback();
                     }
                 }
                 UpdateProcedure(procedure, resultSet);

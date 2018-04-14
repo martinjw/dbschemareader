@@ -1,8 +1,8 @@
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
-using System;
-using System.Collections.Generic;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -20,125 +20,156 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabaseTable> Tables(string tableName)
         {
             return new Tables(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)
         {
             return new Columns(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.PrimaryKey)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> UniqueKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.UniqueKey)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> ForeignKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.ForeignKey)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> ComputedColumns(string tableName)
         {
             return new ComputedColumns(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> IdentityColumns(string tableName)
         {
             return new IdentityColumns(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseIndex> Indexes(string tableName)
         {
             return new Indexes(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
             return new Triggers(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTable> ColumnDescriptions(string tableName)
         {
             return new ColumnDescriptions(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTable> TableDescriptions(string tableName)
         {
             return new TableDescriptions(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> CheckConstraints(string tableName)
         {
             return new CheckConstraints(Owner, tableName)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseView> Views(string viewName)
         {
-            return new Views(Owner, viewName)
-                .Execute(DbConnection);
+            var views = new Views(Owner, viewName)
+                .Execute(ConnectionAdapter);
+            if (string.IsNullOrEmpty(viewName) || !views.Any())
+            {
+                var mviews = new MaterializedViews(Owner, viewName)
+                    .Execute(ConnectionAdapter);
+                foreach (var mview in mviews)
+                {
+                    views.Add(mview);
+                }
+            }
+            return views;
         }
 
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
-            return new ViewColumns(Owner, viewName)
-                .Execute(DbConnection);
+            var columns = new ViewColumns(Owner, viewName)
+                .Execute(ConnectionAdapter);
+            if (string.IsNullOrEmpty(viewName) || !columns.Any())
+            {
+                var mCols = new MaterializedViewColumns(Owner, viewName)
+                    .Execute(ConnectionAdapter);
+                foreach (var mcol in mCols)
+                {
+                    columns.Add(mcol);
+                }
+            }
+            return columns;
+        }
+
+        public override IList<DatabaseIndex> ViewIndexes(string tableName)
+        {
+            return new ViewIndexes(Owner, tableName)
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabasePackage> Packages(string name)
         {
             return new Packages(Owner, name)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseStoredProcedure> StoredProcedures(string name)
         {
             return new StoredProcedures(Owner, name)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseFunction> Functions(string name)
         {
             return new Functions(Owner)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseArgument> ProcedureArguments(string name)
         {
             return new ProcedureArguments(Owner, name)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<ProcedureSource> ProcedureSources(string name)
         {
             return new ProcedureSources(Owner, name)
-                .Execute(DbConnection);
+                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseSequence> Sequences(string name)
         {
-            return new Sequences(Owner).Execute(DbConnection);
+            return new Sequences(Owner).Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseUser> Users()
         {
-            return new Users().Execute(DbConnection);
+            return new Users().Execute(ConnectionAdapter);
+        }
+
+        public override IList<DatabaseDbSchema> Schemas()
+        {
+            return new Schemas().Execute(ConnectionAdapter);
         }
 
         public override void PostProcessing(DatabaseTable databaseTable)

@@ -2,15 +2,13 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.KeyMaps;
-using DatabaseSchemaReader.ProviderSchemaReaders.Converters.RowConverters;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
     internal class ViewColumns : SqlExecuter<DatabaseColumn>
     {
         private readonly string _viewName;
-        private readonly ColumnRowConverter _converter;
 
         public ViewColumns(string owner, string viewName)
         {
@@ -36,14 +34,11 @@ where
     (c.TABLE_NAME = @TableName or (@TableName is null))
  order by 
     c.TABLE_SCHEMA, c.TABLE_NAME, ORDINAL_POSITION";
-
-            var keyMap = new ColumnsKeyMap();
-            _converter = new ColumnRowConverter(keyMap);
         }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 
@@ -55,7 +50,7 @@ where
 
         protected override void Mapper(IDataRecord record)
         {
-            var col = _converter.Convert(record);
+            var col = Columns.Convert(record);
             Result.Add(col);
         }
     }

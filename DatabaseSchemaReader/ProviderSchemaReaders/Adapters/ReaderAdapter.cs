@@ -1,12 +1,12 @@
 ﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System.Collections.Generic;
 using System.Data.Common;
-using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
-    class ReaderAdapter
+    internal class ReaderAdapter
     {
         public readonly SchemaParameters Parameters;
         private ConnectionAdapter _connectionAdapter;
@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return _connectionAdapter;
         }
 
-        protected DbConnection DbConnection
+        protected IConnectionAdapter ConnectionAdapter
         {
             get
             {
@@ -39,7 +39,32 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 {
                     _connectionAdapter = new ConnectionAdapter(Parameters);
                 }
-                return _connectionAdapter.DbConnection;
+                return _connectionAdapter;
+            }
+        }
+
+        //protected DbConnection DbConnection
+        //{
+        //    get
+        //    {
+        //        if (_connectionAdapter == null)
+        //        {
+        //            _connectionAdapter = new ConnectionAdapter(Parameters);
+        //        }
+        //        return _connectionAdapter.DbConnection;
+        //    }
+        //}
+
+        protected DbTransaction DbTransaction
+        {
+            get
+            {
+                if (_connectionAdapter == null)
+                {
+                    _connectionAdapter = new ConnectionAdapter(Parameters);
+                }
+                return _connectionAdapter.DbTransaction;
+
             }
         }
 
@@ -134,6 +159,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new List<DatabaseIndex>();
         }
 
+        public virtual IList<DatabaseIndex> ViewIndexes(string tableName)
+        {
+            return new List<DatabaseIndex>();
+        }
+
         public virtual IList<DatabaseTrigger> Triggers(string tableName)
         {
             return new List<DatabaseTrigger>();
@@ -172,6 +202,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public virtual IList<DatabaseUser> Users()
         {
             return new List<DatabaseUser>();
+        }
+
+        public virtual IList<DatabaseDbSchema> Schemas()
+        {
+            return new List<DatabaseDbSchema>();
         }
 
         public virtual void PostProcessing(DatabaseTable databaseTable)

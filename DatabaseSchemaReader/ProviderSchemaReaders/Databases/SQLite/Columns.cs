@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
 {
@@ -17,14 +18,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
         protected List<DatabaseColumn> Result { get; } = new List<DatabaseColumn>();
         public string PragmaSql { get; set; }
 
-        public IList<DatabaseColumn> Execute(DbConnection connection)
+        public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
         {
-            var tables = new Tables(_tableName).Execute(connection);
+            var tables = new Tables(_tableName).Execute(connectionAdapter);
 
             foreach (var table in tables)
             {
                 var tableName = table.Name;
-                using (var cmd = connection.CreateCommand())
+                using (var cmd = connectionAdapter.DbConnection.CreateCommand())
                 {
                     cmd.CommandText = string.Format(PragmaSql, tableName);
                     int ordinal = 0;
@@ -37,11 +38,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                             {
                                 TableName = tableName,
                                 Name = colName,
+                                SchemaOwner = "",
                                 Ordinal = ordinal,
                                 //type will be like "nvarchar(32)".
                                 //Lengths /precisions could be parsed out (nb remember this is Sqlite)
                                 DbDataType = dr.GetString("type"),
-                                Nullable = dr.GetBoolean("notnull"),
+                                Nullable = !dr.GetBoolean("notnull"),
                                 DefaultValue = dr.GetString("dflt_value"),
                                 IsPrimaryKey = dr.GetBoolean("pk"),
                             };

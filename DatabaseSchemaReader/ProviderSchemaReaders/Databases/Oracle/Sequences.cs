@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
@@ -24,9 +25,9 @@ WHERE
 
         }
 
-        public IList<DatabaseSequence> Execute(DbConnection connection)
+        public IList<DatabaseSequence> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

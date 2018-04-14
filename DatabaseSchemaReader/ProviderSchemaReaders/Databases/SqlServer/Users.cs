@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -26,9 +27,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
             Result.Add(constraint);
         }
 
-        public IList<DatabaseUser> Execute(DbConnection dbConnection)
+        public IList<DatabaseUser> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

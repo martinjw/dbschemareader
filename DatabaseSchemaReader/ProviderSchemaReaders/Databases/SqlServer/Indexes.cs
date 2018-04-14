@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -34,9 +35,10 @@ INNER JOIN
 WHERE 
     (t.name = @TableName OR @TableName IS NULL) AND 
     (SCHEMA_NAME(t.schema_id) = @schemaOwner OR @schemaOwner IS NULL) AND 
-	 t.is_ms_shipped = 0 
+	 t.is_ms_shipped = 0 AND
+     ic.is_included_column = 0
 ORDER BY 
-     t.name, ind.name, col.name";
+     t.name, ind.name, ic.index_column_id";
 
         }
 
@@ -64,7 +66,10 @@ ORDER BY
                 };
                 if (record.GetBoolean("IsPrimary"))
                 {
-                    index.IndexType = "PRIMARY";
+                    //by default SqlServer pks have clustered indexes. If they are not, we need to record it.
+                    index.IndexType = string.Equals("NONCLUSTERED", index.IndexType, StringComparison.OrdinalIgnoreCase) ? 
+                        "PRIMARY NONCLUSTERED" : 
+                        "PRIMARY";
                 }
                 Result.Add(index);
             }
@@ -79,9 +84,9 @@ ORDER BY
 
         }
 
-        public IList<DatabaseIndex> Execute(DbConnection dbConnection)
+        public IList<DatabaseIndex> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(dbConnection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
     }

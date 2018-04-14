@@ -57,8 +57,7 @@ namespace DatabaseSchemaReader.Utilities.DbProvider
         /// <returns></returns>
         public DbProviderFactory GetFactory(DbProviderFactoryDescription description)
         {
-            var providerType = //AssemblyHelper.LoadTypeFrom(description.AssemblyQualifiedName);
-                Type.GetType(description.AssemblyQualifiedName);
+            var providerType = AssemblyHelper.LoadTypeFrom(description.AssemblyQualifiedName);
             if (providerType == null) return null;
 
             var providerInstance = providerType.GetField("Instance",

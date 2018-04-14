@@ -1,5 +1,5 @@
 ﻿using System;
-using DatabaseSchemaReader.Conversion;
+using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Data
@@ -50,13 +50,77 @@ namespace DatabaseSchemaReader.Data
             return !sqlType.HasValue ? SqlType.SqlServer : sqlType.Value;
         }
 
+//#if !NETSTANDARD2_0
+        /// <summary>
+        /// Reads the table schema and data and returns the INSERT statements
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="connection">The connection (must have a connection string.</param>
+        /// <returns></returns>
+        public string ReadTable(string tableName, DbConnection connection)
+        {
+            using (var dr = new DatabaseReader(connection))
+            {
+                var databaseTable = dr.Table(tableName);
+                if (databaseTable == null) return null;
+                return ReadTable(databaseTable, connection);
+            }
+        }
+
         /// <summary>
         /// Reads the table data and returns the INSERT statements
         /// </summary>
         /// <param name="databaseTable">The database table.</param>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connection">The connection.</param>
         /// <returns></returns>
+        public string ReadTable(DatabaseTable databaseTable, DbConnection connection)
+        {
+#if NETSTANDARD2_0
+            var r = new Reader(databaseTable);
+#else
+            var r = new Reader(databaseTable, connection.ConnectionString, connection.GetType().Namespace);
+#endif
+            r.PageSize = PageSize;
+            var dt = r.Read(connection);
+            var w = new InsertWriter(databaseTable, dt);
+            w.IncludeIdentity = IncludeIdentity;
+            w.IncludeBlobs = IncludeBlobs;
+            var providerName = connection.GetType().Namespace;
+            return w.Write(FindSqlType(providerName));
+        }
+        
+        /// <summary>
+        /// Reads the table data and invokes the function for each INSERT statement. The databaseTable must have dataTypes (call DataReader.DataTypes()).
+        /// </summary>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="processRecord">The process record.</param>
+        public void ReadTable(DatabaseTable databaseTable, DbConnection connection,
+                              Func<string, bool> processRecord)
+        {
+            var providerName = connection.GetType().Namespace;
+#if NETSTANDARD2_0
+            var r = new Reader(databaseTable);
+#else
+            var r = new Reader(databaseTable, connection.ConnectionString, providerName);
+#endif
+            var w = new InsertWriter(databaseTable, FindSqlType(providerName));
+            r.Read(connection, record =>
+                       {
+                           var s = w.WriteInsert(record);
+                           return processRecord(s);
+                       });
+
+        }
+        //#else
+#if !NETSTANDARD2_0
+            /// <summary>
+            /// Reads the table data and returns the INSERT statements
+            /// </summary>
+            /// <param name="databaseTable">The database table.</param>
+            /// <param name="connectionString">The connection string.</param>
+            /// <param name="providerName">Name of the provider.</param>
+            /// <returns></returns>
         public string ReadTable(DatabaseTable databaseTable, string connectionString, string providerName)
         {
             var r = new Reader(databaseTable, connectionString, providerName);
@@ -104,6 +168,7 @@ namespace DatabaseSchemaReader.Data
                        });
 
         }
+#endif
 
     }
 }

@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -44,15 +45,15 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection)
+        public IList<DatabaseArgument> Execute(IConnectionAdapter connectionAdapter)
         {
             _requiredDataTypes.Clear();
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
 
             //now lookup datatypes
             foreach (var key in _requiredDataTypes.Keys)
             {
-                var typeName = LookUpTypes(connection, key);
+                var typeName = LookUpTypes(connectionAdapter, key);
                 foreach (var databaseArgument in _requiredDataTypes[key])
                 {
                     databaseArgument.DatabaseDataType = typeName;
@@ -135,11 +136,11 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
             }
         }
 
-        private static string LookUpTypes(DbConnection connection, long id)
+        private string LookUpTypes(IConnectionAdapter connectionAdapter, long id)
         {
             const string sqlCommand =
                 @"SELECT pg_catalog.format_type(:oid, NULL)";
-            using (var cmd = connection.CreateCommand())
+            using (var cmd = BuildCommand(connectionAdapter))
             {
                 cmd.CommandText = sqlCommand;
                 AddDbParameter(cmd, "oid", id);

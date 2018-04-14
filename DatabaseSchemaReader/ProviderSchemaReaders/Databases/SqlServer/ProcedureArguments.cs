@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -47,9 +48,9 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, PARAMETER_NAME";
 
         }
 
-        public IList<DatabaseArgument> Execute(DbConnection connection)
+        public IList<DatabaseArgument> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connection);
+            ExecuteDbReader(connectionAdapter);
             return Result;
         }
 

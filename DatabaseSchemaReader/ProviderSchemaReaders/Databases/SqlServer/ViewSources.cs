@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
@@ -28,11 +29,11 @@ WHERE (o.type='V')
 ORDER BY o.type;";
         }
 
-        public IList<ProcedureSource> Execute(DbConnection connection)
+        public IList<ProcedureSource> Execute(IConnectionAdapter connectionAdapter)
         {
             try
             {
-                ExecuteDbReader(connection);
+                ExecuteDbReader(connectionAdapter);
             }
             catch (DbException exception)
             {
