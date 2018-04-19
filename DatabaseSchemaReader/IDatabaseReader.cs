@@ -16,7 +16,7 @@ namespace DatabaseSchemaReader
         string Owner { get; set; }
 
         /// <summary>
-        /// Gets the database schema. Only call AFTER calling <see cref="ReadAll"/> or one or more other methods such as <see cref="AllTables"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes"/> to add datatypes from DbDataType string after loaded.
+        /// Gets the database schema. Only call AFTER calling <see cref="ReadAll"/> or one or more other methods such as <see cref="AllTables"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences(DataSchema.DatabaseSchema)"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes(DataSchema.DatabaseSchema)"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
         DatabaseSchema DatabaseSchema { get; }
 

@@ -6,7 +6,7 @@ using System.Globalization;
 namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
-    /// The parent of all schema objects. May contain one or many <see cref="DatabaseDbSchema">schemas</a>
+    /// The parent of all schema objects. May contain one or many <see cref="DatabaseDbSchema">schemas</see>
     /// </summary>
     /// <remarks>
     /// When initially populated, many of the objects (tables, stored procedures) are not linked.
