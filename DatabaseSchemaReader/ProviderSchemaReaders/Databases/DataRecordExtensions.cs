@@ -56,6 +56,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             var s = value.ToString();
             if (s == "0") return false;
             if (s == "1") return true;
+            if (s == "-1") return true;
             //could be Y, YES, N, NO, true, false.
             if (s.StartsWith("Y", StringComparison.OrdinalIgnoreCase) || s.StartsWith("T", StringComparison.OrdinalIgnoreCase)) //Y or YES
                 return true;

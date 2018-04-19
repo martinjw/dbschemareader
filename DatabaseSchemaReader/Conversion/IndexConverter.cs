@@ -107,15 +107,24 @@ namespace DatabaseSchemaReader.Conversion
             if (key == null) return false;
             var o = row[key];
             if (o == DBNull.Value) return false;
+            bool result;
+            var s = o.ToString();
             if (o is string)
             {
-                var value = o.ToString();
+                var value = s;
                 if (value.StartsWith("Y", StringComparison.OrdinalIgnoreCase) ||
                     value.StartsWith("T", StringComparison.OrdinalIgnoreCase)) //Y or YES or True
                     return true;
                 return (value.Equals(trueText));
             }
-            return (bool)o;
+
+            if (s == "-1" || s == "1") //#68
+                return true;
+            if (s == "0")
+                return false;
+            if (bool.TryParse(s, out result))
+                return result;
+            return false;
         }
     }
 }
