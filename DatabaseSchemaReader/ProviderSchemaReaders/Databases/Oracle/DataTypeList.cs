@@ -100,7 +100,7 @@ dts.Add(new DataType("TIMESTAMP WITH LOCAL TIME ZONE", "System.DateTime") {
 	LiteralPrefix = "TO_TIMESTAMP_TZ('",
 	LiteralSuffix = "','YYYY-MM-DD HH24:MI:SS.FF')",
 });
-dts.Add(new DataType("TIMESTAMP WITH TIME ZONE", "System.DateTime") {
+dts.Add(new DataType("TIMESTAMP WITH TIME ZONE", "System.DateTimeOffset") {
 	ProviderDbType = 20,
 	CreateFormat = "TIMESTAMP({0} WITH TIME ZONE)",
 	LiteralPrefix = "TO_TIMESTAMP_TZ('",

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -206,6 +207,10 @@ namespace DatabaseSchemaReader.DataSchema
             if (string.IsNullOrEmpty(dbDataType)) return null;
             DataType dt;
             if (dataTypes.TryGetValue(dbDataType, out dt)) return dt;
+
+            //try without (n)
+            var unbraced = Regex.Replace(dbDataType, "\\([^\\)]*\\)", string.Empty);
+            if (dataTypes.TryGetValue(unbraced, out dt)) return dt;
 
             var brace = dbDataType.IndexOf('(');
             if (brace > 1)

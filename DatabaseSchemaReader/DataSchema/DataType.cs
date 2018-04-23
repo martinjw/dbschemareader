@@ -108,6 +108,8 @@ namespace DatabaseSchemaReader.DataSchema
                         _netDataTypeCSharpName = "decimal";
                     else if (t == typeof(double))
                         _netDataTypeCSharpName = "double";
+                    else if (t == typeof(DateTimeOffset))
+                        _netDataTypeCSharpName = "DateTimeOffset";
                     else
                         _netDataTypeCSharpName = NetDataType;
                 }
