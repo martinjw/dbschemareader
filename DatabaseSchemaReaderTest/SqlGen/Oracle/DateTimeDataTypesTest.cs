@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Data;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle;
 using DatabaseSchemaReader.SqlGen.Oracle;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -76,6 +78,23 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
 
             //assert
             Assert.AreEqual("NUMBER (18)", result);
+        }
+
+        [TestMethod]
+        public void TestSqlServerTimeStampWithTimeZone()
+        {
+            //arrange
+            _column.DbDataType = "TIMESTAMP(6) WITH TIME ZONE";
+            _column.Precision = 6;
+            //automatically assign oracle datatypes
+            var types = new DataTypeList().Execute();
+            DatabaseSchemaFixer.UpdateDataTypes(types, new List<DatabaseColumn>(new []{_column}));
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("TIMESTAMP (6) WITH TIME ZONE", result);
         }
 
         [TestMethod]
