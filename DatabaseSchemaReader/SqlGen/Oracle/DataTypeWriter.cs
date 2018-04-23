@@ -277,6 +277,12 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 if (!string.IsNullOrEmpty(defaultValue))
                     sql += " DEFAULT TIMESTAMP '" + defaultValue + "'";
             }
+            if (dataType == "TIMESTAMP WITH TIME ZONE")
+            {
+                sql = string.Format("TIMESTAMP ({0}) WITH TIME ZONE", precision.HasValue ? precision : 6);
+                if (!string.IsNullOrEmpty(defaultValue))
+                    sql += " DEFAULT TIMESTAMP '" + defaultValue + "'";
+            }
 
             if (dataType == "CLOB" || dataType == "NCLOB")
             {

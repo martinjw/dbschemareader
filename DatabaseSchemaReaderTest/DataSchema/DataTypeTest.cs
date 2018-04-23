@@ -29,6 +29,40 @@ namespace DatabaseSchemaReaderTest.DataSchema
         }
 
         [TestMethod]
+        public void DateTimeNetCodeNameTest()
+        {
+            //arrange
+            var column = new DatabaseColumn();
+            column.Name = "TEST";
+            column.DbDataType = "TIMESTAMP";
+
+            column.DataType = new DataType("TIMESTAMP", "System.DateTime");
+
+            //act
+            var result = column.DataType.NetCodeName(column);
+
+            //assert
+            Assert.AreEqual("DateTime", result);
+        }
+
+        [TestMethod]
+        public void DateTimeOffsetNetCodeNameTest()
+        {
+            //arrange
+            var column = new DatabaseColumn();
+            column.Name = "TEST";
+            column.DbDataType = "TIMESTAMP(6) WITH TIME ZONE";
+
+            column.DataType = new DataType("TIMESTAMP WITH TIME ZONE", "System.DateTimeOffset");
+
+            //act
+            var result = column.DataType.NetCodeName(column);
+
+            //assert
+            Assert.AreEqual("DateTimeOffset", result);
+        }
+
+        [TestMethod]
         public void DecimalTest()
         {
             //arrange

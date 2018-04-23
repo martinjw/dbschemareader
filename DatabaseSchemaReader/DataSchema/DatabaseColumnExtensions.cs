@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -45,7 +46,11 @@ namespace DatabaseSchemaReader.DataSchema
             var dataType = column.DbDataType.ToUpperInvariant();
             var brace = dataType.IndexOf("(", StringComparison.OrdinalIgnoreCase);
             if (brace != -1) //timestamp(6)
-                dataType = dataType.Substring(0, brace);
+            {
+                dataType = Regex.Replace(dataType, "\\([^\\)]*\\)", string.Empty);
+                //leave on trailing text
+                //dataType = dataType.Substring(0, brace);
+            }
             //also clean off MySql's unsigned indicator
             var space = dataType.IndexOf(" unsigned", StringComparison.OrdinalIgnoreCase);
             if (space > 1)
