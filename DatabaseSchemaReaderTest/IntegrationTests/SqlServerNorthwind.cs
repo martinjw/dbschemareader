@@ -71,6 +71,30 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         }
 
         [TestMethod, TestCategory("SqlServer")]
+        public void ReadCaseSensitiveTableName()
+        {
+            var dbReader = TestHelper.GetNorthwindReader();
+            var table = dbReader.Table("Products");
+            Debug.WriteLine("Table " + table.Name);
+
+            var dbReader2 = TestHelper.GetNorthwindReader();
+            var table2 = dbReader.Table("PRODUCTS");
+            Debug.WriteLine("Table " + table2.Name);
+
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                var col = table.Columns[i];
+                var col2 = table2.Columns[i];
+
+                Assert.AreEqual(col.Name, col2.Name);
+                Assert.AreEqual(col.Length, col2.Length);
+                Assert.AreEqual(col.IsPrimaryKey, col2.IsPrimaryKey);
+                Assert.AreEqual(col.IsForeignKey, col2.IsForeignKey);
+                Assert.AreEqual(col.IsIndexed, col2.IsIndexed);
+            }
+        }
+
+        [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindAllTables()
         {
             var dbReader = TestHelper.GetNorthwindReader();
