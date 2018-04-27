@@ -47,6 +47,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             {
                 return null;
             }
+
+            tableName = tables.FirstOrDefault()?.Name ?? tableName;
+
             if (string.IsNullOrEmpty(_readerAdapter.Parameters.Owner))
             {
                 var owner = tables[0].SchemaOwner;
