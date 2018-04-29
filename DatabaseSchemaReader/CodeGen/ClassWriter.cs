@@ -207,6 +207,8 @@ namespace DatabaseSchemaReader.CodeGen
                 //Index attribute
                 _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             }
+
+            _cb.AppendLine("using Dapper;");
         }
 
         private void WriteForeignKeyCollections()
