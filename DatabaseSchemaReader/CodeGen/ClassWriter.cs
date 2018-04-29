@@ -162,14 +162,39 @@ namespace DatabaseSchemaReader.CodeGen
                     }
                 }
             }
-            else
+        }
+
+        private void WritePrimaryKey(string className)
+        {
+            foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
             {
-                //single primary key column
-                var column = _table.PrimaryKeyColumn;
-                //could be a view or have no primary key
-                if (column != null)
-                    WriteColumn(column);
+                WriteColumn(column, false);
             }
+
+            // KE: do not use the composite class as the primary key -- we need each PK as a property for Dapper.SimpleCRUD to work
+            //if (_table.HasCompositeKey)
+            //{
+            //    if (!IsEntityFramework())
+            //    {
+            //        _cb.AppendAutomaticProperty(className + "Key", "Key");
+            //    }
+            //    else
+            //    {
+            //        //code first composite key
+            //        foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
+            //        {
+            //            WriteColumn(column, false);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    //single primary key column
+            //    var column = _table.PrimaryKeyColumn;
+            //    //could be a view or have no primary key
+            //    if (column != null)
+            //        WriteColumn(column);
+            //}
         }
 
 
