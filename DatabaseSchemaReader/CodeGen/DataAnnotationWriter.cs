@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -19,11 +20,16 @@ namespace DatabaseSchemaReader.CodeGen
             _isNet4 = isNet4;
         }
 
-        public void Write(ClassBuilder cb, DatabaseColumn column)
+        public void Write(ClassBuilder cb, DatabaseColumn column, string propertyName)
         {
             var netName = column.NetName ?? column.Name;
             //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
             _friendlyName = Regex.Replace(netName, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+
+            if (!string.Equals(propertyName, column.Name))
+            {
+                WriteColumnAttribute(cb, column.Name);
+            }
 
             if (_isNet4) //Display is .Net 4 and Silverlight 3 only 
             {
@@ -92,6 +98,11 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
+        }
+
+        private void WriteColumnAttribute(ClassBuilder cb, string name)
+        {
+            cb.AppendLine($"[Column(\"{name}\")]");
         }
 
         private static void WriteIndex(ClassBuilder cb, DatabaseColumn column)
