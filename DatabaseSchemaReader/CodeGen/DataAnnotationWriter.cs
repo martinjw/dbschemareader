@@ -173,11 +173,11 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteRequiredAttribute(ClassBuilder cb)
         {
-            var required = "[Required]";
+            var required = "[System.ComponentModel.DataAnnotations.Required]";
             var requiredErrorMessage = _codeWriterSettings.RequiredErrorMessage;
             if (!string.IsNullOrEmpty(requiredErrorMessage))
             {
-                required = "[Required(ErrorMessage=\"" +
+                required = "[System.ComponentModel.DataAnnotations.Required(ErrorMessage=\"" +
                     string.Format(CultureInfo.InvariantCulture, requiredErrorMessage, _friendlyName) +
                     "\")]";
             }
