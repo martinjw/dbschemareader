@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
@@ -136,40 +137,79 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteForeignKeyCollections();
 
-            if (!_table.HasCompositeKey &&
-                _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
-                _inheritanceTable == null)
+            WriteGetter(className);
+
+            // KE: skip writing ToString, Equals, and GetHashCode
+            //if (!_table.HasCompositeKey &&
+            //    _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
+            //    _inheritanceTable == null)
+            //{
+            //    var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
+            //    overrider.AddOverrides();
+            //}
+        }
+
+        private void WriteGetter(string className)
+        {
+            var parameters = "";
+            var parameterName = "";
+            var dataType = "";
+            if (_table.HasCompositeKey)
             {
-                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
-                overrider.AddOverrides();
+                dataType = className + "Key";
+                parameterName = "key";
+            }
+            else
+            {
+                var pk = _table.Columns.Single(c => c.IsPrimaryKey);
+                dataType = _dataTypeWriter.Write(pk);
+                parameterName = "id";
+            }
+
+            parameters = $"{dataType} {parameterName}";
+
+            using (_cb.BeginNest($"public static {className} Get({parameters})"))
+            {
+                _cb.AppendLine(@"SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);");
+                using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
+                {
+                    _cb.AppendLine($"var entity = connection.Get<{className}>({parameterName});");
+                    _cb.AppendLine("return entity;");
+                }
             }
         }
 
         private void WritePrimaryKey(string className)
         {
-            if (_table.HasCompositeKey)
+            foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
             {
-                if (!IsEntityFramework())
-                {
-                    _cb.AppendAutomaticProperty(className + "Key", "Key");
-                }
-                else
-                {
-                    //code first composite key
-                    foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
-                    {
-                        WriteColumn(column, false);
-                    }
-                }
+                WriteColumn(column, false);
             }
-            else
-            {
-                //single primary key column
-                var column = _table.PrimaryKeyColumn;
-                //could be a view or have no primary key
-                if (column != null)
-                    WriteColumn(column);
-            }
+
+            // KE: do not use the composite class as the primary key -- we need each PK as a property for Dapper.SimpleCRUD to work
+            //if (_table.HasCompositeKey)
+            //{
+            //    if (!IsEntityFramework())
+            //    {
+            //        _cb.AppendAutomaticProperty(className + "Key", "Key");
+            //    }
+            //    else
+            //    {
+            //        //code first composite key
+            //        foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
+            //        {
+            //            WriteColumn(column, false);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    //single primary key column
+            //    var column = _table.PrimaryKeyColumn;
+            //    //could be a view or have no primary key
+            //    if (column != null)
+            //        WriteColumn(column);
+            //}
         }
 
 
@@ -207,6 +247,8 @@ namespace DatabaseSchemaReader.CodeGen
                 //Index attribute
                 _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             }
+
+            _cb.AppendLine("using Dapper;");
         }
 
         private void WriteForeignKeyCollections()
@@ -336,7 +378,7 @@ namespace DatabaseSchemaReader.CodeGen
                 writeAnnotations = false;
             }
             if(writeAnnotations)
-            _dataAnnotationWriter.Write(_cb, column);
+            _dataAnnotationWriter.Write(_cb, column, propertyName);
             //for code first, ordinary properties are non-virtual. 
             var useVirtual = !IsEntityFramework();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);

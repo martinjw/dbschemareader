@@ -213,6 +213,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 ProviderDbType = 0,
                 CreateFormat = "",
             });
+            dts.Add(new DataType("uuid", "System.Guid")
+            {
+                ProviderDbType = 0,
+                CreateFormat = ""
+            });
             return dts;
         }
     }
