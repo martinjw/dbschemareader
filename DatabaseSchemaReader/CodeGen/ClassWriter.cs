@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
@@ -136,30 +137,44 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteForeignKeyCollections();
 
-            if (!_table.HasCompositeKey &&
-                _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
-                _inheritanceTable == null)
-            {
-                var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
-                overrider.AddOverrides();
-            }
+            WriteGetter(className);
+
+            // KE: skip writing ToString, Equals, and GetHashCode
+            //if (!_table.HasCompositeKey &&
+            //    _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
+            //    _inheritanceTable == null)
+            //{
+            //    var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
+            //    overrider.AddOverrides();
+            //}
         }
 
-        private void WritePrimaryKey(string className)
+        private void WriteGetter(string className)
         {
+            var parameters = "";
+            var parameterName = "";
+            var dataType = "";
             if (_table.HasCompositeKey)
             {
-                if (!IsEntityFramework())
+                dataType = className + "Key";
+                parameterName = "key";
+            }
+            else
+            {
+                var pk = _table.Columns.Single(c => c.IsPrimaryKey);
+                dataType = _dataTypeWriter.Write(pk);
+                parameterName = "id";
+            }
+
+            parameters = $"{dataType} {parameterName}";
+
+            using (_cb.BeginNest($"public static {className} Get({parameters})"))
+            {
+                _cb.AppendLine(@"SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);");
+                using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
                 {
-                    _cb.AppendAutomaticProperty(className + "Key", "Key");
-                }
-                else
-                {
-                    //code first composite key
-                    foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
-                    {
-                        WriteColumn(column, false);
-                    }
+                    _cb.AppendLine($"var entity = connection.Get<{className}>({parameterName});");
+                    _cb.AppendLine("return entity;");
                 }
             }
         }
