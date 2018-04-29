@@ -36,7 +36,10 @@ namespace DatabaseSchemaReader.CodeGen
                 //.Net 4 and Silverlight 3 only 
                 //NOTE: for EF CodeFirst generation, we also mapped fluently.
                 //Despite the duplication, it's useful to have the key as a marker in the model
-                if (_isNet4) cb.AppendLine("[Key]");
+
+                // KE: always write a [Key] attribute
+                cb.AppendLine("[System.ComponentModel.DataAnnotations.Key]");
+                //if (_isNet4) cb.AppendLine("[Key]");
             }
             else if (!column.Nullable)
                 WriteRequiredAttribute(cb);
