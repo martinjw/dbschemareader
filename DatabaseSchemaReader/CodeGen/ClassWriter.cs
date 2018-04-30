@@ -178,9 +178,64 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         WriteForeignKeyGetter("entity", foreignKey);
                     }
+
+                    foreach (var foreignKeyChild in _table.ForeignKeyChildren)
+                    {
+                        WriteForeignKeyChildGetter("entity", foreignKeyChild);
+                    }
+
                     _cb.AppendLine("return entity;");
                 }
             }
+        }
+
+        private void WriteForeignKeyChildGetter(string entityName, DatabaseTable foreignKeyChild)
+        {
+            //var listType = "IList<";
+            //if (IsEntityFramework()) listType = "ICollection<";
+            //var hasTablePerTypeInheritance =
+            //    (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
+
+            //foreach (var foreignKey in _table.ForeignKeyChildren)
+            //{
+            //    if (foreignKey.IsManyToManyTable() && _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
+            //    {
+            //        WriteManyToManyCollection(foreignKey);
+            //        continue;
+            //    }
+            //    if (_table.IsSharedPrimaryKey(foreignKey))
+            //    {
+            //        if (hasTablePerTypeInheritance)
+            //            continue;
+            //        //type and property name are the same
+            //        _cb.AppendAutomaticProperty(foreignKey.NetName, foreignKey.NetName, true);
+            //        continue;
+            //    }
+
+            //    //the other table may have more than one fk pointing at this table
+            //    var fks = _table.InverseForeignKeys(foreignKey);
+            //    foreach (var fk in fks)
+            //    {
+            //        var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKey, fk);
+            //        var dataType = listType + foreignKey.NetName + ">";
+            //        WriteForeignKeyChild(propertyName, dataType);
+            //    }
+            //}
+            var fks = foreignKeyChild.ForeignKeys.Where(fk => fk.ReferencedTable(_table.DatabaseSchema).Name == _table.Name);
+            foreach (var fk in fks)
+            {
+                // Get the foreign key referenced column name and then find the property name of this
+                // Get the foreign key column name
+                var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
+                var c = _table.Columns.Where(tc => tc.Name == fk.Columns.First()).First();
+                var n = PropertyName(c);
+                _cb.AppendLine($"{entityName}.{propertyName} = connection.Query<{foreignKeyChild.NetName}>(@\"select * from \"\"{foreignKeyChild.Name}\"\" where \"\"{fk.Columns.First()}\"\" = @{n};\", new {{ @{n} =  {entityName}.{n}}}).AsList();");
+
+            }
+            // entity.CustomerVehicleCollection = connection.Query<CustomerVehicle>(@"select * from ""CustomerVehicle"" where "" "" ", new {  });
+
+            
+
         }
 
         private void WriteForeignKeyGetter(string entityName, DatabaseConstraint foreignKey)
