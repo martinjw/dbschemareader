@@ -174,9 +174,51 @@ namespace DatabaseSchemaReader.CodeGen
                 using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
                 {
                     _cb.AppendLine($"var entity = connection.Get<{className}>({parameterName});");
+                    foreach (var foreignKey in _table.ForeignKeys)
+                    {
+                        WriteForeignKeyGetter("entity", foreignKey);
+                    }
                     _cb.AppendLine("return entity;");
                 }
             }
+        }
+
+        private void WriteForeignKeyGetter(string entityName, DatabaseConstraint foreignKey)
+        {
+            
+
+            ////we inherit from it instead (problem with self-joins)
+            //if (Equals(refTable, _inheritanceTable)) return;
+
+            //if (refTable == null)
+            //{
+            //    //we can't find the foreign key table, so just write the columns
+            //    WriteForeignKeyColumns(foreignKey, "");
+            //    return;
+            //}
+
+            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey); // Device
+            var refTable = foreignKey.ReferencedTable(_table.DatabaseSchema); // Device
+            var dataType = refTable.NetName; // Device
+            var refColumn = foreignKey.ReferencedColumns(_table.DatabaseSchema).First();
+            //
+            //refTable.PrimaryKey.Columns.
+            //connection.Query<Device>(@"select * from ""Device"" where ""DeviceSerialNumber"" = @deviceSerialNumber", new { deviceSerialNumber = 123 });
+
+
+            //var fkColumns = _table.Columns.Where(c => c.IsForeignKey).GroupBy(c => c.ForeignKeyTableName);
+
+
+            //foreach (fkc in fkColumns)
+            //{
+            //    // Get the foreign key
+            //    var fk = _table.ForeignKeys.Where(_fk => _fk.`)
+            //}
+
+            var c = _table.Columns.Where(tc => tc.Name == foreignKey.Columns.First()).First();
+            var n = PropertyName(c);
+            _cb.AppendLine($"{entityName}.{propertyName} = connection.QuerySingle<{dataType}>(@\"select * from \"\"{refTable}\"\" where \"\"{refColumn}\"\" = @{refColumn};\", new {{ @{refColumn} =  {entityName}.{n}}});");
+            
         }
 
         private void WritePrimaryKey(string className)
