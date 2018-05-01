@@ -46,7 +46,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         internal Nester BeginNest(string s, string summary)
         {
-            _sb.AppendLine();
+            //_sb.AppendLine();
             AppendXmlSummary(summary);
             _sb.AppendLine(_indent + s);
             _sb.AppendLine(_indent + "{");
@@ -79,7 +79,7 @@ namespace DatabaseSchemaReader.CodeGen
                 propertyName);
 
             _sb.AppendLine(line);
-            _sb.AppendLine(); //add an empty line
+            //_sb.AppendLine(); //add an empty line
         }
 
         internal void AppendAutomaticCollectionProperty(string dataType, string propertyName)
@@ -98,7 +98,7 @@ namespace DatabaseSchemaReader.CodeGen
                 protectedSetter ? "protected" : "private");
 
             _sb.AppendLine(line);
-            _sb.AppendLine(); //add an empty line
+            //_sb.AppendLine(); //add an empty line
         }
 
         internal void EndNest()
