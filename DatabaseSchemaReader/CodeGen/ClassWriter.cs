@@ -159,7 +159,7 @@ namespace DatabaseSchemaReader.CodeGen
             using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(Dictionary<string, object> filter)"))
             {
                 _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
-                using (_cb.BeginNest("if (filter != null && filter.Count < 1)"))
+                using (_cb.BeginNest("if (filter != null && filter.Count > 0)"))
                 {
                     _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\"));");
                     _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
