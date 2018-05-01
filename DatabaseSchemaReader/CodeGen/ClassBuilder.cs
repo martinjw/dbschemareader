@@ -74,7 +74,7 @@ namespace DatabaseSchemaReader.CodeGen
                 CultureInfo.InvariantCulture,
                 "{0}public {1}{2} {3} {{ get; set; }}",
                 _indent,
-                isVirtual ? "virtual " : string.Empty,
+                false ? "virtual " : string.Empty,
                 dataType,
                 propertyName);
 
