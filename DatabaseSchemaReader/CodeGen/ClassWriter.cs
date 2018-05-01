@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
@@ -75,7 +76,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
 
-                using (_cb.BeginNest(classDefinition, comment))
+                using (_cb.BeginNest(classDefinition, ""))
                 {
                     WriteClassMembers(className);
                 }
@@ -126,7 +127,7 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var column in _table.Columns)
             {
                 if (column.IsPrimaryKey) continue;
-                if (column.IsForeignKey) continue;
+                //if (column.IsForeignKey) continue;
                 WriteColumn(column);
             }
 
@@ -137,7 +138,9 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteForeignKeyCollections();
 
-            WriteGetter(className);
+            WriteGet(className);
+
+            WriteGetList(className);
 
             // KE: skip writing ToString, Equals, and GetHashCode
             //if (!_table.HasCompositeKey &&
@@ -149,31 +152,41 @@ namespace DatabaseSchemaReader.CodeGen
             //}
         }
 
-        private void WriteGetter(string className)
+        private void WriteGetList(string className)
         {
-            var parameters = "";
-            var parameterName = "";
-            var dataType = "";
-            if (_table.HasCompositeKey)
+            _cb.AppendLine("");
+            using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(Dictionary<string, object> filter)"))
             {
-                dataType = className + "Key";
-                parameterName = "key";
-            }
-            else
-            {
-                var pk = _table.Columns.Single(c => c.IsPrimaryKey);
-                dataType = _dataTypeWriter.Write(pk);
-                parameterName = "id";
-            }
-
-            parameters = $"{dataType} {parameterName}";
-
-            using (_cb.BeginNest($"public static {className} Get({parameters})"))
-            {
-                _cb.AppendLine(@"SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);");
                 using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
                 {
-                    _cb.AppendLine($"var entity = connection.Get<{className}>({parameterName});");
+                    _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
+                    _cb.AppendLine($"string sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
+                    using (_cb.BeginNest($"if (!string.IsNullOrEmpty(whereClause))"))
+                    {
+                        _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
+                    }
+
+                    _cb.AppendLine($"return connection.Query<{className}>(sqlQuery);");
+                }
+            }
+        }
+
+        private void WriteGet(string className)
+        {
+            _cb.AppendLine("");
+            using (_cb.BeginNest($"public static {className} Get(Dictionary<string, object> filter)"))
+            {
+                using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
+                {
+                    _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
+                    _cb.AppendLine($"string sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
+                    using (_cb.BeginNest($"if (!string.IsNullOrEmpty(whereClause))"))
+                    {
+                        _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
+                    }
+
+                    _cb.AppendLine("");
+                    _cb.AppendLine($"var entity = connection.QuerySingleOrDefault<{className}>(sqlQuery);");
                     foreach (var foreignKey in _table.ForeignKeys)
                     {
                         WriteForeignKeyGetter("entity", foreignKey);
@@ -229,7 +242,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
                 var c = _table.Columns.Where(tc => tc.Name == fk.Columns.First()).First();
                 var n = PropertyName(c);
-                _cb.AppendLine($"{entityName}.{propertyName} = connection.Query<{foreignKeyChild.NetName}>(@\"select * from \"\"{foreignKeyChild.Name}\"\" where \"\"{fk.Columns.First()}\"\" = @{n};\", new {{ @{n} =  {entityName}.{n}}}).AsList();");
+                _cb.AppendLine($"{entityName}.{propertyName} = connection.Query<{foreignKeyChild.NetName}>(@\"SELECT * FROM \"\"{foreignKeyChild.Name}\"\" WHERE \"\"{fk.Columns.First()}\"\" = @{n};\", new {{ @{n} =  {entityName}.{n}}}).AsList();");
 
             }
             // entity.CustomerVehicleCollection = connection.Query<CustomerVehicle>(@"select * from ""CustomerVehicle"" where "" "" ", new {  });
@@ -240,39 +253,34 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteForeignKeyGetter(string entityName, DatabaseConstraint foreignKey)
         {
+            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey);
+            var refTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
+            var dataType = refTable.NetName;
             
+            if (foreignKey.Columns.Count != foreignKey.ReferencedColumns(_table.DatabaseSchema).Count())
+            {
+                throw new InvalidOperationException("Number of foreign key columns does not match number of columns referended!");
+            }
 
-            ////we inherit from it instead (problem with self-joins)
-            //if (Equals(refTable, _inheritanceTable)) return;
+            var referencedColumns = foreignKey.ReferencedColumns(_table.DatabaseSchema).ToList();
+            var wheres = new List<string>();
+            var parameters = new List<string>();
+            for (var i = 0; i < foreignKey.Columns.Count; i++)
+            {
+                var refColumn = referencedColumns[i];
+                var column = _table.Columns.Single(tc => tc.Name == refColumn);
+                var fkPropertyName = PropertyName(column);
 
-            //if (refTable == null)
-            //{
-            //    //we can't find the foreign key table, so just write the columns
-            //    WriteForeignKeyColumns(foreignKey, "");
-            //    return;
-            //}
+                var s1 = $"\"\"{refColumn}\"\" = @{refColumn}";
+                wheres.Add(s1);
 
-            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey); // Device
-            var refTable = foreignKey.ReferencedTable(_table.DatabaseSchema); // Device
-            var dataType = refTable.NetName; // Device
-            var refColumn = foreignKey.ReferencedColumns(_table.DatabaseSchema).First();
-            //
-            //refTable.PrimaryKey.Columns.
-            //connection.Query<Device>(@"select * from ""Device"" where ""DeviceSerialNumber"" = @deviceSerialNumber", new { deviceSerialNumber = 123 });
+                var s2 = $"@{refColumn} = {entityName}.{fkPropertyName}";
+                parameters.Add(s2);
+            }
 
-
-            //var fkColumns = _table.Columns.Where(c => c.IsForeignKey).GroupBy(c => c.ForeignKeyTableName);
-
-
-            //foreach (fkc in fkColumns)
-            //{
-            //    // Get the foreign key
-            //    var fk = _table.ForeignKeys.Where(_fk => _fk.`)
-            //}
-
-            var c = _table.Columns.Where(tc => tc.Name == foreignKey.Columns.First()).First();
-            var n = PropertyName(c);
-            _cb.AppendLine($"{entityName}.{propertyName} = connection.QuerySingle<{dataType}>(@\"select * from \"\"{refTable}\"\" where \"\"{refColumn}\"\" = @{refColumn};\", new {{ @{refColumn} =  {entityName}.{n}}});");
+            string whereClause = String.Join(" AND ", wheres);
+            string parameterList = String.Join(", ", parameters);
+            _cb.AppendLine($"{entityName}.{propertyName} = connection.QuerySingleOrDefault<{dataType}>(@\"SELECT * FROM \"\"{refTable}\"\" WHERE {whereClause};\", new {{ {parameterList} }});");
             
         }
 
@@ -332,11 +340,10 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteNamespaces()
         {
             _cb.AppendLine("using System;");
-            if (_table.ForeignKeyChildren.Any())
-            {
+            
                 _cb.AppendLine("using System.Collections.Generic;");
-            }
-            _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+            
+            //_cb.AppendLine("using System.ComponentModel.DataAnnotations;");
             if (_codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst &&
                 _codeWriterSettings.WriteCodeFirstIndexAttribute &&
                 _table.Indexes.Count > 0)
@@ -345,12 +352,13 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             }
 
+            _cb.AppendLine("using System.Linq;");
             _cb.AppendLine("using Dapper;");
         }
 
         private void WriteForeignKeyCollections()
         {
-            var listType = "IList<";
+            var listType = "IEnumerable<";
             if (IsEntityFramework()) listType = "ICollection<";
             var hasTablePerTypeInheritance =
                 (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
@@ -454,6 +462,11 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
+            if (column.DbDataType.Contains("geography") || column.DbDataType.Contains("geometry"))
+            {
+                return;
+            }
+
             var propertyName = PropertyName(column);
             var dataType = _dataTypeWriter.Write(column);
 
@@ -474,8 +487,8 @@ namespace DatabaseSchemaReader.CodeGen
                 //EF Core doesn't like [Key] annotations on composite keys
                 writeAnnotations = false;
             }
-            if(writeAnnotations)
-            _dataAnnotationWriter.Write(_cb, column, propertyName);
+            if (writeAnnotations)
+                _dataAnnotationWriter.Write(_cb, column, propertyName);
             //for code first, ordinary properties are non-virtual. 
             var useVirtual = !IsEntityFramework();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
@@ -488,32 +501,33 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         internal static string PropertyName(DatabaseColumn column)
         {
-            var propertyName = column.NetName;
-            //in case the netName hasn't been set
-            if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
-            // KL: Ensures that property name doesn't match class name
-            if (propertyName == column.Table.NetName)
-            {
-                propertyName = string.Format("{0}Column", propertyName);
-            }
-            if (column.IsPrimaryKey && column.IsForeignKey)
-            {
-                //if it's a composite key as well, always write an Id version
-                var table = column.Table;
-                if (table != null && table.HasCompositeKey)
-                {
-                    return propertyName + "Id";
-                }
-                //a foreign key will be written, so we need to avoid a collision
-                var refTable = FindForeignKeyTable(column);
-                var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
-                if (fkDataType == propertyName)
-                {
-                    //in EF, you want a fk Id property
-                    //must not conflict with entity fk name
-                    propertyName += "Id";
-                }
-            }
+            var propertyName = column.Name;
+            //var propertyName = column.NetName;
+            ////in case the netName hasn't been set
+            //if (string.IsNullOrEmpty(propertyName)) propertyName = column.Name;
+            //// KL: Ensures that property name doesn't match class name
+            //if (propertyName == column.Table.NetName)
+            //{
+            //    propertyName = string.Format("{0}Column", propertyName);
+            //}
+            //if (column.IsPrimaryKey && column.IsForeignKey)
+            //{
+            //    //if it's a composite key as well, always write an Id version
+            //    var table = column.Table;
+            //    if (table != null && table.HasCompositeKey)
+            //    {
+            //        return propertyName + "Id";
+            //    }
+            //    //a foreign key will be written, so we need to avoid a collision
+            //    var refTable = FindForeignKeyTable(column);
+            //    var fkDataType = refTable != null ? refTable.NetName : column.ForeignKeyTableName;
+            //    if (fkDataType == propertyName)
+            //    {
+            //        //in EF, you want a fk Id property
+            //        //must not conflict with entity fk name
+            //        propertyName += "Id";
+            //    }
+            //}
             return propertyName;
         }
 
@@ -589,7 +603,7 @@ namespace DatabaseSchemaReader.CodeGen
             //CodeFirst can cope with multi-keys
             if (IsEntityFramework()) return;
 
-            using (_cb.BeginNest("public class " + className + "Key", "Class representing " + _table.Name + " composite key"))
+            using (_cb.BeginNest("public class " + className + "Key", ""))
             {
                 foreach (var column in _table.Columns.Where(x => x.IsPrimaryKey))
                 {
@@ -598,7 +612,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
                 overrider.NetName = className + "Key";
-                overrider.AddOverrides();
+                //overrider.AddOverrides();
             }
         }
     }
