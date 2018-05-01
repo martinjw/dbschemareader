@@ -21,10 +21,19 @@ namespace DatabaseSchemaReader.CodeGen
             if (column != null)
             {
                 //if it's a foreign key (CategoryId)
-                if (column.IsForeignKey && name.EndsWith("Id", StringComparison.OrdinalIgnoreCase) && name.Length > 2)
+                if (column.IsForeignKey && name.Length > 2)
                 {
-                    //remove the "Id" - it's just a "Category"
-                    name = name.Substring(0, name.Length - 2);
+                    if (name.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //remove the "Id" - it's just a "Category"
+                        name = name.Substring(0, name.Length - 2);
+                    }
+
+                    if (name.EndsWith("Number", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //remove the "Number" - it's just a "Category"
+                        name = name.Substring(0, name.Length - 6);
+                    }
                 }
                 //member name cannot be same as class name
                 if (name == column.Table.NetName)
@@ -97,11 +106,13 @@ namespace DatabaseSchemaReader.CodeGen
             //if there is only one column (not composite) use the netName of that column
             if (foreignKey.Columns.Count == 1)
             {
-                //var columnName = foreignKey.Columns.Single();
-                //var column = table.FindColumn(columnName);
-                ////if it is a primary key, we've used the original name for a scalar property
-                //if (!column.IsPrimaryKey)
-                //    propertyName = column.NetName;
+                var columnName = foreignKey.Columns.Single();
+                var column = table.FindColumn(columnName);
+                //if it is a primary key, we've used the original name for a scalar property
+                if (!column.IsPrimaryKey)
+                {
+                    propertyName = column.NetName; // KE: enabling this line I think will make it so that CustomerAssetOrganization.ParentOrganization property name is written instead of CustomerAssetOrganization.CustomerAssetOrganizationKey. But enabling this line also causes Device.DeviceModelNumber property name to be duplicated!
+                }
             }
             else //composite keys
             {
