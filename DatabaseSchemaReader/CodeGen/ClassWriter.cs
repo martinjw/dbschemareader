@@ -76,16 +76,17 @@ namespace DatabaseSchemaReader.CodeGen
 
                 _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
 
+                _cb.AppendLine("");
                 using (_cb.BeginNest(classDefinition, ""))
                 {
                     WriteClassMembers(className);
                 }
             }
 
-            if (_table.HasCompositeKey && _inheritanceTable == null)
-            {
-                WriteCompositeKeyClass(className);
-            }
+            //if (_table.HasCompositeKey && _inheritanceTable == null)
+            //{
+            //    WriteCompositeKeyClass(className);
+            //}
 
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
@@ -157,17 +158,22 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
             using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(Dictionary<string, object> filter)"))
             {
+                _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
+                _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
+                using (_cb.BeginNest($"if (!string.IsNullOrEmpty(whereClause))"))
+                {
+                    _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
+                }
+
+                _cb.AppendLine("");
+                _cb.AppendLine($"IEnumerable<{className}> entities;");
                 using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
                 {
-                    _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
-                    _cb.AppendLine($"string sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
-                    using (_cb.BeginNest($"if (!string.IsNullOrEmpty(whereClause))"))
-                    {
-                        _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
-                    }
-
-                    _cb.AppendLine($"return connection.Query<{className}>(sqlQuery);");
+                    _cb.AppendLine($"entities = connection.Query<{className}>(sqlQuery);");
                 }
+
+                _cb.AppendLine("");
+                _cb.AppendLine("return entities;");
             }
         }
 
@@ -176,35 +182,38 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
             using (_cb.BeginNest($"public static {className} Get(Dictionary<string, object> filter)"))
             {
+                using (_cb.BeginNest("if (filter == null || filter.Count < 1)"))
+                {
+                    _cb.AppendLine("throw new ArgumentNullException(\"Parameter 'filter' is null but must contain at least one key-value pair. Did you mean to call GetList?\");");
+                }
+
+                _cb.AppendLine("");
+                _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
+                _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
+                _cb.AppendLine($"{className} entity;");
                 using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
                 {
-                    _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
-                    _cb.AppendLine($"string sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
-                    using (_cb.BeginNest($"if (!string.IsNullOrEmpty(whereClause))"))
-                    {
-                        _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
-                    }
+                    _cb.AppendLine($"entity = connection.QuerySingleOrDefault<{className}>(sqlQuery);");
+                }
 
-                    _cb.AppendLine("");
-                    _cb.AppendLine($"var entity = connection.QuerySingleOrDefault<{className}>(sqlQuery);");
-                    using (_cb.BeginNest("if (entity == null)"))
-                    {
-                        _cb.AppendLine("return entity;");
-                    }
-
-                    _cb.AppendLine("");
-                    foreach (var foreignKey in _table.ForeignKeys)
-                    {
-                        WriteForeignKeyGetter("entity", foreignKey);
-                    }
-
-                    foreach (var foreignKeyChild in _table.ForeignKeyChildren)
-                    {
-                        WriteForeignKeyChildGetter("entity", foreignKeyChild);
-                    }
-
+                _cb.AppendLine("");
+                using (_cb.BeginNest("if (entity == null)"))
+                {
                     _cb.AppendLine("return entity;");
                 }
+
+                _cb.AppendLine("");
+                foreach (var foreignKey in _table.ForeignKeys)
+                {
+                    WriteForeignKeyGetter("entity", foreignKey);
+                }
+
+                foreach (var foreignKeyChild in _table.ForeignKeyChildren)
+                {
+                    WriteForeignKeyChildGetter("entity", foreignKeyChild);
+                }
+
+                _cb.AppendLine("return entity;");
             }
         }
 
@@ -218,17 +227,54 @@ namespace DatabaseSchemaReader.CodeGen
                 var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
 
                 var dictionaryItems = new List<string>();
-                foreach (var fkc in fk.Columns)
+                var propertiesNullChecks = new List<string>();
+
+                if (fk.Columns.Count != fk.ReferencedColumns(_table.DatabaseSchema).Count())
                 {
-                    var c = _table.Columns.Single(tc => tc.Name == fkc);
-                    var n = PropertyName(c);
-                    var s3 = $"{{ \"{fkc}\", {entityName}.{n} }}";
+                    throw new InvalidOperationException("Number of foreign key columns does not match number of columns referended!");
+                }
+
+                var referencedColumns = fk.ReferencedColumns(_table.DatabaseSchema).ToList();
+                //foreach (var fkc in fk.Columns)
+                for (var i = 0; i < fk.Columns.Count; i++)
+                {
+                    //var refColumn = referencedColumns[i];
+                    //var column = fk.Columns[i];//_table.Columns.Single(tc => tc.Name == fkc);
+                    var refColumn = fk.Columns[i];//_table.Columns.Single(tc => tc.Name == fkc);
+                    var column = referencedColumns[i];
+
+
+                    var fkPropertyName = PropertyName(_table.Columns.Single(tc => tc.Name == column));
+                    var actualColumn = _table.Columns.Single(tc => tc.Name == column);
+                    var s3 = $"{{ \"{refColumn}\", {entityName}.{fkPropertyName} }}";
                     dictionaryItems.Add(s3);
+
+                    if (!actualColumn.DataType.GetNetType().IsValueType || actualColumn.Nullable)
+                    {
+                        propertiesNullChecks.Add($"{entityName}.{fkPropertyName} == null");
+                    }
                 }
 
                 //_cb.AppendLine($"{entityName}.{propertyName} = connection.Query<{foreignKeyChild.NetName}>(@\"SELECT * FROM \"\"{foreignKeyChild.Name}\"\" WHERE \"\"{fk.Columns.First()}\"\" = @{n};\", new {{ @{n} =  {entityName}.{n}}}).AsList();");
                 var dictionary = $"new Dictionary<string, object>() {{{String.Join(", ", dictionaryItems)}}}";
-                _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList({dictionary});");
+                if (propertiesNullChecks.Count > 0)
+                {
+                    using (_cb.BeginNest($"if ({String.Join(" || ", propertiesNullChecks)})"))
+                    {
+                        _cb.AppendLine($"{entityName}.{propertyName} = null;");
+                    }
+
+                    using (_cb.BeginNest("else"))
+                    {
+                        _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList({dictionary});");
+                    }
+
+                    _cb.AppendLine("");
+                }
+                else
+                {
+                    _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList({dictionary});");
+                }
             }
         }
 
@@ -247,11 +293,13 @@ namespace DatabaseSchemaReader.CodeGen
             var wheres = new List<string>();
             var parameters = new List<string>();
             var dictionaryItems = new List<string>();
+            var propertiesNullChecks = new List<string>();
             for (var i = 0; i < foreignKey.Columns.Count; i++)
             {
                 var refColumn = referencedColumns[i];
-                var column = _table.Columns.Single(tc => tc.Name == refColumn);
-                var fkPropertyName = PropertyName(column);
+                var column = foreignKey.Columns[i];//_table.Columns.Single(tc => tc.Name == refColumn);
+                var fkPropertyName = PropertyName(_table.Columns.Single(tc => tc.Name == column));
+                var actualColumn = _table.Columns.Single(tc => tc.Name == column);
 
                 var s1 = $"\"\"{refColumn}\"\" = @{refColumn}";
                 wheres.Add(s1);
@@ -261,14 +309,35 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var s3 = $"{{ \"{refColumn}\", {entityName}.{fkPropertyName} }}";
                 dictionaryItems.Add(s3);
+
+                if (!actualColumn.DataType.GetNetType().IsValueType || actualColumn.Nullable)
+                {
+                    propertiesNullChecks.Add($"{entityName}.{fkPropertyName} == null");
+                }
             }
 
             //string whereClause = String.Join(" AND ", wheres);
             //string parameterList = String.Join(", ", parameters);
             //_cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get(@\"SELECT * FROM \"\"{refTable}\"\" WHERE {whereClause};\", new {{ {parameterList} }});");
-
             var dictionary = $"new Dictionary<string, object>() {{{String.Join(", ", dictionaryItems)}}}";
-            _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get({dictionary});");
+            if (propertiesNullChecks.Count > 0)
+            {
+                using (_cb.BeginNest($"if ({String.Join(" || ", propertiesNullChecks)})"))
+                {
+                    _cb.AppendLine($"{entityName}.{propertyName} = null;");
+                }
+
+                using (_cb.BeginNest("else"))
+                {
+                    _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get({dictionary});");
+                }
+
+                _cb.AppendLine("");
+            }
+            else
+            {
+                _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get({dictionary});");
+            }
         }
 
         private void WritePrimaryKey(string className)
