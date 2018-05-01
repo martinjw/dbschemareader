@@ -158,13 +158,13 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
             using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(Dictionary<string, object> filter)"))
             {
-                _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
                 _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
-                using (_cb.BeginNest($"if (!string.IsNullOrEmpty(whereClause))"))
+                using (_cb.BeginNest("if (filter != null && filter.Count < 1)"))
                 {
+                    _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\"));");
                     _cb.AppendLine($"sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
                 }
-
+                    
                 _cb.AppendLine("");
                 _cb.AppendLine($"IEnumerable<{className}> entities;");
                 using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
@@ -188,7 +188,7 @@ namespace DatabaseSchemaReader.CodeGen
                 }
 
                 _cb.AppendLine("");
-                _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter?.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
+                _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
                 _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
                 _cb.AppendLine($"{className} entity;");
                 using (_cb.BeginNest(@"using (var connection = new Npgsql.NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
