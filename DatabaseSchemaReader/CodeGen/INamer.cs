@@ -21,6 +21,8 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         string NameCollection(string className);
 
+        string NameParameter(string parameterName);
+
         /// <summary>
         /// For a column, returns the property name for a primary key
         /// </summary>
