@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
 
@@ -160,6 +161,12 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("#region CRUD Methods");
             WriteGet(className);
             _cb.AppendLine("");
+
+            WriteGet2(className);
+            _cb.AppendLine("");
+
+            WriteWiths(className);
+            _cb.AppendLine("");
             WriteGetList(className);
             _cb.AppendLine("#endregion");
 
@@ -171,6 +178,87 @@ namespace DatabaseSchemaReader.CodeGen
             //    var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
             //    overrider.AddOverrides();
             //}
+        }
+
+        private void WriteWiths(string className)
+        {
+            foreach (var foreignKey in _table.ForeignKeys)
+            {
+                WriteWith(className, foreignKey);
+                _cb.AppendLine("");
+            }
+
+            foreach (var foreignKey in _table.ForeignKeyChildren)
+            {
+                WriteWith(className, foreignKey);
+                _cb.AppendLine("");
+            }
+        }
+
+        public void WriteWith(string className, DatabaseTable foreignKeyChild)
+        {
+            var fks = foreignKeyChild.ForeignKeys.Where(fk => fk.ReferencedTable(_table.DatabaseSchema).Name == _table.Name);
+            foreach (var fk in fks)
+            {
+                // Get the foreign key referenced column name and then find the property name of this
+                // Get the foreign key column name
+                var propertyName = _codeWriterSettings.Namer.ForeignKeyCollectionName(_table.Name, foreignKeyChild, fk);
+                var dataType = foreignKeyChild.NetName;
+                if (fk.Columns.Count != fk.ReferencedColumns(_table.DatabaseSchema).Count())
+                {
+                    throw new InvalidOperationException("Number of foreign key columns does not match number of columns referended!");
+                }
+
+                var referencedColumns = fk.ReferencedColumns(_table.DatabaseSchema).ToList();
+                var methodParameters = new List<Tuple<string, string>>();
+                for (var i = 0; i < fk.Columns.Count; i++)
+                {
+                    var refColumn = fk.Columns[i];
+                    var column = referencedColumns[i];
+                    var fkPropertyName = PropertyName(_table.Columns.Single(tc => tc.Name == column));
+                    var actualColumn = _table.Columns.Single(tc => tc.Name == column);
+                    var dataTypeForParameter = _dataTypeWriter.Write(actualColumn);
+                    methodParameters.Add(new Tuple<string, string>(_codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter));
+                }
+
+                var signatureParameters = String.Join(", ", methodParameters.Select(mp => $"{mp.Item2} {mp.Item1}"));
+                _cb.BeginNest($"public {className} With{propertyName}({signatureParameters})");
+                var callParameters = String.Join(", ", methodParameters.Select(mp => mp.Item1));
+                _cb.AppendLine($"this.{propertyName} = {dataType}.GetList({callParameters});");
+                _cb.AppendLine("return this;");
+                _cb.EndNest();
+            }
+        }
+
+        public void WriteWith(string className, DatabaseConstraint foreignKey)
+        {
+            var propertyName = _codeWriterSettings.Namer.ForeignKeyName(_table, foreignKey);
+            var refTable = foreignKey.ReferencedTable(_table.DatabaseSchema);
+            var dataType = refTable.NetName;
+
+            if (foreignKey.Columns.Count != foreignKey.ReferencedColumns(_table.DatabaseSchema).Count())
+            {
+                throw new InvalidOperationException("Number of foreign key columns does not match number of columns referended!");
+            }
+
+            var referencedColumns = foreignKey.ReferencedColumns(_table.DatabaseSchema).ToList();
+            var methodParameters = new List<Tuple<string, string>>();
+            for (var i = 0; i < foreignKey.Columns.Count; i++)
+            {
+                var refColumn = referencedColumns[i];
+                var column = foreignKey.Columns[i];
+                var fkPropertyName = PropertyName(_table.Columns.Single(tc => tc.Name == column));
+                var actualColumn = _table.Columns.Single(tc => tc.Name == column);
+                var dataTypeForParameter = _dataTypeWriter.Write(actualColumn);
+                methodParameters.Add(new Tuple<string, string>(_codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter));
+            }
+
+            var signatureParameters = String.Join(", ", methodParameters.Select(mp => $"{mp.Item2} {mp.Item1}"));
+            _cb.BeginNest($"public {className} With{propertyName}({signatureParameters})");
+            var callParameters = String.Join(", ", methodParameters.Select(mp => mp.Item1));
+            _cb.AppendLine($"this.{propertyName} = {dataType}.Get({callParameters});");
+            _cb.AppendLine("return this;");
+            _cb.EndNest();
         }
 
         private void WriteGetList(string className)
@@ -203,6 +291,83 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("");
                 _cb.AppendLine("return entities;");
             }
+        }
+
+        private void WriteGetList2(string className)
+        {
+            foreach (var foreignKeyChild in _table.ForeignKeyChildren)
+            {
+                WriteForeignKeyChildGetter("entity", foreignKeyChild);
+            }
+        }
+
+        private void WriteGet2(string className)
+        {
+            var methodParameters = new List<Tuple<string, string, string, string>>();
+            foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
+            {
+                var pn = _codeWriterSettings.Namer.NameParameter(PropertyName(column));
+                var dt = _dataTypeWriter.Write(column);
+                var cn = PropertyName(column);
+                var fn = Regex.Replace(PropertyName(column), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+                var fields = fn.Split(' ').ToList();
+                var firstChar = fields[0].ToLower()[0];
+                if (firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' || firstChar == 'u')
+                {
+                    fields.Insert(0, "An");
+                }
+                else
+                {
+                    fields.Insert(0, "A");
+                }
+
+                for (var i = 1; i < fields.Count; i++)
+                {
+                    var f = fields[i];
+                    if (f.ToLower() == "id")
+                    {
+                        fields[i] = "ID";
+                        continue;
+                    }
+
+                    fields[i] = fields[i].ToLower();
+                }
+
+                var summary = String.Join(" ", fields);
+
+                methodParameters.Add(new Tuple<string, string, string, string>(pn, dt, cn, summary));
+            }
+
+            var signatureParameters = String.Join(", ", methodParameters.Select(mp => $"{mp.Item2} {mp.Item1}"));
+
+            _cb.AppendXmlSummary(
+                $"Queries the database for a single instance whose properties match the specified filter.",
+                returns: $"An instance of <see cref=\"{className}\"/>, or <c>null</c> if there is no match.",
+                exceptions: new List<Tuple<string, string>>()
+                {
+                                new Tuple<string, string>("ArgumentNullException", "<paramref name=\"filter\"/> is <c>null</c> or empty."),
+                                new Tuple<string, string>("InvalidOperationException", "There are multiple matches in the database.")
+                },
+                parameters: methodParameters.Select(mp => new Tuple<string, string>(mp.Item1, mp.Item4)),
+                remarks: $"This method gets only primitive properties, i.e., only properties that correspond to columns on the database table. No recursion is performed."
+            );
+
+            using (_cb.BeginNest($"public static {className} Get({signatureParameters})"))
+            {
+                var wc = String.Join(" AND ", methodParameters.Select(mp => $@"\""{mp.Item3}\"" = '{{{mp.Item1}}}'"));
+                var sq = $@"$""SELECT * FROM \""{_table.Name}\"" WHERE {wc};""";
+                _cb.AppendLine($"{className} entity;");
+                using (_cb.BeginNest(@"using (var connection = new NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
+                {
+                    _cb.AppendLine($"entity = connection.QuerySingleOrDefault<{className}>({sq});");
+                }
+
+                _cb.AppendLine("");
+
+                _cb.AppendLine("return entity;");
+
+            }
+
         }
 
         private void WriteGet(string className)

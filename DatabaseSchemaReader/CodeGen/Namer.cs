@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -52,6 +55,33 @@ namespace DatabaseSchemaReader.CodeGen
         public virtual string NameCollection(string className)
         {
             return className + "Collection";
+        }
+
+        public virtual string NameParameter(string parameterName)
+        {
+            var n = NameFixer.ToCamelCase(parameterName);
+            //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
+            var friendlyName = Regex.Replace(n, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+            var fields = friendlyName.Split(' ');
+            var sb = new StringBuilder();
+            foreach (var f in fields)
+            {
+                if (CultureInfo.InvariantCulture.TextInfo.ToLower(f) == "id")
+                {
+                    sb.Append("id");
+                    continue;
+                }
+
+                if (Regex.IsMatch(f, "[0-9]+"))
+                {
+                    sb.Append(f);
+                    continue;
+                }
+
+                sb.Append(f.ToLowerInvariant().Substring(0,1));
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
