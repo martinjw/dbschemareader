@@ -272,7 +272,7 @@ namespace DatabaseSchemaReader.CodeGen
                 },
                 remarks: $"This method returns shallow instances of <see cref=\"{className}\"/>, i.e., it does not recurse."
             );
-            using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(Dictionary<string, object> filter)"))
+            using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(IDbConnection c, Dictionary<string, object> filter)"))
             {
                 _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\";\";");
                 using (_cb.BeginNest("if (filter != null && filter.Count > 0)"))
@@ -282,11 +282,7 @@ namespace DatabaseSchemaReader.CodeGen
                 }
 
                 _cb.AppendLine("");
-                _cb.AppendLine($"IEnumerable<{className}> entities;");
-                using (_cb.BeginNest(@"using (var connection = new NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
-                {
-                    _cb.AppendLine($"entities = connection.Query<{className}>(sqlQuery);");
-                }
+                _cb.AppendLine($"var entities = c.Query<{className}>(sqlQuery);");
 
                 _cb.AppendLine("");
                 _cb.AppendLine("return entities;");
@@ -386,7 +382,7 @@ namespace DatabaseSchemaReader.CodeGen
                 },
                 remarks: $"This method recursively gets primitive and navigation properties. Navigation collection properties are populated by calling the <see cref=\"GetList\"/> method."
             );
-            using (_cb.BeginNest($"public static {className} Get(Dictionary<string, object> filter)"))
+            using (_cb.BeginNest($"public static {className} Get(IDbConnection c, Dictionary<string, object> filter)"))
             {
                 using (_cb.BeginNest("if (filter == null || filter.Count < 1)"))
                 {
@@ -396,13 +392,7 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("");
                 _cb.AppendLine($"var whereClause = String.Join(\" AND \", filter.Keys.Select(k => $\"\\\"{{k}}\\\" = '{{filter[k]}}'\")); ");
                 _cb.AppendLine($"var sqlQuery = $\"SELECT * FROM \\\"{_table.Name}\\\" WHERE {{whereClause}};\";");
-                _cb.AppendLine($"{className} entity;");
-                using (_cb.BeginNest(@"using (var connection = new NpgsqlConnection(""Server = 127.0.0.1; User id = postgres; Pwd = 12345678; database = enterprise_data;""))"))
-                {
-                    _cb.AppendLine($"entity = connection.QuerySingleOrDefault<{className}>(sqlQuery);");
-                }
-
-                _cb.AppendLine("");
+                _cb.AppendLine($"var entity = c.QuerySingleOrDefault<{className}>(sqlQuery);");
                 using (_cb.BeginNest("if (entity == null)"))
                 {
                     _cb.AppendLine("return entity;");
@@ -472,14 +462,14 @@ namespace DatabaseSchemaReader.CodeGen
 
                     using (_cb.BeginNest("else"))
                     {
-                        _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList({dictionary});");
+                        _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList(c, {dictionary});");
                     }
 
                     _cb.AppendLine("");
                 }
                 else
                 {
-                    _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList({dictionary});");
+                    _cb.AppendLine($"{entityName}.{propertyName} = {foreignKeyChild.NetName}.GetList(c, {dictionary});");
                 }
             }
         }
@@ -535,14 +525,14 @@ namespace DatabaseSchemaReader.CodeGen
 
                 using (_cb.BeginNest("else"))
                 {
-                    _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get({dictionary});");
+                    _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get(c, {dictionary});");
                 }
 
                 _cb.AppendLine("");
             }
             else
             {
-                _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get({dictionary});");
+                _cb.AppendLine($"{entityName}.{propertyName} = {dataType}.Get(c, {dictionary});");
             }
         }
 
@@ -603,6 +593,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             _cb.AppendLine("using System;");
             _cb.AppendLine("using System.Collections.Generic;");
+            _cb.AppendLine("using System.Data;");
             _cb.AppendLine("using System.Linq;");
             _cb.AppendLine("using Dapper;");
             _cb.AppendLine("using Npgsql;");
