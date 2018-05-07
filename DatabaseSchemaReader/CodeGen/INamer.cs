@@ -46,5 +46,6 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="foreignKey">The foreign key.</param>
         /// <returns></returns>
         string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey);
+        string NameColumnAsMethodTitle(string columnNameToQueryBy);
     }
 }
