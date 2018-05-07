@@ -47,6 +47,25 @@ namespace DatabaseSchemaReader.CodeGen
             return name;
         }
 
+
+        public string NameColumnAsMethodTitle(string name)
+        {
+            var name2 = NameFixer.ToPascalCase(name);
+            if (name2.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+            {
+                //remove the "Id" - it's just a "Category"
+                name2 = name2.Substring(0, name2.Length - 2);
+            }
+
+            if (name2.EndsWith("Number", StringComparison.OrdinalIgnoreCase))
+            {
+                //remove the "Number" - it's just a "Category"
+                name2 = name2.Substring(0, name2.Length - 6);
+            }
+
+            return name2;
+        }
+
         /// <summary>
         /// Names the collection.
         /// </summary>

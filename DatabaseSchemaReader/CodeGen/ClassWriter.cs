@@ -13,9 +13,6 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
-    /// <summary>
-    /// Turns a specified <see cref="DatabaseTable"/> into a C# class
-    /// </summary>
     public class ClassWriter
     {
         private readonly DatabaseTable _table;
@@ -26,11 +23,6 @@ namespace DatabaseSchemaReader.CodeGen
         private DatabaseTable _inheritanceTable;
         //private CodeInserter _codeInserter;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClassWriter"/> class.
-        /// </summary>
-        /// <param name="table">The table.</param>
-        /// <param name="codeWriterSettings">The code writer settings.</param>
         public ClassWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings)
         {
             _codeWriterSettings = codeWriterSettings;
@@ -40,14 +32,10 @@ namespace DatabaseSchemaReader.CodeGen
             //if (_codeInserter == null) _codeInserter = new CodeInserter();
         }
 
-        /// <summary>
-        /// Writes the C# code of the table
-        /// </summary>
-        /// <returns></returns>
         public string Write()
         {
             var codeTarget = _codeWriterSettings.CodeTarget;
-            _dataAnnotationWriter = new DataAnnotationWriter(IsEntityFramework(), _codeWriterSettings);
+            _dataAnnotationWriter = new DataAnnotationWriter(false, _codeWriterSettings);
             var className = _table.NetName;
             if (string.IsNullOrEmpty(className) && _table.DatabaseSchema != null)
             {
@@ -79,27 +67,22 @@ namespace DatabaseSchemaReader.CodeGen
 
             WriteUsings();
             _cb.AppendLine("");
-            if (codeTarget == CodeTarget.PocoRiaServices)
-            {
-                WriteRiaClass(className);
-            }
-            else
-            {
-                var tableOrView = _table is DatabaseView ? "view" : "table";
-                var comment = "Class representing the " + _table.Name + " " + tableOrView;
-                var classDefinition = "public class " + className;
-                if (_inheritanceTable != null)
-                {
-                    classDefinition += " : " + _inheritanceTable.NetName;
-                }
 
-                _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
-
-                using (_cb.BeginNest(classDefinition, comment))
-                {
-                    WriteClassMembers(className);
-                }
+            var tableOrView = _table is DatabaseView ? "view" : "table";
+            var comment = "Class representing the " + _table.Name + " " + tableOrView;
+            var classDefinition = "public class " + className;
+            if (_inheritanceTable != null)
+            {
+                classDefinition += " : " + _inheritanceTable.NetName;
             }
+
+            _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
+
+            using (_cb.BeginNest(classDefinition, comment))
+            {
+                WriteClassMembers(className);
+            }
+
 
             //if (_table.HasCompositeKey && _inheritanceTable == null)
             //{
@@ -112,19 +95,6 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             return _cb.ToString();
-        }
-
-        private void WriteRiaClass(string className)
-        {
-            _cb.AppendLine("[MetadataType(typeof(" + className + "." + className + "Metadata))]");
-            using (_cb.BeginBrace("public partial class " + className))
-            {
-                //write the buddy class
-                using (_cb.BeginNest("internal sealed class " + className + "Metadata"))
-                {
-                    WriteClassMembers(className);
-                }
-            }
         }
 
         private void WriteClassMembers(string className)
@@ -167,14 +137,17 @@ namespace DatabaseSchemaReader.CodeGen
             //WriteGet(className);
             _cb.AppendLine("");
 
-            WriteGet2(className);
-            _cb.AppendLine("");
+            //WriteGet2(className);
+            //_cb.AppendLine("");
 
             WriteWiths(className);
             _cb.AppendLine("");
             //WriteGetList(className);
-            _cb.AppendLine("");
-            WriteGetList2(className);
+            //_cb.AppendLine("");
+            //WriteGetList2(className);
+
+
+            WriteGetters(className);
             _cb.AppendLine("#endregion");
 
             // KE: skip writing ToString, Equals, and GetHashCode
@@ -185,6 +158,218 @@ namespace DatabaseSchemaReader.CodeGen
             //    var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
             //    overrider.AddOverrides();
             //}
+        }
+
+        private IEnumerable<DatabaseColumn> GetInverseForeignKeyReferencedColumns()
+        {
+            var c = new List<DatabaseColumn>();
+            foreach (var ifk in _table.InverseForeignKeys(_table))
+            {
+                if (ifk.RefersToTable != ifk.TableName)
+                {
+                    foreach (var rc in ifk.ReferencedColumns(_table.DatabaseSchema))
+                    {
+                        c.Add(ifk.ReferencedTable(_table.DatabaseSchema).FindColumn(rc));
+                    }
+                }
+                else
+                {
+                    foreach (var _c in ifk.Columns)
+                    {
+                        c.Add(ifk.ReferencedTable(_table.DatabaseSchema).FindColumn(_c));
+                    }
+                }
+            }
+
+            return c;
+        }
+
+        private IEnumerable<DatabaseColumn> GetForeignKeyColumns()
+        {
+            var c = new List<DatabaseColumn>();
+            foreach (var fk in _table.ForeignKeys)
+            {
+                if (fk.RefersToTable == fk.TableName)
+                {
+                    foreach (var rc in fk.ReferencedColumns(_table.DatabaseSchema))
+                    {
+                        c.Add(_table.FindColumn(rc));
+                    }
+                }
+                else
+                {
+                    foreach (var _c in fk.Columns)
+                    {
+                        c.Add(_table.FindColumn(_c));
+                    }
+                }
+            }
+
+            return c;
+        }
+
+        private void WriteGetters(string className)
+        {
+            // Get a list of primary keys
+            // Find all combinations of the list
+            // Write a GetSingle method for the combination of all primary keys
+            // For each other combination, write a GetList method
+
+            var primaryKeyColumns = _table.Columns.Where(c => c.IsPrimaryKey);
+            WriteGet2(className, primaryKeyColumns);
+
+            List<IEnumerable<DatabaseColumn>> combinations = null;
+
+            var allKeys = new List<DatabaseColumn>();
+            allKeys.AddRange(primaryKeyColumns);
+            allKeys.AddRange(GetInverseForeignKeyReferencedColumns());
+            allKeys.AddRange(GetForeignKeyColumns());
+            for (var i = 1; i <= allKeys.Distinct().Count(); i++)
+            {
+                if (combinations == null)
+                {
+                    combinations = new List<IEnumerable<DatabaseColumn>>();
+                }
+
+                var c = allKeys.Distinct().DifferentCombinations(i);
+                combinations.AddRange(c);
+            }
+
+            if (combinations == null)
+            {
+                return;
+            }
+
+            foreach (var c in combinations)
+            {
+                if (c.SequenceEqual(primaryKeyColumns))
+                {
+                    continue;
+                }
+
+                WriteGetList2(className, c);
+            }
+        }
+
+        private void WriteGetList2(string className, IEnumerable<DatabaseColumn> columns)
+        {
+            var methodParameters = new List<Parameter>();
+            foreach (var c in columns)
+            {
+                var pn = _codeWriterSettings.Namer.NameParameter(PropertyName(c));
+                var dt = _dataTypeWriter.Write(c);
+                var cn = PropertyName(c);
+                var fn = Regex.Replace(PropertyName(c), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+                var fields = fn.Split(' ').ToList();
+                var firstChar = fields[0].ToLower()[0];
+                if (firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' || firstChar == 'u')
+                {
+                    fields.Insert(0, "An");
+                }
+                else
+                {
+                    fields.Insert(0, "A");
+                }
+
+                for (var i = 1; i < fields.Count; i++)
+                {
+                    var f = fields[i];
+                    if (f.ToLower() == "id")
+                    {
+                        fields[i] = "ID";
+                        continue;
+                    }
+
+                    fields[i] = fields[i].ToLower();
+                }
+
+                var summary = String.Join(" ", fields);
+
+                methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary });
+            }
+
+            var signatureParameters = String.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
+
+            var methodName = $"GetListBy{String.Join("And", methodParameters.Select(mp => _codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.ColumnNameToQueryBy)))}";
+
+            _cb.AppendXmlSummary(
+                $"Queries the database for each instance whose properties match the specified values.",
+                returns: $"A list of instances of <see cref=\"{className}\"/>, or an empty list if there are no matches.",
+                parameters: methodParameters.Select(_mp => new Tuple<string, string>(_mp.Name, _mp.Summary)),
+                remarks: $"This method returns shallow instances of <see cref=\"{className}\"/>, i.e., it does not recurse."
+            );
+
+            using (_cb.BeginNest($"public static IEnumerable<{className}> {methodName}({signatureParameters})"))
+            {
+                var wc = String.Join(" AND ", methodParameters.Select(mp => $@"\""{mp.ColumnNameToQueryBy}\"" = '{{{mp.Name}}}'"));
+                var sq = $@"$""SELECT * FROM \""{_table.Name}\"" WHERE {wc};""";
+
+                _cb.AppendLine($"var entities = DbConnection.Instance.Query<{className}>({sq});");
+                _cb.AppendLine("return entities;");
+
+            }
+        }
+
+        private void WriteGet2(string className, IEnumerable<DatabaseColumn> primaryKeyColumns)
+        {
+            var methodParameters = new List<Parameter>();
+            foreach (var column in primaryKeyColumns)
+            {
+                var pn = _codeWriterSettings.Namer.NameParameter(PropertyName(column));
+                var dt = _dataTypeWriter.Write(column);
+                var cn = PropertyName(column);
+                var fn = Regex.Replace(PropertyName(column), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+                var fields = fn.Split(' ').ToList();
+                var firstChar = fields[0].ToLower()[0];
+                if (firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' || firstChar == 'u')
+                {
+                    fields.Insert(0, "An");
+                }
+                else
+                {
+                    fields.Insert(0, "A");
+                }
+
+                for (var i = 1; i < fields.Count; i++)
+                {
+                    var f = fields[i];
+                    if (f.ToLower() == "id")
+                    {
+                        fields[i] = "ID";
+                        continue;
+                    }
+
+                    fields[i] = fields[i].ToLower();
+                }
+
+                var summary = String.Join(" ", fields);
+
+                methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary });
+            }
+
+            var signatureParameters = String.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
+
+            _cb.AppendXmlSummary(
+                $"Queries the database for a single instance whose properties match the specified values.",
+                returns: $"An instance of <see cref=\"{className}\"/>, or <c>null</c> if there is no match.",
+                exceptions: new List<Tuple<string, string>>()
+                {
+                                new Tuple<string, string>("ArgumentNullException", "<paramref name=\"filter\"/> is <c>null</c> or empty."),
+                                new Tuple<string, string>("InvalidOperationException", "There are multiple matches in the database.")
+                },
+                parameters: methodParameters.Select(mp => new Tuple<string, string>(mp.Name, mp.Summary)),
+                remarks: $"This method gets only primitive properties, i.e., only properties that correspond to columns on the database table. No recursion is performed."
+            );
+
+            using (_cb.BeginNest($"public static {className} Get({signatureParameters})"))
+            {
+                var wc = String.Join(" AND ", methodParameters.Select(mp => $@"\""{mp.ColumnNameToQueryBy}\"" = '{{{mp.Name}}}'"));
+                var sq = $@"$""SELECT * FROM \""{_table.Name}\"" WHERE {wc};""";
+
+                _cb.AppendLine($"var entity = DbConnection.Instance.QuerySingleOrDefault<{className}>({sq});");
+                _cb.AppendLine("return entity;");
+
+            }
         }
 
         private void WriteWiths(string className)
@@ -216,7 +401,7 @@ namespace DatabaseSchemaReader.CodeGen
                 }
 
                 var referencedColumns = fk.ReferencedColumns(_table.DatabaseSchema).ToList();
-                var methodParameters = new List<Tuple<string, string>>();
+                var methodParameters = new List<Tuple<string, string, string>>();
                 for (var i = 0; i < fk.Columns.Count; i++)
                 {
                     var refColumn = fk.Columns[i];
@@ -224,14 +409,28 @@ namespace DatabaseSchemaReader.CodeGen
                     var fkPropertyName = PropertyName(_table.Columns.Single(tc => tc.Name == column));
                     var actualColumn = _table.Columns.Single(tc => tc.Name == column);
                     var dataTypeForParameter = _dataTypeWriter.Write(actualColumn);
-                    methodParameters.Add(new Tuple<string, string>(_codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter));
+                    methodParameters.Add(new Tuple<string, string, string>(_codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter, refColumn));
                 }
 
                 var signatureParameters = String.Join(", ", methodParameters.Select(mp => $"{mp.Item2} {mp.Item1}"));
                 _cb.BeginNest($"public {className} With{propertyName}()");
-                var callParameters = String.Join(", ", methodParameters.Select(mp => mp.Item1));
-                var s = String.Join(", ", fk.Columns.Select(fkc => $"this.{PropertyName(_table.Columns.Single(tc => tc.Name == fkc))}"));
-                _cb.AppendLine($"this.{propertyName} = {dataType}.GetList({s});");
+
+                var methodCallParameters = new List<string>();
+                foreach (var _fkc in fk.Columns)
+                {
+                    var _tc = _table.Columns.Single(tc => tc.Name == _fkc);
+                    var parameter = $"this.{PropertyName(_tc)}";
+                    if (_dataTypeWriter.Write(_tc).EndsWith("?"))
+                    {
+                        parameter += ".Value";
+                    }
+
+                    methodCallParameters.Add(parameter);
+                }
+
+                var s = String.Join(", ", methodCallParameters);
+                var methodName = $"GetListBy{String.Join("And", methodParameters.Select(mp => _codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.Item3)))}";
+                _cb.AppendLine($"this.{propertyName} = {dataType}.{methodName}({s});");
                 _cb.AppendLine("return this;");
                 _cb.EndNest();
             }
@@ -262,7 +461,21 @@ namespace DatabaseSchemaReader.CodeGen
 
             _cb.BeginNest($"public {className} With{propertyName}()");
 
-            var s = String.Join(", ", foreignKey.Columns.Select(fkc => $"this.{PropertyName(_table.Columns.Single(tc => tc.Name == fkc))}"));
+            var methodCallParameters = new List<string>();
+            foreach (var _fkc in foreignKey.Columns)
+            {
+                var _tc = _table.Columns.Single(tc => tc.Name == _fkc);
+                var parameter = $"this.{PropertyName(_tc)}";
+                if (_dataTypeWriter.Write(_tc).EndsWith("?"))
+                {
+                    parameter += ".Value";
+                }
+
+                methodCallParameters.Add(parameter);
+            }
+
+
+            var s = String.Join(", ", methodCallParameters);
             _cb.AppendLine($"this.{propertyName} = {dataType}.Get({s});");
             _cb.AppendLine("return this;");
             _cb.EndNest();
@@ -354,7 +567,7 @@ namespace DatabaseSchemaReader.CodeGen
                         // dataTypeForParameter = int
                         //methodParameters.Add(new Tuple<string, string>(_codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter));
 
-                        
+
                         var p = new Parameter();
                         p.Name = _codeWriterSettings.Namer.NameParameter(refColumn);
                         p.DataType = dataTypeForParameter;
@@ -393,9 +606,6 @@ namespace DatabaseSchemaReader.CodeGen
 
                     methodParameters.Add(parameters);
                 }
-
-                
-
             }
 
             var distinctMethodParameters = methodParameters.Distinct(new ParameterListComparer());
@@ -477,7 +687,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var wc = String.Join(" AND ", methodParameters.Select(mp => $@"\""{mp.Item3}\"" = '{{{mp.Item1}}}'"));
                 var sq = $@"$""SELECT * FROM \""{_table.Name}\"" WHERE {wc};""";
-                
+
                 _cb.AppendLine($"var entity = DbConnection.Instance.QuerySingleOrDefault<{className}>({sq});");
                 _cb.AppendLine("return entity;");
 
@@ -688,26 +898,6 @@ namespace DatabaseSchemaReader.CodeGen
             //}
         }
 
-
-        //private bool IsCodeFirst()
-        //{
-        //    return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
-        //        _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
-        //}
-
-        private bool IsEntityFramework()
-        {
-            return _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst ||
-                _codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices ||
-                _codeWriterSettings.CodeTarget == CodeTarget.PocoEfCore;
-        }
-
-        private bool IsNHibernate()
-        {
-            return _codeWriterSettings.CodeTarget == CodeTarget.PocoNHibernateFluent ||
-                _codeWriterSettings.CodeTarget == CodeTarget.PocoNHibernateHbm;
-        }
-
         private void WriteUsings()
         {
             _cb.AppendLine("using System;");
@@ -721,7 +911,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteForeignKeyCollections()
         {
             var listType = "IEnumerable<";
-            if (IsEntityFramework()) listType = "ICollection<";
+
             var hasTablePerTypeInheritance =
                 (_table.ForeignKeyChildren.Count(fk => _table.IsSharedPrimaryKey(fk)) > 1);
 
@@ -752,13 +942,11 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-
-
         private void WriteForeignKeyChild(string propertyName, string dataType)
         {
             if (_codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
                 _cb.AppendLine("[Include]");
-            _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
+            _cb.AppendAutomaticCollectionProperty(dataType, propertyName, false);
         }
 
         private void WriteManyToManyCollection(DatabaseTable foreignKey)
@@ -772,7 +960,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
             var propertyName = _codeWriterSettings.Namer.NameCollection(target.NetName);
             var dataType = "ICollection<" + target.NetName + ">";
-            _cb.AppendAutomaticCollectionProperty(dataType, propertyName, IsNHibernate());
+            _cb.AppendAutomaticCollectionProperty(dataType, propertyName, false);
 
         }
 
@@ -852,15 +1040,10 @@ namespace DatabaseSchemaReader.CodeGen
             if (writeAnnotations)
                 _dataAnnotationWriter.Write(_cb, column, propertyName);
             //for code first, ordinary properties are non-virtual. 
-            var useVirtual = !IsEntityFramework();
+            var useVirtual = true;
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
 
-        /// <summary>
-        /// Logic for propertyName. Shared with mapping.
-        /// </summary>
-        /// <param name="column">The column.</param>
-        /// <returns></returns>
         internal static string PropertyName(DatabaseColumn column)
         {
             var propertyName = column.Name;
@@ -909,14 +1092,6 @@ namespace DatabaseSchemaReader.CodeGen
             return refTable;
         }
 
-        /// <summary>
-        /// KL:
-        /// Similar to WriteColumn. Will send the appropriate dataType and propertyName to
-        /// _cb.AppendAutomaticProperty to be written.
-        /// 
-        /// This method was needed to support composite foreign keys.
-        /// </summary>
-        /// <param name="foreignKey"></param>
         private void WriteForeignKey(DatabaseConstraint foreignKey)
         {
             // get the reference table
@@ -937,7 +1112,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             _cb.AppendAutomaticProperty(dataType, propertyName);
 
-            if (IsEntityFramework() && _codeWriterSettings.UseForeignKeyIdProperties)
+            if (false && _codeWriterSettings.UseForeignKeyIdProperties)
             {
                 WriteForeignKeyColumns(foreignKey, propertyName);
             }
@@ -962,9 +1137,6 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteCompositeKeyClass(string className)
         {
-            //CodeFirst can cope with multi-keys
-            if (IsEntityFramework()) return;
-
             using (_cb.BeginNest("public class " + className + "Key", ""))
             {
                 foreach (var column in _table.Columns.Where(x => x.IsPrimaryKey))
