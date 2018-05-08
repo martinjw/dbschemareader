@@ -73,7 +73,10 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         public virtual string NameCollection(string className)
         {
-            return className + "Collection";
+            var ps = new PluralizationServiceInstance();
+            var pluralized = ps.Pluralize(className);
+            return pluralized;
+            //return className + "Collection";
         }
 
         public virtual string NameParameter(string parameterName)

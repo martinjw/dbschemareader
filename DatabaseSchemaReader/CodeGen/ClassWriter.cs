@@ -134,30 +134,9 @@ namespace DatabaseSchemaReader.CodeGen
 
             _cb.AppendLine("");
             _cb.AppendLine("#region CRUD Methods");
-            //WriteGet(className);
-            _cb.AppendLine("");
-
-            //WriteGet2(className);
-            //_cb.AppendLine("");
-
             WriteWiths(className);
-            _cb.AppendLine("");
-            //WriteGetList(className);
-            //_cb.AppendLine("");
-            //WriteGetList2(className);
-
-
             WriteGetters(className);
             _cb.AppendLine("#endregion");
-
-            // KE: skip writing ToString, Equals, and GetHashCode
-            //if (!_table.HasCompositeKey &&
-            //    _codeWriterSettings.CodeTarget != CodeTarget.PocoRiaServices &&
-            //    _inheritanceTable == null)
-            //{
-            //    var overrider = new OverrideWriter(_cb, _table, _codeWriterSettings.Namer);
-            //    overrider.AddOverrides();
-            //}
         }
 
         private IEnumerable<DatabaseColumn> GetInverseForeignKeyReferencedColumns()
@@ -217,9 +196,9 @@ namespace DatabaseSchemaReader.CodeGen
 
             var primaryKeyColumns = _table.Columns.Where(c => c.IsPrimaryKey);
             WriteGet2(className, primaryKeyColumns);
+            _cb.AppendLine("");
 
             List<IEnumerable<DatabaseColumn>> combinations = null;
-
             var allKeys = new List<DatabaseColumn>();
             allKeys.AddRange(primaryKeyColumns);
             allKeys.AddRange(GetInverseForeignKeyReferencedColumns());
@@ -248,6 +227,7 @@ namespace DatabaseSchemaReader.CodeGen
                 }
 
                 WriteGetList2(className, c);
+                _cb.AppendLine("");
             }
         }
 
