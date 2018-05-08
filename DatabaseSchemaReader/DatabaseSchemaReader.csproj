@@ -84,4 +84,8 @@
     <EmbeddedResource Include="CodeGen\Project.xml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="PluralizeService.Core" Version="1.0.0.5" />
+  </ItemGroup>
+
 </Project>
