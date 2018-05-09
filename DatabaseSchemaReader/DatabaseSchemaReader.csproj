@@ -86,6 +86,7 @@
 
   <ItemGroup>
     <PackageReference Include="PluralizeService.Core" Version="1.0.0.5" />
+    <PackageReference Include="System.CodeDom" Version="4.4.0" />
   </ItemGroup>
 
 </Project>
