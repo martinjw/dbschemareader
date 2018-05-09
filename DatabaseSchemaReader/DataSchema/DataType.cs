@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// <summary>
         /// Protected ctor for serialization
         /// </summary>
-        protected DataType()
+        public DataType()
         {
             
         }
