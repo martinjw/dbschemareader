@@ -69,7 +69,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
 
             var tableOrView = _table is DatabaseView ? "view" : "table";
-            var comment = "Class representing the " + _table.Name + " " + tableOrView;
+            var comment = "Class representing the " + _table.Name + " " + tableOrView + ".";
             var classDefinition = "public class " + className;
             if (_inheritanceTable != null)
             {
