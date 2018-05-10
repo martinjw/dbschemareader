@@ -101,7 +101,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
             else
             {
-                InitializeCollectionsInConstructor(className);
+                //InitializeCollectionsInConstructor(className);
             }
 
             _codeWriterSettings.CodeInserter.WriteClassMembers(_table, _cb);
