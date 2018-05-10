@@ -33,10 +33,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
         protected override void Mapper(IDbCommand cmd)
         {
             var enumTypeNameToValueListDictionary = new Dictionary<string, List<string>>();
-
             using (var dr = cmd.ExecuteReader())
             {
-
                 while (dr.Read())
                 {
 
