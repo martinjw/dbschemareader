@@ -106,6 +106,9 @@ namespace DatabaseSchemaReader.CodeGen
 
             _codeWriterSettings.CodeInserter.WriteClassMembers(_table, _cb);
 
+            WriteColumnNamesArray();
+            _cb.AppendLine("");
+
             _cb.AppendLine("#region Primitive Properties");
             if (_inheritanceTable == null)
             {
@@ -135,11 +138,55 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("#region CRUD Methods");
             _cb.AppendLine("public IDbContext DbContext { get; set; }");
             _cb.AppendLine("");
+            WriteColumnNamesToInsertOrUpdateMethod(className);
+            _cb.AppendLine("");
+            WriteDelete(className);
+            _cb.AppendLine("");
+            WriteUpdate(className);
+            _cb.AppendLine("");
             WriteCreate(className);
             _cb.AppendLine("");
             WriteGetters(className);
             WriteWiths(className);
             _cb.AppendLine("#endregion");
+        }
+
+        private void WriteColumnNamesToInsertOrUpdateMethod(string className)
+        {
+            _cb.BeginNest($"private static IEnumerable<string> GetColumnNamesToInsertOrUpdate({className} entity)");
+            _cb.AppendLine($"var columnProperties = entity.GetType().GetProperties().Where(p => p.IsDefined(typeof(ColumnAttribute), false));");
+            _cb.AppendLine($"var columnNames = new List<string>();");
+            _cb.BeginNest($"foreach (var cp in columnProperties)");
+            _cb.AppendLine($"var ca = (ColumnAttribute)cp.GetCustomAttribute(typeof(ColumnAttribute));");
+            _cb.AppendLine($"var dgaca = (DatabaseGeneratedAttribute)cp.GetCustomAttribute(typeof(DatabaseGeneratedAttribute));");
+            _cb.BeginNest($"if (dgaca != null && dgaca.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity)");
+            _cb.AppendLine("continue;");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.BeginNest($"if (dgaca != null && dgaca.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed)");
+            _cb.AppendLine($"var defaultValue = cp.PropertyType.IsValueType ? Activator.CreateInstance(cp.PropertyType) : null;");
+            _cb.BeginNest($"if (cp.GetValue(entity).Equals(defaultValue))");
+            _cb.AppendLine("continue;");
+            _cb.EndNest();
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine($"columnNames.Add(ca.Name);");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine("return columnNames;");
+            _cb.EndNest();
+        }
+
+        private void WriteColumnNamesArray()
+        {
+            //
+            var columnNames = new List<string>();
+            foreach (var c in _table.Columns)
+            {
+                columnNames.Add($"\"\\\"{c.Name}\\\"\"");
+            }
+
+            _cb.AppendLine($"private static readonly string[] allColumnNames = new string[] {{ {string.Join(", ", columnNames)} }};");
         }
 
         private IEnumerable<DatabaseColumn> GetInverseForeignKeyReferencedColumns()
@@ -304,7 +351,42 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("return entities;");
             }
         }
-        
+
+        private void WriteDelete(string className)
+        {
+
+        }
+
+        private void WriteUpdate(string className)
+        {
+            var parametersForSummary = new List<Tuple<string, string>>
+            {
+                new Tuple<string, string>("dbc", "A database context."),
+                new Tuple<string, string>("entity", "An entity to update.")
+            };
+            _cb.AppendXmlSummary(
+                $"Updates the specified <see cref=\"{className}\"/> in the database.",
+                $"The updated instance of <see cref=\"{className}\"/> with fully-populated and updated properties.",
+                parameters: parametersForSummary
+            );
+
+            _cb.BeginNest($"public static {className} Update(IDbContext dbc, {className} entity)");
+            _cb.AppendLine($"var columnNamesToUpdate = GetColumnNamesToInsertOrUpdate(entity);");
+            _cb.AppendLine($"var setClause = string.Join(\", \", columnNamesToUpdate.Select(cn => $\"{{cn}} = {{$\"@{{cn.Trim(\'\"\')}}\"}}\"));");
+
+            // Find PK columns and property names
+            var pkColumnsAndProperties = string.Join(" AND ", _table.Columns.Where(c => c.IsPrimaryKey).Select(c => $"\\\"{c.Name}\\\" = @{PropertyName(c)}"));
+            
+            _cb.AppendLine($"var whereClause = \"{pkColumnsAndProperties}\";");
+            _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
+            _cb.AppendLine($"var sql = $\"UPDATE \\\"Customer\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
+            _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
+            _cb.AppendLine($"var result = connection.Query<{className}>(sql, entity).Single();");
+            _cb.AppendLine("return result;");
+            _cb.EndNest();
+            _cb.EndNest();
+        }
+
         private void WriteCreate(string className)
         {
             var parametersForSummary = new List<Tuple<string, string>>
@@ -319,29 +401,12 @@ namespace DatabaseSchemaReader.CodeGen
                 parametersForSummary
             );
             _cb.BeginNest($"public static {className} Create(IDbContext dbc, {className} entity)");
-            _cb.AppendLine($"var columnProperties = entity.GetType().GetProperties().Where(p => p.IsDefined(typeof(ColumnAttribute), false));");
-            _cb.AppendLine($"var columnNamesToInsert = new List<string>();");
-            _cb.AppendLine($"var allColumnNames = new List<string>();");
-            _cb.BeginNest($"foreach (var cp in columnProperties)");
-            _cb.AppendLine($"var ca = (ColumnAttribute)cp.GetCustomAttribute(typeof(ColumnAttribute));");
-            _cb.AppendLine($"allColumnNames.Add(ca.Name);");
-            _cb.AppendLine($"var dgaca = (DatabaseGeneratedAttribute)cp.GetCustomAttribute(typeof(DatabaseGeneratedAttribute));");
-            _cb.BeginNest($"if (dgaca != null && dgaca.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity)");
-            _cb.AppendLine("continue;");
-            _cb.EndNest();
-            _cb.AppendLine("");
-            _cb.BeginNest($"if (dgaca != null && dgaca.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed)");
-            _cb.AppendLine($"var defaultValue = cp.PropertyType.IsValueType ? Activator.CreateInstance(cp.PropertyType) : null;");
-            _cb.BeginNest($"if (cp.GetValue(entity).Equals(defaultValue))");
-            _cb.AppendLine("continue;");
-            _cb.EndNest();
-            _cb.EndNest();
-            _cb.AppendLine("");
-            _cb.AppendLine($"columnNamesToInsert.Add(ca.Name);");
-            _cb.EndNest();
-            _cb.AppendLine("");
+            _cb.AppendLine($"var columnNamesToInsert = GetColumnNamesToInsertOrUpdate(entity);");
             _cb.AppendLine($"var sqlParameterNames = columnNamesToInsert.Select(cn => $\"@{{cn.Trim(\'\"\')}}\");");
-            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"Customer\\\" ({{string.Join(\", \", columnNamesToInsert)}}) VALUES ({{string.Join(\", \", sqlParameterNames)}}) RETURNING {{string.Join(\", \", allColumnNames)}};\";");
+            _cb.AppendLine($"var columnsClause = $\"({{string.Join(\", \", columnNamesToInsert)}})\";");
+            _cb.AppendLine($"var valuesClause = $\"({{string.Join(\", \", sqlParameterNames)}})\";");
+            _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
+            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"Customer\\\" {{columnsClause}} VALUES {{valuesClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"var result = connection.Query<{className}>(sql, entity).Single();");
             _cb.AppendLine("return result;");
@@ -499,7 +564,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 throw new InvalidOperationException("Number of foreign key columns does not match number of columns referenced!");
             }
-            
+
             _cb.BeginNest($"public {className} With{propertyName}()");
 
             var methodCallParameters = new List<string>
@@ -524,7 +589,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("return this;");
             _cb.EndNest();
         }
-        
+
         private void WritePrimaryKey()
         {
             foreach (var column in _table.Columns.Where(c => c.IsPrimaryKey))
