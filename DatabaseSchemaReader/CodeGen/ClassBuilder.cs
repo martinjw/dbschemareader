@@ -107,7 +107,7 @@ namespace DatabaseSchemaReader.CodeGen
                 propertyName);
 
             _sb.AppendLine(line);
-            //_sb.AppendLine(); //add an empty line
+            _sb.AppendLine(); //add an empty line
         }
 
         internal void AppendAutomaticCollectionProperty(string dataType, string propertyName)
