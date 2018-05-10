@@ -75,7 +75,7 @@ namespace DatabaseSchemaReader.CodeGen
         internal Nester BeginNest(string s, string summary)
         {
             //_sb.AppendLine();
-            AppendXmlSummary(summary);
+            //AppendXmlSummary(summary);
             _sb.AppendLine(_indent + s);
             _sb.AppendLine(_indent + "{");
             PushIndent();

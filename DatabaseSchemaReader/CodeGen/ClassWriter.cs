@@ -78,6 +78,8 @@ namespace DatabaseSchemaReader.CodeGen
 
             _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
 
+            _cb.AppendXmlSummary(comment);
+            _cb.AppendLine($"[Table(\"\\\"{_table.Name}\\\"\")]");
             using (_cb.BeginNest(classDefinition, comment))
             {
                 WriteClassMembers(className);
@@ -495,7 +497,10 @@ namespace DatabaseSchemaReader.CodeGen
         {
             _cb.AppendLine("using System;");
             _cb.AppendLine("using System.Collections.Generic;");
+            _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+            _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             _cb.AppendLine("using System.Linq;");
+
             _cb.AppendLine("");
             _cb.AppendLine("using Dapper;");
             _cb.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
