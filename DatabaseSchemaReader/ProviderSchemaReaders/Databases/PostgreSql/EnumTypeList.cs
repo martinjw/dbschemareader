@@ -30,29 +30,34 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             //AddDbParameter(command, "TABLENAME", _tableName);
         }
 
-        protected override void Mapper(IDataReader dr)
+        protected override void Mapper(IDbCommand cmd)
         {
             var enumTypeNameToValueListDictionary = new Dictionary<string, List<string>>();
-            while (dr.Read())
+
+            using (var dr = cmd.ExecuteReader())
             {
 
-                var typname = dr["typname"].ToString();
-                var enumlabel = dr["enumlabel"].ToString();
-
-                List<string> values;
-                if (enumTypeNameToValueListDictionary.TryGetValue(typname, out values))
+                while (dr.Read())
                 {
 
-                    if (!values.Contains(enumlabel))
+                    var typname = dr["typname"].ToString();
+                    var enumlabel = dr["enumlabel"].ToString();
+
+                    List<string> values;
+                    if (enumTypeNameToValueListDictionary.TryGetValue(typname, out values))
                     {
-                        values.Add(enumlabel);
+
+                        if (!values.Contains(enumlabel))
+                        {
+                            values.Add(enumlabel);
+                        }
+
+                        continue;
                     }
 
-                    continue;
+                    values = new List<string>() { enumlabel };
+                    enumTypeNameToValueListDictionary.Add(typname, values);
                 }
-
-                values = new List<string>() { enumlabel };
-                enumTypeNameToValueListDictionary.Add(typname, values);
             }
 
             var compileUnit = new CodeCompileUnit();
@@ -73,7 +78,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 }
 
                 theNamespace.Types.Add(myEnumeration);
-                
+
             }
 
             var provider = new CSharpCodeProvider();
