@@ -85,12 +85,6 @@ namespace DatabaseSchemaReader.CodeGen
                 WriteClassMembers(className);
             }
 
-
-            //if (_table.HasCompositeKey && _inheritanceTable == null)
-            //{
-            //    WriteCompositeKeyClass(className);
-            //}
-
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
                 _cb.EndNest();
