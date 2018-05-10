@@ -26,83 +26,32 @@ namespace DatabaseSchemaReader.CodeGen
             //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
             _friendlyName = Regex.Replace(netName, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
 
-            if (!string.Equals(propertyName, column.Name))
-            {
-                WriteColumnAttribute(cb, column.Name);
-            }
 
-            if (_isNet4) //Display is .Net 4 and Silverlight 3 only 
-            {
-                WriteDisplayAttribute(cb, netName);
-            }
 
-            //we won't mark primary keys as required, because they may be assigned by a ORM primary key strategy or database identity/sequence
             if (column.IsPrimaryKey)
             {
-                //.Net 4 and Silverlight 3 only 
-                //NOTE: for EF CodeFirst generation, we also mapped fluently.
-                //Despite the duplication, it's useful to have the key as a marker in the model
-
-                // KE: always write a [Key] attribute
-                //cb.AppendLine("[System.ComponentModel.DataAnnotations.Key]");
-                //if (_isNet4) cb.AppendLine("[Key]");
+                cb.AppendLine("[Key]");
             }
             else if (!column.Nullable)
-                //WriteRequiredAttribute(cb);
-
-            //foreign keys will not expose the underlying type
-            if (column.IsForeignKey)
-                return;
-
-            if (column.IsIndexed &&
-                _codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst &&
-                _codeWriterSettings.WriteCodeFirstIndexAttribute &&
-                column.Table != null)
             {
-                WriteIndex(cb, column);
+                cb.AppendLine("[Required]");
             }
 
-            //var dt = column.DataType;
-            //if (dt == null)
-            //{
-            //    //it is a database specific type
-            //}
-            //else if (dt.IsString)
-            //{
-            //    //if it's over a million characters, no point validating
-            //    if (column.Length < 1073741823 && column.Length > 0)
-            //        WriteStringLengthAttribute(cb, column.Length);
-            //}
-            //else if (dt.IsInt)
-            //{
-            //    var max = column.Precision.GetValueOrDefault() - column.Scale.GetValueOrDefault();
-            //    if (max > 0 && max < 10)
-            //    {
-            //        //int.MaxValue is 2,147,483,647 (precision 10), no need to range
-            //        WriteIntegerRange(cb, max);
-            //    }
-            //}
-            //else if (dt.GetNetType() == typeof(decimal))
-            //{
-            //    var cst = dt.NetCodeName(column);
-            //    if (cst == "int" || cst == "short" || cst == "long")
-            //    {
-            //        //we've decided it's an integer type, decimal annotation not valid
-            //        return;
-            //    }
-            //    //[Range(typeof(decimal),"0", "999")]
-            //    var max = column.Precision.GetValueOrDefault() - column.Scale.GetValueOrDefault();
-            //    if (max > 0 && max < 28)
-            //    {
-            //        WriteDecimalRange(cb, max);
-            //    }
-            //}
+            WriteColumnAttribute(cb, column.Name);
 
+            if (column.IsAutoNumber)
+            {
+                cb.AppendLine($"[DatabaseGenerated(DatabaseGeneratedOption.Identity)]");
+            }
+            else if (!string.IsNullOrEmpty(column.DefaultValue))
+            {
+                cb.AppendLine($"[DatabaseGenerated(DatabaseGeneratedOption.Computed)]");
+            }
         }
 
         private void WriteColumnAttribute(ClassBuilder cb, string name)
         {
-            cb.AppendLine($"[Column(\"{name}\")]");
+            cb.AppendLine($"[Column(\"\\\"{name}\\\"\")]");
         }
 
         private static void WriteIndex(ClassBuilder cb, DatabaseColumn column)

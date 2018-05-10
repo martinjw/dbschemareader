@@ -78,16 +78,12 @@ namespace DatabaseSchemaReader.CodeGen
 
             _codeWriterSettings.CodeInserter.WriteTableAnnotations(_table, _cb);
 
+            _cb.AppendXmlSummary(comment);
+            _cb.AppendLine($"[Table(\"\\\"{_table.Name}\\\"\")]");
             using (_cb.BeginNest(classDefinition, comment))
             {
                 WriteClassMembers(className);
             }
-
-
-            //if (_table.HasCompositeKey && _inheritanceTable == null)
-            //{
-            //    WriteCompositeKeyClass(className);
-            //}
 
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
@@ -105,7 +101,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
             else
             {
-                InitializeCollectionsInConstructor(className);
+                //InitializeCollectionsInConstructor(className);
             }
 
             _codeWriterSettings.CodeInserter.WriteClassMembers(_table, _cb);
@@ -138,6 +134,8 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine("");
             _cb.AppendLine("#region CRUD Methods");
             _cb.AppendLine("public IDbContext DbContext { get; set; }");
+            _cb.AppendLine("");
+            WriteCreate(className);
             _cb.AppendLine("");
             WriteGetters(className);
             WriteWiths(className);
@@ -305,6 +303,50 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine("entities?.ToList().ForEach(e => e.DbContext = dbc);");
                 _cb.AppendLine("return entities;");
             }
+        }
+        
+        private void WriteCreate(string className)
+        {
+            var parametersForSummary = new List<Tuple<string, string>>
+            {
+                new Tuple<string, string>("dbc", "A database context."),
+                new Tuple<string, string>("entity", "An entity to insert.")
+            };
+            _cb.AppendXmlSummary(
+                $"Inserts the specified <see cref=\"{className}\"/> to the database.",
+                $"The inserted instance of <see cref=\"{className}\"/> with fully-populated properties.",
+                $"This method ignores properties on <see cref=\"{className}\"/> that correspond to columns with auto-generated sequences, and properties whose values are default and corresond to nullable columns with default values.",
+                parametersForSummary
+            );
+            _cb.BeginNest($"public static {className} Create(IDbContext dbc, {className} entity)");
+            _cb.AppendLine($"var columnProperties = entity.GetType().GetProperties().Where(p => p.IsDefined(typeof(ColumnAttribute), false));");
+            _cb.AppendLine($"var columnNamesToInsert = new List<string>();");
+            _cb.AppendLine($"var allColumnNames = new List<string>();");
+            _cb.BeginNest($"foreach (var cp in columnProperties)");
+            _cb.AppendLine($"var ca = (ColumnAttribute)cp.GetCustomAttribute(typeof(ColumnAttribute));");
+            _cb.AppendLine($"allColumnNames.Add(ca.Name);");
+            _cb.AppendLine($"var dgaca = (DatabaseGeneratedAttribute)cp.GetCustomAttribute(typeof(DatabaseGeneratedAttribute));");
+            _cb.BeginNest($"if (dgaca != null && dgaca.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity)");
+            _cb.AppendLine("continue;");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.BeginNest($"if (dgaca != null && dgaca.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed)");
+            _cb.AppendLine($"var defaultValue = cp.PropertyType.IsValueType ? Activator.CreateInstance(cp.PropertyType) : null;");
+            _cb.BeginNest($"if (cp.GetValue(entity).Equals(defaultValue))");
+            _cb.AppendLine("continue;");
+            _cb.EndNest();
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine($"columnNamesToInsert.Add(ca.Name);");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine($"var sqlParameterNames = columnNamesToInsert.Select(cn => $\"@{{cn.Trim(\'\"\')}}\");");
+            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"Customer\\\" ({{string.Join(\", \", columnNamesToInsert)}}) VALUES ({{string.Join(\", \", sqlParameterNames)}}) RETURNING {{string.Join(\", \", allColumnNames)}};\";");
+            _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
+            _cb.AppendLine($"var result = connection.Query<{className}>(sql, entity).Single();");
+            _cb.AppendLine("return result;");
+            _cb.EndNest();
+            _cb.EndNest();
         }
 
         private void WriteGet(string className, IEnumerable<DatabaseColumn> primaryKeyColumns)
@@ -495,7 +537,11 @@ namespace DatabaseSchemaReader.CodeGen
         {
             _cb.AppendLine("using System;");
             _cb.AppendLine("using System.Collections.Generic;");
+            _cb.AppendLine("using System.ComponentModel.DataAnnotations;");
+            _cb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             _cb.AppendLine("using System.Linq;");
+            _cb.AppendLine("using System.Reflection;");
+
             _cb.AppendLine("");
             _cb.AppendLine("using Dapper;");
             _cb.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
