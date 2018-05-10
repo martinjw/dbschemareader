@@ -82,10 +82,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 
         protected abstract void Mapper(IDataRecord record);
 
-        protected virtual void Mapper(IDataReader dr)
-        {
-
-        }
+        protected virtual void Mapper(IDbCommand cmd) { }
     }
 }
 
