@@ -38,6 +38,19 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             }
         }
 
+        protected void ExecuteDbReaderWhole(IConnectionAdapter connectionAdapter)
+        {
+            Trace.WriteLine($"Sql: {Sql}");
+            using (var cmd = BuildCommand(connectionAdapter))
+            {
+                cmd.CommandText = Sql;
+                AddParameters(cmd);
+
+                    Mapper(cmd);
+
+            }
+        }
+
         protected DbCommand BuildCommand(IConnectionAdapter connectionAdapter)
         {
             var connection = connectionAdapter.DbConnection;
@@ -67,5 +80,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
         protected abstract void AddParameters(DbCommand command);
 
         protected abstract void Mapper(IDataRecord record);
+
+        protected virtual void Mapper(IDbCommand cmd) { }
     }
 }
+

@@ -21,6 +21,8 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         string NameCollection(string className);
 
+        string NameParameter(string parameterName);
+
         /// <summary>
         /// For a column, returns the property name for a primary key
         /// </summary>
@@ -44,5 +46,6 @@ namespace DatabaseSchemaReader.CodeGen
         /// <param name="foreignKey">The foreign key.</param>
         /// <returns></returns>
         string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey);
+        string NameColumnAsMethodTitle(string columnNameToQueryBy);
     }
 }

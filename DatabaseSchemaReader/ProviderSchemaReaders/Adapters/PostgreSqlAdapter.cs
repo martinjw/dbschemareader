@@ -15,7 +15,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DataType> DataTypes()
         {
-            return new DataTypeList().Execute();
+            var dts = new List<DataType>();
+            dts.AddRange(new DataTypeList().Execute());
+            dts.AddRange(new EnumTypeList().Execute(ConnectionAdapter));
+            return dts;
         }
 
         public override IList<DatabaseTable> Tables(string tableName)

@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -31,12 +34,37 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(_indent + string.Format(CultureInfo.InvariantCulture, s, args));
         }
 
-        internal void AppendXmlSummary(string summary)
+        internal void AppendXmlSummary(string summary, string returns = "", string remarks = "", IEnumerable<Tuple<string, string>> exceptions = null, IEnumerable<Tuple<string, string>> parameters = null)
         {
             if (string.IsNullOrEmpty(summary)) return;
             _sb.AppendLine(_indent + "/// <summary>");
             _sb.AppendLine(_indent + "/// " + summary);
             _sb.AppendLine(_indent + "/// </summary>");
+            if (parameters?.Count() > 0)
+            {
+                foreach (var p in parameters)
+                {
+                    _sb.AppendLine($"{_indent}/// <param name=\"{p.Item1}\">{p.Item2}</param>");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(returns))
+            {
+                _sb.AppendLine($"{_indent}/// <returns>{returns}</returns>");
+            }
+
+            if (exceptions?.Count() > 0)
+            {
+                foreach (var e in exceptions)
+                {
+                    _sb.AppendLine($"{_indent}/// <exception cref=\"{e.Item1}\">{e.Item2}</exception>");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(remarks))
+            {
+                _sb.AppendLine($"{_indent}/// <remarks>{remarks}</remarks>");
+            }
         }
 
         internal Nester BeginNest(string s)
@@ -46,8 +74,8 @@ namespace DatabaseSchemaReader.CodeGen
 
         internal Nester BeginNest(string s, string summary)
         {
-            _sb.AppendLine();
-            AppendXmlSummary(summary);
+            //_sb.AppendLine();
+            //AppendXmlSummary(summary);
             _sb.AppendLine(_indent + s);
             _sb.AppendLine(_indent + "{");
             PushIndent();
@@ -98,7 +126,7 @@ namespace DatabaseSchemaReader.CodeGen
                 protectedSetter ? "protected" : "private");
 
             _sb.AppendLine(line);
-            _sb.AppendLine(); //add an empty line
+            //_sb.AppendLine(); //add an empty line
         }
 
         internal void EndNest()

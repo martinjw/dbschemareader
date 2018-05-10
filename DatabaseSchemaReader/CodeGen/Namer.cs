@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -21,10 +24,19 @@ namespace DatabaseSchemaReader.CodeGen
             if (column != null)
             {
                 //if it's a foreign key (CategoryId)
-                if (column.IsForeignKey && name.EndsWith("Id", StringComparison.OrdinalIgnoreCase) && name.Length > 2)
+                if (column.IsForeignKey && name.Length > 2)
                 {
-                    //remove the "Id" - it's just a "Category"
-                    name = name.Substring(0, name.Length - 2);
+                    if (name.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //remove the "Id" - it's just a "Category"
+                        name = name.Substring(0, name.Length - 2);
+                    }
+
+                    if (name.EndsWith("Number", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //remove the "Number" - it's just a "Category"
+                        name = name.Substring(0, name.Length - 6);
+                    }
                 }
                 //member name cannot be same as class name
                 if (name == column.Table.NetName)
@@ -35,6 +47,25 @@ namespace DatabaseSchemaReader.CodeGen
             return name;
         }
 
+
+        public string NameColumnAsMethodTitle(string name)
+        {
+            var name2 = NameFixer.ToPascalCase(name);
+            if (name2.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+            {
+                //remove the "Id" - it's just a "Category"
+                name2 = name2.Substring(0, name2.Length - 2);
+            }
+
+            if (name2.EndsWith("Number", StringComparison.OrdinalIgnoreCase))
+            {
+                //remove the "Number" - it's just a "Category"
+                name2 = name2.Substring(0, name2.Length - 6);
+            }
+
+            return name2;
+        }
+
         /// <summary>
         /// Names the collection.
         /// </summary>
@@ -42,7 +73,37 @@ namespace DatabaseSchemaReader.CodeGen
         /// <returns></returns>
         public virtual string NameCollection(string className)
         {
-            return className + "Collection";
+            var ps = new PluralizationServiceInstance();
+            var pluralized = ps.Pluralize(className);
+            return pluralized;
+            //return className + "Collection";
+        }
+
+        public virtual string NameParameter(string parameterName)
+        {
+            var n = NameFixer.ToCamelCase(parameterName);
+            //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
+            var friendlyName = Regex.Replace(n, "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
+            var fields = friendlyName.Split(' ');
+            var sb = new StringBuilder();
+            foreach (var f in fields)
+            {
+                if (CultureInfo.InvariantCulture.TextInfo.ToLower(f) == "id")
+                {
+                    sb.Append("id");
+                    continue;
+                }
+
+                if (Regex.IsMatch(f, "[0-9]+"))
+                {
+                    sb.Append(f);
+                    continue;
+                }
+
+                sb.Append(f.ToLowerInvariant().Substring(0,1));
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -101,7 +162,9 @@ namespace DatabaseSchemaReader.CodeGen
                 var column = table.FindColumn(columnName);
                 //if it is a primary key, we've used the original name for a scalar property
                 if (!column.IsPrimaryKey)
-                    propertyName = column.NetName;
+                {
+                    propertyName = column.NetName; // KE: enabling this line I think will make it so that CustomerAssetOrganization.ParentOrganization property name is written instead of CustomerAssetOrganization.CustomerAssetOrganizationKey. But enabling this line also causes Device.DeviceModelNumber property name to be duplicated!
+                }
             }
             else //composite keys
             {
