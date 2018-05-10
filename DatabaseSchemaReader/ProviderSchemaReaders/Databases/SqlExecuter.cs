@@ -45,10 +45,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             {
                 cmd.CommandText = Sql;
                 AddParameters(cmd);
-                using (var dr = cmd.ExecuteReader())
-                {
-                    Mapper(dr);
-                }
+
+                    Mapper(cmd);
+
             }
         }
 
