@@ -379,9 +379,9 @@ namespace DatabaseSchemaReader.CodeGen
             
             _cb.AppendLine($"var whereClause = \"{pkColumnsAndProperties}\";");
             _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
-            _cb.AppendLine($"var sql = $\"UPDATE \\\"Customer\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
+            _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
-            _cb.AppendLine($"var result = connection.Query<{className}>(sql, entity).Single();");
+            _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
             _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
@@ -406,9 +406,9 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var columnsClause = $\"({{string.Join(\", \", columnNamesToInsert)}})\";");
             _cb.AppendLine($"var valuesClause = $\"({{string.Join(\", \", sqlParameterNames)}})\";");
             _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
-            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"Customer\\\" {{columnsClause}} VALUES {{valuesClause}} RETURNING {{returningClause}};\";");
+            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"{className}\\\" {{columnsClause}} VALUES {{valuesClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
-            _cb.AppendLine($"var result = connection.Query<{className}>(sql, entity).Single();");
+            _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
             _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
