@@ -354,7 +354,65 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteDelete(string className)
         {
+            // Find PK columns and property names
+            var pkColumnsAndProperties = string.Join(" AND ", _table.Columns.Where(c => c.IsPrimaryKey).Select(c => $"\\\"{c.Name}\\\" = @{PropertyName(c)}"));
+            var logicalDeleteColumn = _table.Columns.SingleOrDefault(c => c.Name.ToLower().Equals("deletedtimestamp"));
+            if (logicalDeleteColumn != null)
+            {
+                WriteDeleteLogical(className, pkColumnsAndProperties, logicalDeleteColumn);
+                _cb.AppendLine("");
+            }
 
+            WriteDeletePhysical(className, pkColumnsAndProperties);
+            _cb.AppendLine("");
+
+            var parametersForSummary = new List<Tuple<string, string>>
+            {
+                new Tuple<string, string>("dbc", "A database context."),
+                new Tuple<string, string>("entity", "An entity to delete.")
+            };
+            _cb.AppendXmlSummary(
+                $"Deletes the specified <see cref=\"{className}\"/> from the database.",
+                $"The deleted instance of <see cref=\"{className}\"/> with fully-populated and updated properties (logical/soft delete), or <c>null</c> (physical/hard delete).",
+                $"Logical/soft delete is performed if possible (i.e., the table has a column for storing the deleted timestamp).",
+                parametersForSummary
+            );
+
+            _cb.BeginNest($"public static {className} Delete(IDbContext dbc, {className} entity)");
+            if (logicalDeleteColumn != null)
+            {
+                _cb.AppendLine($"return DeleteLogical(dbc, entity);");
+            }
+            else
+            {
+                _cb.AppendLine($"DeletePhysical(dbc, entity);");
+                _cb.AppendLine("return null;");
+            }
+            _cb.EndNest();
+        }
+
+        private void WriteDeleteLogical(string className, string whereClause, DatabaseColumn logicalDeleteColumn)
+        {
+            _cb.BeginNest($"internal static {className} DeleteLogical(IDbContext dbc, {className} entity)");
+            var setClause = $"\\\"{logicalDeleteColumn.Name}\\\" = @{PropertyName(logicalDeleteColumn)}";
+            _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
+            _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {setClause} WHERE {whereClause} RETURNING {{returningClause}};\";");
+            _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
+            _cb.AppendLine($"entity.{PropertyName(logicalDeleteColumn)} = DateTime.UtcNow;");
+            _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
+            _cb.AppendLine("return result;");
+            _cb.EndNest();
+            _cb.EndNest();
+        }
+
+        private void WriteDeletePhysical(string className, string whereClause)
+        {
+            _cb.BeginNest($"internal static void DeletePhysical(IDbContext dbc, {className} entity)");
+            var sql = $"DELETE FROM \\\"{className}\\\" WHERE {whereClause};";
+            _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
+            _cb.AppendLine($"var result = connection.Execute(\"{sql}\", entity);");
+            _cb.EndNest();
+            _cb.EndNest();
         }
 
         private void WriteUpdate(string className)
