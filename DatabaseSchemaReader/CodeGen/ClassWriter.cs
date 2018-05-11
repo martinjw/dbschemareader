@@ -399,7 +399,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {setClause} WHERE {whereClause} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"entity.{PropertyName(logicalDeleteColumn)} = DateTime.UtcNow;");
-            _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
+            _cb.AppendLine($"var result = connection.QuerySingleOrDefault<{className}>(sql, entity);");
             _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
@@ -439,7 +439,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
             _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
-            _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
+            _cb.AppendLine($"var result = connection.QuerySingleOrDefault<{className}>(sql, entity);");
             _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
@@ -541,6 +541,10 @@ namespace DatabaseSchemaReader.CodeGen
                     _cb.AppendLine($"entity = connection.QuerySingleOrDefault<{className}>({sq});");
                 }
 
+                _cb.AppendLine("");
+                _cb.BeginNest($"if (entity == null)");
+                _cb.AppendLine("return null;");
+                _cb.EndNest();
                 _cb.AppendLine("");
                 _cb.AppendLine($"entity.DbContext = dbc;");
                 _cb.AppendLine("return entity;");
