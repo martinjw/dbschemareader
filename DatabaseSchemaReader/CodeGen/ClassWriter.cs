@@ -248,6 +248,9 @@ namespace DatabaseSchemaReader.CodeGen
             WriteGet(className, primaryKeyColumns);
             _cb.AppendLine("");
 
+            WriteGetList(className);
+            _cb.AppendLine("");
+
             List<IEnumerable<DatabaseColumn>> combinations = null;
             var allKeys = new List<DatabaseColumn>();
             allKeys.AddRange(primaryKeyColumns);
@@ -278,6 +281,29 @@ namespace DatabaseSchemaReader.CodeGen
 
                 WriteGetListBys(className, c);
                 _cb.AppendLine("");
+            }
+        }
+
+        private void WriteGetList(string className)
+        {
+            _cb.AppendXmlSummary(
+                $"Queries the database for each instance.",
+                $"A list of instances of <see cref=\"{className}\"/>, or an empty list if are none.",
+                $"This method returns shallow instances of <see cref=\"{className}\"/>, i.e., it does not recurse."
+            );
+
+            using (_cb.BeginNest($"public static IEnumerable<{className}> GetList(IDbContext dbc)"))
+            {
+                var sq = $@"$""SELECT * FROM \""{_table.Name}\"";""";
+                _cb.AppendLine($"IEnumerable<{className}> entities;");
+                using (_cb.BeginNest("using (var connection = dbc.CreateConnection())"))
+                {
+                    _cb.AppendLine($"entities = connection.Query<{className}>({sq});");
+                }
+
+                _cb.AppendLine("");
+                _cb.AppendLine("entities?.ToList().ForEach(e => e.DbContext = dbc);");
+                _cb.AppendLine("return entities;");
             }
         }
 

@@ -118,7 +118,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var line = string.Format(
                 CultureInfo.InvariantCulture,
-                "{0}public virtual {1} {2} {{ get; {3} set; }}",
+                "{0}public virtual {1} {2} {{ get; set; }}",
                 _indent,
                 dataType,
                 propertyName,
