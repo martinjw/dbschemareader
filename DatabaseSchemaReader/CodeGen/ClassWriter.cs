@@ -382,14 +382,14 @@ namespace DatabaseSchemaReader.CodeGen
         {
             // Find PK columns and property names
             var pkColumnsAndProperties = string.Join(" AND ", _table.Columns.Where(c => c.IsPrimaryKey).Select(c => $"\\\"{c.Name}\\\" = @{PropertyName(c)}"));
-            var logicalDeleteColumn = _table.Columns.SingleOrDefault(c => c.Name.ToLower().Equals("deletedtimestamp"));
+            var logicalDeleteColumn = _table.Columns.SingleOrDefault(c => c.Name.ToLower().Equals("deletedtimestamp") || c.Name.ToLower().Equals("enddate"));
             if (logicalDeleteColumn != null)
             {
                 WriteDeleteLogical(className, pkColumnsAndProperties, logicalDeleteColumn);
                 _cb.AppendLine("");
             }
 
-            WriteDeletePhysical(className, pkColumnsAndProperties);
+            WriteDeletePhysical(className);
             _cb.AppendLine("");
 
             var parametersForSummary = new List<Tuple<string, string>>
@@ -407,11 +407,35 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.BeginNest($"public static {className} Delete(IDbContext dbc, {className} entity)");
             if (logicalDeleteColumn != null)
             {
-                _cb.AppendLine($"return DeleteLogical(dbc, entity);");
+                _cb.AppendLine($"var deletedEntity = DeleteLogical(dbc, entity);");
+                _cb.BeginNest($"if (deletedEntity == null)");
+                _cb.AppendLine($"throw new EntityNotFoundException();");
+                _cb.EndNest();
+                _cb.AppendLine("");
+                _cb.AppendLine("return deletedEntity;");
             }
             else
             {
-                _cb.AppendLine($"DeletePhysical(dbc, entity);");
+                _cb.AppendLine("int countRowsAffected = -1;");
+                _cb.BeginNest("try");
+                    _cb.AppendLine($"countRowsAffected = DeletePhysical(dbc, entity);");
+                _cb.EndNest();
+                _cb.BeginNest("catch (Exception e)");
+                    _cb.BeginNest($"if (e is PostgresException pge && pge.SqlState == \"23503\")");
+                        _cb.AppendLine("throw new EntityHasDependenciesException();");
+                    _cb.EndNest();
+                    _cb.AppendLine("");
+                    _cb.AppendLine("throw;");
+                _cb.EndNest();
+                _cb.AppendLine("");
+                _cb.BeginNest("if (countRowsAffected == 0)");
+                    _cb.AppendLine("throw new EntityNotFoundException();");
+                _cb.EndNest();
+                _cb.AppendLine("");
+                _cb.BeginNest("if (countRowsAffected != 1)");
+                    _cb.AppendLine("throw new Exception(\"Delete affected more than one row.\");");
+                _cb.EndNest();
+                _cb.AppendLine("");
                 _cb.AppendLine("return null;");
             }
             _cb.EndNest();
@@ -425,18 +449,28 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {setClause} WHERE {whereClause} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"entity.{PropertyName(logicalDeleteColumn)} = DateTime.UtcNow;");
-            _cb.AppendLine($"var result = connection.QuerySingleOrDefault<{className}>(sql, entity);");
-            _cb.AppendLine("return result;");
+            _cb.AppendLine($"return connection.QuerySingleOrDefault<{className}>(sql, entity);");
             _cb.EndNest();
             _cb.EndNest();
         }
 
-        private void WriteDeletePhysical(string className, string whereClause)
+        private void WriteDeletePhysical(string className)
         {
-            _cb.BeginNest($"internal static void DeletePhysical(IDbContext dbc, {className} entity)");
+            _cb.BeginNest($"internal static int DeletePhysical(IDbContext dbc, {className} entity)");
+            var pkColumns = _table.Columns.Where(c => c.IsPrimaryKey);
+            var whereClause = string.Join(" AND ", pkColumns.Select(c => $"\\\"{c.Name}\\\" = @{PropertyName(c)}"));
+
             var sql = $"DELETE FROM \\\"{className}\\\" WHERE {whereClause};";
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
-            _cb.AppendLine($"var result = connection.Execute(\"{sql}\", entity);");
+            _cb.BeginNest($"using (var command = connection.CreateCommand())");
+            _cb.AppendLine($"command.CommandText = \"{sql}\";");
+            foreach (var pk in pkColumns)
+            {
+                _cb.AppendLine($"dbc.AddParameter(command, \"{pk.Name}\", entity.{PropertyName(pk)});");
+            }
+
+            _cb.AppendLine($"return command.ExecuteNonQuery();");
+            _cb.EndNest();
             _cb.EndNest();
             _cb.EndNest();
         }
@@ -697,6 +731,8 @@ namespace DatabaseSchemaReader.CodeGen
 
             _cb.AppendLine("");
             _cb.AppendLine("using Dapper;");
+            _cb.AppendLine("using Npgsql;");
+            _cb.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Exceptions;");
             _cb.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
         }
 
