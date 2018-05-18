@@ -6,11 +6,6 @@ using System.Text.RegularExpressions;
 using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
 
-
-// TODO: pluralize the collection properties and With methods that use them
-// TODO: figure out how to properly overload the getlist methods for cao by parent and caoid
-// TODO: figure out how to handle nullable parameters for the wither's
-
 namespace DatabaseSchemaReader.CodeGen
 {
     public class ClassWriter
@@ -359,6 +354,7 @@ namespace DatabaseSchemaReader.CodeGen
                 $"Queries the database for each instance whose properties match the specified values.",
                 $"A list of instances of <see cref=\"{className}\"/>, or an empty list if there are no matches.",
                 $"This method returns shallow instances of <see cref=\"{className}\"/>, i.e., it does not recurse.",
+                null,
                 parametersForSummary
             );
 
@@ -401,6 +397,11 @@ namespace DatabaseSchemaReader.CodeGen
                 $"Deletes the specified <see cref=\"{className}\"/> from the database.",
                 $"The deleted instance of <see cref=\"{className}\"/> with fully-populated and updated properties (logical/soft delete), or <c>null</c> (physical/hard delete).",
                 $"Logical/soft delete is performed if possible (i.e., the table has a column for storing the deleted timestamp).",
+                new List<Tuple<string, string>>()
+                    {
+                        new Tuple<string, string>("EntityNotFoundException", "<paramref name=\"entity\"/> is not found in the database."),
+                        new Tuple<string, string>("EntityHasDependenciesException", "<paramref name=\"entity\"/> cannot be deleted because it is still referenced in the database.")
+                    },
                 parametersForSummary
             );
 
@@ -446,7 +447,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.BeginNest($"internal static {className} DeleteLogical(IDbContext dbc, {className} entity)");
             var setClause = $"\\\"{logicalDeleteColumn.Name}\\\" = @{PropertyName(logicalDeleteColumn)}";
             _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
-            _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {setClause} WHERE {whereClause} RETURNING {{returningClause}};\";");
+            _cb.AppendLine($"var sql = $\"UPDATE \\\"{_table.Name}\\\" SET {setClause} WHERE {whereClause} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"entity.{PropertyName(logicalDeleteColumn)} = DateTime.UtcNow;");
             _cb.AppendLine($"return connection.QuerySingleOrDefault<{className}>(sql, entity);");
@@ -460,7 +461,7 @@ namespace DatabaseSchemaReader.CodeGen
             var pkColumns = _table.Columns.Where(c => c.IsPrimaryKey);
             var whereClause = string.Join(" AND ", pkColumns.Select(c => $"\\\"{c.Name}\\\" = @{PropertyName(c)}"));
 
-            var sql = $"DELETE FROM \\\"{className}\\\" WHERE {whereClause};";
+            var sql = $"DELETE FROM \\\"{_table.Name}\\\" WHERE {whereClause};";
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.BeginNest($"using (var command = connection.CreateCommand())");
             _cb.AppendLine($"command.CommandText = \"{sql}\";");
@@ -469,6 +470,7 @@ namespace DatabaseSchemaReader.CodeGen
                 _cb.AppendLine($"dbc.AddParameter(command, \"{pk.Name}\", entity.{PropertyName(pk)});");
             }
 
+            _cb.AppendLine("connection.Open();");
             _cb.AppendLine($"return command.ExecuteNonQuery();");
             _cb.EndNest();
             _cb.EndNest();
@@ -485,7 +487,9 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendXmlSummary(
                 $"Updates the specified <see cref=\"{className}\"/> in the database.",
                 $"The updated instance of <see cref=\"{className}\"/> with fully-populated and updated properties.",
-                parameters: parametersForSummary
+                string.Empty,
+                null,
+                parametersForSummary
             );
 
             _cb.BeginNest($"public static {className} Update(IDbContext dbc, {className} entity)");
@@ -497,7 +501,7 @@ namespace DatabaseSchemaReader.CodeGen
             
             _cb.AppendLine($"var whereClause = \"{pkColumnsAndProperties}\";");
             _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
-            _cb.AppendLine($"var sql = $\"UPDATE \\\"{className}\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
+            _cb.AppendLine($"var sql = $\"UPDATE \\\"{_table.Name}\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"var result = connection.QuerySingleOrDefault<{className}>(sql, entity);");
             _cb.AppendLine("return result;");
@@ -516,6 +520,7 @@ namespace DatabaseSchemaReader.CodeGen
                 $"Inserts the specified <see cref=\"{className}\"/> to the database.",
                 $"The inserted instance of <see cref=\"{className}\"/> with fully-populated properties.",
                 $"This method ignores properties on <see cref=\"{className}\"/> that correspond to columns with auto-generated sequences, and properties whose values are default and corresond to nullable columns with default values.",
+                null,
                 parametersForSummary
             );
             _cb.BeginNest($"public static {className} Create(IDbContext dbc, {className} entity)");
@@ -524,7 +529,7 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var columnsClause = $\"({{string.Join(\", \", columnNamesToInsert)}})\";");
             _cb.AppendLine($"var valuesClause = $\"({{string.Join(\", \", sqlParameterNames)}})\";");
             _cb.AppendLine($"var returningClause = string.Join(\", \", allColumnNames);");
-            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"{className}\\\" {{columnsClause}} VALUES {{valuesClause}} RETURNING {{returningClause}};\";");
+            _cb.AppendLine($"var sql = $\"INSERT INTO \\\"{_table.Name}\\\" {{columnsClause}} VALUES {{valuesClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
             _cb.AppendLine("return result;");
