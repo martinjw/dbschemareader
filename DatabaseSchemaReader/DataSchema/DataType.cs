@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using DatabaseSchemaReader.CodeGen;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -63,11 +64,11 @@ namespace DatabaseSchemaReader.DataSchema
             _typeName = typeName;
             _netDataType = netDataType;
         }
+
         ///<summary>
         ///The provider-specific data type name.
         ///</summary>
         public string TypeName { get { return _typeName; } }
-
 
         ///<summary>
         ///The name of the .NET Framework type of the data type.
@@ -332,6 +333,11 @@ namespace DatabaseSchemaReader.DataSchema
         public override string ToString()
         {
             return TypeName + " = " + NetDataType;
+        }
+
+        public virtual string WriteCodeFile(CodeWriterSettings codeWriterSettings, ClassBuilder classBuilder)
+        {
+            return null;
         }
     }
 }

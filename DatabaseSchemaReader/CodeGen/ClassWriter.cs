@@ -12,7 +12,6 @@ namespace DatabaseSchemaReader.CodeGen
     {
         private readonly DatabaseTable _table;
         private readonly ClassBuilder _cb;
-        private readonly DataTypeWriter _dataTypeWriter = new DataTypeWriter();
         private DataAnnotationWriter _dataAnnotationWriter;
         private readonly CodeWriterSettings _codeWriterSettings;
         private DatabaseTable _inheritanceTable;
@@ -37,7 +36,6 @@ namespace DatabaseSchemaReader.CodeGen
                 PrepareSchemaNames.Prepare(_table.DatabaseSchema, _codeWriterSettings.Namer);
                 className = _table.NetName;
             }
-            _dataTypeWriter.CodeTarget = codeTarget;
 
             _inheritanceTable = _table.FindInheritanceTable();
 
@@ -308,7 +306,7 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var c in columns)
             {
                 var pn = _codeWriterSettings.Namer.NameParameter(PropertyName(c));
-                var dt = _dataTypeWriter.Write(c);
+                var dt = DataTypeWriter.FindDataType(c);
                 var cn = PropertyName(c);
                 var fn = Regex.Replace(PropertyName(c), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
                 var fields = fn.Split(' ').ToList();
@@ -543,7 +541,7 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var column in primaryKeyColumns)
             {
                 var pn = _codeWriterSettings.Namer.NameParameter(PropertyName(column));
-                var dt = _dataTypeWriter.Write(column);
+                var dt = DataTypeWriter.FindDataType(column);
                 var cn = PropertyName(column);
                 var fn = Regex.Replace(PropertyName(column), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
                 var fields = fn.Split(' ').ToList();
@@ -650,7 +648,7 @@ namespace DatabaseSchemaReader.CodeGen
                     var refColumn = fk.Columns[i];
                     var column = referencedColumns[i];
                     var actualColumn = _table.Columns.Single(tc => tc.Name == column);
-                    var dataTypeForParameter = _dataTypeWriter.Write(actualColumn);
+                    var dataTypeForParameter = DataTypeWriter.FindDataType(actualColumn);
                     methodParameters.Add(new Tuple<string, string, string>(_codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter, refColumn));
                 }
 
@@ -665,7 +663,7 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     var tc = _table.Columns.Single(_tc => _tc.Name == fkc);
                     var parameter = $"this.{PropertyName(tc)}";
-                    if (_dataTypeWriter.Write(tc).EndsWith("?"))
+                    if (DataTypeWriter.FindDataType(tc).EndsWith("?"))
                     {
                         parameter += ".Value";
                     }
@@ -703,7 +701,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var tc = _table.Columns.Single(_tc => _tc.Name == fkc);
                 var parameter = $"this.{PropertyName(tc)}";
-                if (_dataTypeWriter.Write(tc).EndsWith("?"))
+                if (DataTypeWriter.FindDataType(tc).EndsWith("?"))
                 {
                     parameter += ".Value";
                 }
@@ -851,7 +849,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var propertyName = PropertyName(column);
-            var dataType = _dataTypeWriter.Write(column);
+            var dataType = DataTypeWriter.FindDataType(column);
 
             if (notNetName)
             {

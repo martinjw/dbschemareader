@@ -8,13 +8,13 @@ using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 {
 
-    abstract class SqlExecuter<T> : SqlExecuter where T : new()
+    public abstract class SqlExecuter<T> : SqlExecuter where T : new()
     {
 
         protected List<T> Result { get; } = new List<T>();
     }
 
-    abstract class SqlExecuter
+    public abstract class SqlExecuter
     {
 
         public string Sql { get; set; }
@@ -45,9 +45,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             {
                 cmd.CommandText = Sql;
                 AddParameters(cmd);
-
-                    Mapper(cmd);
-
+                Mapper(cmd);
             }
         }
 

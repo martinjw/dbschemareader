@@ -72,6 +72,13 @@ namespace DatabaseSchemaReader.CodeGen
             InitMappingProjects(directory, pw);
             _mappingNamer = new MappingNamer();
 
+            foreach (var dataType in _schema.DataTypes)
+            {
+                var dtw = new DataTypeWriter(dataType, _codeWriterSettings);
+                var txt = dtw.Write();
+                WriteClassFile(directory, dataType.NetDataType, txt);
+            }
+
             foreach (var table in _schema.Tables)
             {
                 if (FilterIneligible(table)) continue;

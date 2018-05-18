@@ -30,8 +30,6 @@ ORDER BY table_schema, table_name";
             return Result;
         }
 
-
-
         protected override void AddParameters(DbCommand command)
         {
             AddDbParameter(command, "OWNER", Owner);

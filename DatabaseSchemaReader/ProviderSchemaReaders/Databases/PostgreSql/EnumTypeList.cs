@@ -10,14 +10,7 @@ using Microsoft.CSharp;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
-    public enum CustomerContactType
-    {
-        LIAISON_CONTACT,
-        INSTALL_CONTACT,
-        BILLING_CONTACT,
-    }
-
-    class EnumTypeList : SqlExecuter<DataType>
+    public class EnumTypeList : SqlExecuter<DataType>
     {
         public EnumTypeList()
         {
@@ -37,14 +30,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             {
                 while (dr.Read())
                 {
-
                     var typname = dr["typname"].ToString();
                     var enumlabel = dr["enumlabel"].ToString();
-
                     List<string> values;
                     if (enumTypeNameToValueListDictionary.TryGetValue(typname, out values))
                     {
-
                         if (!values.Contains(enumlabel))
                         {
                             values.Add(enumlabel);
@@ -58,40 +48,17 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 }
             }
 
-            var compileUnit = new CodeCompileUnit();
-            var theNamespace = new CodeNamespace("test");
-            theNamespace.Imports.Add(new CodeNamespaceImport("System"));
-            compileUnit.Namespaces.Add(theNamespace);
-
-            foreach (var e in enumTypeNameToValueListDictionary)
+            foreach (var entry in enumTypeNameToValueListDictionary)
             {
-                var myEnumeration = new CodeTypeDeclaration(e.Key);
-                myEnumeration.IsEnum = true;
-                myEnumeration.Attributes = MemberAttributes.Public;
-                foreach (var v in e.Value)
+                Result.Add(new EnumeratedDataType(entry.Key, entry.Key)
                 {
-                    var _v = v.Replace(" ", "_");
-                    var value = new CodeMemberField(e.Key, _v);
-                    myEnumeration.Members.Add(value);
-                }
-
-                theNamespace.Types.Add(myEnumeration);
-
-            }
-
-            var provider = new CSharpCodeProvider();
-            using (StreamWriter sw = new StreamWriter($"tst.cs", false))
-            {
-                var tw = new IndentedTextWriter(sw, "    ");
-                provider.GenerateCodeFromCompileUnit(compileUnit, tw, new CodeGeneratorOptions());
-                tw.Close();
+                    EnumerationValues = entry.Value
+                });
             }
         }
 
         protected override void Mapper(IDataRecord record)
         {
-
-
         }
 
         public IList<DataType> Execute(IConnectionAdapter connectionAdapter)
