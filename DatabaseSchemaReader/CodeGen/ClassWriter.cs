@@ -448,7 +448,13 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var sql = $\"UPDATE \\\"{_table.Name}\\\" SET {setClause} WHERE {whereClause} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"entity.{PropertyName(logicalDeleteColumn)} = DateTime.UtcNow;");
-            _cb.AppendLine($"return connection.QuerySingleOrDefault<{className}>(sql, entity);");
+            _cb.AppendLine($"var result = connection.QuerySingleOrDefault<{className}>(sql, entity);");
+            _cb.BeginNest($"if (result == null)");
+            _cb.AppendLine("return null;");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine($"result.DbContext = dbc;");
+            _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
         }
@@ -502,6 +508,11 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var sql = $\"UPDATE \\\"{_table.Name}\\\" SET {{setClause}} WHERE {{whereClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"var result = connection.QuerySingleOrDefault<{className}>(sql, entity);");
+            _cb.BeginNest($"if (result == null)");
+            _cb.AppendLine("return null;");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine($"result.DbContext = dbc;");
             _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
@@ -530,6 +541,11 @@ namespace DatabaseSchemaReader.CodeGen
             _cb.AppendLine($"var sql = $\"INSERT INTO \\\"{_table.Name}\\\" {{columnsClause}} VALUES {{valuesClause}} RETURNING {{returningClause}};\";");
             _cb.BeginNest($"using (var connection = dbc.CreateConnection())");
             _cb.AppendLine($"var result = connection.QuerySingle<{className}>(sql, entity);");
+            _cb.BeginNest($"if (result == null)");
+            _cb.AppendLine("return null;");
+            _cb.EndNest();
+            _cb.AppendLine("");
+            _cb.AppendLine($"result.DbContext = dbc;");
             _cb.AppendLine("return result;");
             _cb.EndNest();
             _cb.EndNest();
