@@ -153,7 +153,7 @@ namespace DatabaseSchemaReader.CodeGen
                 return null;
             }
             //This is a name for the foreign key. Only used for composite keys.
-            var propertyName = refTable.NetName;
+            var propertyName = refTable.Name;
 
             //if there is only one column (not composite) use the netName of that column
             if (foreignKey.Columns.Count == 1)
@@ -203,7 +203,7 @@ namespace DatabaseSchemaReader.CodeGen
         public virtual string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey)
         {
             var fksToTarget = table.ForeignKeys.Where(x => x.RefersToTable == targetTable).ToList();
-            string name = table.NetName;
+            string name = table.Name;
             if (fksToTarget.Count > 1)
                 name = string.Join("", foreignKey.Columns.Select(x => table.FindColumn(x).NetName).ToArray());
 

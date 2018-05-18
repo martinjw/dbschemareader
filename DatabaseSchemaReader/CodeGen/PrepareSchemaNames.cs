@@ -15,7 +15,10 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var table in schema.Tables)
             {
                 if (string.IsNullOrEmpty(table.NetName))
-                    table.NetName = namer.Name(table);
+                {
+                    table.NetName = namer.Name(table) + "Entity";
+                }
+
                 FixDuplicateName(tableNames, table);
                 tableNames.Add(table.NetName);
                 foreach (var column in table.Columns)
