@@ -76,6 +76,11 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var dtw = new DataTypeWriter(dataType, _codeWriterSettings);
                 var txt = dtw.Write();
+                if (string.IsNullOrEmpty(txt))
+                {
+                    continue;
+                }
+
                 WriteClassFile(directory, dataType.NetDataType, txt);
             }
 
