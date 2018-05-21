@@ -31,7 +31,7 @@ namespace DatabaseSchemaReader.DataSchema
             classBuilder.AppendLine("");
             classBuilder.BeginNest($"namespace {codeWriterSettings.Namespace}");
 
-            classBuilder.AppendLine("using System;");
+            classBuilder.AppendLine("using NpgsqlTypes;");
             classBuilder.AppendLine("");
             classBuilder.BeginNest($"public enum {NetDataType}");
 
@@ -42,7 +42,7 @@ namespace DatabaseSchemaReader.DataSchema
                 {
                     enumerationValueToWrite += ",";
                 }
-
+                classBuilder.AppendLine($"[PgName(\"{EnumerationValues[i]}\")]");
                 classBuilder.AppendLine(enumerationValueToWrite);
             }
             

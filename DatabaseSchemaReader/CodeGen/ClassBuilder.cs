@@ -34,7 +34,7 @@ namespace DatabaseSchemaReader.CodeGen
             _sb.AppendLine(_indent + string.Format(CultureInfo.InvariantCulture, s, args));
         }
 
-        internal void AppendXmlSummary(string summary, string returns = "", string remarks = "", IEnumerable<Tuple<string, string>> exceptions = null, IEnumerable<Tuple<string, string>> parameters = null)
+        internal void AppendXmlSummary(string summary, string returns = "", string remarks = "", IEnumerable<Tuple<string, string>> exceptions = null, IEnumerable<Parameter> parameters = null)
         {
             if (string.IsNullOrEmpty(summary)) return;
             _sb.AppendLine(_indent + "/// <summary>");
@@ -44,7 +44,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var p in parameters)
                 {
-                    _sb.AppendLine($"{_indent}/// <param name=\"{p.Item1}\">{p.Item2}</param>");
+                    _sb.AppendLine($"{_indent}/// <param name=\"{p.Name}\">{p.Summary}</param>");
                 }
             }
 

@@ -9,6 +9,8 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// A *simple* code generation
     /// </summary>
@@ -60,12 +62,17 @@ namespace DatabaseSchemaReader.CodeGen
         /// <exception cref="IOException"/>
         /// <exception cref="UnauthorizedAccessException"/>
         /// <exception cref="System.Security.SecurityException" />
-        public void Execute(DirectoryInfo directory)
+        public void Execute(DirectoryInfo directory, IEnumerable<string> logicalDeleteColumns)
         {
             if (directory == null)
+            {
                 throw new ArgumentNullException("directory");
+            }
+
             if (!directory.Exists)
+            {
                 throw new InvalidOperationException("Directory does not exist: " + directory.FullName);
+            }
 
             var pw = CreateProjectWriter();
 
@@ -90,7 +97,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var className = table.NetName;
                 UpdateEntityNames(className, table.Name);
 
-                var cw = new ClassWriter(table, _codeWriterSettings);
+                var cw = new ClassWriter(table, _codeWriterSettings, logicalDeleteColumns);
                 var txt = cw.Write();
 
                 var fileName = WriteClassFile(directory, className, txt);
@@ -106,7 +113,7 @@ namespace DatabaseSchemaReader.CodeGen
                     var className = view.NetName;
                     UpdateEntityNames(className, view.Name);
 
-                    var cw = new ClassWriter(view, _codeWriterSettings);
+                    var cw = new ClassWriter(view, _codeWriterSettings, null);
                     var txt = cw.Write();
 
                     var fileName = WriteClassFile(directory, className, txt);
