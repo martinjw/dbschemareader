@@ -113,5 +113,47 @@ namespace DatabaseSchemaReader.DataSchema
             }
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Returns the .NET type of the column.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns>The .NET type of the column</returns>
+        /// <remarks>
+        /// For numeric Db data types uses column.Precision and column.Scale to determine the correct .NET data type.
+        /// </remarks>
+        public static Type NetDataType(this DatabaseColumn column)
+        {
+            if (column == null) return null;
+            if (column.DataType == null) return null;
+
+            if (!column.DataType.IsNumeric || column.DataType.IsInt) return column.DataType.GetNetType();
+            var precision = column.Precision.GetValueOrDefault();
+            var scale = column.Scale.GetValueOrDefault();
+            return NetTypeForIntegers(column, scale, precision);
+        }
+
+
+        private static Type NetTypeForIntegers(DatabaseColumn column, int scale, int precision)
+        {
+            if (scale != 0 || precision >= 19) return column.DataType.GetNetType();
+
+            //could be a short, int or long...
+            //VARCHAR2(10) is common for Oracle integers, but it can overflow an int
+            //int.MaxValue is 2147483647 so +1 is allowable in the database
+            if (precision > 10) //up to long.MaxValue
+            {
+                return typeof(long);
+            }
+            if (precision > 4) //2147483647
+            {
+                return typeof(int);
+            }
+            if (precision > 1)
+            {
+                return typeof(short);
+            }
+            return column.DataType.GetNetType();
+        }
     }
 }

@@ -95,5 +95,98 @@ namespace DatabaseSchemaReaderTest.DataSchema
             //assert
             Assert.AreEqual("smallint(5) unsigned", result);
         }
+
+        [TestMethod]
+        public void TestNetDataTypeForString()
+        {
+            //arrange
+            var column = new DatabaseColumn
+            {
+                DbDataType = "VARCHAR2",
+                DataType = new DataType("VARCHAR2", "System.String"),
+            };
+
+            //act
+            var result = column.NetDataType();
+
+            //assert
+            Assert.AreEqual(typeof(string), result);
+        }
+
+        [TestMethod]
+        public void TestNetDataTypeForDecimal()
+        {
+            //arrange
+            var column = new DatabaseColumn
+            {
+                DbDataType = "NUMBER",
+                DataType = new DataType("NUMBER", "System.Decimal"),
+                Precision = 5,
+                Scale = 2
+            };
+
+            //act
+            var result = column.NetDataType();
+
+            //assert
+            Assert.AreEqual(typeof(decimal), result);
+        }
+
+        [TestMethod]
+        public void TestNetDataTypeForInt()
+        {
+            //arrange
+            var column = new DatabaseColumn
+            {
+                DbDataType = "NUMBER",
+                DataType = new DataType("NUMBER", "System.Decimal"),
+                Precision = 5,
+                Scale = 0
+            };
+
+            //act
+            var result = column.NetDataType();
+
+            //assert
+            Assert.AreEqual(typeof(int), result);
+        }
+
+        [TestMethod]
+        public void TestNetDataTypeForShort()
+        {
+            //arrange
+            var column = new DatabaseColumn
+            {
+                DbDataType = "NUMBER",
+                DataType = new DataType("NUMBER", "System.Decimal"),
+                Precision = 2,
+                Scale = 0
+            };
+
+            //act
+            var result = column.NetDataType();
+
+            //assert
+            Assert.AreEqual(typeof(short), result);
+        }
+
+        [TestMethod]
+        public void TestNetDataTypeForLong()
+        {
+            //arrange
+            var column = new DatabaseColumn
+            {
+                DbDataType = "NUMBER",
+                DataType = new DataType("NUMBER", "System.Decimal"),
+                Precision = 12,
+                Scale = 0
+            };
+
+            //act
+            var result = column.NetDataType();
+
+            //assert
+            Assert.AreEqual(typeof(long), result);
+        }
     }
 }
