@@ -55,15 +55,13 @@ namespace DatabaseSchemaReader.CodeGen
 // </auto-generated>
 //------------------------------------------------------------------------------");
 
+            WriteUsings();
             _cb.AppendLine("");
             if (!string.IsNullOrEmpty(_codeWriterSettings.Namespace))
             {
                 _cb.BeginNest("namespace " + _codeWriterSettings.Namespace);
             }
-
-            WriteUsings();
-            _cb.AppendLine("");
-
+            
             var tableOrView = _table is DatabaseView ? "view" : "table";
             var comment = "Class representing the " + _table.Name + " " + tableOrView + ".";
             var classDefinition = "public class " + _table.NetName;
