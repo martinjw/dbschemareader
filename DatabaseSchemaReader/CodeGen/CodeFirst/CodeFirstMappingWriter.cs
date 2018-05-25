@@ -209,7 +209,7 @@ namespace DatabaseSchemaReader.CodeGen.CodeFirst
                     .Where(x => x.IsPrimaryKey)
                     //primary keys must be scalar so if it's a foreign key use the Id mirror property
                     //.Select(x => "x." + x.NetName + (x.IsForeignKey ? "Id" : string.Empty))
-                    .Select(x => "x." + ClassWriter.PropertyName(x))
+                    .Select(x => "x." + CodeWriterUtils.GetPropertyNameForDatabaseColumn(x))
                     .ToArray());
             _cb.AppendLine("// Primary key (composite)");
             //double braces for a format

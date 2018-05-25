@@ -97,13 +97,17 @@ namespace DatabaseSchemaReader.CodeGen
                 var className = table.NetName;
                 UpdateEntityNames(className, table.Name);
 
-                var cw = new ClassWriter(table, _codeWriterSettings, logicalDeleteColumns);
-                var txt = cw.Write();
+                var classWriter = new ClassWriter(table, _codeWriterSettings);
+                var classText = classWriter.Write();
+                WriteClassFile(directory, className, classText);
 
-                var fileName = WriteClassFile(directory, className, txt);
-                pw.AddClass(fileName);
+                var repositoryInterfaceWriter = new RepositoryInterfaceWriter(table, _codeWriterSettings);
+                var interfaceText = repositoryInterfaceWriter.Write();
+                WriteClassFile(directory, CodeWriterUtils.GetRepositoryInterfaceName(table), interfaceText);
 
-                WriteMapping(table, pw);
+                var repositoryImplementationWriter = new RepositoryImplementationWriter(table, _codeWriterSettings, logicalDeleteColumns);
+                var implementationText = repositoryImplementationWriter.Write();
+                WriteClassFile(directory, CodeWriterUtils.GetRepositoryImplementationName(table), implementationText);
             }
 
             if (_codeWriterSettings.IncludeViews)
@@ -113,7 +117,7 @@ namespace DatabaseSchemaReader.CodeGen
                     var className = view.NetName;
                     UpdateEntityNames(className, view.Name);
 
-                    var cw = new ClassWriter(view, _codeWriterSettings, null);
+                    var cw = new ClassWriter(view, _codeWriterSettings);
                     var txt = cw.Write();
 
                     var fileName = WriteClassFile(directory, className, txt);

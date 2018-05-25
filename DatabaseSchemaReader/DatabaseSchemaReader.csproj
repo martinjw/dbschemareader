@@ -60,6 +60,10 @@
     <DefineConstants>TRACE;DEBUG;COREFX;NETSTANDARD2_0;</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DocumentationFile />
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
     <Compile Remove="DbSchemaReader\**\*.cs;ProviderSchemaReaders\DbProviders\**\*.cs;Conversion\**\*.cs;Data\**\*.cs;Procedures\**\*.cs;Utilities\DbProvider\**\*.cs" />
   </ItemGroup>
