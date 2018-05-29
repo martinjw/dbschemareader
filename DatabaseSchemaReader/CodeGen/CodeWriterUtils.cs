@@ -1,9 +1,8 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -41,16 +40,26 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static IEnumerable<Parameter> GetCreateMethodParameters(DatabaseTable table)
         {
-            return new List<Parameter>
+            return new List<Parameter> { GetEntityParameter(table, "An entity to insert.") };
+        }
+
+        public static Parameter GetDbContextMethodParameter()
+        {
+            return new Parameter()
             {
-                new Parameter
-                {
-                    Name = "entity",
-                    Summary = "An entity to insert.",
-                    DataType = table.NetName
-                }
+                DataType = "IDbContext",
+                Name = "dbContext",
+                Summary = "A database context."
             };
         }
+
+        public static IEnumerable<Parameter> AddDbContextParameter(IEnumerable<Parameter> parameters)
+        {
+            var p = parameters.ToList();
+            p.Insert(0, GetDbContextMethodParameter());
+            return p;
+        }
+
 
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
@@ -134,15 +143,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static IEnumerable<Parameter> GetUpdateMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings)
         {
-            var methodParameters = GetMethodParametersForPrimaryKeys(table, codeWriterSettings);
-            var methodParametersPlusEntity = methodParameters.ToList();
-            methodParametersPlusEntity.Add(new Parameter
-            {
-                Name = "entity",
-                Summary = "An entity with updated values.",
-                DataType = table.NetName
-            });
-            return methodParametersPlusEntity;
+            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings);
         }
 
         public static string GetDeleteMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
@@ -288,6 +289,23 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             return interfaceName;
+        }
+
+        public static IEnumerable<Parameter> AddEntityParameter(IEnumerable<Parameter> parameters, DatabaseTable table, string parameterSummary)
+        {
+            var p = parameters.ToList();
+            p.Add(GetEntityParameter(table, parameterSummary));
+            return p;
+        }
+
+        private static Parameter GetEntityParameter(DatabaseTable table, string parameterSummary)
+        {
+            return new Parameter
+            {
+                Name = "entity",
+                Summary = parameterSummary,
+                DataType = table.NetName
+            };
         }
     }
 }
