@@ -38,7 +38,7 @@ WHERE
 	 t.is_ms_shipped = 0 AND
      ic.is_included_column = 0
 ORDER BY 
-     t.name, ind.name, ic.index_column_id";
+     t.name, ind.name, ic.key_ordinal";
 
         }
 
