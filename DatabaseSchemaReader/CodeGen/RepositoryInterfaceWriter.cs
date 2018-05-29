@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DatabaseSchemaReader.DataSchema;
 using System.Linq;
-using System.Text;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -74,7 +71,9 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }*/
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings))};");
+            var updateMethodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings);
+            updateMethodParameters = CodeWriterUtils.AddEntityParameter(updateMethodParameters, table, "An entity with updated values.");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, updateMethodParameters)};");
             classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings))};");
         }
 
