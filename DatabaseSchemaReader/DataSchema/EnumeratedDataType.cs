@@ -28,11 +28,9 @@ namespace DatabaseSchemaReader.DataSchema
 //    Behavior of class members defined in this file may be changed by overriding in a derived class.
 // </auto-generated>
 //------------------------------------------------------------------------------");
-            classBuilder.AppendLine("");
-            classBuilder.BeginNest($"namespace {codeWriterSettings.Namespace}");
-
             classBuilder.AppendLine("using NpgsqlTypes;");
             classBuilder.AppendLine("");
+            classBuilder.BeginNest($"namespace {codeWriterSettings.Namespace}");
             classBuilder.BeginNest($"public enum {NetDataType}");
 
             for (var i = 0; i < EnumerationValues.Count(); i++)

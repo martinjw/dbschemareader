@@ -1,11 +1,8 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Mail;
-using System.Text.RegularExpressions;
-using DatabaseSchemaReader.CodeGen.CodeFirst;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -319,11 +316,6 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
-            if (column.DbDataType.Contains("geography") || column.DbDataType.Contains("geometry"))
-            {
-                return;
-            }
-
             var propertyName = CodeWriterUtils.GetPropertyNameForDatabaseColumn(column);
             var dataType = DataTypeWriter.FindDataType(column);
 

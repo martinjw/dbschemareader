@@ -620,7 +620,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteParseEntityFromReader(string entityVariableName)
         {
-            foreach (var c in table.Columns.Where(c => c.DbDataType != "geometry" && c.DbDataType != "geography"))
+            foreach (var c in table.Columns)
             {
                 if (c.Nullable)
                 {
