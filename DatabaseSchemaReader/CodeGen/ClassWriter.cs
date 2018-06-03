@@ -207,6 +207,7 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("using System.Collections.Generic;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            classBuilder.AppendLine("using NetTopologySuite.Geometries;");
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
             classBuilder.AppendLine("");
         }
