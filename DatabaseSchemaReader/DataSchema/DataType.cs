@@ -235,6 +235,20 @@ namespace DatabaseSchemaReader.DataSchema
             }
         }
 
+        public bool IsGeospatial
+        {
+            get
+            {
+                var tn = this.TypeName.ToLower();
+                if (tn.Contains("geometry") || tn.Contains("geography"))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         /// <summary>
         /// Returns if this is a System.Single (float)
         /// </summary>
