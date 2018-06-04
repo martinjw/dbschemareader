@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Mail;
-using System.Text.RegularExpressions;
-using DatabaseSchemaReader.CodeGen.CodeFirst;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
@@ -210,6 +207,11 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("using System.Collections.Generic;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            if (table.Columns.Select(c => c.DataType.IsGeospatial).Contains(true))
+            {
+                classBuilder.AppendLine("using NetTopologySuite.Geometries;");
+            }
+
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
             classBuilder.AppendLine("");
         }
@@ -319,11 +321,6 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
-            if (column.DbDataType.Contains("geography") || column.DbDataType.Contains("geometry"))
-            {
-                return;
-            }
-
             var propertyName = CodeWriterUtils.GetPropertyNameForDatabaseColumn(column);
             var dataType = DataTypeWriter.FindDataType(column);
 

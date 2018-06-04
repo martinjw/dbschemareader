@@ -39,7 +39,8 @@ namespace DatabaseSchemaReader.CodeGen
                 dt != null &&
                 !dt.IsString &&
                 !string.IsNullOrEmpty(dataType) &&
-                !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase))
+                !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase) &&
+                !dt.IsGeospatial)
             {
                 dataType += "?"; //nullable
             }

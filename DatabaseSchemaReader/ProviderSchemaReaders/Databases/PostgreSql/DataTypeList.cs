@@ -218,6 +218,17 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 ProviderDbType = 0,
                 CreateFormat = ""
             });
+            dts.Add(new DataType("geometry", "Point")
+            {
+                ProviderDbType = 0,
+                CreateFormat = ""
+            });
+            dts.Add(new DataType("geography", "Point")
+            {
+                ProviderDbType = 0,
+                CreateFormat = ""
+            });
+
             return dts;
         }
     }

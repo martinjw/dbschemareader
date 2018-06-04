@@ -31,7 +31,6 @@ namespace DatabaseSchemaReader.DataSchema
             classBuilder.AppendLine("using NpgsqlTypes;");
             classBuilder.AppendLine("");
             classBuilder.BeginNest($"namespace {codeWriterSettings.Namespace}");
-
             classBuilder.BeginNest($"public enum {NetDataType}");
 
             for (var i = 0; i < EnumerationValues.Count(); i++)
