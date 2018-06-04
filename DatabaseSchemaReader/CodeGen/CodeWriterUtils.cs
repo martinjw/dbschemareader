@@ -122,7 +122,7 @@ namespace DatabaseSchemaReader.CodeGen
         public static string GetWithMethodSignature(DatabaseTable table, DatabaseConstraint foreignKey, CodeWriterSettings codeWriterSettings)
         {
             var propertyName = codeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
-            return $"{table.NetName} With{propertyName}()";
+            return $"virtual {table.NetName} With{propertyName}()";
         }
 
         public static IEnumerable<DatabaseConstraint> GetWithForeignKeys(DatabaseTable table, DatabaseTable foreignKeyChild)
@@ -133,7 +133,7 @@ namespace DatabaseSchemaReader.CodeGen
         public static string GetWithMethodSignature(DatabaseTable table, DatabaseTable foreignKeyChild, DatabaseConstraint foreignForeignKey, CodeWriterSettings codeWriterSettings)
         {
             var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKeyChild, foreignForeignKey);
-            return $"{table.NetName} With{propertyName}()";
+            return $"virtual {table.NetName} With{propertyName}()";
         }
 
         public static string GetUpdateMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
