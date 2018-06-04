@@ -76,7 +76,11 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             classBuilder.AppendLine("using System.Linq;");
             classBuilder.AppendLine("using System.Reflection;");
-            classBuilder.AppendLine("using NetTopologySuite.Geometries;");
+            if (table.Columns.Select(c => c.DataType.IsGeospatial).Contains(true))
+            {
+                classBuilder.AppendLine("using NetTopologySuite.Geometries;");
+            }
+
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Exceptions;");
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
             classBuilder.AppendLine("");

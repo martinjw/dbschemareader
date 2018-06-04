@@ -207,7 +207,11 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("using System.Collections.Generic;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
-            classBuilder.AppendLine("using NetTopologySuite.Geometries;");
+            if (table.Columns.Select(c => c.DataType.IsGeospatial).Contains(true))
+            {
+                classBuilder.AppendLine("using NetTopologySuite.Geometries;");
+            }
+
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
             classBuilder.AppendLine("");
         }
