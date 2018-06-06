@@ -627,13 +627,23 @@ namespace DatabaseSchemaReader.CodeGen
         {
             foreach (var c in table.Columns)
             {
+                var dataType = DataTypeWriter.FindDataType(c);
                 if (c.Nullable)
                 {
-                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = reader.GetValue({c.Ordinal - 1}) == DBNull.Value ? null : ({DataTypeWriter.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
+                    if (c.DataType is EnumeratedDataType)
+                    {
+                        var dataTypeNotNullable = dataType.Substring(0, dataType.Length - 1);
+                        classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = reader.GetValue({c.Ordinal - 1}) == DBNull.Value ? null : ({dataType})Enum.Parse(typeof({dataTypeNotNullable}), reader.GetString({c.Ordinal - 1}));");
+                    }
+                    else
+                    {
+                        classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = reader.GetValue({c.Ordinal - 1}) == DBNull.Value ? null : ({dataType})reader.GetValue({c.Ordinal - 1});");
+                    }
+
                 }
                 else
                 {
-                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ({DataTypeWriter.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
+                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ({dataType})reader.GetValue({c.Ordinal - 1});");
                 }
             }
         }
