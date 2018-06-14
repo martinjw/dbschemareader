@@ -32,10 +32,22 @@ namespace DatabaseSchemaReader.CodeGen
                         name = name.Substring(0, name.Length - 2);
                     }
 
-                    if (name.EndsWith("Number", StringComparison.OrdinalIgnoreCase))
+                    if (name.EndsWith("SerialNumber", StringComparison.OrdinalIgnoreCase))
                     {
-                        //remove the "Number" - it's just a "Category"
+                        //remove the "SerialNumber" - it's just a "Category"
+                        name = name.Substring(0, name.Length - 12);
+                    }
+
+                    if (name.EndsWith("ModelNumber", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //remove the "Number" part but keep "Model" - it's just a "Category"
                         name = name.Substring(0, name.Length - 6);
+                    }
+
+                    if (name.EndsWith("RoleCode", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //remove the "Code" part but keep the "Role" - it's just a "Category"
+                        name = name.Substring(0, name.Length - 4);
                     }
                 }
                 //member name cannot be same as class name
