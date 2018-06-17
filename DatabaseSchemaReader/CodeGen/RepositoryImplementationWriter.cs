@@ -101,21 +101,11 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("");
 
             var combinations = CodeWriterUtils.GetGetListByColumnCombinations(table)?.ToList();
-            if (combinations == null)
+            combinations?.ForEach(c =>
             {
-                return;
-            }
-
-            foreach (var c in combinations)
-            {
-                if (c.SequenceEqual(primaryKeyColumns))
-                {
-                    continue;
-                }
-
                 WriteGetListBy(c);
                 classBuilder.AppendLine("");
-            }
+            });
         }
 
         private void WriteGetListMethodSummary(IEnumerable<Parameter> methodParameters)

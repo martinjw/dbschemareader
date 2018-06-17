@@ -32,23 +32,23 @@ namespace DatabaseSchemaReader.CodeGen
                         name = name.Substring(0, name.Length - 2);
                     }
 
-                    if (name.EndsWith("SerialNumber", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //remove the "SerialNumber" - it's just a "Category"
-                        name = name.Substring(0, name.Length - 12);
-                    }
+                    //if (name.EndsWith("SerialNumber", StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    //remove the "SerialNumber" - it's just a "Category"
+                    //    name = name.Substring(0, name.Length - 12);
+                    //}
 
-                    if (name.EndsWith("ModelNumber", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //remove the "Number" part but keep "Model" - it's just a "Category"
-                        name = name.Substring(0, name.Length - 6);
-                    }
+                    //if (name.EndsWith("ModelNumber", StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    //remove the "Number" part but keep "Model" - it's just a "Category"
+                    //    name = name.Substring(0, name.Length - 6);
+                    //}
 
-                    if (name.EndsWith("RoleCode", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //remove the "Code" part but keep the "Role" - it's just a "Category"
-                        name = name.Substring(0, name.Length - 4);
-                    }
+                    //if (name.EndsWith("RoleCode", StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    //remove the "Code" part but keep the "Role" - it's just a "Category"
+                    //    name = name.Substring(0, name.Length - 4);
+                    //}
                 }
                 //member name cannot be same as class name
                 if (name == column.Table.NetName)
@@ -59,7 +59,6 @@ namespace DatabaseSchemaReader.CodeGen
             return name;
         }
 
-
         public string NameColumnAsMethodTitle(string name)
         {
             var name2 = NameFixer.ToPascalCase(name);
@@ -69,11 +68,23 @@ namespace DatabaseSchemaReader.CodeGen
                 name2 = name2.Substring(0, name2.Length - 2);
             }
 
-            if (name2.EndsWith("Number", StringComparison.OrdinalIgnoreCase))
-            {
-                //remove the "Number" - it's just a "Category"
-                name2 = name2.Substring(0, name2.Length - 6);
-            }
+            //if (name2.EndsWith("SerialNumber", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    //remove the "SerialNumber" - it's just a "Category"
+            //    name2 = name2.Substring(0, name2.Length - 12);
+            //}
+
+            //if (name2.EndsWith("ModelNumber", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    //remove the "Number" part but keep "Model" - it's just a "Category"
+            //    name2 = name2.Substring(0, name2.Length - 6);
+            //}
+
+            //if (name2.EndsWith("RoleCode", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    //remove the "Code" part but keep the "Role" - it's just a "Category"
+            //    name2 = name2.Substring(0, name2.Length - 4);
+            //}
 
             return name2;
         }
@@ -112,7 +123,7 @@ namespace DatabaseSchemaReader.CodeGen
                     continue;
                 }
 
-                sb.Append(f.ToLowerInvariant().Substring(0,1));
+                sb.Append(f.ToLowerInvariant().Substring(0, 1));
             }
 
             return sb.ToString();
@@ -158,42 +169,22 @@ namespace DatabaseSchemaReader.CodeGen
         public virtual string ForeignKeyName(DatabaseTable table, DatabaseConstraint foreignKey)
         {
             var refTable = foreignKey.ReferencedTable(table.DatabaseSchema);
-
-            if (refTable == null)
-            {
-                //we can't find the foreign key table, so just write the columns
-                return null;
-            }
-            //This is a name for the foreign key. Only used for composite keys.
             var propertyName = refTable.Name;
+            if (table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
+            {
+                // Append the key name to the property name. In the event of multiple foreign keys to the same table
+                // This will give the consumer context.
+                propertyName += foreignKey.Name;
+            }
 
-            //if there is only one column (not composite) use the netName of that column
-            if (foreignKey.Columns.Count == 1)
+            if (propertyName == table.Name)
             {
                 var columnName = foreignKey.Columns.Single();
                 var column = table.FindColumn(columnName);
-                //if it is a primary key, we've used the original name for a scalar property
                 if (!column.IsPrimaryKey)
                 {
-                    propertyName = column.NetName; // KE: enabling this line I think will make it so that CustomerAssetOrganization.ParentOrganization property name is written instead of CustomerAssetOrganization.CustomerAssetOrganizationKey. But enabling this line also causes Device.DeviceModelNumber property name to be duplicated!
+                    propertyName = column.NetName;
                 }
-            }
-            else //composite keys
-            {
-                // Check whether the referenced table is used in any other key. This ensures that the property names
-                // are unique.
-                if (table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
-                {
-                    // Append the key name to the property name. In the event of multiple foreign keys to the same table
-                    // This will give the consumer context.
-                    propertyName += foreignKey.Name;
-                }
-            }
-
-            // Ensures that property name cannot be the same as class name
-            if (propertyName == table.NetName)
-            {
-                propertyName += "Key";
             }
             return propertyName;
         }
