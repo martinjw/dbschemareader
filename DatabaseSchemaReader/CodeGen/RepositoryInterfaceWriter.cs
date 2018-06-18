@@ -44,19 +44,7 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings))};");
             classBuilder.AppendLine($"{CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetGetListMethodParameters(table, codeWriterSettings))};");
             var combinations = CodeWriterUtils.GetGetListByColumnCombinations(table)?.ToList();
-            var primaryKeyColumns = CodeWriterUtils.GetPrimaryKeyColumns(table);
-            if (combinations != null)
-            {
-                foreach (var c in combinations)
-                {
-                    if (c.SequenceEqual(primaryKeyColumns))
-                    {
-                        continue;
-                    }
-
-                    classBuilder.AppendLine($"{CodeWriterUtils.GetGetListByMethodSignature(table, c, codeWriterSettings, CodeWriterUtils.GetMethodParametersForColumns(c, codeWriterSettings))};");
-                }
-            }
+            combinations?.ForEach(c => classBuilder.AppendLine($"{CodeWriterUtils.GetGetListByMethodSignature(table, c, codeWriterSettings, CodeWriterUtils.GetMethodParametersForColumns(c, codeWriterSettings))};"));
 
             /*foreach (var foreignKey in table.ForeignKeys)
             {

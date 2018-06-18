@@ -102,7 +102,11 @@ namespace DatabaseSchemaReader.CodeGen
             var primaryKeyColumns = GetPrimaryKeyColumns(table);
             List<IEnumerable<DatabaseColumn>> combinations = null;
             var allKeys = new List<DatabaseColumn>();
-            allKeys.AddRange(primaryKeyColumns);
+            if (primaryKeyColumns.Count() > 1)
+            {
+                allKeys.AddRange(primaryKeyColumns);
+            }
+
             allKeys.AddRange(GetInverseForeignKeyReferencedColumns(table));
             allKeys.AddRange(GetForeignKeyColumns(table));
             for (var i = 1; i <= allKeys.Distinct().Count(); i++)
@@ -116,7 +120,51 @@ namespace DatabaseSchemaReader.CodeGen
                 combinations.AddRange(c);
             }
 
-            return combinations;
+            if (combinations == null)
+            {
+                return null;
+            }
+
+            return OmitUniqueConstraintColumnsFromCombinations(combinations, table);
+        }
+
+        public static IEnumerable<IEnumerable<DatabaseColumn>> OmitUniqueConstraintColumnsFromCombinations(IEnumerable<IEnumerable<DatabaseColumn>> combinations, DatabaseTable table)
+        {
+            if (combinations == null)
+            {
+                return null;
+            }
+
+            var primaryKeyColumns = GetPrimaryKeyColumns(table)?.ToList();
+            var uniqueConstraintColumns = GetUniqueConstraintColumns(table)?.ToList();
+            uniqueConstraintColumns?.Add(primaryKeyColumns);
+            List<IEnumerable<DatabaseColumn>> newCombinations = null;
+            foreach (var c in combinations)
+            {
+                var combinationContainsUniqueConstraint = false;
+                foreach (var cols in uniqueConstraintColumns)
+                {
+                    if (!cols.Except(c).Any())
+                    {
+                        combinationContainsUniqueConstraint = true;
+                        break;
+                    }
+                }
+
+                if (combinationContainsUniqueConstraint)
+                {
+                    continue;
+                }
+
+                if (newCombinations == null)
+                {
+                    newCombinations = new List<IEnumerable<DatabaseColumn>>();
+                }
+
+                newCombinations.Add(c);
+            }
+
+            return newCombinations;
         }
 
         public static string GetWithMethodSignature(DatabaseTable table, DatabaseConstraint foreignKey, CodeWriterSettings codeWriterSettings)
@@ -159,6 +207,23 @@ namespace DatabaseSchemaReader.CodeGen
         public static IEnumerable<DatabaseColumn> GetPrimaryKeyColumns(DatabaseTable table)
         {
             return table.Columns.Where(c => c.IsPrimaryKey);
+        }
+
+        public static IEnumerable<IEnumerable<DatabaseColumn>> GetUniqueConstraintColumns(DatabaseTable table)
+        {
+            var items = new List<List<DatabaseColumn>>();
+            foreach (var uk in table.UniqueKeys)
+            {
+                var cols = new List<DatabaseColumn>();
+                foreach (var c in uk.Columns)
+                {
+                    cols.Add(table.FindColumn(c));
+                }
+
+                items.Add(cols);
+            }
+
+            return items;
         }
 
         public static IEnumerable<DatabaseColumn> GetForeignKeyColumns(DatabaseTable table)
