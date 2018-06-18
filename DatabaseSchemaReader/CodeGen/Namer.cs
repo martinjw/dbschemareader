@@ -31,25 +31,8 @@ namespace DatabaseSchemaReader.CodeGen
                         //remove the "Id" - it's just a "Category"
                         name = name.Substring(0, name.Length - 2);
                     }
-
-                    //if (name.EndsWith("SerialNumber", StringComparison.OrdinalIgnoreCase))
-                    //{
-                    //    //remove the "SerialNumber" - it's just a "Category"
-                    //    name = name.Substring(0, name.Length - 12);
-                    //}
-
-                    //if (name.EndsWith("ModelNumber", StringComparison.OrdinalIgnoreCase))
-                    //{
-                    //    //remove the "Number" part but keep "Model" - it's just a "Category"
-                    //    name = name.Substring(0, name.Length - 6);
-                    //}
-
-                    //if (name.EndsWith("RoleCode", StringComparison.OrdinalIgnoreCase))
-                    //{
-                    //    //remove the "Code" part but keep the "Role" - it's just a "Category"
-                    //    name = name.Substring(0, name.Length - 4);
-                    //}
                 }
+
                 //member name cannot be same as class name
                 if (name == column.Table.NetName)
                 {
@@ -61,32 +44,14 @@ namespace DatabaseSchemaReader.CodeGen
 
         public string NameColumnAsMethodTitle(string name)
         {
-            var name2 = NameFixer.ToPascalCase(name);
-            if (name2.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+            var namePascalCase = NameFixer.ToPascalCase(name);
+            if (namePascalCase.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
             {
                 //remove the "Id" - it's just a "Category"
-                name2 = name2.Substring(0, name2.Length - 2);
+                namePascalCase = namePascalCase.Substring(0, namePascalCase.Length - 2);
             }
 
-            //if (name2.EndsWith("SerialNumber", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    //remove the "SerialNumber" - it's just a "Category"
-            //    name2 = name2.Substring(0, name2.Length - 12);
-            //}
-
-            //if (name2.EndsWith("ModelNumber", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    //remove the "Number" part but keep "Model" - it's just a "Category"
-            //    name2 = name2.Substring(0, name2.Length - 6);
-            //}
-
-            //if (name2.EndsWith("RoleCode", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    //remove the "Code" part but keep the "Role" - it's just a "Category"
-            //    name2 = name2.Substring(0, name2.Length - 4);
-            //}
-
-            return name2;
+            return namePascalCase;
         }
 
         /// <summary>
