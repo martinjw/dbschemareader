@@ -173,20 +173,27 @@ namespace DatabaseSchemaReader.CodeGen
                 "DbContext"
             };
 
+            var propertyName = codeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
             foreach (var fkc in foreignKey.Columns)
             {
                 var tc = table.Columns.Single(_tc => _tc.Name == fkc);
                 var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(tc)}";
-                if (DataTypeWriter.FindDataType(tc).EndsWith("?"))
+                if (tc.Nullable && DataTypeWriter.FindDataType(tc).EndsWith("?")) // KE: need the check for the "?" so that we correctly handle reference types like string
                 {
+                    using (classBuilder.BeginNest($"if (!{parameter}.HasValue)"))
+                    {
+                        classBuilder.AppendLine($"{propertyName} = null;");
+                        classBuilder.AppendLine("return this;");
+                    }
+
+                    classBuilder.AppendLine("");
                     parameter += ".Value";
                 }
-
+                
                 methodCallParameters.Add(parameter);
             }
 
             var s = string.Join(", ", methodCallParameters);
-            var propertyName = codeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
             classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.Get({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();
