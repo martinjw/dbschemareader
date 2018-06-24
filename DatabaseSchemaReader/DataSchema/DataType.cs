@@ -156,11 +156,11 @@ namespace DatabaseSchemaReader.DataSchema
             //could be a short, int or long...
             //VARCHAR2(10) is common for Oracle integers, but it can overflow an int
             //int.MaxValue is 2147483647 so +1 is allowable in the database
-            if (precision > 10) //up to long.MaxValue
+            if (precision > 32) //up to long.MaxValue
             {
                 return "long";
             }
-            if (precision > 4) //2147483647
+            if (precision > 16) //2147483647
             {
                 return "int";
             }
