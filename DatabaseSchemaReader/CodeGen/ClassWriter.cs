@@ -124,7 +124,7 @@ namespace DatabaseSchemaReader.CodeGen
                     var column = referencedColumns[i];
                     var actualColumn = table.Columns.Single(tc => tc.Name == column);
                     var dataTypeForParameter = DataTypeWriter.FindDataType(actualColumn);
-                    methodParameters.Add(new Tuple<string, string, string>(codeWriterSettings.Namer.NameParameter(refColumn), dataTypeForParameter, refColumn));
+                    methodParameters.Add(new Tuple<string, string, string>(codeWriterSettings.Namer.NameToAcronym(refColumn), dataTypeForParameter, refColumn));
                 }
 
                 classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKeyChild, fk, codeWriterSettings)}");
