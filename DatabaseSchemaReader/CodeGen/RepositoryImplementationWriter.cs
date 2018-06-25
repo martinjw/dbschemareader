@@ -406,8 +406,13 @@ namespace DatabaseSchemaReader.CodeGen
                 var sqlCommandText = ConstructSqlQuery(methodParameters, innerJoinClause, columnsToReturn);
                 classBuilder.AppendLine($"var entities = new List<{table.NetName}>();");
                 WriteExecuteReaderBlock(
-                    sqlCommandText,
-                    cb => { },
+                    sqlCommandText, cb =>
+                        {
+                            foreach (var mp in methodParameters)
+                            {
+                                cb.AppendLine($"dbContext.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                            }
+                        },
                     cb =>
                     {
                         using (cb.BeginNest("while (reader.Read())"))
