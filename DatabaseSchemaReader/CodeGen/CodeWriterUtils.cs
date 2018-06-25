@@ -8,6 +8,11 @@ namespace DatabaseSchemaReader.CodeGen
 {
     public static class CodeWriterUtils
     {
+        public const string CustomerTableName = "Customer";
+        public const string CustomerIDColumnName = "CustomerID";
+        public const string CustomerAssetOrganizationIDColumnName = "CustomerAssetOrganizationID";
+        public const string CustomerAssetOrganizationTableName = "CustomerAssetOrganization";
+
         public static void WriteFileHeader(ClassBuilder classBuilder)
         {
             classBuilder.AppendLine(@"//------------------------------------------------------------------------------
@@ -60,15 +65,14 @@ namespace DatabaseSchemaReader.CodeGen
             return p;
         }
 
-
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
             return $"{table.NetName} Get({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetGetMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public static IEnumerable<Parameter> GetGetMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings);
+            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
         }
 
         public static string GetGetListMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
@@ -76,8 +80,24 @@ namespace DatabaseSchemaReader.CodeGen
             return $"IEnumerable<{table.NetName}> GetList({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetGetListMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public static IEnumerable<Parameter> GetGetListMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
+            var columns = new List<DatabaseColumn>();
+            if (byCustomer)
+            {
+                if (TableHasOrgUnitForeignKey(table))
+                {
+                    var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
+                    columns.Add(orgUnitTable.FindColumn(CustomerIDColumnName));
+                }
+                else
+                {
+                    return new List<Parameter>();
+                }
+
+                return GetMethodParametersForColumns(columns, codeWriterSettings);
+            }
+            
             return new List<Parameter>();
         }
 
@@ -189,9 +209,9 @@ namespace DatabaseSchemaReader.CodeGen
             return $"{table.NetName} Update({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetUpdateMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public static IEnumerable<Parameter> GetUpdateMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings);
+            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
         }
 
         public static string GetDeleteMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
@@ -199,9 +219,9 @@ namespace DatabaseSchemaReader.CodeGen
             return $"{table.NetName} Delete({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetDeleteMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public static IEnumerable<Parameter> GetDeleteMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings);
+            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
         }
 
         public static IEnumerable<DatabaseColumn> GetPrimaryKeyColumns(DatabaseTable table)
@@ -274,10 +294,31 @@ namespace DatabaseSchemaReader.CodeGen
             return c;
         }
 
-        public static IEnumerable<Parameter> GetMethodParametersForPrimaryKeys(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public static IEnumerable<Parameter> GetMethodParametersForPrimaryKeys(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
-            return GetMethodParametersForColumns(table.Columns.Where(c => c.IsPrimaryKey), codeWriterSettings);
+            var columns = table.Columns.Where(c => c.IsPrimaryKey).ToList();
+            if (byCustomer)
+            {
+                if (TableHasOrgUnitForeignKey(table))
+                {
+                    var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
+                    columns.Add(orgUnitTable.FindColumn(CustomerIDColumnName));
+                }
+                else
+                {
+                    return new List<Parameter>();
+                }
+            }
+
+            return GetMethodParametersForColumns(columns, codeWriterSettings);
         }
+
+        private static bool TableHasOrgUnitForeignKey(DatabaseTable table)
+        {
+            return table.ForeignKeys.Any(fk => fk.Columns.Any(fkc => fkc.Equals(CustomerAssetOrganizationIDColumnName)) &&
+                                               fk.ReferencedColumns(table.DatabaseSchema).Any(rfc => rfc.Equals(CustomerAssetOrganizationIDColumnName)));
+        }
+
         public static string PrintParametersForSignature(IEnumerable<Parameter> methodParameters)
         {
             if (methodParameters?.Count() < 1)
@@ -293,7 +334,8 @@ namespace DatabaseSchemaReader.CodeGen
             var methodParameters = new List<Parameter>();
             foreach (var column in columns)
             {
-                var pn = codeWriterSettings.Namer.NameParameter(GetPropertyNameForDatabaseColumn(column));
+                var ta = codeWriterSettings.Namer.NameToAcronym(column.TableName);
+                var pn = codeWriterSettings.Namer.NameToAcronym(GetPropertyNameForDatabaseColumn(column));
                 var dt = DataTypeWriter.FindDataType(column);
                 var cn = GetPropertyNameForDatabaseColumn(column);
                 var fn = Regex.Replace(GetPropertyNameForDatabaseColumn(column), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
@@ -322,7 +364,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var summary = String.Join(" ", fields) + ".";
 
-                methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary });
+                methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary, TableAlias = ta});
             }
 
             return methodParameters;
