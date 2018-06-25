@@ -667,7 +667,8 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 WriteGetPropertyColumnPairs();
                 classBuilder.AppendLine("var valuesClause = string.Join(\", \", propertyColumnPairs.Keys.Select(k => \"@\" + k.Name));");
-                classBuilder.AppendLine($"var sqlCommandText = $\"INSERT INTO \\\"{table.Name}\\\" ({{string.Join(\", \", propertyColumnPairs.Values)}}) VALUES ({{valuesClause}}) RETURNING {GetAllColumnNames(new List<DatabaseTable> { table })};\";");
+                var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
+                classBuilder.AppendLine($"var sqlCommandText = $\"INSERT INTO \\\"{table.Name}\\\" AS {thisTableAlias} ({{string.Join(\", \", propertyColumnPairs.Values)}}) VALUES ({{valuesClause}}) RETURNING {GetAllColumnNames(new List<DatabaseTable> { table })};\";");
                 var entityVariableName = "createdEntity";
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
                 WriteExecuteReaderBlock(
