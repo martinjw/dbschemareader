@@ -150,22 +150,26 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteDeleteLogical()
         {
             var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false);
-            WriteDeleteLogicalCommon(methodParameters, null, GetAllColumnNames(new List<DatabaseTable>{ table }));
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
+            WriteDeleteLogicalCommon(methodParameters, null, whereClause, GetAllColumnNames(new List<DatabaseTable>{ table }));
         }
 
         private void WriteDeleteLogicalByCustomer(IEnumerable<Parameter> methodParameters)
         {
             var orgUnitTableAlias = codeWriterSettings.Namer.NameToAcronym(CodeWriterUtils.CustomerAssetOrganizationTableName);
             var fromClause = $"\\\"{CodeWriterUtils.CustomerAssetOrganizationTableName}\\\" {orgUnitTableAlias}";
-            WriteDeleteLogicalCommon(methodParameters, fromClause, GetAllColumnNamesByCustomer());
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
+            var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
+            var joinOnClause = $"{thisTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\" = {orgUnitTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\"";
+            whereClause = $"{joinOnClause} AND {whereClause}";
+            WriteDeleteLogicalCommon(methodParameters, fromClause, whereClause, GetAllColumnNamesByCustomer());
         }
 
-        private void WriteDeleteLogicalCommon(IEnumerable<Parameter> methodParameters, string fromClause, string columnsToReturn)
+        private void WriteDeleteLogicalCommon(IEnumerable<Parameter> methodParameters, string fromClause, string whereClause, string columnsToReturn)
         {
             var methodParametersWithDbContext = CodeWriterUtils.AddDbContextParameter(methodParameters);
             using (classBuilder.BeginNest($"private static {table.NetName} DeleteLogical({CodeWriterUtils.PrintParametersForSignature(methodParametersWithDbContext)})"))
             {
-                var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
                 var logicalDeleteColumn = table.Columns.Single(c => logicalDeleteColumns.Contains(c.Name));
                 var setClause = $"\\\"{logicalDeleteColumn.Name}\\\" = NOW()";
                 var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
@@ -204,21 +208,25 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteDeletePhysical()
         {
             var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false);
-            WriteDeletePhysicalCommon(methodParameters, null);
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
+            WriteDeletePhysicalCommon(methodParameters, null, whereClause);
         }
 
         private void WriteDeletePhysicalByCustomer(IEnumerable<Parameter> methodParameters)
         {
             var orgUnitTableAlias = codeWriterSettings.Namer.NameToAcronym(CodeWriterUtils.CustomerAssetOrganizationTableName);
             var usingClause = $"\\\"{CodeWriterUtils.CustomerAssetOrganizationTableName}\\\" {orgUnitTableAlias}";
-            WriteDeletePhysicalCommon(methodParameters, usingClause);
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
+            var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
+            var joinOnClause = $"{thisTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\" = {orgUnitTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\"";
+            whereClause = $"{joinOnClause} AND {whereClause}";
+            WriteDeletePhysicalCommon(methodParameters, usingClause, whereClause);
         }
 
-        private void WriteDeletePhysicalCommon(IEnumerable<Parameter> methodParameters, string usingClause)
+        private void WriteDeletePhysicalCommon(IEnumerable<Parameter> methodParameters, string usingClause, string whereClause)
         {
             var methodParametersWithDbContext = CodeWriterUtils.AddDbContextParameter(methodParameters);
             classBuilder.BeginNest($"private static int DeletePhysical({CodeWriterUtils.PrintParametersForSignature(methodParametersWithDbContext)})");
-            var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
             var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
             var sqlCommandText = $"DELETE FROM ONLY \\\"{table.Name}\\\" AS {thisTableAlias}";
             if (!string.IsNullOrEmpty(usingClause))
@@ -252,7 +260,8 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteUpdate()
         {
             var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false);
-            WriteUpdateCommon(methodParameters, null, GetAllColumnNames(new List<DatabaseTable> { table }));
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters.ToList());
+            WriteUpdateCommon(methodParameters, null, whereClause, GetAllColumnNames(new List<DatabaseTable> { table }));
         }
 
         private void WriteUpdateByCustomer()
@@ -265,10 +274,14 @@ namespace DatabaseSchemaReader.CodeGen
 
             var orgUnitTableAlias = codeWriterSettings.Namer.NameToAcronym(CodeWriterUtils.CustomerAssetOrganizationTableName);
             var fromClause = $"\\\"{CodeWriterUtils.CustomerAssetOrganizationTableName}\\\" {orgUnitTableAlias}";
-            WriteUpdateCommon(methodParametersByCustomer, fromClause, GetAllColumnNamesByCustomer());
+            var whereClause = GetWhereClauseFromMethodParameters(methodParametersByCustomer.ToList());
+            var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
+            var joinOnClause = $"{thisTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\" = {orgUnitTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\"";
+            whereClause = $"{joinOnClause} AND {whereClause}";
+            WriteUpdateCommon(methodParametersByCustomer, fromClause, whereClause, GetAllColumnNamesByCustomer());
         }
 
-        private void WriteUpdateCommon(IEnumerable<Parameter> methodParameters, string fromClause, string columnsToReturn)
+        private void WriteUpdateCommon(IEnumerable<Parameter> methodParameters, string fromClause, string whereClause, string columnsToReturn)
         {
             var methodParametersWithDbContext = CodeWriterUtils.AddDbContextParameter(methodParameters);
             var entityParameterSummary = "An entity with updated values.";
@@ -278,7 +291,7 @@ namespace DatabaseSchemaReader.CodeGen
             using (classBuilder.BeginNest($"public static {CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParametersWithDbContextAndEntity)}"))
             {
                 WriteGetPropertyColumnPairs();
-                var whereClause = GetWhereClauseFromMethodParameters(methodParameters.ToList());
+                
                 classBuilder.AppendLine("var setClause = string.Join(\", \", propertyColumnPairs.Select(pcp => $\"{pcp.Value} = @{pcp.Key.Name}\"));");
                 var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
                 if (!string.IsNullOrEmpty(fromClause))
