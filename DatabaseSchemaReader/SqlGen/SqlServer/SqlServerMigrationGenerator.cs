@@ -142,7 +142,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             //we could plug in "CLUSTERED" or "PRIMARY XML" from index.IndexType here
             var indexType = index.IsUnique ? "UNIQUE " : string.Empty;
 
-            var clustered = string.IsNullOrWhiteSpace(index.IndexType) ? string.Empty : index.IndexType + " ";
+            var clustered = string.IsNullOrEmpty(index.IndexType?.Trim()) ? string.Empty : index.IndexType + " ";
 
             return string.Format(CultureInfo.InvariantCulture,
                        "CREATE {0}{4}INDEX {1} ON {2}({3})",
