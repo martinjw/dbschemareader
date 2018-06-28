@@ -131,5 +131,26 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 Escape(index.Name),
                 TableName(databaseTable));
         }
+
+        public override string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        {
+            if (index.Columns.Count == 0)
+            {
+                //IndexColumns errors 
+                return "-- add index " + index.Name + " (unknown columns)";
+            }
+            //we could plug in "CLUSTERED" or "PRIMARY XML" from index.IndexType here
+            var indexType = index.IsUnique ? "UNIQUE " : string.Empty;
+
+            var clustered = string.IsNullOrWhiteSpace(index.IndexType) ? string.Empty : index.IndexType + " ";
+
+            return string.Format(CultureInfo.InvariantCulture,
+                       "CREATE {0}{4}INDEX {1} ON {2}({3})",
+                       indexType, //must have trailing space
+                       Escape(index.Name),
+                       TableName(databaseTable),
+                       GetColumnList(index.Columns.Select(i => i.Name)),
+                       clustered) + LineEnding();
+        }
     }
 }

@@ -12,7 +12,6 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
         [TestMethod]
         public void TestSqlServerWithSchema()
         {
-
             //arrange
             var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
 
@@ -31,7 +30,6 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
         [TestMethod]
         public void TestSqlServerNonUnique()
         {
-
             //arrange
             var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
 
@@ -49,9 +47,50 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
         }
 
         [TestMethod]
+        public void TestSqlServerNonUnique_NonClustered()
+        {
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = MigrationCommon.CreateNewColumn();
+            var index = MigrationCommon.CreateUniqueIndex(column, "COUNTRY");
+            index.IsUnique = false;
+            index.IndexType = "NONCLUSTERED";
+
+            //act
+            var sql = migration.AddIndex(table, index);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE NONCLUSTERED INDEX [UI_COUNTRY] ON [dbo].[Orders]([COUNTRY])", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
+
+
+        [TestMethod]
+        public void TestSqlServerNonUnique_Clustered()
+        {
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = MigrationCommon.CreateNewColumn();
+            var index = MigrationCommon.CreateUniqueIndex(column, "COUNTRY");
+            index.IsUnique = false;
+            index.IndexType = "CLUSTERED";
+
+            //act
+            var sql = migration.AddIndex(table, index);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE CLUSTERED INDEX [UI_COUNTRY] ON [dbo].[Orders]([COUNTRY])", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
+
+
+        [TestMethod]
         public void TestSqlServerNoSchema()
         {
-
             //arrange
             var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
 
@@ -66,6 +105,46 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
 
             //assert
             Assert.IsTrue(sql.StartsWith("CREATE UNIQUE INDEX [UI_COUNTRY] ON [Orders]([COUNTRY])", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
+
+        [TestMethod]
+        public void TestSqlServerNoSchema_NonClustered()
+        {
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = MigrationCommon.CreateNewColumn();
+            var index = MigrationCommon.CreateUniqueIndex(column, "COUNTRY");
+            index.IndexType = "NONCLUSTERED";
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddIndex(table, index);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE UNIQUE NONCLUSTERED INDEX [UI_COUNTRY] ON [Orders]([COUNTRY])", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
+
+        [TestMethod]
+        public void TestSqlServerNoSchema_Clustered()
+        {
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = MigrationCommon.CreateNewColumn();
+            var index = MigrationCommon.CreateUniqueIndex(column, "COUNTRY");
+            index.IndexType = "CLUSTERED";
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddIndex(table, index);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE UNIQUE CLUSTERED INDEX [UI_COUNTRY] ON [Orders]([COUNTRY])", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
 
 
