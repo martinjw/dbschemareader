@@ -101,12 +101,23 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false))};");
 
             var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true);
-            if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
+            if (methodParametersByCustomer != null && methodParametersByCustomer.Any())
             {
-                return;
+                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+            if (table.UniqueKeys.Any())
+            {
+                var methodParametersForUniqueConstraint = CodeWriterUtils.GetMethodParametersForUniqueConstraint(table, codeWriterSettings, false);
+                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersForUniqueConstraint)};");
+
+                var methodParametersForUniqueConstraintByCustomer = CodeWriterUtils.GetMethodParametersForUniqueConstraint(table, codeWriterSettings, true);
+                if (methodParametersForUniqueConstraintByCustomer != null &&
+                    methodParametersForUniqueConstraintByCustomer.Any())
+                {
+                    classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersForUniqueConstraintByCustomer)};");
+                }
+            }
         }
 
         private void WriteCreate()

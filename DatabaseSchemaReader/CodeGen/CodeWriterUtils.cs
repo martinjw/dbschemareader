@@ -330,6 +330,25 @@ namespace DatabaseSchemaReader.CodeGen
             return c;
         }
 
+        public static IEnumerable<Parameter> GetMethodParametersForUniqueConstraint(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
+        {
+            var columns = table.Columns.Where(item => item.IsUniqueKey).ToList();
+            if (byCustomer)
+            {
+                if (TableHasOrgUnitForeignKey(table))
+                {
+                    var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
+                    columns.Add(orgUnitTable.FindColumn(CustomerIDColumnName));
+                }
+                else
+                {
+                    return new List<Parameter>();
+                }
+            }
+
+            return GetMethodParametersForColumns(columns, codeWriterSettings);
+        }
+
         public static IEnumerable<Parameter> GetMethodParametersForPrimaryKeys(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
             var columns = table.Columns.Where(c => c.IsPrimaryKey).ToList();
