@@ -12,5 +12,6 @@ namespace DatabaseSchemaReader.CodeGen
         public string DataType;
         public string ColumnNameToQueryBy;
         public string Summary;
+        public string TableAlias;
     }
 }

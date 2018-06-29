@@ -67,7 +67,7 @@ namespace DatabaseSchemaReader.CodeGen
             //return className + "Collection";
         }
 
-        public virtual string NameParameter(string parameterName)
+        public virtual string NameToAcronym(string parameterName)
         {
             var n = NameFixer.ToCamelCase(parameterName);
             //http://weblogs.asp.net/jgalloway/archive/2005/09/27/426087.aspx
