@@ -27,6 +27,42 @@ namespace DatabaseSchemaReader.CodeGen
 //------------------------------------------------------------------------------");
         }
 
+        public static void DeduplicateMethodParameterNames(IList<Parameter> methodParameters)
+        {
+            var uniqueCount = methodParameters.Select(item => item.Name).Distinct().Count();
+            var count = methodParameters.Count();
+            var noDupes = uniqueCount == count;
+            if (noDupes)
+            {
+                return;
+            }
+
+            var duplicateNameGroups = methodParameters.GroupBy(item => item.Name).Where(item => item.Count() > 1);
+            duplicateNameGroups.ToList().ForEach(duplicateNameGroup =>
+            {
+                var firstOne = true;
+                var uniqueNumber = 2;
+                for (var i = 0; i < methodParameters.Count(); i++)
+                {
+                    var parameter = methodParameters[i];
+                    if (parameter.Name != duplicateNameGroup.Key)
+                    {
+                        continue;
+                    }
+
+                    if (firstOne)
+                    {
+                        firstOne = false;
+                        continue;
+                    }
+
+                    parameter.Name = $"{parameter.Name}{uniqueNumber}";
+                    methodParameters[i] = parameter;
+                    uniqueNumber++;
+                }
+            });
+        }
+
         public static void BeginNestNamespace(ClassBuilder classBuilder, CodeWriterSettings codeWriterSettings)
         {
             if (!String.IsNullOrEmpty(codeWriterSettings.Namespace))
@@ -367,6 +403,7 @@ namespace DatabaseSchemaReader.CodeGen
                 methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary, TableAlias = ta});
             }
 
+            DeduplicateMethodParameterNames(methodParameters);
             return methodParameters;
         }
 
