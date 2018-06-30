@@ -454,24 +454,47 @@ namespace DatabaseSchemaReader.CodeGen
         {
             WriteGet();
             WriteGetByCustomer();
+            WriteGetUnique();
+            WriteGetUniqueByCustomer();
         }
 
         private void WriteGet()
         {
-            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false).ToList();
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, false).ToList();
             WriteGetCommon(methodParameters, null, GetAllColumnNames(new List<DatabaseTable> { table }));
         }
 
         private void WriteGetByCustomer()
         {
-            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true);
+            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, false);
             if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
             {
                 return;
             }
 
-
             WriteGetCommon(methodParametersByCustomer, GetInnerJoinOrgUnitClause(), GetAllColumnNamesByCustomer());
+        }
+
+        private void WriteGetUnique()
+        {
+            var methodParametersUnique = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParametersUnique == null || !methodParametersUnique.Any())
+            {
+                return;
+            }
+
+            WriteGetCommon(methodParametersUnique, null, GetAllColumnNames(new List<DatabaseTable> { table }));
+        }
+
+        private void WriteGetUniqueByCustomer()
+        {
+            var methodParametersUniqueByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParametersUniqueByCustomer == null || !methodParametersUniqueByCustomer.Any())
+            {
+                return;
+            }
+
+            WriteGetCommon(methodParametersUniqueByCustomer, GetInnerJoinOrgUnitClause(), GetAllColumnNamesByCustomer());
         }
 
         private void WriteGetCommon(IEnumerable<Parameter> methodParameters, string innerJoinClause, string columnsToReturn)

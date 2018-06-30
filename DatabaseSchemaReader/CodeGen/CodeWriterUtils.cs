@@ -106,9 +106,14 @@ namespace DatabaseSchemaReader.CodeGen
             return $"{table.NetName} Get({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetGetMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
+        public static IEnumerable<Parameter> GetGetMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer, bool forUniqueConstraint)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            if (!forUniqueConstraint)
+            {
+                return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            }
+
+            return GetMethodParametersForUniqueConstraint(table, codeWriterSettings, byCustomer);
         }
 
         public static string GetGetListMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
@@ -332,6 +337,11 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static IEnumerable<Parameter> GetMethodParametersForUniqueConstraint(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
+            if (!table.UniqueKeys.Any())
+            {
+                return new List<Parameter>();
+            }
+
             var columns = table.Columns.Where(item => item.IsUniqueKey).ToList();
             if (byCustomer)
             {
