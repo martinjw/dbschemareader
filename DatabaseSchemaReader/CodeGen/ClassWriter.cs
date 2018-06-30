@@ -108,52 +108,118 @@ namespace DatabaseSchemaReader.CodeGen
 
         public void WriteWith(DatabaseTable foreignKeyChild)
         {
-            foreach (var fk in CodeWriterUtils.GetWithForeignKeys(table, foreignKeyChild))
+            var ffks = CodeWriterUtils.GetWithForeignKeys(table, foreignKeyChild).ToList();
+            foreach (var ffk in ffks)
             {
-                var dataType = foreignKeyChild.NetName;
-                if (fk.Columns.Count != fk.ReferencedColumns(table.DatabaseSchema).Count())
-                {
-                    throw new InvalidOperationException("Number of foreign key columns does not match number of columns referenced!");
-                }
+                var ffkTable = table.DatabaseSchema.FindTableByName(ffk.TableName);
+                var ffkReferencedTable = ffk.ReferencedTable(table.DatabaseSchema);
+                var ffkColumns = ffk.Columns.Select(item => ffkTable.FindColumn(item));
+                ffkColumns.OrderBy(item => item.Name);
+                var ffkReferencedColumns = ffk.ReferencedColumns(table.DatabaseSchema).Select(item => ffkReferencedTable.FindColumn(item));
 
-                var referencedColumns = fk.ReferencedColumns(table.DatabaseSchema).ToList();
-                var methodParameters = new List<Tuple<string, string, string>>();
-                for (var i = 0; i < fk.Columns.Count; i++)
-                {
-                    var refColumn = fk.Columns[i];
-                    var column = referencedColumns[i];
-                    var actualColumn = table.Columns.Single(tc => tc.Name == column);
-                    var dataTypeForParameter = DataTypeWriter.FindDataType(actualColumn);
-                    methodParameters.Add(new Tuple<string, string, string>(codeWriterSettings.Namer.NameToAcronym(refColumn), dataTypeForParameter, refColumn));
-                }
+                var withMethodSignature = CodeWriterUtils.GetWithMethodSignature(
+                    ffkReferencedTable,
+                    ffkTable,
+                    ffk,
+                    codeWriterSettings);
 
-                classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKeyChild, fk, codeWriterSettings)}");
-
-                var methodCallParameters = new List<string>
-                {
-                    "DbContext"
-                };
-
-                foreach (var fkc in fk.Columns)
-                {
-                    var tc = table.Columns.Single(_tc => _tc.Name == fkc);
-                    var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(tc)}";
-                    if (DataTypeWriter.FindDataType(tc).EndsWith("?"))
+                var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
+                var repositoryNameForFfkTable = CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild);
+                var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetListByMethodName(ffkColumns, codeWriterSettings);
+                classBuilder.BeginNest($"public {withMethodSignature}");
+                    var repositoryMethodCallParametersForFfkTable = new List<string> { "DbContext" };
+                    foreach (var ffkReferencedColumn in ffkReferencedColumns)
                     {
-                        parameter += ".Value";
+                        var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(ffkReferencedColumn)}";
+                        if (ffkReferencedColumn.Nullable && DataTypeWriter.FindDataType(ffkReferencedColumn).EndsWith("?"))
+                        {
+                            using (classBuilder.BeginNest($"if (!{parameter}.HasValue)"))
+                            {
+                                classBuilder.AppendLine($"{propertyName} = new List<{ffkTable.NetName}>();");
+                                classBuilder.AppendLine("return this;");
+                            }
+
+                            classBuilder.AppendLine("");
+                            parameter += ".Value";
+                        }
+
+                        repositoryMethodCallParametersForFfkTable.Add(parameter);
                     }
 
-                    methodCallParameters.Add(parameter);
-                }
-
-                var s = string.Join(", ", methodCallParameters);
-                var methodName = $"GetListBy{string.Join("And", methodParameters.Select(mp => codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.Item3)))}";
-                var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKeyChild, fk);
-                classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild)}.{methodName}({s});");
-                classBuilder.AppendLine("return this;");
+                    var repositoryMethodCallParametersForFfkTablePrinted = string.Join(", ", repositoryMethodCallParametersForFfkTable);
+                    classBuilder.AppendLine($"{propertyName} = {repositoryNameForFfkTable}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
+                    classBuilder.AppendLine("return this;");
                 classBuilder.EndNest();
                 classBuilder.AppendLine("");
             }
+
+
+
+
+            //var fks = CodeWriterUtils.GetWithForeignKeys(table, foreignKeyChild).ToList();
+            //foreach (var fk in fks)
+            //{
+            //WriteWith(fk);
+            //var dataType = foreignKeyChild.NetName;
+            //if (fk.Columns.Count != fk.ReferencedColumns(table.DatabaseSchema).Count())
+            //{
+            //    throw new InvalidOperationException("Number of foreign key columns does not match number of columns referenced!");
+            //}
+
+            //var referencedColumnNames = fk.ReferencedColumns(table.DatabaseSchema).ToList();
+            //var methodParameters = new List<Tuple<string, string, string>>();
+            //for (var i = 0; i < fk.Columns.Count; i++)
+            //{
+            //    var refColumn = fk.Columns[i];
+            //    var column = referencedColumnNames[i];
+            //    var actualColumn = table.Columns.Single(tc => tc.Name == column);
+            //    var dataTypeForParameter = DataTypeWriter.FindDataType(actualColumn);
+            //    methodParameters.Add(new Tuple<string, string, string>(codeWriterSettings.Namer.NameToAcronym(refColumn), dataTypeForParameter, refColumn));
+            //}
+
+            //classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKeyChild, fk, codeWriterSettings)}");
+
+            //var methodCallParameters = new List<string>
+            //{
+            //    "DbContext"
+            //};
+
+            //foreach (var fkc in fk.Columns)
+            //{
+            //    var tc = table.Columns.Single(_tc => _tc.Name == fkc);
+            //    var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(tc)}";
+            //    if (DataTypeWriter.FindDataType(tc).EndsWith("?"))
+            //    {
+            //        parameter += ".Value";
+            //    }
+
+            //    methodCallParameters.Add(parameter);
+            //}
+
+            //var s = string.Join(", ", methodCallParameters);
+            ///*var actualMethodParameters = new List<Parameter>();
+            //foreach (var item in methodParameters)
+            //{
+            //    actualMethodParameters.Add(new Parameter
+            //                                   {
+            //                                       Name = item.Item1,
+            //                                       DataType = item.Item2,
+            //                                       ColumnNameToQueryBy = item.Item3
+            //                                   });
+            //}*/
+
+            //var referencedColumns = referencedColumnNames.Select(c => fk.ReferencedTable(table.DatabaseSchema).FindColumn(c));
+            //var actualMethodParameters = CodeWriterUtils.GetMethodParametersForColumns(fk.Columns.Select(c => table.FindColumn(c)), codeWriterSettings);
+            ////var actualMethodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, codeWriterSettings);
+            //var methodName = CodeWriterUtils.GetGetListByMethodName(actualMethodParameters, codeWriterSettings);
+            ////var methodName = $"GetListBy{string.Join("And", methodParameters.Select(mp => codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.Item3)))}";
+            //var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKeyChild, fk);
+
+            //classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild)}.{methodName}({s});");
+            //classBuilder.AppendLine("return this;");
+            //classBuilder.EndNest();
+            //classBuilder.AppendLine("");
+            //}
         }
 
         public void WriteWith(DatabaseConstraint foreignKey)
@@ -194,7 +260,13 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var s = string.Join(", ", methodCallParameters);
-            classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.Get({s});");
+            //classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.Get({s});");
+            var referencedColumnNames = foreignKey.ReferencedColumns(table.DatabaseSchema).ToList();
+            referencedColumnNames.Sort();
+            var referencedColumns = referencedColumnNames.Select(c => foreignKey.ReferencedTable(table.DatabaseSchema).FindColumn(c));
+            var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, codeWriterSettings);
+            var methodName = CodeWriterUtils.GetGetListByMethodName(methodParameters, codeWriterSettings);
+            classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.{methodName}({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();
             classBuilder.AppendLine("");

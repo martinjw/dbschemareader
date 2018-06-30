@@ -442,9 +442,10 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetListMethodSummary(methodParameters);
+            var methodName = CodeWriterUtils.GetGetListByMethodName(methodParameters, codeWriterSettings);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return GetList({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
 
             classBuilder.AppendLine("");
@@ -536,9 +537,10 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetMethodSummary(methodParameters);
+            var methodName = CodeWriterUtils.GetGetListByMethodName(methodParameters, codeWriterSettings);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return Get({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
 
             classBuilder.AppendLine("");
