@@ -61,50 +61,92 @@ namespace DatabaseSchemaReader.CodeGen
             var isLogicalDelete = table.Columns.Any(c => logicalDeleteColumns.Contains(c.Name));
             WriteDelete(isLogicalDelete);
             WriteDeleteByCustomer(isLogicalDelete);
+            WriteDeleteUnique(isLogicalDelete);
+            WriteDeleteUniqueByCustomer(isLogicalDelete);
         }
 
         private void WriteDelete(bool isLogicalDelete)
         {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false, false);
             if (isLogicalDelete)
             {
-                WriteDeleteLogical();
+                WriteDeleteLogical(methodParameters);
                 classBuilder.AppendLine("");
             }
 
-            WriteDeletePhysical();
+            WriteDeletePhysical(methodParameters);
             classBuilder.AppendLine("");
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false);
             WriteDeleteCommon(methodParameters, isLogicalDelete);
+            classBuilder.AppendLine("");
         }
 
         private void WriteDeleteByCustomer(bool isLogicalDelete)
         {
-            var methodParametersByCustomer = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true);
-            if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true, false);
+            if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
             if (isLogicalDelete)
             {
-                WriteDeleteLogicalByCustomer(methodParametersByCustomer);
+                WriteDeleteLogicalByCustomer(methodParameters);
                 classBuilder.AppendLine("");
             }
 
-            WriteDeletePhysicalByCustomer(methodParametersByCustomer);
+            WriteDeletePhysicalByCustomer(methodParameters);
             classBuilder.AppendLine("");
-            WriteDeleteCommon(methodParametersByCustomer, isLogicalDelete);
+            WriteDeleteCommon(methodParameters, isLogicalDelete);
+        }
+
+        private void WriteDeleteUnique(bool isLogicalDelete)
+        {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            if (isLogicalDelete)
+            {
+                WriteDeleteLogicalUnique(methodParameters);
+                classBuilder.AppendLine("");
+            }
+
+            WriteDeletePhysicalUnique(methodParameters);
+            classBuilder.AppendLine("");
+            WriteDeleteCommon(methodParameters, isLogicalDelete);
+        }
+
+        private void WriteDeleteUniqueByCustomer(bool isLogicalDelete)
+        {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            if (isLogicalDelete)
+            {
+                WriteDeleteLogicalUniqueByCustomer(methodParameters);
+                classBuilder.AppendLine("");
+            }
+
+            WriteDeletePhysicalUniqueByCustomer(methodParameters);
+            classBuilder.AppendLine("");
+            WriteDeleteCommon(methodParameters, isLogicalDelete);
         }
 
         private void WriteDeleteCommon(IEnumerable<Parameter> methodParameters, bool isLogicalDelete)
         {
+            var partialMethodName = CodeWriterUtils.ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             var methodParametersWithDbContext = CodeWriterUtils.AddDbContextParameter(methodParameters);
             WriteDeleteMethodSummary(methodParametersWithDbContext);
             using (classBuilder.BeginNest($"public static {CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParametersWithDbContext)}"))
             {
                 if (isLogicalDelete)
                 {
-                    classBuilder.AppendLine($"var deletedEntity = DeleteLogical({PrintParametersForCall(methodParametersWithDbContext)});");
+                    classBuilder.AppendLine($"var deletedEntity = {CodeWriterUtils.BaseMethodNameDelete}LogicalBy{partialMethodName}({PrintParametersForCall(methodParametersWithDbContext)});");
                     classBuilder.BeginNest($"if (deletedEntity == null)");
                     classBuilder.AppendLine($"throw new EntityNotFoundException();");
                     classBuilder.EndNest();
@@ -115,7 +157,7 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     classBuilder.AppendLine("int countRowsAffected = -1;");
                     classBuilder.BeginNest("try");
-                    classBuilder.AppendLine($"countRowsAffected = DeletePhysical({PrintParametersForCall(methodParametersWithDbContext)});");
+                    classBuilder.AppendLine($"countRowsAffected = {CodeWriterUtils.BaseMethodNameDelete}PhysicalBy{partialMethodName}({PrintParametersForCall(methodParametersWithDbContext)});");
                     classBuilder.EndNest();
                     classBuilder.BeginNest("catch (Exception e)");
                     classBuilder.BeginNest($"if (e is Npgsql.PostgresException pge && pge.SqlState == \"23503\")");
@@ -139,19 +181,17 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteDeleteMethodSummary(methodParameters);
+            var methodName = CodeWriterUtils.GetMethodName(methodParameters, codeWriterSettings, true, CodeWriterUtils.BaseMethodNameDelete);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return Delete({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
-
-            classBuilder.AppendLine("");
         }
 
-        private void WriteDeleteLogical()
+        private void WriteDeleteLogical(IEnumerable<Parameter> methodParameters)
         {
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false);
             var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
-            WriteDeleteLogicalCommon(methodParameters, null, whereClause, GetAllColumnNames(new List<DatabaseTable>{ table }));
+            WriteDeleteLogicalCommon(methodParameters, null, whereClause, GetAllColumnNames(new List<DatabaseTable> { table }));
         }
 
         private void WriteDeleteLogicalByCustomer(IEnumerable<Parameter> methodParameters)
@@ -165,10 +205,21 @@ namespace DatabaseSchemaReader.CodeGen
             WriteDeleteLogicalCommon(methodParameters, fromClause, whereClause, GetAllColumnNamesByCustomer());
         }
 
+        private void WriteDeleteLogicalUnique(IEnumerable<Parameter> methodParameters)
+        {
+            WriteDeleteLogical(methodParameters);
+        }
+
+        private void WriteDeleteLogicalUniqueByCustomer(IEnumerable<Parameter> methodParameters)
+        {
+            WriteDeleteLogicalByCustomer(methodParameters);
+        }
+
         private void WriteDeleteLogicalCommon(IEnumerable<Parameter> methodParameters, string fromClause, string whereClause, string columnsToReturn)
         {
+            var partialMethodName = CodeWriterUtils.ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             var methodParametersWithDbContext = CodeWriterUtils.AddDbContextParameter(methodParameters);
-            using (classBuilder.BeginNest($"private static {table.NetName} DeleteLogical({CodeWriterUtils.PrintParametersForSignature(methodParametersWithDbContext)})"))
+            using (classBuilder.BeginNest($"private static {table.NetName} {CodeWriterUtils.BaseMethodNameDelete}LogicalBy{partialMethodName}({CodeWriterUtils.PrintParametersForSignature(methodParametersWithDbContext)})"))
             {
                 var logicalDeleteColumn = table.Columns.Single(c => logicalDeleteColumns.Contains(c.Name));
                 var setClause = $"\\\"{logicalDeleteColumn.Name}\\\" = NOW()";
@@ -178,7 +229,7 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     sqlCommandText = $"{sqlCommandText} FROM {fromClause}";
                 }
-                
+
                 sqlCommandText = $"{sqlCommandText} WHERE {whereClause} RETURNING {columnsToReturn};\";";
 
                 var entityVariableName = "deletedEntity";
@@ -205,9 +256,8 @@ namespace DatabaseSchemaReader.CodeGen
             }
         }
 
-        private void WriteDeletePhysical()
+        private void WriteDeletePhysical(IEnumerable<Parameter> methodParameters)
         {
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false);
             var whereClause = GetWhereClauseFromMethodParameters(methodParameters);
             WriteDeletePhysicalCommon(methodParameters, null, whereClause);
         }
@@ -223,10 +273,21 @@ namespace DatabaseSchemaReader.CodeGen
             WriteDeletePhysicalCommon(methodParameters, usingClause, whereClause);
         }
 
+        private void WriteDeletePhysicalUnique(IEnumerable<Parameter> methodParameters)
+        {
+            WriteDeletePhysical(methodParameters);
+        }
+
+        private void WriteDeletePhysicalUniqueByCustomer(IEnumerable<Parameter> methodParameters)
+        {
+            WriteDeletePhysicalByCustomer(methodParameters);
+        }
+
         private void WriteDeletePhysicalCommon(IEnumerable<Parameter> methodParameters, string usingClause, string whereClause)
         {
+            var partialMethodName = CodeWriterUtils.ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             var methodParametersWithDbContext = CodeWriterUtils.AddDbContextParameter(methodParameters);
-            classBuilder.BeginNest($"private static int DeletePhysical({CodeWriterUtils.PrintParametersForSignature(methodParametersWithDbContext)})");
+            classBuilder.BeginNest($"private static int {CodeWriterUtils.BaseMethodNameDelete}PhysicalBy{partialMethodName}({CodeWriterUtils.PrintParametersForSignature(methodParametersWithDbContext)})");
             var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
             var sqlCommandText = $"DELETE FROM ONLY \\\"{table.Name}\\\" AS {thisTableAlias}";
             if (!string.IsNullOrEmpty(usingClause))
@@ -255,30 +316,61 @@ namespace DatabaseSchemaReader.CodeGen
         {
             WriteUpdate();
             WriteUpdateByCustomer();
+            WriteUpdateUnique();
+            WriteUpdateUniqueByCustomer();
         }
 
         private void WriteUpdate()
         {
-            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false);
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false, false);
             var whereClause = GetWhereClauseFromMethodParameters(methodParameters.ToList());
             WriteUpdateCommon(methodParameters, null, whereClause, GetAllColumnNames(new List<DatabaseTable> { table }));
         }
 
         private void WriteUpdateByCustomer()
         {
-            var methodParametersByCustomer = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true);
-            if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true, false);
+            if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
             var orgUnitTableAlias = codeWriterSettings.Namer.NameToAcronym(CodeWriterUtils.CustomerAssetOrganizationTableName);
             var fromClause = $"\\\"{CodeWriterUtils.CustomerAssetOrganizationTableName}\\\" {orgUnitTableAlias}";
-            var whereClause = GetWhereClauseFromMethodParameters(methodParametersByCustomer.ToList());
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters.ToList());
             var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
             var joinOnClause = $"{thisTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\" = {orgUnitTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\"";
             whereClause = $"{joinOnClause} AND {whereClause}";
-            WriteUpdateCommon(methodParametersByCustomer, fromClause, whereClause, GetAllColumnNamesByCustomer());
+            WriteUpdateCommon(methodParameters, fromClause, whereClause, GetAllColumnNamesByCustomer());
+        }
+
+        private void WriteUpdateUnique()
+        {
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters.ToList());
+            WriteUpdateCommon(methodParameters, null, whereClause, GetAllColumnNames(new List<DatabaseTable> { table }));
+        }
+
+        private void WriteUpdateUniqueByCustomer()
+        {
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            var orgUnitTableAlias = codeWriterSettings.Namer.NameToAcronym(CodeWriterUtils.CustomerAssetOrganizationTableName);
+            var fromClause = $"\\\"{CodeWriterUtils.CustomerAssetOrganizationTableName}\\\" {orgUnitTableAlias}";
+            var whereClause = GetWhereClauseFromMethodParameters(methodParameters.ToList());
+            var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
+            var joinOnClause = $"{thisTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\" = {orgUnitTableAlias}.\\\"{CodeWriterUtils.CustomerAssetOrganizationIDColumnName}\\\"";
+            whereClause = $"{joinOnClause} AND {whereClause}";
+            WriteUpdateCommon(methodParameters, fromClause, whereClause, GetAllColumnNamesByCustomer());
         }
 
         private void WriteUpdateCommon(IEnumerable<Parameter> methodParameters, string fromClause, string whereClause, string columnsToReturn)
@@ -291,7 +383,7 @@ namespace DatabaseSchemaReader.CodeGen
             using (classBuilder.BeginNest($"public static {CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParametersWithDbContextAndEntity)}"))
             {
                 WriteGetPropertyColumnPairs();
-                
+
                 classBuilder.AppendLine("var setClause = string.Join(\", \", propertyColumnPairs.Select(pcp => $\"{pcp.Value} = @{pcp.Key.Name}\"));");
                 var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
                 if (!string.IsNullOrEmpty(fromClause))
@@ -333,9 +425,10 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteUpdateMethodSummary(methodParametersWithEntity);
+            var methodName = CodeWriterUtils.GetMethodName(methodParametersWithEntity, codeWriterSettings, true, CodeWriterUtils.BaseMethodNameUpdate);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParametersWithEntity)}"))
             {
-                classBuilder.AppendLine($"return Update({PrintParametersForCall(methodParametersWithDbContextAndEntity)});");
+                classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContextAndEntity)});");
             }
 
             classBuilder.AppendLine("");
@@ -442,7 +535,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetListMethodSummary(methodParameters);
-            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, false);
+            var methodName = CodeWriterUtils.GetMethodName(methodParameters, codeWriterSettings, false, CodeWriterUtils.BaseMethodNameGet);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
                 classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
@@ -537,7 +630,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetMethodSummary(methodParameters);
-            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, true);
+            var methodName = CodeWriterUtils.GetMethodName(methodParameters, codeWriterSettings, true, CodeWriterUtils.BaseMethodNameGet);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
                 classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");

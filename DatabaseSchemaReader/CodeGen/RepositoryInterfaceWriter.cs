@@ -51,31 +51,100 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteDeletes()
         {
-            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false))};");
+            WriteDelete();
+            WriteDeleteByCustomer();
+            WriteDeleteUnique();
+            WriteDeleteUniqueByCustomer();
+        }
 
-            var methodParametersByCustomer = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true);
-            if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
+        private void WriteDelete()
+        {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false, false);
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+        }
+
+        private void WriteDeleteByCustomer()
+        {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true, false);
+            if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+        }
+
+        private void WriteDeleteUnique()
+        {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+        }
+
+        private void WriteDeleteUniqueByCustomer()
+        {
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
         }
 
         private void WriteUpdates()
         {
-            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false);
+            WriteUpdate();
+            WriteUpdateByCustomer();
+            WriteUpdateUnique();
+            WriteUpdateUniqueByCustomer();
+        }
+
+        private void WriteUpdate()
+        {
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false, false);
             methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
             classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+        }
 
-            var methodParametersByCustomer = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true);
-            if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
+        private void WriteUpdateByCustomer()
+        {
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true, false);
+            if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            methodParametersByCustomer = CodeWriterUtils.AddEntityParameter(methodParametersByCustomer, table, "An entity with updated values.");
-            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+            methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+        }
+
+        private void WriteUpdateUnique()
+        {
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+        }
+
+        private void WriteUpdateUniqueByCustomer()
+        {
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParameters == null || !methodParameters.Any())
+            {
+                return;
+            }
+
+            methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
         }
 
         private void WriteGetListBys()
@@ -106,29 +175,35 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteGetUniqueByCustomer()
         {
-            var methodParametersUniqueByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, true);
-            if (methodParametersUniqueByCustomer != null && methodParametersUniqueByCustomer.Any())
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParameters == null || !methodParameters.Any())
             {
-                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersUniqueByCustomer)};");
+                return;
             }
+
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
         }
 
         private void WriteGetUnique()
         {
-            var methodParametersUnique = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, true);
-            if (methodParametersUnique != null && methodParametersUnique.Any())
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParameters == null || !methodParameters.Any())
             {
-                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersUnique)};");
+                return;
             }
+
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
         }
 
         private void WriteGetByCustomer()
         {
-            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, false);
-            if (methodParametersByCustomer != null && methodParametersByCustomer.Any())
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, false);
+            if (methodParameters == null || !methodParameters.Any())
             {
-                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+                return;
             }
+
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
         }
 
         private void WriteGet()
