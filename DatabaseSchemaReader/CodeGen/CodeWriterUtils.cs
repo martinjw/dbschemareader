@@ -104,7 +104,7 @@ namespace DatabaseSchemaReader.CodeGen
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
             //return $"{table.NetName} Get({PrintParametersForSignature(methodParameters)})";
-            var methodName = GetGetListByMethodName(methodParameters, codeWriterSettings);
+            var methodName = GetGetMethodName(methodParameters, codeWriterSettings, true);
             return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
@@ -121,7 +121,7 @@ namespace DatabaseSchemaReader.CodeGen
         public static string GetGetListMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
             //return $"IEnumerable<{table.NetName}> GetList({PrintParametersForSignature(methodParameters)})";
-            var methodName = GetGetListByMethodName(methodParameters, codeWriterSettings);
+            var methodName = GetGetMethodName(methodParameters, codeWriterSettings, false);
             return $"IEnumerable<{table.NetName}> {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
@@ -148,12 +148,12 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetGetListByMethodSignature(DatabaseTable table, IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            //return $"IEnumerable<{table.NetName}> {GetGetListByMethodName(columns, codeWriterSettings)}({PrintParametersForSignature(methodParameters)})";
-            var methodName = GetGetListByMethodName(columns, codeWriterSettings);
+            //return $"IEnumerable<{table.NetName}> {GetGetMethodName(columns, codeWriterSettings)}({PrintParametersForSignature(methodParameters)})";
+            var methodName = GetGetMethodName(columns, codeWriterSettings, false);
             return $"IEnumerable<{table.NetName}> {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static string GetGetListByMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings)
+        public static string GetGetMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings, bool singular)
         {
             var s = new List<string>();
             foreach (var p in methodParameters)
@@ -165,14 +165,14 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
-            return $"GetBy{string.Join("And", s)}";
+            var methodName = singular ? "Get" : "GetList";
+            return s.Any() ? $"{methodName}By{string.Join("And", s)}" : methodName;
         }
 
-        public static string GetGetListByMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
+        public static string GetGetMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, bool singular)
         {
             var methodParameters = GetGetListByMethodParameters(columns, codeWriterSettings);
-            //return $"GetListBy{string.Join("And", methodParameters.Select(mp => codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.ColumnNameToQueryBy)))}";
-            return $"GetBy{string.Join("And", methodParameters.Select(mp => codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.ColumnNameToQueryBy)))}";
+            return GetGetMethodName(methodParameters, codeWriterSettings, singular);
         }
 
         public static IEnumerable<Parameter> GetGetListByMethodParameters(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)

@@ -125,7 +125,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
                 var repositoryNameForFfkTable = CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild);
-                var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetListByMethodName(ffkColumns, codeWriterSettings);
+                var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
                 classBuilder.BeginNest($"public {withMethodSignature}");
                     var repositoryMethodCallParametersForFfkTable = new List<string> { "DbContext" };
                     foreach (var ffkReferencedColumn in ffkReferencedColumns)
@@ -211,7 +211,7 @@ namespace DatabaseSchemaReader.CodeGen
             //var referencedColumns = referencedColumnNames.Select(c => fk.ReferencedTable(table.DatabaseSchema).FindColumn(c));
             //var actualMethodParameters = CodeWriterUtils.GetMethodParametersForColumns(fk.Columns.Select(c => table.FindColumn(c)), codeWriterSettings);
             ////var actualMethodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, codeWriterSettings);
-            //var methodName = CodeWriterUtils.GetGetListByMethodName(actualMethodParameters, codeWriterSettings);
+            //var methodName = CodeWriterUtils.GetGetMethodName(actualMethodParameters, codeWriterSettings);
             ////var methodName = $"GetListBy{string.Join("And", methodParameters.Select(mp => codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.Item3)))}";
             //var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKeyChild, fk);
 
@@ -265,7 +265,7 @@ namespace DatabaseSchemaReader.CodeGen
             referencedColumnNames.Sort();
             var referencedColumns = referencedColumnNames.Select(c => foreignKey.ReferencedTable(table.DatabaseSchema).FindColumn(c));
             var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, codeWriterSettings);
-            var methodName = CodeWriterUtils.GetGetListByMethodName(methodParameters, codeWriterSettings);
+            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, true);
             classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.{methodName}({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();

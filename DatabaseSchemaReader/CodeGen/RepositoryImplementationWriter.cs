@@ -442,7 +442,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetListMethodSummary(methodParameters);
-            var methodName = CodeWriterUtils.GetGetListByMethodName(methodParameters, codeWriterSettings);
+            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, false);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
                 classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
@@ -537,7 +537,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetMethodSummary(methodParameters);
-            var methodName = CodeWriterUtils.GetGetListByMethodName(methodParameters, codeWriterSettings);
+            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, true);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
                 classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
@@ -634,7 +634,7 @@ namespace DatabaseSchemaReader.CodeGen
             WriteGetListByMethodSummary(methodParameters);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListByMethodSignature(table, columns, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return {CodeWriterUtils.GetGetListByMethodName(columns, codeWriterSettings)}({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {CodeWriterUtils.GetGetMethodName(columns, codeWriterSettings, false)}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
         }
 
