@@ -103,17 +103,25 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            return $"{table.NetName} Get({PrintParametersForSignature(methodParameters)})";
+            var methodName = GetGetMethodName(methodParameters, codeWriterSettings, true);
+            return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetGetMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
+        public static IEnumerable<Parameter> GetGetMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer, bool forUniqueConstraint)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            if (!forUniqueConstraint)
+            {
+                return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            }
+
+            return GetMethodParametersForUniqueConstraint(table, codeWriterSettings, byCustomer);
         }
 
         public static string GetGetListMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            return $"IEnumerable<{table.NetName}> GetList({PrintParametersForSignature(methodParameters)})";
+            //return $"IEnumerable<{table.NetName}> GetList({PrintParametersForSignature(methodParameters)})";
+            var methodName = GetGetMethodName(methodParameters, codeWriterSettings, false);
+            return $"IEnumerable<{table.NetName}> {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
         public static IEnumerable<Parameter> GetGetListMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
@@ -139,13 +147,31 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetGetListByMethodSignature(DatabaseTable table, IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            return $"IEnumerable<{table.NetName}> {GetGetListByMethodName(columns, codeWriterSettings)}({PrintParametersForSignature(methodParameters)})";
+            //return $"IEnumerable<{table.NetName}> {GetGetMethodName(columns, codeWriterSettings)}({PrintParametersForSignature(methodParameters)})";
+            var methodName = GetGetMethodName(columns, codeWriterSettings, false);
+            return $"IEnumerable<{table.NetName}> {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static string GetGetListByMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
+        public static string GetGetMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings, bool singular)
+        {
+            var s = new List<string>();
+            foreach (var p in methodParameters)
+            {
+                if (!string.IsNullOrEmpty(p.ColumnNameToQueryBy))
+                {
+                    var properName = codeWriterSettings.Namer.NameColumnAsMethodTitle(p.ColumnNameToQueryBy);
+                    s.Add(properName);
+                }
+            }
+
+            var methodName = singular ? "Get" : "GetList";
+            return s.Any() ? $"{methodName}By{string.Join("And", s)}" : methodName;
+        }
+
+        public static string GetGetMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, bool singular)
         {
             var methodParameters = GetGetListByMethodParameters(columns, codeWriterSettings);
-            return $"GetListBy{string.Join("And", methodParameters.Select(mp => codeWriterSettings.Namer.NameColumnAsMethodTitle(mp.ColumnNameToQueryBy)))}";
+            return GetGetMethodName(methodParameters, codeWriterSettings, singular);
         }
 
         public static IEnumerable<Parameter> GetGetListByMethodParameters(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
@@ -262,7 +288,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static IEnumerable<DatabaseColumn> GetPrimaryKeyColumns(DatabaseTable table)
         {
-            return table.Columns.Where(c => c.IsPrimaryKey);
+            return table.Columns.Where(c => c.IsPrimaryKey).ToList().OrderBy(item => item.Name);
         }
 
         public static IEnumerable<IEnumerable<DatabaseColumn>> GetUniqueConstraintColumns(DatabaseTable table)
@@ -330,9 +356,33 @@ namespace DatabaseSchemaReader.CodeGen
             return c;
         }
 
+        public static IEnumerable<Parameter> GetMethodParametersForUniqueConstraint(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
+        {
+            if (!table.UniqueKeys.Any())
+            {
+                return new List<Parameter>();
+            }
+
+            var columns = table.Columns.Where(item => item.IsUniqueKey).ToList().OrderBy(item => item.Name).ToList();
+            if (byCustomer)
+            {
+                if (TableHasOrgUnitForeignKey(table))
+                {
+                    var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
+                    columns.Add(orgUnitTable.FindColumn(CustomerIDColumnName));
+                }
+                else
+                {
+                    return new List<Parameter>();
+                }
+            }
+
+            return GetMethodParametersForColumns(columns, codeWriterSettings);
+        }
+
         public static IEnumerable<Parameter> GetMethodParametersForPrimaryKeys(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
-            var columns = table.Columns.Where(c => c.IsPrimaryKey).ToList();
+            var columns = table.Columns.Where(c => c.IsPrimaryKey).ToList().OrderBy(item => item.Name).ToList();
             if (byCustomer)
             {
                 if (TableHasOrgUnitForeignKey(table))
@@ -368,7 +418,7 @@ namespace DatabaseSchemaReader.CodeGen
         public static List<Parameter> GetMethodParametersForColumns(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
         {
             var methodParameters = new List<Parameter>();
-            foreach (var column in columns)
+            foreach (var column in columns.ToList().OrderBy(item => item.Name))
             {
                 var ta = codeWriterSettings.Namer.NameToAcronym(column.TableName);
                 var pn = codeWriterSettings.Namer.NameToAcronym(GetPropertyNameForDatabaseColumn(column));

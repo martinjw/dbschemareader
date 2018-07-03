@@ -442,9 +442,10 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetListMethodSummary(methodParameters);
+            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, false);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return GetList({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
 
             classBuilder.AppendLine("");
@@ -454,24 +455,47 @@ namespace DatabaseSchemaReader.CodeGen
         {
             WriteGet();
             WriteGetByCustomer();
+            WriteGetUnique();
+            WriteGetUniqueByCustomer();
         }
 
         private void WriteGet()
         {
-            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false).ToList();
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, false).ToList();
             WriteGetCommon(methodParameters, null, GetAllColumnNames(new List<DatabaseTable> { table }));
         }
 
         private void WriteGetByCustomer()
         {
-            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true);
+            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, false);
             if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
             {
                 return;
             }
 
-
             WriteGetCommon(methodParametersByCustomer, GetInnerJoinOrgUnitClause(), GetAllColumnNamesByCustomer());
+        }
+
+        private void WriteGetUnique()
+        {
+            var methodParametersUnique = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParametersUnique == null || !methodParametersUnique.Any())
+            {
+                return;
+            }
+
+            WriteGetCommon(methodParametersUnique, null, GetAllColumnNames(new List<DatabaseTable> { table }));
+        }
+
+        private void WriteGetUniqueByCustomer()
+        {
+            var methodParametersUniqueByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParametersUniqueByCustomer == null || !methodParametersUniqueByCustomer.Any())
+            {
+                return;
+            }
+
+            WriteGetCommon(methodParametersUniqueByCustomer, GetInnerJoinOrgUnitClause(), GetAllColumnNamesByCustomer());
         }
 
         private void WriteGetCommon(IEnumerable<Parameter> methodParameters, string innerJoinClause, string columnsToReturn)
@@ -513,9 +537,10 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendLine("");
             WriteGetMethodSummary(methodParameters);
+            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, true);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return Get({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {methodName}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
 
             classBuilder.AppendLine("");
@@ -609,7 +634,7 @@ namespace DatabaseSchemaReader.CodeGen
             WriteGetListByMethodSummary(methodParameters);
             using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListByMethodSignature(table, columns, codeWriterSettings, methodParameters)}"))
             {
-                classBuilder.AppendLine($"return {CodeWriterUtils.GetGetListByMethodName(columns, codeWriterSettings)}({PrintParametersForCall(methodParametersWithDbContext)});");
+                classBuilder.AppendLine($"return {CodeWriterUtils.GetGetMethodName(columns, codeWriterSettings, false)}({PrintParametersForCall(methodParametersWithDbContext)});");
             }
         }
 

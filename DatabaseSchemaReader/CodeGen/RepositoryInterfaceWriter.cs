@@ -98,15 +98,43 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteGets()
         {
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false))};");
+            WriteGet();
+            WriteGetByCustomer();
+            WriteGetUnique();
+            WriteGetUniqueByCustomer();
+        }
 
-            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true);
-            if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
+        private void WriteGetUniqueByCustomer()
+        {
+            var methodParametersUniqueByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, true);
+            if (methodParametersUniqueByCustomer != null && methodParametersUniqueByCustomer.Any())
             {
-                return;
+                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersUniqueByCustomer)};");
             }
+        }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+        private void WriteGetUnique()
+        {
+            var methodParametersUnique = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, true);
+            if (methodParametersUnique != null && methodParametersUnique.Any())
+            {
+                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersUnique)};");
+            }
+        }
+
+        private void WriteGetByCustomer()
+        {
+            var methodParametersByCustomer = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, false);
+            if (methodParametersByCustomer != null && methodParametersByCustomer.Any())
+            {
+                classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+            }
+        }
+
+        private void WriteGet()
+        {
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, false);
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
         }
 
         private void WriteCreate()
