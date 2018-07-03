@@ -188,7 +188,7 @@ namespace DatabaseSchemaReader.CodeGen
             referencedColumnNames.Sort();
             var referencedColumns = referencedColumnNames.Select(c => foreignKey.ReferencedTable(table.DatabaseSchema).FindColumn(c));
             var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, CodeWriterSettings);
-            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, CodeWriterSettings, true);
+            var methodName = CodeWriterUtils.GetMethodName(methodParameters, CodeWriterSettings, true, CodeWriterUtils.BaseMethodNameGet);
             classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.{methodName}({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();

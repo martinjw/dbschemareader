@@ -13,6 +13,10 @@ namespace DatabaseSchemaReader.CodeGen
         public const string CustomerIDColumnName = "CustomerID";
         public const string CustomerAssetOrganizationIDColumnName = "CustomerAssetOrganizationID";
         public const string CustomerAssetOrganizationTableName = "CustomerAssetOrganization";
+        public const string BaseMethodNameCreate = "Create";
+        public const string BaseMethodNameGet = "Get";
+        public const string BaseMethodNameUpdate = "Update";
+        public const string BaseMethodNameDelete = "Delete";
 
         public static void WriteFileHeader(ClassBuilder classBuilder)
         {
@@ -104,7 +108,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            var methodName = GetGetMethodName(methodParameters, codeWriterSettings, true);
+            var methodName = GetMethodName(methodParameters, codeWriterSettings, true, BaseMethodNameGet);
             return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
@@ -121,7 +125,7 @@ namespace DatabaseSchemaReader.CodeGen
         public static string GetGetListMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
             //return $"IEnumerable<{table.NetName}> GetList({PrintParametersForSignature(methodParameters)})";
-            var methodName = GetGetMethodName(methodParameters, codeWriterSettings, false);
+            var methodName = GetMethodName(methodParameters, codeWriterSettings, false, BaseMethodNameGet);
             return $"IEnumerable<{table.NetName}> {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
@@ -142,7 +146,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 return GetMethodParametersForColumns(columns, codeWriterSettings);
             }
-            
+
             return new List<Parameter>();
         }
 
@@ -153,7 +157,7 @@ namespace DatabaseSchemaReader.CodeGen
             return $"IEnumerable<{table.NetName}> {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static string GetGetMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings, bool singular)
+        public static string ConvertParametersToMethodNameByPart(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings)
         {
             var s = new List<string>();
             foreach (var p in methodParameters)
@@ -165,14 +169,20 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
-            var methodName = singular ? "Get" : "GetList";
-            return s.Any() ? $"{methodName}By{string.Join("And", s)}" : methodName;
+            return s.Any() ? string.Join("And", s) : string.Empty;
+        }
+
+        public static string GetMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings, bool singular, string baseMethodName)
+        {
+            var partialMethodName = ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
+            var methodName = singular ? baseMethodName : $"{baseMethodName}List";
+            return !string.IsNullOrEmpty(partialMethodName) ? $"{methodName}By{partialMethodName}" : methodName;
         }
 
         public static string GetGetMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, bool singular)
         {
             var methodParameters = GetGetListByMethodParameters(columns, codeWriterSettings);
-            return GetGetMethodName(methodParameters, codeWriterSettings, singular);
+            return GetMethodName(methodParameters, codeWriterSettings, singular, BaseMethodNameGet);
         }
 
         public static IEnumerable<Parameter> GetGetListByMethodParameters(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
@@ -269,22 +279,34 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetUpdateMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            return $"{table.NetName} Update({PrintParametersForSignature(methodParameters)})";
+            var methodName = GetMethodName(methodParameters, codeWriterSettings, true, BaseMethodNameUpdate);
+            return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetUpdateMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
+        public static IEnumerable<Parameter> GetUpdateMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer, bool forUniqueConstraint)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            if (!forUniqueConstraint)
+            {
+                return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            }
+
+            return GetMethodParametersForUniqueConstraint(table, codeWriterSettings, byCustomer);
         }
 
         public static string GetDeleteMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            return $"{table.NetName} Delete({PrintParametersForSignature(methodParameters)})";
+            var methodName = GetMethodName(methodParameters, codeWriterSettings, true, BaseMethodNameDelete);
+            return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
 
-        public static IEnumerable<Parameter> GetDeleteMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
+        public static IEnumerable<Parameter> GetDeleteMethodParameters(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer, bool forUniqueConstraint)
         {
-            return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            if (!forUniqueConstraint)
+            {
+                return GetMethodParametersForPrimaryKeys(table, codeWriterSettings, byCustomer);
+            }
+
+            return GetMethodParametersForUniqueConstraint(table, codeWriterSettings, byCustomer);
         }
 
         public static IEnumerable<DatabaseColumn> GetPrimaryKeyColumns(DatabaseTable table)
@@ -365,12 +387,12 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var columns = table.Columns.Where(item => item.IsUniqueKey).ToList().OrderBy(item => item.Name).ToList();
+            var methodParameters = GetMethodParametersForColumns(columns, codeWriterSettings);
             if (byCustomer)
             {
                 if (TableHasOrgUnitForeignKey(table))
                 {
-                    var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
-                    columns.Add(orgUnitTable.FindColumn(CustomerIDColumnName));
+                    methodParameters.Add(GetCustomerParameter(table.DatabaseSchema, codeWriterSettings));
                 }
                 else
                 {
@@ -378,18 +400,18 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
-            return GetMethodParametersForColumns(columns, codeWriterSettings);
+            return methodParameters;
         }
 
         public static IEnumerable<Parameter> GetMethodParametersForPrimaryKeys(DatabaseTable table, CodeWriterSettings codeWriterSettings, bool byCustomer)
         {
             var columns = table.Columns.Where(c => c.IsPrimaryKey).ToList().OrderBy(item => item.Name).ToList();
+            var methodParameters = GetMethodParametersForColumns(columns, codeWriterSettings);
             if (byCustomer)
             {
                 if (TableHasOrgUnitForeignKey(table))
                 {
-                    var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
-                    columns.Add(orgUnitTable.FindColumn(CustomerIDColumnName));
+                    methodParameters.Add(GetCustomerParameter(table.DatabaseSchema, codeWriterSettings));
                 }
                 else
                 {
@@ -397,7 +419,7 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
-            return GetMethodParametersForColumns(columns, codeWriterSettings);
+            return methodParameters;
         }
 
         private static bool TableHasOrgUnitForeignKey(DatabaseTable table)
@@ -451,7 +473,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var summary = String.Join(" ", fields) + ".";
 
-                methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary, TableAlias = ta});
+                methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary, TableAlias = ta });
             }
 
             DeduplicateMethodParameterNames(methodParameters);
@@ -501,6 +523,16 @@ namespace DatabaseSchemaReader.CodeGen
                 Summary = parameterSummary,
                 DataType = table.NetName
             };
+        }
+
+        private static Parameter GetCustomerParameter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
+        {
+            var orgUnitTable = schema.FindTableByName(CustomerAssetOrganizationTableName);
+            var methodParameters = GetMethodParametersForColumns(new List<DatabaseColumn>
+            {
+                orgUnitTable.FindColumn(CustomerIDColumnName)
+            }, codeWriterSettings);
+            return methodParameters.Single();
         }
 
         public static string WriteClassFile(DirectoryInfo directory, string className, string txt)
