@@ -6,91 +6,82 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
-    public class ClassWriter
+    public class EntityWriter
     {
-        private readonly DatabaseTable table;
-        private readonly ClassBuilder classBuilder;
-        private DataAnnotationWriter _dataAnnotationWriter;
-        private readonly CodeWriterSettings codeWriterSettings;
-        private DatabaseTable _inheritanceTable;
-        //private CodeInserter _codeInserter;
+        private readonly MappingNamer mappingNamer;
+        private ClassBuilder classBuilder;
+        private DatabaseTable table;
+        private DataAnnotationWriter dataAnnotationWriter;
+        public CodeWriterSettings CodeWriterSettings { get; }
+        public DatabaseSchema Schema { get; }
 
-        public ClassWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public EntityWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            this.codeWriterSettings = codeWriterSettings;
-            this.table = table;
-            classBuilder = new ClassBuilder();
+            Schema = schema;
+            CodeWriterSettings = codeWriterSettings;
+            PrepareSchemaNames.Prepare(schema, CodeWriterSettings.Namer);
+            dataAnnotationWriter = new DataAnnotationWriter(false, codeWriterSettings);
+            mappingNamer = new MappingNamer();
+        }
+
+        public void Execute()
+        {
+            foreach (var t in Schema.Tables)
+            {
+                table = t;
+                classBuilder = new ClassBuilder();
+                var implementationText = Write();
+                CodeWriterUtils.WriteClassFile(CodeWriterSettings.OutputDirectory, table.NetName, implementationText);
+            }
         }
 
         public string Write()
         {
-            var codeTarget = codeWriterSettings.CodeTarget;
-            _dataAnnotationWriter = new DataAnnotationWriter(false, codeWriterSettings);
-
             if (string.IsNullOrEmpty(table.NetName) && table.DatabaseSchema != null)
             {
-                PrepareSchemaNames.Prepare(table.DatabaseSchema, codeWriterSettings.Namer);
+                PrepareSchemaNames.Prepare(table.DatabaseSchema, CodeWriterSettings.Namer);
             }
 
-            _inheritanceTable = table.FindInheritanceTable();
-
-            codeWriterSettings.CodeInserter.WriteNamespaces(table, classBuilder);
             CodeWriterUtils.WriteFileHeader(classBuilder);
             WriteUsings();
-            CodeWriterUtils.BeginNestNamespace(classBuilder, codeWriterSettings);
-            
-            var tableOrView = table is DatabaseView ? "view" : "table";
-            var comment = "Class representing the " + table.Name + " " + tableOrView + ".";
-            var classDefinition = $"public class {table.NetName}";
-            if (_inheritanceTable != null)
-            {
-                classDefinition += " : " + _inheritanceTable.NetName;
-            }
+            CodeWriterUtils.BeginNestNamespace(classBuilder, CodeWriterSettings);
 
-            codeWriterSettings.CodeInserter.WriteTableAnnotations(table, classBuilder);
-
-            classBuilder.AppendXmlSummary(comment);
+            classBuilder.AppendXmlSummary($"Class representing the {table.Name} table.");
             classBuilder.AppendLine($"[Table(\"\\\"{table.Name}\\\"\")]");
-            using (classBuilder.BeginNest(classDefinition, comment))
+            using (classBuilder.BeginNest($"public class {table.NetName}"))
             {
                 WriteAllMembers();
             }
-
-            if (!string.IsNullOrEmpty(codeWriterSettings.Namespace))
-            {
-                classBuilder.EndNest();
-            }
-
+            
+            classBuilder.EndNest();
             return classBuilder.ToString();
         }
 
         private void WriteAllMembers()
         {
-            codeWriterSettings.CodeInserter.WriteClassMembers(table, classBuilder);
-
             classBuilder.AppendLine("public IDbContext DbContext { get; set; }");
             classBuilder.AppendLine("");
+            WritePrimaryKeyColumnProperties();
+            WriteNonPrimaryKeyColumnProperties();
+            WriteForeignKeyProperties();
+            WriteForeignKeyCollectionProperties();
+            WriteWiths();
+        }
 
-            if (_inheritanceTable == null)
-            {
-                WritePrimaryKey();
-            }
-
-            foreach (var column in table.Columns)
-            {
-                if (column.IsPrimaryKey) continue;
-                //if (column.IsForeignKey) continue;
-                WriteColumn(column);
-            }
-
+        private void WriteForeignKeyProperties()
+        {
             foreach (var foreignKey in table.ForeignKeys)
             {
                 WriteForeignKey(foreignKey);
             }
+        }
 
-            WriteForeignKeyCollections();
-
-            WriteWiths();
+        private void WriteNonPrimaryKeyColumnProperties()
+        {
+            foreach (var column in table.Columns.Where(c => !c.IsPrimaryKey))
+            {
+                WriteColumn(column);
+            }
         }
 
         private void WriteWiths()
@@ -121,34 +112,34 @@ namespace DatabaseSchemaReader.CodeGen
                     ffkReferencedTable,
                     ffkTable,
                     ffk,
-                    codeWriterSettings);
+                    CodeWriterSettings);
 
-                var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
+                var propertyName = CodeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
                 var repositoryNameForFfkTable = CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild);
-                var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
+                var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, CodeWriterSettings, false);
                 classBuilder.BeginNest($"public {withMethodSignature}");
-                    var repositoryMethodCallParametersForFfkTable = new List<string> { "DbContext" };
-                    foreach (var ffkReferencedColumn in ffkReferencedColumns)
+                var repositoryMethodCallParametersForFfkTable = new List<string> { "DbContext" };
+                foreach (var ffkReferencedColumn in ffkReferencedColumns)
+                {
+                    var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(ffkReferencedColumn)}";
+                    if (ffkReferencedColumn.Nullable && DataTypeWriter.FindDataType(ffkReferencedColumn).EndsWith("?"))
                     {
-                        var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(ffkReferencedColumn)}";
-                        if (ffkReferencedColumn.Nullable && DataTypeWriter.FindDataType(ffkReferencedColumn).EndsWith("?"))
+                        using (classBuilder.BeginNest($"if (!{parameter}.HasValue)"))
                         {
-                            using (classBuilder.BeginNest($"if (!{parameter}.HasValue)"))
-                            {
-                                classBuilder.AppendLine($"{propertyName} = new List<{ffkTable.NetName}>();");
-                                classBuilder.AppendLine("return this;");
-                            }
-
-                            classBuilder.AppendLine("");
-                            parameter += ".Value";
+                            classBuilder.AppendLine($"{propertyName} = new List<{ffkTable.NetName}>();");
+                            classBuilder.AppendLine("return this;");
                         }
 
-                        repositoryMethodCallParametersForFfkTable.Add(parameter);
+                        classBuilder.AppendLine("");
+                        parameter += ".Value";
                     }
 
-                    var repositoryMethodCallParametersForFfkTablePrinted = string.Join(", ", repositoryMethodCallParametersForFfkTable);
-                    classBuilder.AppendLine($"{propertyName} = {repositoryNameForFfkTable}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
-                    classBuilder.AppendLine("return this;");
+                    repositoryMethodCallParametersForFfkTable.Add(parameter);
+                }
+
+                var repositoryMethodCallParametersForFfkTablePrinted = string.Join(", ", repositoryMethodCallParametersForFfkTable);
+                classBuilder.AppendLine($"{propertyName} = {repositoryNameForFfkTable}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
+                classBuilder.AppendLine("return this;");
                 classBuilder.EndNest();
                 classBuilder.AppendLine("");
             }
@@ -165,14 +156,14 @@ namespace DatabaseSchemaReader.CodeGen
                 throw new InvalidOperationException("Number of foreign key columns does not match number of columns referenced!");
             }
 
-            classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, codeWriterSettings)}");
+            classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, CodeWriterSettings)}");
 
             var methodCallParameters = new List<string>
             {
                 "DbContext"
             };
 
-            var propertyName = codeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
+            var propertyName = CodeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
             foreach (var fkc in foreignKey.Columns)
             {
                 var tc = table.Columns.Single(_tc => _tc.Name == fkc);
@@ -188,7 +179,7 @@ namespace DatabaseSchemaReader.CodeGen
                     classBuilder.AppendLine("");
                     parameter += ".Value";
                 }
-                
+
                 methodCallParameters.Add(parameter);
             }
 
@@ -197,15 +188,15 @@ namespace DatabaseSchemaReader.CodeGen
             var referencedColumnNames = foreignKey.ReferencedColumns(table.DatabaseSchema).ToList();
             referencedColumnNames.Sort();
             var referencedColumns = referencedColumnNames.Select(c => foreignKey.ReferencedTable(table.DatabaseSchema).FindColumn(c));
-            var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, codeWriterSettings);
-            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, codeWriterSettings, true);
+            var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, CodeWriterSettings);
+            var methodName = CodeWriterUtils.GetGetMethodName(methodParameters, CodeWriterSettings, true);
             classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.{methodName}({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();
             classBuilder.AppendLine("");
         }
 
-        private void WritePrimaryKey()
+        private void WritePrimaryKeyColumnProperties()
         {
             foreach (var column in table.Columns.Where(c => c.IsPrimaryKey))
             {
@@ -228,7 +219,7 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("");
         }
 
-        private void WriteForeignKeyCollections()
+        private void WriteForeignKeyCollectionProperties()
         {
             var listType = "IEnumerable<";
 
@@ -237,7 +228,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             foreach (var foreignKey in table.ForeignKeyChildren)
             {
-                if (foreignKey.IsManyToManyTable() && codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                if (foreignKey.IsManyToManyTable() && CodeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
                 {
                     WriteManyToManyCollection(foreignKey);
                     continue;
@@ -255,7 +246,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var fks = table.InverseForeignKeys(foreignKey);
                 foreach (var fk in fks)
                 {
-                    var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKey, fk);
+                    var propertyName = CodeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKey, fk);
                     var dataType = listType + foreignKey.NetName + ">";
                     WriteForeignKeyChild(propertyName, dataType);
                     classBuilder.AppendLine("");
@@ -265,7 +256,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteForeignKeyChild(string propertyName, string dataType)
         {
-            if (codeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
+            if (CodeWriterSettings.CodeTarget == CodeTarget.PocoRiaServices)
                 classBuilder.AppendLine("[Include]");
             classBuilder.AppendAutomaticCollectionProperty(dataType, propertyName, false);
         }
@@ -279,7 +270,7 @@ namespace DatabaseSchemaReader.CodeGen
                 Debug.WriteLine("Can't navigate the many to many relationship for " + table.Name + " to " + foreignKey.Name);
                 return;
             }
-            var propertyName = codeWriterSettings.Namer.NameCollection(target.NetName);
+            var propertyName = CodeWriterSettings.Namer.NameCollection(target.NetName);
             var dataType = "ICollection<" + target.NetName + ">";
             classBuilder.AppendAutomaticCollectionProperty(dataType, propertyName, false);
 
@@ -293,7 +284,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 return;
             }
-            var propertyName = codeWriterSettings.Namer.NameCollection(target.NetName);
+            var propertyName = CodeWriterSettings.Namer.NameCollection(target.NetName);
             var dataType = "List<" + target.NetName + ">";
             classBuilder.AppendLine(propertyName + " = new " + dataType + "();");
         }
@@ -305,7 +296,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var foreignKey in table.ForeignKeyChildren)
                 {
-                    if (foreignKey.IsManyToManyTable() && codeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
+                    if (foreignKey.IsManyToManyTable() && CodeWriterSettings.CodeTarget == CodeTarget.PocoEntityCodeFirst)
                     {
                         WriteManyToManyInitialize(foreignKey);
                         continue;
@@ -317,7 +308,7 @@ namespace DatabaseSchemaReader.CodeGen
                     var fks = table.InverseForeignKeys(foreignKey);
                     foreach (DatabaseConstraint fk in fks)
                     {
-                        var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKey, fk);
+                        var propertyName = CodeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKey, fk);
                         var dataType = "List<" + foreignKey.NetName + ">";
                         classBuilder.AppendLine(propertyName + " = new " + dataType + "();");
                     }
@@ -343,13 +334,11 @@ namespace DatabaseSchemaReader.CodeGen
                 propertyName += "Id";
             }
 
-            codeWriterSettings.CodeInserter.WriteColumnAnnotations(table, column, classBuilder);
-            _dataAnnotationWriter.Write(classBuilder, column, propertyName);
+            CodeWriterSettings.CodeInserter.WriteColumnAnnotations(table, column, classBuilder);
+            dataAnnotationWriter.Write(classBuilder, column, propertyName);
             var useVirtual = true;
             classBuilder.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
-
-
 
         private static DatabaseTable FindForeignKeyTable(DatabaseColumn column)
         {
@@ -372,28 +361,25 @@ namespace DatabaseSchemaReader.CodeGen
             // get the reference table
             var refTable = foreignKey.ReferencedTable(table.DatabaseSchema);
 
-            //we inherit from it instead (problem with self-joins)
-            if (Equals(refTable, _inheritanceTable)) return;
-
             if (refTable == null)
             {
                 //we can't find the foreign key table, so just write the columns
-                WriteForeignKeyColumns(foreignKey, "");
+                WriteForeignKeyProperties(foreignKey, "");
                 return;
             }
 
-            var propertyName = codeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
+            var propertyName = CodeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
             var dataType = refTable.NetName;
 
             classBuilder.AppendAutomaticProperty(dataType, propertyName);
 
-            if (false && codeWriterSettings.UseForeignKeyIdProperties)
+            if (false && CodeWriterSettings.UseForeignKeyIdProperties)
             {
-                WriteForeignKeyColumns(foreignKey, propertyName);
+                WriteForeignKeyProperties(foreignKey, propertyName);
             }
         }
 
-        private void WriteForeignKeyColumns(DatabaseConstraint foreignKey, string propertyName)
+        private void WriteForeignKeyProperties(DatabaseConstraint foreignKey, string propertyName)
         {
             //for code first, we may have to write scalar properties
             //1 if the fk is also a pk
@@ -407,6 +393,18 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     WriteColumn(column, propertyName.Equals(column.NetName));
                 }
+            }
+        }
+
+        private void UpdateEntityNames(string className, string tableName)
+        {
+            if (mappingNamer.EntityNames.Contains(className))
+            {
+                Debug.WriteLine("Name conflict! " + tableName + "=" + className);
+            }
+            else
+            {
+                mappingNamer.EntityNames.Add(className);
             }
         }
     }
