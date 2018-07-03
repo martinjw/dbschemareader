@@ -193,7 +193,6 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             var s = string.Join(", ", methodCallParameters);
-            //classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.Get({s});");
             var referencedColumnNames = foreignKey.ReferencedColumns(table.DatabaseSchema).ToList();
             referencedColumnNames.Sort();
             var referencedColumns = referencedColumnNames.Select(c => foreignKey.ReferencedTable(table.DatabaseSchema).FindColumn(c));

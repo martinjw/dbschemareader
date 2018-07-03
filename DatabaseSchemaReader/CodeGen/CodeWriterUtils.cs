@@ -103,7 +103,6 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            //return $"{table.NetName} Get({PrintParametersForSignature(methodParameters)})";
             var methodName = GetGetMethodName(methodParameters, codeWriterSettings, true);
             return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
