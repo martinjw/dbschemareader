@@ -1,6 +1,7 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -500,6 +501,15 @@ namespace DatabaseSchemaReader.CodeGen
                 Summary = parameterSummary,
                 DataType = table.NetName
             };
+        }
+
+        public static string WriteClassFile(DirectoryInfo directory, string className, string txt)
+        {
+            var fileName = className + ".cs";
+            var path = Path.Combine(directory.FullName, fileName);
+            if (!directory.Exists) directory.Create();
+            File.WriteAllText(path, txt);
+            return fileName;
         }
     }
 }
