@@ -1,6 +1,7 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -107,7 +108,6 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetGetMethodSignature(DatabaseTable table, CodeWriterSettings codeWriterSettings, IEnumerable<Parameter> methodParameters)
         {
-            //return $"{table.NetName} Get({PrintParametersForSignature(methodParameters)})";
             var methodName = GetMethodName(methodParameters, codeWriterSettings, true, BaseMethodNameGet);
             return $"{table.NetName} {methodName}({PrintParametersForSignature(methodParameters)})";
         }
@@ -533,6 +533,15 @@ namespace DatabaseSchemaReader.CodeGen
                 orgUnitTable.FindColumn(CustomerIDColumnName)
             }, codeWriterSettings);
             return methodParameters.Single();
+        }
+
+        public static string WriteClassFile(DirectoryInfo directory, string className, string txt)
+        {
+            var fileName = className + ".cs";
+            var path = Path.Combine(directory.FullName, fileName);
+            if (!directory.Exists) directory.Create();
+            File.WriteAllText(path, txt);
+            return fileName;
         }
     }
 }

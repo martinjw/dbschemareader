@@ -5,20 +5,37 @@ namespace DatabaseSchemaReader.CodeGen
 {
     public class DataTypeWriter
     {
-        private readonly DataType _dataType;
-        private readonly ClassBuilder _cb;
-        private readonly CodeWriterSettings _codeWriterSettings;
+        private ClassBuilder classBuilder;
+        private DataType dataType;
+        public CodeWriterSettings CodeWriterSettings { get; }
+        public DatabaseSchema Schema { get; }
 
-        public DataTypeWriter(DataType dataType, CodeWriterSettings codeWriterSettings)
+        public DataTypeWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            _codeWriterSettings = codeWriterSettings;
-            _dataType = dataType;
-            _cb = new ClassBuilder();
+            CodeWriterSettings = codeWriterSettings;
+            Schema = schema;
         }
 
+        public void Execute()
+        {
+
+            foreach (var type in Schema.DataTypes)
+            {
+                dataType = type;
+                classBuilder = new ClassBuilder();
+                var txt = Write();
+                if (string.IsNullOrEmpty(txt))
+                {
+                    continue;
+                }
+
+                CodeWriterUtils.WriteClassFile(CodeWriterSettings.OutputDirectory, type.NetDataType, txt);
+            }
+        }
+        
         public string Write()
         {
-            return _dataType.WriteCodeFile(_codeWriterSettings, _cb);
+            return dataType.WriteCodeFile(CodeWriterSettings, classBuilder);
         }
 
         public static string FindDataType(DatabaseColumn column)

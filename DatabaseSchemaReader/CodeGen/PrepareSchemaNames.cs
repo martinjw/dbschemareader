@@ -3,9 +3,8 @@ using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
-    static class PrepareSchemaNames
+    public static class PrepareSchemaNames
     {
-
         public static void Prepare(DatabaseSchema schema, INamer namer)
         {
             //now with simple check for duplicate names

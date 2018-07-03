@@ -1,38 +1,50 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DatabaseSchemaReader.CodeGen
 {
     public class RepositoryInterfaceWriter
     {
-        private readonly DatabaseTable table;
-        private readonly ClassBuilder classBuilder;
-        private DataAnnotationWriter _dataAnnotationWriter;
-        private readonly CodeWriterSettings codeWriterSettings;
+        private DatabaseTable table;
+        private ClassBuilder classBuilder;
+        private IEnumerable<string> logicalDeleteColumns;
+        public CodeWriterSettings CodeWriterSettings { get; }
+        public DatabaseSchema Schema { get; }
 
-        public RepositoryInterfaceWriter(DatabaseTable table, CodeWriterSettings codeWriterSettings)
+        public RepositoryInterfaceWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings)
         {
-            this.codeWriterSettings = codeWriterSettings;
-            this.table = table;
-            classBuilder = new ClassBuilder();
+            CodeWriterSettings = codeWriterSettings;
+            Schema = schema;
         }
 
-        public string Write()
+        public void Execute()
+        {
+            foreach (var t in Schema.Tables)
+            {
+                table = t;
+                classBuilder = new ClassBuilder();
+                var implementationText = Write();
+                CodeWriterUtils.WriteClassFile(CodeWriterSettings.OutputDirectory, CodeWriterUtils.GetRepositoryInterfaceName(table), implementationText);
+            }
+        }
+
+        private string Write()
         {
             if (string.IsNullOrEmpty(table.NetName) && table.DatabaseSchema != null)
             {
-                PrepareSchemaNames.Prepare(table.DatabaseSchema, codeWriterSettings.Namer);
+                PrepareSchemaNames.Prepare(table.DatabaseSchema, CodeWriterSettings.Namer);
             }
 
             CodeWriterUtils.WriteFileHeader(classBuilder);
             WriteUsings();
-            CodeWriterUtils.BeginNestNamespace(classBuilder, codeWriterSettings);
+            CodeWriterUtils.BeginNestNamespace(classBuilder, CodeWriterSettings);
             var tableOrView = table is DatabaseView ? "view" : "table";
             var comment = $"Interface providing repository CRUD operations for the {table.Name} {tableOrView}";
             var interfaceDefinition = $"public interface {CodeWriterUtils.GetRepositoryInterfaceName(table)}";
             classBuilder.AppendXmlSummary(comment);
-            classBuilder.BeginNest(interfaceDefinition, comment);
+            classBuilder.BeginNest(interfaceDefinition);
             WriteInterfaceMembers();
             classBuilder.EndNest(); // interface
             classBuilder.EndNest(); // namespace
@@ -59,41 +71,41 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteDelete()
         {
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false, false);
-            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, CodeWriterSettings, false, false);
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteDeleteByCustomer()
         {
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true, false);
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, CodeWriterSettings, true, false);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteDeleteUnique()
         {
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, false, true);
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, CodeWriterSettings, false, true);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteDeleteUniqueByCustomer()
         {
-            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, codeWriterSettings, true, true);
+            var methodParameters = CodeWriterUtils.GetDeleteMethodParameters(table, CodeWriterSettings, true, true);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetDeleteMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteUpdates()
@@ -106,63 +118,63 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteUpdate()
         {
-            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false, false);
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, CodeWriterSettings, false, false);
             methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
-            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteUpdateByCustomer()
         {
-            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true, false);
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, CodeWriterSettings, true, false);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
             methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
-            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteUpdateUnique()
         {
-            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, false, true);
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, CodeWriterSettings, false, true);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
             methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
-            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteUpdateUniqueByCustomer()
         {
-            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, codeWriterSettings, true, true);
+            var methodParameters = CodeWriterUtils.GetUpdateMethodParameters(table, CodeWriterSettings, true, true);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
             methodParameters = CodeWriterUtils.AddEntityParameter(methodParameters, table, "An entity with updated values.");
-            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetUpdateMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteGetListBys()
         {
             var combinations = CodeWriterUtils.GetGetListByColumnCombinations(table)?.ToList();
-            combinations?.ForEach(c => classBuilder.AppendLine($"{CodeWriterUtils.GetGetListByMethodSignature(table, c, codeWriterSettings, CodeWriterUtils.GetMethodParametersForColumns(c, codeWriterSettings))};"));
+            combinations?.ForEach(c => classBuilder.AppendLine($"{CodeWriterUtils.GetGetListByMethodSignature(table, c, CodeWriterSettings, CodeWriterUtils.GetMethodParametersForColumns(c, CodeWriterSettings))};"));
         }
 
         private void WriteGetLists()
         {
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, CodeWriterUtils.GetGetListMethodParameters(table, codeWriterSettings, false))};");
-            var methodParametersByCustomer = CodeWriterUtils.GetGetListMethodParameters(table, codeWriterSettings, true);
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetListMethodSignature(table, CodeWriterSettings, CodeWriterUtils.GetGetListMethodParameters(table, CodeWriterSettings, false))};");
+            var methodParametersByCustomer = CodeWriterUtils.GetGetListMethodParameters(table, CodeWriterSettings, true);
             if (methodParametersByCustomer == null || !methodParametersByCustomer.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParametersByCustomer)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetListMethodSignature(table, CodeWriterSettings, methodParametersByCustomer)};");
         }
 
         private void WriteGets()
@@ -175,41 +187,41 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteGetUniqueByCustomer()
         {
-            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, true);
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, CodeWriterSettings, true, true);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteGetUnique()
         {
-            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, true);
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, CodeWriterSettings, false, true);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteGetByCustomer()
         {
-            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, true, false);
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, CodeWriterSettings, true, false);
             if (methodParameters == null || !methodParameters.Any())
             {
                 return;
             }
 
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteGet()
         {
-            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, codeWriterSettings, false, false);
-            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)};");
+            var methodParameters = CodeWriterUtils.GetGetMethodParameters(table, CodeWriterSettings, false, false);
+            classBuilder.AppendLine($"{CodeWriterUtils.GetGetMethodSignature(table, CodeWriterSettings, methodParameters)};");
         }
 
         private void WriteCreate()
