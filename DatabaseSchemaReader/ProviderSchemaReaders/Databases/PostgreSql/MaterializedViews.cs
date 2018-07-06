@@ -39,16 +39,14 @@ AND (matviewname = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY schemaname, matviewname";
         }
 
+        public int ServerVersion { get; set; }
+
         public IList<DatabaseView> Execute(IConnectionAdapter connectionAdapter)
         {
             //or is there something on connection?
             try
             {
-                //server_version_num available from 8.2 +
-                var cmd = BuildCommand(connectionAdapter);
-                cmd.CommandText = @"SELECT current_setting('server_version_num')"; //or SHOW server_version
-                //bizarrely, although this is version in a numeric format, it comes back as a string
-                var hasMatViewsTable = int.Parse((string)cmd.ExecuteScalar(), NumberStyles.Any) > 90300;
+                var hasMatViewsTable = ServerVersion > 90300;
                 if (hasMatViewsTable)
                 {
                     Sql = _sql93;

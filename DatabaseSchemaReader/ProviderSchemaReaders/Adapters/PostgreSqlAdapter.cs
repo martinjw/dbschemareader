@@ -9,6 +9,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
     class PostgreSqlAdapter : ReaderAdapter
     {
+        private int _serverVersion;
+
         public PostgreSqlAdapter(SchemaParameters schemaParameters) : base(schemaParameters)
         {
         }
@@ -56,8 +58,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
-            return new Triggers(Owner, tableName)
-                .Execute(ConnectionAdapter);
+            if (_serverVersion == 0)
+            {
+                _serverVersion = new ServerVersion().Execute(ConnectionAdapter);
+            }
+
+            var triggers = new Triggers(Owner, tableName) {ServerVersion = _serverVersion};
+            return triggers.Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> CheckConstraints(string tableName)
@@ -84,7 +91,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 .Execute(ConnectionAdapter);
             if (string.IsNullOrEmpty(viewName) || !views.Any())
             {
-                var mviews = new MaterializedViews(Owner, viewName)
+                if (_serverVersion == 0)
+                {
+                    _serverVersion = new ServerVersion().Execute(ConnectionAdapter);
+                }
+
+                var materializedViews = new MaterializedViews(Owner, viewName) {ServerVersion = _serverVersion};
+                var mviews = materializedViews
                     .Execute(ConnectionAdapter);
                 foreach (var mview in mviews)
                 {

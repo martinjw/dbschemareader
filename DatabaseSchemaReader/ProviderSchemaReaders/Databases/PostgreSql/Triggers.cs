@@ -36,25 +36,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             };
             Result.Add(trigger);
         }
+        public int ServerVersion { get; set; }
 
         public IList<DatabaseTrigger> Execute(IConnectionAdapter connectionAdapter)
         {
-            var version = connectionAdapter.DbConnection.ServerVersion;
             string timing = "CONDITION_TIMING";
-            if (version != null)
+            if (ServerVersion >= 90100)
             {
-                if (version.IndexOf(',') != -1)
-                {
-                    //Devart shows an unparseable string
-                    //PostgreSQL 9.3.4, compiled by Visual C++ build 1600, 64-bit 
-                    version = version.Substring(0, version.IndexOf(','))
-                        .Replace("PostgreSQL ", "");
-                }
-                var v = new Version(version);
-                if (v.Major >= 9 && v.Minor >= 1)
-                {
-                    timing = "ACTION_TIMING";
-                }
+                timing = "ACTION_TIMING";
             }
 
             Sql = @"SELECT 
