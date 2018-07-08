@@ -23,7 +23,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
      ColumnName = col.name,
      INDEX_TYPE = ind.type_desc,
      IsPrimary = is_primary_key,
-     IsUnique = is_unique_constraint
+     IsUnique = is_unique
 FROM 
      sys.indexes ind 
 INNER JOIN 
