@@ -59,9 +59,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteAllMembers()
         {
-            classBuilder.AppendLine("public IDbContext DbContext { get; set; }");
-            classBuilder.AppendLine("");
-            WriteConstructorAndFields();
+            WriteConstructorsAndFields();
             WritePrimaryKeyColumnProperties();
             WriteNonPrimaryKeyColumnProperties();
             WriteForeignKeyProperties();
@@ -69,48 +67,44 @@ namespace DatabaseSchemaReader.CodeGen
             WriteWiths();
         }
 
-        private void WriteConstructorAndFields()
+        private void WriteConstructorsAndFields()
         {
-            var tables = new List<DatabaseTable>();
-            foreach (var fk in table.ForeignKeys)
-            {
-                tables.Add(fk.ReferencedTable(table.DatabaseSchema));
-            }
-
-            foreach (var t in table.ForeignKeyChildren)
-            {
-                tables.Add(t);
-            }
-
-            var fields = new List<Parameter>();
-            foreach (var t in tables.Distinct())
-            {
-                var field = new Parameter
-                {
-                    ColumnNameToQueryBy = null,
-                    DataType = CodeWriterUtils.GetRepositoryInterfaceName(t),
-                    Name = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(t))
-                };
-
-                fields.Add(field);
-            }
-
+            var tables = CodeWriterUtils.GetAllForeignTables(table);
+            var fields = CodeWriterUtils.GetTablesAsParameters(tables);
             WriteFields(fields);
-            classBuilder.AppendLine("");
+            WriteConstructor();
             WriteConstructor(fields);
-            classBuilder.AppendLine("");
         }
 
         private void WriteFields(IEnumerable<Parameter> fields)
         {
+            if (fields == null || !fields.Any())
+            {
+                return;
+            }
+
             foreach (var f in fields)
             {
                 classBuilder.AppendLine($"private {f.DataType} {f.Name};");
             }
+
+            classBuilder.AppendLine("");
+        }
+
+        private void WriteConstructor()
+        {
+            classBuilder.BeginNest($"public {table.NetName}()");
+            classBuilder.EndNest();
+            classBuilder.AppendLine("");
         }
 
         private void WriteConstructor(IEnumerable<Parameter> fields)
         {
+            if (fields == null || !fields.Any())
+            {
+                return;
+            }
+
             var constructorSignature = string.Join(", ", fields.Select(f => $"{f.DataType} {f.Name}"));
             using (classBuilder.BeginNest($"public {table.NetName}({constructorSignature})"))
             {
@@ -119,6 +113,8 @@ namespace DatabaseSchemaReader.CodeGen
                     classBuilder.AppendLine($"this.{f.Name} = {f.Name};");
                 }
             }
+
+            classBuilder.AppendLine("");
         }
 
         private void WriteForeignKeyProperties()

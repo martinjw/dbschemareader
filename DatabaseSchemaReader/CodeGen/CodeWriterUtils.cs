@@ -32,6 +32,40 @@ namespace DatabaseSchemaReader.CodeGen
 //------------------------------------------------------------------------------");
         }
 
+        public static IEnumerable<DatabaseTable> GetAllForeignTables(DatabaseTable table)
+        {
+            var tables = new List<DatabaseTable>();
+            foreach (var fk in table.ForeignKeys)
+            {
+                tables.Add(fk.ReferencedTable(table.DatabaseSchema));
+            }
+
+            foreach (var t in table.ForeignKeyChildren)
+            {
+                tables.Add(t);
+            }
+
+            return tables;
+        }
+
+        public static IEnumerable<Parameter> GetTablesAsParameters(IEnumerable<DatabaseTable> tables)
+        {
+            var fields = new List<Parameter>();
+            foreach (var t in tables.Distinct().OrderBy(t => t.Name))
+            {
+                var field = new Parameter
+                                {
+                                    ColumnNameToQueryBy = null,
+                                    DataType = CodeWriterUtils.GetRepositoryInterfaceName(t),
+                                    Name = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(t))
+                                };
+
+                fields.Add(field);
+            }
+
+            return fields;
+        }
+
         public static void DeduplicateMethodParameterNames(IList<Parameter> methodParameters)
         {
             var uniqueCount = methodParameters.Select(item => item.Name).Distinct().Count();
