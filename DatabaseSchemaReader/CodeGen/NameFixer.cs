@@ -81,7 +81,7 @@ namespace DatabaseSchemaReader.CodeGen
             return name;
         }
 
-        private static string MakePascalCase(string name)
+        public static string MakePascalCase(string name)
         {
             //make underscores into spaces, plus other odd punctuation
             name = name.Replace('_', ' ').Replace('$', ' ').Replace('#', ' ');

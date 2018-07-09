@@ -52,7 +52,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 WriteAllMembers();
             }
-            
+
             classBuilder.EndNest();
             return classBuilder.ToString();
         }
@@ -61,11 +61,64 @@ namespace DatabaseSchemaReader.CodeGen
         {
             classBuilder.AppendLine("public IDbContext DbContext { get; set; }");
             classBuilder.AppendLine("");
+            WriteConstructorAndFields();
             WritePrimaryKeyColumnProperties();
             WriteNonPrimaryKeyColumnProperties();
             WriteForeignKeyProperties();
             WriteForeignKeyCollectionProperties();
             WriteWiths();
+        }
+
+        private void WriteConstructorAndFields()
+        {
+            var tables = new List<DatabaseTable>();
+            foreach (var fk in table.ForeignKeys)
+            {
+                tables.Add(fk.ReferencedTable(table.DatabaseSchema));
+            }
+
+            foreach (var t in table.ForeignKeyChildren)
+            {
+                tables.Add(t);
+            }
+
+            var fields = new List<Parameter>();
+            foreach (var t in tables.Distinct())
+            {
+                var field = new Parameter
+                {
+                    ColumnNameToQueryBy = null,
+                    DataType = CodeWriterUtils.GetRepositoryInterfaceName(t),
+                    Name = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(t))
+                };
+
+                fields.Add(field);
+            }
+
+            WriteFields(fields);
+            classBuilder.AppendLine("");
+            WriteConstructor(fields);
+            classBuilder.AppendLine("");
+        }
+
+        private void WriteFields(IEnumerable<Parameter> fields)
+        {
+            foreach (var f in fields)
+            {
+                classBuilder.AppendLine($"private {f.DataType} {f.Name};");
+            }
+        }
+
+        private void WriteConstructor(IEnumerable<Parameter> fields)
+        {
+            var constructorSignature = string.Join(", ", fields.Select(f => $"{f.DataType} {f.Name}"));
+            using (classBuilder.BeginNest($"public {table.NetName}({constructorSignature})"))
+            {
+                foreach (var f in fields)
+                {
+                    classBuilder.AppendLine($"this.{f.Name} = {f.Name};");
+                }
+            }
         }
 
         private void WriteForeignKeyProperties()
@@ -115,10 +168,9 @@ namespace DatabaseSchemaReader.CodeGen
                     CodeWriterSettings);
 
                 var propertyName = CodeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
-                var repositoryNameForFfkTable = CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild);
                 var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, CodeWriterSettings, false);
                 classBuilder.BeginNest($"public {withMethodSignature}");
-                var repositoryMethodCallParametersForFfkTable = new List<string> { "DbContext" };
+                var repositoryMethodCallParametersForFfkTable = new List<string>();
                 foreach (var ffkReferencedColumn in ffkReferencedColumns)
                 {
                     var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(ffkReferencedColumn)}";
@@ -138,7 +190,8 @@ namespace DatabaseSchemaReader.CodeGen
                 }
 
                 var repositoryMethodCallParametersForFfkTablePrinted = string.Join(", ", repositoryMethodCallParametersForFfkTable);
-                classBuilder.AppendLine($"{propertyName} = {repositoryNameForFfkTable}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
+                var fieldNameForFfkTableRepository = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild));
+                classBuilder.AppendLine($"{propertyName} = {fieldNameForFfkTableRepository}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
                 classBuilder.AppendLine("return this;");
                 classBuilder.EndNest();
                 classBuilder.AppendLine("");
@@ -158,10 +211,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, CodeWriterSettings)}");
 
-            var methodCallParameters = new List<string>
-            {
-                "DbContext"
-            };
+            var methodCallParameters = new List<string>();
 
             var propertyName = CodeWriterSettings.Namer.ForeignKeyName(table, foreignKey);
             foreach (var fkc in foreignKey.Columns)
@@ -189,7 +239,8 @@ namespace DatabaseSchemaReader.CodeGen
             var referencedColumns = referencedColumnNames.Select(c => foreignKey.ReferencedTable(table.DatabaseSchema).FindColumn(c));
             var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, CodeWriterSettings);
             var methodName = CodeWriterUtils.GetMethodName(methodParameters, CodeWriterSettings, true, CodeWriterUtils.BaseMethodNameGet);
-            classBuilder.AppendLine($"{propertyName} = {CodeWriterUtils.GetRepositoryImplementationName(foreignKey.ReferencedTable(table.DatabaseSchema))}.{methodName}({s});");
+            var fieldNameForFkTableRepository = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(refTable));
+            classBuilder.AppendLine($"{propertyName} = {fieldNameForFkTableRepository}.{methodName}({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();
             classBuilder.AppendLine("");
