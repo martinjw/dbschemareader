@@ -233,6 +233,11 @@ namespace DatabaseSchemaReader.CodeGen
         {
             classBuilder.AppendLine("using System;");
             classBuilder.AppendLine("using System.Collections.Generic;");
+            foreach (var u in CodeWriterSettings.Usings)
+            {
+                classBuilder.AppendLine($"using {u};");
+            }
+
             classBuilder.AppendLine("");
         }
     }

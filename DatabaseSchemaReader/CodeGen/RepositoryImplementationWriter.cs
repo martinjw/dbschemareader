@@ -676,7 +676,11 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Exceptions;");
-            classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Repositories;");
+            foreach (var u in CodeWriterSettings.Usings)
+            {
+                classBuilder.AppendLine($"using {u};");
+            }
+
             classBuilder.AppendLine("");
         }
 

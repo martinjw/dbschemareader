@@ -22,6 +22,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public DirectoryInfo OutputDirectory { get; set; }
         public string Namespace { get; set; }
+        public string[] Usings { get; set; }
         public CodeTarget CodeTarget { get; set; }
         public INamer Namer
         {
