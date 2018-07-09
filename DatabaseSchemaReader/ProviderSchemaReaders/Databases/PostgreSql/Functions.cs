@@ -23,8 +23,8 @@ pr.prosrc AS BODY
 LEFT OUTER JOIN pg_type tp ON tp.oid = pr.prorettype
 INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
 INNER JOIN pg_language lng ON lng.oid = pr.prolang
- WHERE pr.proisagg = FALSE
-  AND tp.typname <> 'trigger'
+ WHERE --pr.proisagg = FALSE AND 
+  tp.typname <> 'trigger'
   AND ns.nspname NOT LIKE 'pg_%'
   AND ns.nspname != 'information_schema'
   AND (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)
@@ -54,7 +54,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
         {
             var owner = record.GetString("SCHEMA");
             var name = record.GetString("NAME");
-			var sql = record.GetString("BODY");
+            var sql = record.GetString("BODY");
             var sproc = new DatabaseFunction
             {
                 SchemaOwner = owner,

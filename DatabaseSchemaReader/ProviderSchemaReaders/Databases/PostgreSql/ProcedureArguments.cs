@@ -33,8 +33,8 @@ pr.proargnames as ARGNAMES
   FROM pg_proc pr
 LEFT OUTER JOIN pg_type tp ON tp.oid = pr.prorettype
 INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
-  WHERE proisagg = FALSE 
-   AND tp.typname <> 'trigger'
+  WHERE --proisagg = FALSE AND 
+   tp.typname <> 'trigger'
    AND ns.nspname NOT LIKE 'pg_%'
    AND ns.nspname != 'information_schema'
    AND (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)
