@@ -29,21 +29,42 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 using (classBuilder.BeginNest($"public static class {className}"))
                 {
-                    using (classBuilder.BeginNest($"public static IServiceCollection AddEnterpriseDataRepositories(this IServiceCollection services)"))
-                    {
-                        foreach (var t in schema.Tables)
-                        {
-                            var interfaceName = CodeWriterUtils.GetRepositoryInterfaceName(t);
-                            var implementationName = CodeWriterUtils.GetRepositoryImplementationName(t);
-                            classBuilder.AppendLine($"services.AddTransient<{interfaceName}, {implementationName}>();");
-                        }
-
-                        classBuilder.AppendLine("return services;");
-                    }
+                    WriteRegisterRepositories();
+                    WriteRegisterEntities();
                 }
             }
 
             return classBuilder.ToString();
+        }
+
+        private void WriteRegisterRepositories()
+        {
+            using (classBuilder.BeginNest($"public static IServiceCollection AddEnterpriseDataRepositories(this IServiceCollection services)"))
+            {
+                foreach (var t in schema.Tables)
+                {
+                    var interfaceName = CodeWriterUtils.GetRepositoryInterfaceName(t);
+                    var implementationName = CodeWriterUtils.GetRepositoryImplementationName(t);
+                    classBuilder.AppendLine($"services.AddTransient<{interfaceName}, {implementationName}>();");
+                }
+
+                classBuilder.AppendLine("return services;");
+            }
+
+            classBuilder.AppendLine("");
+        }
+
+        private void WriteRegisterEntities()
+        {
+            using (classBuilder.BeginNest($"public static IServiceCollection AddEnterpriseDataEntities(this IServiceCollection services)"))
+            {
+                foreach (var t in schema.Tables)
+                { 
+                    classBuilder.AppendLine($"services.AddTransient<{t.NetName}>();");
+                }
+
+                classBuilder.AppendLine("return services;");
+            }
         }
 
         private void WriteUsings()
