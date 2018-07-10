@@ -246,7 +246,7 @@ namespace DatabaseSchemaReader.CodeGen
                             using (cb.BeginNest("if (reader.Read())"))
                             {
                                 // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-                                classBuilder.AppendLine($"{entityVariableName} = new {table.NetName}({entityConstructorCallParameters});");
+                                classBuilder.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
                                 WriteParseEntityFromReader(entityVariableName);
                             }
                         });
@@ -411,7 +411,7 @@ namespace DatabaseSchemaReader.CodeGen
                         using (cb.BeginNest("if (reader.Read())"))
                         {
                             // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-                            classBuilder.AppendLine($"{entityVariableName} = new {table.NetName}({entityConstructorCallParameters});");
+                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader(entityVariableName);
                         }
                     });
@@ -509,7 +509,7 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         using (cb.BeginNest("while (reader.Read())"))
                         {
-                            classBuilder.AppendLine($"var entity = new {table.NetName}({entityConstructorCallParameters});");
+                            classBuilder.AppendLine($"var entity = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader("entity");
                             classBuilder.AppendLine("entities.Add(entity);");
                         }
@@ -595,7 +595,7 @@ namespace DatabaseSchemaReader.CodeGen
                             }
 
                             cb.AppendLine("");*/
-                            cb.AppendLine($"{entityVariableName} = new {table.NetName}({entityConstructorCallParameters});");
+                            cb.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader(entityVariableName);
 
                             // TODO: KE - parse the org unit information coming back and populate the entity's org unit so that WithCustomerAssetOrganization does not have to be called at the service layer, also need to modify returned columns
@@ -610,8 +610,13 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteConstructorsAndFields()
         {
             var tables = CodeWriterUtils.GetAllForeignTables(table);
-            var fields = CodeWriterUtils.GetTablesAsParameters(tables).ToList();
+            var fields = new List<Parameter>();//CodeWriterUtils.GetTablesAsParameters(tables).ToList();
             fields.Insert(0, CodeWriterUtils.GetDbContextMethodParameter());
+            fields.Add(new Parameter
+                           {
+                               DataType = "IServiceProvider",
+                               Name = "serviceProvider"
+                           });
             WriteFields(fields);
             classBuilder.AppendLine("");
             WriteConstructor(fields);
@@ -700,7 +705,7 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         using (cb.BeginNest("while (reader.Read())"))
                         {
-                            classBuilder.AppendLine($"var entity = new {table.NetName}({entityConstructorCallParameters});");
+                            classBuilder.AppendLine($"var entity = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader("entity");
                             classBuilder.AppendLine("entities.Add(entity);");
                         }
@@ -792,7 +797,7 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         using (cb.BeginNest("if (reader.Read())"))
                         {
-                            classBuilder.AppendLine($"{entityVariableName} = new {table.NetName}({entityConstructorCallParameters});");
+                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader(entityVariableName);
                         }
                     });
