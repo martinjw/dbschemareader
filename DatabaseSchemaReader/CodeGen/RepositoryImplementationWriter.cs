@@ -10,9 +10,10 @@ namespace DatabaseSchemaReader.CodeGen
         private DatabaseTable table;
         private ClassBuilder classBuilder;
         private IEnumerable<string> logicalDeleteColumns;
-        private string entityConstructorCallParameters;
         private CodeWriterSettings codeWriterSettings { get; }
         private DatabaseSchema schema { get; }
+        private string _serviceProviderFieldName = "_serviceProvider";
+        private string _dbContextFieldName = "_dbContext";
 
         public RepositoryImplementationWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings, IEnumerable<string> logicalDeleteColumns)
         {
@@ -26,7 +27,6 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var t in schema.Tables)
             {
                 table = t;
-                entityConstructorCallParameters = String.Join(", ", CodeWriterUtils.GetTablesAsParameters(CodeWriterUtils.GetAllForeignTables(table)).Select(item => item.Name));
                 classBuilder = new ClassBuilder();
                 var implementationText = Write();
                 CodeWriterUtils.WriteClassFile(codeWriterSettings.OutputDirectory, CodeWriterUtils.GetRepositoryImplementationName(table), implementationText);
@@ -238,7 +238,7 @@ namespace DatabaseSchemaReader.CodeGen
                         {
                             foreach (var mp in methodParameters)
                             {
-                                classBuilder.AppendLine($"dbContext.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                                classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                             }
                         },
                     cb =>
@@ -246,7 +246,7 @@ namespace DatabaseSchemaReader.CodeGen
                             using (cb.BeginNest("if (reader.Read())"))
                             {
                                 // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-                                classBuilder.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
+                                classBuilder.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
                                 WriteParseEntityFromReader(entityVariableName);
                             }
                         });
@@ -293,12 +293,12 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             sqlCommandText = $"{sqlCommandText} WHERE {whereClause};";
-            classBuilder.BeginNest($"using (var connection = dbContext.CreateConnection())");
+            classBuilder.BeginNest($"using (var connection = {_dbContextFieldName}.CreateConnection())");
             classBuilder.BeginNest($"using (var command = connection.CreateCommand())");
             classBuilder.AppendLine($"command.CommandText = \"{sqlCommandText}\";");
             foreach (var mp in methodParameters)
             {
-                classBuilder.AppendLine($"dbContext.AddParameter(command, \"{mp.Name}\", {mp.Name});");
+                classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"{mp.Name}\", {mp.Name});");
             }
 
             classBuilder.AppendLine("connection.Open();");
@@ -397,13 +397,12 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         foreach (var mp in methodParameters)
                         {
-                            classBuilder.AppendLine($"dbContext.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                            classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                         }
 
                         using (classBuilder.BeginNest($"foreach (var key in propertyColumnPairs.Keys)"))
                         {
-                            classBuilder.AppendLine(
-                                "dbContext.AddParameter(command, $\"@{key.Name}\", key.GetValue(entity));");
+                            classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, $\"@{{key.Name}}\", key.GetValue(entity));");
                         }
                     },
                     cb =>
@@ -411,7 +410,7 @@ namespace DatabaseSchemaReader.CodeGen
                         using (cb.BeginNest("if (reader.Read())"))
                         {
                             // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
+                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader(entityVariableName);
                         }
                     });
@@ -502,14 +501,14 @@ namespace DatabaseSchemaReader.CodeGen
                         {
                             foreach (var mp in methodParameters)
                             {
-                                cb.AppendLine($"dbContext.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                                cb.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                             }
                         },
                     cb =>
                     {
                         using (cb.BeginNest("while (reader.Read())"))
                         {
-                            classBuilder.AppendLine($"var entity = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
+                            classBuilder.AppendLine($"var entity = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader("entity");
                             classBuilder.AppendLine("entities.Add(entity);");
                         }
@@ -581,7 +580,7 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         foreach (var mp in methodParameters)
                         {
-                            cb.AppendLine($"dbContext.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                            cb.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                         }
                     },
                     cb =>
@@ -595,7 +594,7 @@ namespace DatabaseSchemaReader.CodeGen
                             }
 
                             cb.AppendLine("");*/
-                            cb.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
+                            cb.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader(entityVariableName);
 
                             // TODO: KE - parse the org unit information coming back and populate the entity's org unit so that WithCustomerAssetOrganization does not have to be called at the service layer, also need to modify returned columns
@@ -609,13 +608,14 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteConstructorsAndFields()
         {
-            var tables = CodeWriterUtils.GetAllForeignTables(table);
-            var fields = new List<Parameter>();//CodeWriterUtils.GetTablesAsParameters(tables).ToList();
-            fields.Insert(0, CodeWriterUtils.GetDbContextMethodParameter());
+            var fields = new List<Parameter>();
+            var dbContextParameter = CodeWriterUtils.GetDbContextMethodParameter();
+            dbContextParameter.Name = _dbContextFieldName;
+            fields.Add(dbContextParameter);
             fields.Add(new Parameter
                            {
                                DataType = "IServiceProvider",
-                               Name = "serviceProvider"
+                               Name = _serviceProviderFieldName
                            });
             WriteFields(fields);
             classBuilder.AppendLine("");
@@ -698,14 +698,14 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         foreach (var mp in methodParameters)
                         {
-                            classBuilder.AppendLine($"dbContext.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                            classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                         }
                     },
                     cb =>
                     {
                         using (cb.BeginNest("while (reader.Read())"))
                         {
-                            classBuilder.AppendLine($"var entity = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
+                            classBuilder.AppendLine($"var entity = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader("entity");
                             classBuilder.AppendLine("entities.Add(entity);");
                         }
@@ -790,14 +790,14 @@ namespace DatabaseSchemaReader.CodeGen
                     {
                         using (classBuilder.BeginNest($"foreach (var key in propertyColumnPairs.Keys)"))
                         {
-                            classBuilder.AppendLine("dbContext.AddParameter(command, $\"@{key.Name}\", key.GetValue(entity));");
+                            classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, $\"@{{key.Name}}\", key.GetValue(entity));");
                         }
                     },
                     cb =>
                     {
                         using (cb.BeginNest("if (reader.Read())"))
                         {
-                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName})serviceProvider.GetService(typeof({table.NetName}));");
+                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
                             WriteParseEntityFromReader(entityVariableName);
                         }
                     });
@@ -871,7 +871,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteExecuteReaderBlock(string sqlCommandText, Action<ClassBuilder> addCommandParameters, Action<ClassBuilder> processReader)
         {
-            using (classBuilder.BeginNest($"using (var connection = dbContext.CreateConnection())"))
+            using (classBuilder.BeginNest($"using (var connection = {_dbContextFieldName}.CreateConnection())"))
             {
                 classBuilder.AppendLine("connection.Open();");
                 using (classBuilder.BeginNest($"using (var command = connection.CreateCommand())"))

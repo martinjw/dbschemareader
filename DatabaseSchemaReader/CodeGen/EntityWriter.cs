@@ -85,7 +85,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             foreach (var f in fields)
             {
-                classBuilder.AppendLine($"protected {f.DataType} {f.Name};");
+                classBuilder.AppendLine($"protected {f.DataType} _{f.Name};");
             }
 
             classBuilder.AppendLine("");
@@ -110,7 +110,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 foreach (var f in fields)
                 {
-                    classBuilder.AppendLine($"this.{f.Name} = {f.Name};");
+                    classBuilder.AppendLine($"_{f.Name} = {f.Name};");
                 }
             }
 
@@ -187,7 +187,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var repositoryMethodCallParametersForFfkTablePrinted = string.Join(", ", repositoryMethodCallParametersForFfkTable);
                 var fieldNameForFfkTableRepository = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(foreignKeyChild));
-                classBuilder.AppendLine($"{propertyName} = {fieldNameForFfkTableRepository}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
+                classBuilder.AppendLine($"{propertyName} = _{fieldNameForFfkTableRepository}.{repositoryMethodNameForFfkTable}({repositoryMethodCallParametersForFfkTablePrinted});");
                 classBuilder.AppendLine("return this;");
                 classBuilder.EndNest();
                 classBuilder.AppendLine("");
@@ -236,7 +236,7 @@ namespace DatabaseSchemaReader.CodeGen
             var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(referencedColumns, codeWriterSettings);
             var methodName = CodeWriterUtils.GetMethodName(methodParameters, codeWriterSettings, true, CodeWriterUtils.BaseMethodNameGet);
             var fieldNameForFkTableRepository = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(refTable));
-            classBuilder.AppendLine($"{propertyName} = {fieldNameForFkTableRepository}.{methodName}({s});");
+            classBuilder.AppendLine($"{propertyName} = _{fieldNameForFkTableRepository}.{methodName}({s});");
             classBuilder.AppendLine("return this;");
             classBuilder.EndNest();
             classBuilder.AppendLine("");
