@@ -905,11 +905,11 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 if (c.Nullable)
                 {
-                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = reader.GetValue({c.Ordinal - 1}) == DBNull.Value ? null : ({DataTypeWriter.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
+                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = reader.GetValue({c.Ordinal - 1}) == DBNull.Value ? null : ({CodeWriterUtils.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
                 }
                 else
                 {
-                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ({DataTypeWriter.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
+                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ({CodeWriterUtils.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
                 }
             }
         }

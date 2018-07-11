@@ -170,7 +170,7 @@ namespace DatabaseSchemaReader.CodeGen
                 foreach (var ffkReferencedColumn in ffkReferencedColumns)
                 {
                     var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(ffkReferencedColumn)}";
-                    if (ffkReferencedColumn.Nullable && DataTypeWriter.FindDataType(ffkReferencedColumn).EndsWith("?"))
+                    if (ffkReferencedColumn.Nullable && CodeWriterUtils.FindDataType(ffkReferencedColumn).EndsWith("?"))
                     {
                         using (classBuilder.BeginNest($"if (!{parameter}.HasValue)"))
                         {
@@ -214,7 +214,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var tc = table.Columns.Single(_tc => _tc.Name == fkc);
                 var parameter = $"{CodeWriterUtils.GetPropertyNameForDatabaseColumn(tc)}";
-                if (tc.Nullable && DataTypeWriter.FindDataType(tc).EndsWith("?")) // KE: need the check for the "?" so that we correctly handle reference types like string
+                if (tc.Nullable && CodeWriterUtils.FindDataType(tc).EndsWith("?")) // KE: need the check for the "?" so that we correctly handle reference types like string
                 {
                     using (classBuilder.BeginNest($"if (!{parameter}.HasValue)"))
                     {
@@ -374,7 +374,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteColumn(DatabaseColumn column, bool notNetName)
         {
             var propertyName = CodeWriterUtils.GetPropertyNameForDatabaseColumn(column);
-            var dataType = DataTypeWriter.FindDataType(column);
+            var dataType = CodeWriterUtils.FindDataType(column);
 
             if (notNetName)
             {

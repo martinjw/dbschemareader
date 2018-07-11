@@ -348,10 +348,5 @@ namespace DatabaseSchemaReader.DataSchema
         {
             return TypeName + " = " + NetDataType;
         }
-
-        public virtual string WriteCodeFile(CodeWriterSettings codeWriterSettings, ClassBuilder classBuilder)
-        {
-            return null;
-        }
     }
 }

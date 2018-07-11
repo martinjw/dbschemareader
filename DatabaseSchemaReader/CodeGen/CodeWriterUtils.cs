@@ -196,21 +196,21 @@ namespace DatabaseSchemaReader.CodeGen
             var s = new List<string>();
             foreach (var p in methodParameters)
             {
-                if (!string.IsNullOrEmpty(p.ColumnNameToQueryBy))
+                if (!String.IsNullOrEmpty(p.ColumnNameToQueryBy))
                 {
                     var properName = codeWriterSettings.Namer.NameColumnAsMethodTitle(p.ColumnNameToQueryBy);
                     s.Add(properName);
                 }
             }
 
-            return s.Any() ? string.Join("And", s) : string.Empty;
+            return s.Any() ? String.Join("And", s) : String.Empty;
         }
 
         public static string GetMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings, bool singular, string baseMethodName)
         {
             var partialMethodName = ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             var methodName = singular ? baseMethodName : $"{baseMethodName}List";
-            return !string.IsNullOrEmpty(partialMethodName) ? $"{methodName}By{partialMethodName}" : methodName;
+            return !String.IsNullOrEmpty(partialMethodName) ? $"{methodName}By{partialMethodName}" : methodName;
         }
 
         public static string GetGetMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, bool singular)
@@ -466,7 +466,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             if (methodParameters?.Count() < 1)
             {
-                return string.Empty;
+                return String.Empty;
             }
 
             return String.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
@@ -479,7 +479,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var ta = codeWriterSettings.Namer.NameToAcronym(column.TableName);
                 var pn = codeWriterSettings.Namer.NameToAcronym(GetPropertyNameForDatabaseColumn(column));
-                var dt = DataTypeWriter.FindDataType(column);
+                var dt = FindDataType(column);
                 var cn = GetPropertyNameForDatabaseColumn(column);
                 var fn = Regex.Replace(GetPropertyNameForDatabaseColumn(column), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
                 var fields = fn.Split(' ').ToList();
@@ -563,7 +563,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var orgUnitTable = schema.FindTableByName(CustomerAssetOrganizationTableName);
             var methodParameters = GetMethodParametersForColumns(new List<DatabaseColumn>
-            {
+                                                                     {
                 orgUnitTable.FindColumn(CustomerIDColumnName)
             }, codeWriterSettings);
             return methodParameters.Single();
@@ -576,6 +576,32 @@ namespace DatabaseSchemaReader.CodeGen
             if (!directory.Exists) directory.Create();
             File.WriteAllText(path, txt);
             return fileName;
+        }
+
+        public static string FindDataType(DatabaseColumn column)
+        {
+            var dt = column.DataType;
+            string dataType;
+            if (dt == null)
+            {
+                dataType = "object";
+            }
+            else
+            {
+                //use precision and scale for more precise conversion
+                dataType = dt.NetCodeName(column);
+            }
+            //if it's nullable (and not string or array)
+            if (column.Nullable &&
+                dt != null &&
+                !dt.IsString &&
+                !String.IsNullOrEmpty(dataType) &&
+                !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase) &&
+                !dt.IsGeospatial)
+            {
+                dataType += "?"; //nullable
+            }
+            return dataType;
         }
     }
 }
