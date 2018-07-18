@@ -581,7 +581,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var orgUnitTable = schema.FindTableByName(CustomerAssetOrganizationTableName);
             var methodParameters = GetMethodParametersForColumns(new List<DatabaseColumn>
-                                                                     {
+            {
                 orgUnitTable.FindColumn(CustomerIDColumnName)
             }, codeWriterSettings);
             return methodParameters.Single();
