@@ -104,7 +104,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static void BeginNestNamespace(ClassBuilder classBuilder, CodeWriterSettings codeWriterSettings)
         {
-            if (!String.IsNullOrEmpty(codeWriterSettings.Namespace))
+            if (!string.IsNullOrEmpty(codeWriterSettings.Namespace))
             {
                 classBuilder.BeginNest("namespace " + codeWriterSettings.Namespace);
                 return;
@@ -202,21 +202,21 @@ namespace DatabaseSchemaReader.CodeGen
             var s = new List<string>();
             foreach (var p in methodParameters)
             {
-                if (!String.IsNullOrEmpty(p.ColumnNameToQueryBy))
+                if (!string.IsNullOrEmpty(p.ColumnNameToQueryBy))
                 {
                     var properName = codeWriterSettings.Namer.NameColumnAsMethodTitle(p.ColumnNameToQueryBy);
                     s.Add(properName);
                 }
             }
 
-            return s.Any() ? String.Join("And", s) : String.Empty;
+            return s.Any() ? string.Join("And", s) : string.Empty;
         }
 
         public static string GetMethodName(IEnumerable<Parameter> methodParameters, CodeWriterSettings codeWriterSettings, bool singular, string baseMethodName)
         {
             var partialMethodName = ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             var methodName = singular ? baseMethodName : $"{baseMethodName}List";
-            return !String.IsNullOrEmpty(partialMethodName) ? $"{methodName}By{partialMethodName}" : methodName;
+            return !string.IsNullOrEmpty(partialMethodName) ? $"{methodName}By{partialMethodName}" : methodName;
         }
 
         public static string GetGetMethodName(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings, bool singular)
@@ -484,10 +484,10 @@ namespace DatabaseSchemaReader.CodeGen
         {
             if (methodParameters?.Count() < 1)
             {
-                return String.Empty;
+                return string.Empty;
             }
 
-            return String.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
+            return string.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
         }
 
         public static List<Parameter> GetMethodParametersForColumns(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
@@ -523,7 +523,7 @@ namespace DatabaseSchemaReader.CodeGen
                     fields[i] = fields[i].ToLower();
                 }
 
-                var summary = String.Join(" ", fields) + ".";
+                var summary = string.Join(" ", fields) + ".";
 
                 methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary, TableAlias = ta });
             }
@@ -613,7 +613,7 @@ namespace DatabaseSchemaReader.CodeGen
             if (column.Nullable &&
                 dt != null &&
                 !dt.IsString &&
-                !String.IsNullOrEmpty(dataType) &&
+                !string.IsNullOrEmpty(dataType) &&
                 !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase) &&
                 !dt.IsGeospatial)
             {
