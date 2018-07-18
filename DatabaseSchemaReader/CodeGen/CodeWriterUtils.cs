@@ -54,11 +54,11 @@ namespace DatabaseSchemaReader.CodeGen
             foreach (var t in tables.Distinct().OrderBy(t => t.Name))
             {
                 var field = new Parameter
-                                {
-                                    ColumnNameToQueryBy = null,
-                                    DataType = CodeWriterUtils.GetRepositoryInterfaceName(t),
-                                    Name = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(t))
-                                };
+                {
+                    ColumnNameToQueryBy = null,
+                    DataType = CodeWriterUtils.GetRepositoryInterfaceName(t),
+                    Name = NameFixer.ToCamelCase(CodeWriterUtils.GetRepositoryImplementationName(t))
+                };
 
                 fields.Add(field);
             }
@@ -168,6 +168,12 @@ namespace DatabaseSchemaReader.CodeGen
             var columns = new List<DatabaseColumn>();
             if (byCustomer)
             {
+                var hasCustomer = table.Columns.Any(c => c.Name == CustomerIDColumnName);
+                if (hasCustomer)
+                {
+                    return new List<Parameter>();
+                }
+
                 if (TableHasOrgUnitForeignKey(table))
                 {
                     var orgUnitTable = table.DatabaseSchema.FindTableByName(CustomerAssetOrganizationTableName);
@@ -424,6 +430,12 @@ namespace DatabaseSchemaReader.CodeGen
             var methodParameters = GetMethodParametersForColumns(columns, codeWriterSettings);
             if (byCustomer)
             {
+                var hasCustomer = columns.Any(c => c.Name == CustomerIDColumnName);
+                if (hasCustomer)
+                {
+                    return new List<Parameter>();
+                }
+
                 if (TableHasOrgUnitForeignKey(table))
                 {
                     methodParameters.Add(GetCustomerParameter(table.DatabaseSchema, codeWriterSettings));
@@ -443,6 +455,12 @@ namespace DatabaseSchemaReader.CodeGen
             var methodParameters = GetMethodParametersForColumns(columns, codeWriterSettings);
             if (byCustomer)
             {
+                var hasCustomer = columns.Any(c => c.Name == CustomerIDColumnName);
+                if (hasCustomer)
+                {
+                    return new List<Parameter>();
+                }
+
                 if (TableHasOrgUnitForeignKey(table))
                 {
                     methodParameters.Add(GetCustomerParameter(table.DatabaseSchema, codeWriterSettings));
