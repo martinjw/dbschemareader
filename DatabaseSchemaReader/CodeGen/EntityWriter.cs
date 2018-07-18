@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendXmlSummary($"Class representing the {table.Name} table.");
             classBuilder.AppendLine($"[Table(\"\\\"{table.Name}\\\"\")]");
-            using (classBuilder.BeginNest($"public partial class {table.NetName}"))
+            using (classBuilder.BeginNest($"public class {table.NetName}"))
             {
                 WriteAllMembers();
             }
@@ -85,7 +85,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             foreach (var f in fields)
             {
-                classBuilder.AppendLine($"protected {f.DataType} _{f.Name};");
+                classBuilder.AppendLine($"private {f.DataType} _{f.Name};");
             }
 
             classBuilder.AppendLine("");
@@ -165,7 +165,7 @@ namespace DatabaseSchemaReader.CodeGen
 
                 var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
                 var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
-                classBuilder.BeginNest($"public virtual {withMethodSignature}");
+                classBuilder.BeginNest($"public {withMethodSignature}");
                 var repositoryMethodCallParametersForFfkTable = new List<string>();
                 foreach (var ffkReferencedColumn in ffkReferencedColumns)
                 {
@@ -205,7 +205,7 @@ namespace DatabaseSchemaReader.CodeGen
                 throw new InvalidOperationException("Number of foreign key columns does not match number of columns referenced!");
             }
 
-            classBuilder.BeginNest($"public virtual {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, codeWriterSettings)}");
+            classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, codeWriterSettings)}");
 
             var methodCallParameters = new List<string>();
 
