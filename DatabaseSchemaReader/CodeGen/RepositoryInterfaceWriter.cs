@@ -42,7 +42,7 @@ namespace DatabaseSchemaReader.CodeGen
             CodeWriterUtils.BeginNestNamespace(classBuilder, codeWriterSettings);
             var tableOrView = table is DatabaseView ? "view" : "table";
             var comment = $"Interface providing repository CRUD operations for the {table.Name} {tableOrView}";
-            var interfaceDefinition = $"public interface {CodeWriterUtils.GetRepositoryInterfaceName(table)}";
+            var interfaceDefinition = $"public partial interface {CodeWriterUtils.GetRepositoryInterfaceName(table)}";
             classBuilder.AppendXmlSummary(comment);
             classBuilder.BeginNest(interfaceDefinition);
             WriteInterfaceMembers();

@@ -45,7 +45,7 @@ namespace DatabaseSchemaReader.CodeGen
             CodeWriterUtils.BeginNestNamespace(classBuilder, codeWriterSettings);
             var tableOrView = table is DatabaseView ? "view" : "table";
             var comment = $"Repository class for the {table.Name} {tableOrView}";
-            var classDefinition = $"public class {CodeWriterUtils.GetRepositoryImplementationName(table)} : {CodeWriterUtils.GetRepositoryInterfaceName(table)}";
+            var classDefinition = $"public partial class {CodeWriterUtils.GetRepositoryImplementationName(table)} : {CodeWriterUtils.GetRepositoryInterfaceName(table)}";
             classBuilder.AppendXmlSummary(comment);
             classBuilder.BeginNest(classDefinition);
             WriteAllMembers();
