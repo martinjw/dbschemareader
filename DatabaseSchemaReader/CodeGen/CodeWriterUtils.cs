@@ -104,7 +104,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static void BeginNestNamespace(ClassBuilder classBuilder, CodeWriterSettings codeWriterSettings)
         {
-            if (!String.IsNullOrEmpty(codeWriterSettings.Namespace))
+            if (!string.IsNullOrEmpty(codeWriterSettings.Namespace))
             {
                 classBuilder.BeginNest("namespace " + codeWriterSettings.Namespace);
                 return;
@@ -487,7 +487,7 @@ namespace DatabaseSchemaReader.CodeGen
                 return string.Empty;
             }
 
-            return String.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
+            return string.Join(", ", methodParameters.Select(mp => $"{mp.DataType} {mp.Name}"));
         }
 
         public static List<Parameter> GetMethodParametersForColumns(IEnumerable<DatabaseColumn> columns, CodeWriterSettings codeWriterSettings)
@@ -497,7 +497,7 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var ta = codeWriterSettings.Namer.NameToAcronym(column.TableName);
                 var pn = codeWriterSettings.Namer.NameToAcronym(GetPropertyNameForDatabaseColumn(column));
-                var dt = DataTypeWriter.FindDataType(column);
+                var dt = FindDataType(column);
                 var cn = GetPropertyNameForDatabaseColumn(column);
                 var fn = Regex.Replace(GetPropertyNameForDatabaseColumn(column), "([A-Z]+|[0-9]+)", " $1", RegexOptions.Compiled).Trim();
                 var fields = fn.Split(' ').ToList();
@@ -523,7 +523,7 @@ namespace DatabaseSchemaReader.CodeGen
                     fields[i] = fields[i].ToLower();
                 }
 
-                var summary = String.Join(" ", fields) + ".";
+                var summary = string.Join(" ", fields) + ".";
 
                 methodParameters.Add(new Parameter() { Name = pn, DataType = dt, ColumnNameToQueryBy = cn, Summary = summary, TableAlias = ta });
             }
@@ -594,6 +594,32 @@ namespace DatabaseSchemaReader.CodeGen
             if (!directory.Exists) directory.Create();
             File.WriteAllText(path, txt);
             return fileName;
+        }
+
+        public static string FindDataType(DatabaseColumn column)
+        {
+            var dt = column.DataType;
+            string dataType;
+            if (dt == null)
+            {
+                dataType = "object";
+            }
+            else
+            {
+                //use precision and scale for more precise conversion
+                dataType = dt.NetCodeName(column);
+            }
+            //if it's nullable (and not string or array)
+            if (column.Nullable &&
+                dt != null &&
+                !dt.IsString &&
+                !string.IsNullOrEmpty(dataType) &&
+                !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase) &&
+                !dt.IsGeospatial)
+            {
+                dataType += "?"; //nullable
+            }
+            return dataType;
         }
     }
 }

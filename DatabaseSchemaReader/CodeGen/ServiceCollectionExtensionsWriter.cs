@@ -24,6 +24,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         private string Write()
         {
+            CodeWriterUtils.WriteFileHeader(classBuilder);
             WriteUsings();
             using (classBuilder.BeginNest($"namespace {codeWriterSettings.Namespace}"))
             {
