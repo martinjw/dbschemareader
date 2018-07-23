@@ -234,20 +234,25 @@ namespace DatabaseSchemaReader.CodeGen
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
                 WriteExecuteReaderBlock(
                     sqlCommandText,
-                    cb =>
+                    () =>
                         {
                             foreach (var mp in methodParameters)
                             {
                                 classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                             }
                         },
-                    cb =>
+                    () =>
                         {
-                            using (cb.BeginNest("if (reader.Read())"))
+
+                            using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
                             {
-                                // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-                                classBuilder.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
-                                WriteParseEntityFromReader(entityVariableName);
+                                using (classBuilder.BeginNest("if (reader.Read())"))
+                                {
+                                    // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
+                                    classBuilder.AppendLine(
+                                        $"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
+                                    WriteParseEntityFromReader(entityVariableName);
+                                }
                             }
                         });
                 WriteReturnEntityIfNotNull(entityVariableName);
@@ -286,26 +291,30 @@ namespace DatabaseSchemaReader.CodeGen
             var partialMethodName = CodeWriterUtils.ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             classBuilder.BeginNest($"private int {CodeWriterUtils.BaseMethodNameDelete}PhysicalBy{partialMethodName}({CodeWriterUtils.PrintParametersForSignature(methodParameters)})");
             var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
-            var sqlCommandText = $"DELETE FROM ONLY \\\"{table.Name}\\\" AS {thisTableAlias}";
+            var sqlCommandText = $"\"DELETE FROM ONLY \\\"{table.Name}\\\" AS {thisTableAlias}";
             if (!string.IsNullOrEmpty(usingClause))
             {
                 sqlCommandText = $"{sqlCommandText} USING {usingClause}";
             }
 
-            sqlCommandText = $"{sqlCommandText} WHERE {whereClause};";
-            classBuilder.BeginNest($"using (var connection = {_dbContextFieldName}.CreateConnection())");
-            classBuilder.BeginNest($"using (var command = connection.CreateCommand())");
-            classBuilder.AppendLine($"command.CommandText = \"{sqlCommandText}\";");
-            foreach (var mp in methodParameters)
-            {
-                classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"{mp.Name}\", {mp.Name});");
-            }
+            sqlCommandText = $"{sqlCommandText} WHERE {whereClause};\"";
 
-            classBuilder.AppendLine("connection.Open();");
-            classBuilder.AppendLine($"return command.ExecuteNonQuery();");
+
+            WriteExecuteReaderBlock(
+                sqlCommandText,
+                () =>
+                    {
+                        foreach (var mp in methodParameters)
+                        {
+                            classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"{mp.Name}\", {mp.Name});");
+                        }
+                    },
+                () =>
+                    {
+                        classBuilder.AppendLine($"return command.ExecuteNonQuery();");
+                    });
+
             // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-            classBuilder.EndNest();
-            classBuilder.EndNest();
             classBuilder.EndNest();
         }
 
@@ -393,7 +402,7 @@ namespace DatabaseSchemaReader.CodeGen
                 var entityVariableName = "updatedEntity";
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
                 WriteExecuteReaderBlock("sqlCommandText",
-                    cb =>
+                    () =>
                     {
                         foreach (var mp in methodParameters)
                         {
@@ -405,13 +414,18 @@ namespace DatabaseSchemaReader.CodeGen
                             classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, $\"@{{key.Name}}\", key.GetValue(entity));");
                         }
                     },
-                    cb =>
+                    () =>
                     {
-                        using (cb.BeginNest("if (reader.Read())"))
+
+                        using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
                         {
-                            // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
-                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
-                            WriteParseEntityFromReader(entityVariableName);
+                            using (classBuilder.BeginNest("if (reader.Read())"))
+                            {
+                                // TODO: KE - consider throwing here if multiple rows were modified! It should never be the case except for bad data even though the schema allows it
+                                classBuilder.AppendLine(
+                                    $"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
+                                WriteParseEntityFromReader(entityVariableName);
+                            }
                         }
                     });
                 WriteReturnEntityIfNotNull(entityVariableName);
@@ -497,20 +511,25 @@ namespace DatabaseSchemaReader.CodeGen
                 var sqlCommandText = ConstructSqlQuery(methodParameters, innerJoinClause, columnsToReturn);
                 classBuilder.AppendLine($"var entities = new List<{table.NetName}>();");
                 WriteExecuteReaderBlock(
-                    sqlCommandText, cb =>
+                    sqlCommandText,
+                    () =>
                         {
                             foreach (var mp in methodParameters)
                             {
-                                cb.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                                classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                             }
                         },
-                    cb =>
+                    () =>
                     {
-                        using (cb.BeginNest("while (reader.Read())"))
+                        using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
                         {
-                            classBuilder.AppendLine($"var entity = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
-                            WriteParseEntityFromReader("entity");
-                            classBuilder.AppendLine("entities.Add(entity);");
+                            using (classBuilder.BeginNest("while (reader.Read())"))
+                            {
+                                classBuilder.AppendLine(
+                                    $"var entity = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
+                                WriteParseEntityFromReader("entity");
+                                classBuilder.AppendLine("entities.Add(entity);");
+                            }
                         }
                     });
                 classBuilder.AppendLine("");
@@ -576,28 +595,33 @@ namespace DatabaseSchemaReader.CodeGen
                 var entityVariableName = "entity";
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
                 WriteExecuteReaderBlock(
-                    sqlCommandText, cb =>
+                    sqlCommandText,
+                    () =>
                     {
                         foreach (var mp in methodParameters)
                         {
-                            cb.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
+                            classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                         }
                     },
-                    cb =>
+                    () =>
                     {
-                        using (cb.BeginNest("if (reader.Read())"))
+                        using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
                         {
-                            // TODO: KE - discuss the following commented block -- I think this is a good idea for us until our schema is made to match business rules
-                            /*using (cb.BeginNest("if (reader.Read())"))
+                            using (classBuilder.BeginNest("if (reader.Read())"))
                             {
-                                cb.AppendLine("throw new InvalidOperationException(\"Multiple rows match the specified criteria.\");");
+                                // TODO: KE - discuss the following commented block -- I think this is a good idea for us until our schema is made to match business rules
+                                /*using (cb.BeginNest("if (reader.Read())"))
+                                {
+                                    cb.AppendLine("throw new InvalidOperationException(\"Multiple rows match the specified criteria.\");");
+                                }
+    
+                                cb.AppendLine("");*/
+                                classBuilder.AppendLine(
+                                    $"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
+                                WriteParseEntityFromReader(entityVariableName);
+
+                                // TODO: KE - parse the org unit information coming back and populate the entity's org unit so that WithCustomerAssetOrganization does not have to be called at the service layer, also need to modify returned columns
                             }
-
-                            cb.AppendLine("");*/
-                            cb.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
-                            WriteParseEntityFromReader(entityVariableName);
-
-                            // TODO: KE - parse the org unit information coming back and populate the entity's org unit so that WithCustomerAssetOrganization does not have to be called at the service layer, also need to modify returned columns
                         }
                     });
                 WriteReturnEntityIfNotNull(entityVariableName);
@@ -613,10 +637,10 @@ namespace DatabaseSchemaReader.CodeGen
             dbContextParameter.Name = _dbContextFieldName;
             fields.Add(dbContextParameter);
             fields.Add(new Parameter
-                           {
-                               DataType = "IServiceProvider",
-                               Name = _serviceProviderFieldName
-                           });
+            {
+                DataType = "IServiceProvider",
+                Name = _serviceProviderFieldName
+            });
             WriteFields(fields);
             classBuilder.AppendLine("");
             WriteConstructor(fields);
@@ -694,20 +718,26 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 var sqlCommandText = ConstructSqlQuery(methodParameters, null, GetAllColumnNames(new List<DatabaseTable> { table }));
                 classBuilder.AppendLine($"var entities = new List<{table.NetName}>();");
-                WriteExecuteReaderBlock(sqlCommandText, cb =>
+                WriteExecuteReaderBlock(
+                    sqlCommandText,
+                    () =>
                     {
                         foreach (var mp in methodParameters)
                         {
                             classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, \"@{mp.Name}\", {mp.Name});");
                         }
                     },
-                    cb =>
+                    () =>
                     {
-                        using (cb.BeginNest("while (reader.Read())"))
+                        using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
                         {
-                            classBuilder.AppendLine($"var entity = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
-                            WriteParseEntityFromReader("entity");
-                            classBuilder.AppendLine("entities.Add(entity);");
+                            using (classBuilder.BeginNest("while (reader.Read())"))
+                            {
+                                classBuilder.AppendLine(
+                                    $"var entity = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
+                                WriteParseEntityFromReader("entity");
+                                classBuilder.AppendLine("entities.Add(entity);");
+                            }
                         }
                     });
                 classBuilder.AppendLine("");
@@ -786,19 +816,24 @@ namespace DatabaseSchemaReader.CodeGen
                 var entityVariableName = "createdEntity";
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
                 WriteExecuteReaderBlock(
-                    "sqlCommandText", cb =>
+                    "sqlCommandText",
+                    () =>
                     {
                         using (classBuilder.BeginNest($"foreach (var key in propertyColumnPairs.Keys)"))
                         {
                             classBuilder.AppendLine($"{_dbContextFieldName}.AddParameter(command, $\"@{{key.Name}}\", key.GetValue(entity));");
                         }
                     },
-                    cb =>
+                    () =>
                     {
-                        using (cb.BeginNest("if (reader.Read())"))
+                        using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
                         {
-                            classBuilder.AppendLine($"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
-                            WriteParseEntityFromReader(entityVariableName);
+                            using (classBuilder.BeginNest("if (reader.Read())"))
+                            {
+                                classBuilder.AppendLine(
+                                    $"{entityVariableName} = ({table.NetName}){_serviceProviderFieldName}.GetService(typeof({table.NetName}));");
+                                WriteParseEntityFromReader(entityVariableName);
+                            }
                         }
                     });
                 WriteReturnEntityIfNotNull(entityVariableName);
@@ -869,7 +904,7 @@ namespace DatabaseSchemaReader.CodeGen
                 methodParameters);
         }
 
-        private void WriteExecuteReaderBlock(string sqlCommandText, Action<ClassBuilder> addCommandParameters, Action<ClassBuilder> processReader)
+        private void WriteExecuteReaderBlock(string sqlCommandText, Action addCommandParameters, Action processReader)
         {
             using (classBuilder.BeginNest($"using (var connection = {_dbContextFieldName}.CreateConnection())"))
             {
@@ -877,12 +912,8 @@ namespace DatabaseSchemaReader.CodeGen
                 using (classBuilder.BeginNest($"using (var command = connection.CreateCommand())"))
                 {
                     classBuilder.AppendLine($"command.CommandText = {sqlCommandText};");
-                    addCommandParameters(classBuilder);
-
-                    using (classBuilder.BeginNest("using (var reader = command.ExecuteReader())"))
-                    {
-                        processReader(classBuilder);
-                    }
+                    addCommandParameters();
+                    processReader();
                 }
             }
         }
