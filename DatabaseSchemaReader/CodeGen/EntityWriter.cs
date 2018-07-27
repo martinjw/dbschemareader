@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.CodeGen
 
             classBuilder.AppendXmlSummary($"Class representing the {table.Name} table.");
             classBuilder.AppendLine($"[Table(\"\\\"{table.Name}\\\"\")]");
-            using (classBuilder.BeginNest($"public class {table.NetName}"))
+            using (classBuilder.BeginNest($"public partial class {table.NetName}"))
             {
                 WriteAllMembers();
             }
