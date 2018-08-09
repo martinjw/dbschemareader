@@ -32,6 +32,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 .Execute(ConnectionAdapter);
         }
 
+        public override IList<DatabaseColumn> ViewColumns(string viewName)
+        {
+            return new Columns(Owner, viewName)
+                .Execute(ConnectionAdapter);
+        }
+
         public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
         {
             return new Constraints(Owner, tableName, ConstraintType.PrimaryKey)

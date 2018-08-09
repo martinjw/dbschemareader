@@ -17,7 +17,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             Sql = @"SELECT
   table_schema,
   table_name,
-  is_updatable
+  is_updatable,
+  view_definition
 FROM information_schema.views
 WHERE (table_schema = :OWNER OR :OWNER IS NULL)
 AND (table_name = :TABLENAME OR :TABLENAME IS NULL)
@@ -40,10 +41,12 @@ ORDER BY table_schema, table_name";
         {
             var schema = record["table_schema"].ToString();
             var name = record["table_name"].ToString();
+            var sql = record.GetString("view_definition");
             var table = new DatabaseView
             {
                 Name = name,
-                SchemaOwner = schema
+                SchemaOwner = schema,
+                Sql = sql
             };
 
             Result.Add(table);
