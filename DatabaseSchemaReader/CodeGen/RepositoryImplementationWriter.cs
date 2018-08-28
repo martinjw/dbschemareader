@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -13,6 +14,7 @@ namespace DatabaseSchemaReader.CodeGen
         private CodeWriterSettings codeWriterSettings { get; }
         private DatabaseSchema schema { get; }
         private string _serviceProviderFieldName = "_serviceProvider";
+        private string _loggerFieldName = "_logger";
         private string _dbContextFieldName = "_dbContext";
 
         public RepositoryImplementationWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings, IEnumerable<string> logicalDeleteColumns)
@@ -149,8 +151,10 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var partialMethodName = CodeWriterUtils.ConvertParametersToMethodNameByPart(methodParameters, codeWriterSettings);
             WriteDeleteMethodSummary(methodParameters);
-            using (classBuilder.BeginNest($"public {CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters)}"))
+            var methodSignature = CodeWriterUtils.GetDeleteMethodSignature(table, codeWriterSettings, methodParameters);
+            using (classBuilder.BeginNest($"public {methodSignature}"))
             {
+                CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 if (isLogicalDelete)
                 {
                     classBuilder.AppendLine($"var deletedEntity = {CodeWriterUtils.BaseMethodNameDelete}LogicalBy{partialMethodName}({PrintParametersForCall(methodParameters)});");
@@ -173,6 +177,8 @@ namespace DatabaseSchemaReader.CodeGen
                     classBuilder.AppendLine("");
                     classBuilder.AppendLine("return null;");
                 }
+
+                CodeWriterUtils.WriteExitLogging(classBuilder, methodSignature);
             }
         }
 
@@ -383,8 +389,10 @@ namespace DatabaseSchemaReader.CodeGen
             var entityParameterSummary = "An entity with updated values.";
             var methodParametersWithEntity = CodeWriterUtils.AddEntityParameter(methodParameters, table, entityParameterSummary);
             WriteUpdateMethodSummary(methodParametersWithEntity);
-            using (classBuilder.BeginNest($"public {CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParametersWithEntity)}"))
+            var methodSignature = CodeWriterUtils.GetUpdateMethodSignature(table, codeWriterSettings, methodParametersWithEntity);
+            using (classBuilder.BeginNest($"public {methodSignature}"))
             {
+                CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 WriteGetPropertyColumnPairs();
 
                 classBuilder.AppendLine("var setClause = string.Join(\", \", propertyColumnPairs.Select(pcp => $\"{pcp.Value} = @{pcp.Key.Name}\"));");
@@ -418,6 +426,7 @@ namespace DatabaseSchemaReader.CodeGen
                 classBuilder.EndNest();
                 classBuilder.EndNest();
                 WriteReturnEntityIfNotNull(entityVariableName);
+                CodeWriterUtils.WriteExitLogging(classBuilder, methodSignature);
             }
 
             classBuilder.AppendLine("");
@@ -511,8 +520,10 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteGetListCommon(IEnumerable<Parameter> methodParameters, string innerJoinClause, string columnsToReturn)
         {
             WriteGetListMethodSummary(methodParameters);
-            using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParameters)}"))
+            var methodSignature = CodeWriterUtils.GetGetListMethodSignature(table, codeWriterSettings, methodParameters);
+            using (classBuilder.BeginNest($"public {methodSignature}"))
             {
+                CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 var sqlCommandText = ConstructSqlQuery(methodParameters, innerJoinClause, columnsToReturn);
                 classBuilder.AppendLine($"var entities = new List<{table.NetName}>();");
                 WriteBeginCreateConnection();
@@ -530,6 +541,7 @@ namespace DatabaseSchemaReader.CodeGen
                 classBuilder.EndNest();
                 classBuilder.AppendLine("");
                 classBuilder.AppendLine("return entities;");
+                CodeWriterUtils.WriteExitLogging(classBuilder, methodSignature);
             }
 
             classBuilder.AppendLine("");
@@ -585,12 +597,13 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteGetCommon(IEnumerable<Parameter> methodParameters, string innerJoinClause, string columnsToReturn)
         {
             WriteGetMethodSummary(methodParameters);
-            using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters)}"))
+            var methodSignature = CodeWriterUtils.GetGetMethodSignature(table, codeWriterSettings, methodParameters);
+            using (classBuilder.BeginNest($"public {methodSignature}"))
             {
+                CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 var sqlCommandText = ConstructSqlQuery(methodParameters, innerJoinClause, columnsToReturn);
                 var entityVariableName = "entity";
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
-
                 WriteBeginCreateConnection();
                 WriteBeginCreateCommand();
                 classBuilder.AppendLine($"command.CommandText = {sqlCommandText};");
@@ -612,6 +625,7 @@ namespace DatabaseSchemaReader.CodeGen
                 classBuilder.EndNest();
                 classBuilder.EndNest();
                 WriteReturnEntityIfNotNull(entityVariableName);
+                CodeWriterUtils.WriteExitLogging(classBuilder, methodSignature);
             }
 
             classBuilder.AppendLine("");
@@ -623,6 +637,11 @@ namespace DatabaseSchemaReader.CodeGen
             var dbContextParameter = CodeWriterUtils.GetDbContextMethodParameter();
             dbContextParameter.Name = _dbContextFieldName;
             fields.Add(dbContextParameter);
+            fields.Add(new Parameter
+            {
+                DataType = $"ILogger<{CodeWriterUtils.GetRepositoryImplementationName(table)}>",
+                Name = _loggerFieldName
+            });
             fields.Add(new Parameter
             {
                 DataType = "IServiceProvider",
@@ -659,8 +678,10 @@ namespace DatabaseSchemaReader.CodeGen
             classBuilder.AppendLine("using System;");
             classBuilder.AppendLine("using System.Collections.Generic;");
             classBuilder.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            classBuilder.AppendLine("using System.Diagnostics;");
             classBuilder.AppendLine("using System.Linq;");
             classBuilder.AppendLine("using System.Reflection;");
+            classBuilder.AppendLine("using Microsoft.Extensions.Logging;");
             if (table.Columns.Select(c => c.DataType.IsGeospatial).Contains(true))
             {
                 classBuilder.AppendLine("using NetTopologySuite.Geometries;");
@@ -706,8 +727,10 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var methodParameters = CodeWriterUtils.GetMethodParametersForColumns(columns, codeWriterSettings);
             WriteGetListByMethodSummary(methodParameters);
-            using (classBuilder.BeginNest($"public {CodeWriterUtils.GetGetListByMethodSignature(table, columns, codeWriterSettings, methodParameters)}"))
+            var methodSignature = CodeWriterUtils.GetGetListByMethodSignature(table, columns, codeWriterSettings, methodParameters);
+            using (classBuilder.BeginNest($"public {methodSignature}"))
             {
+                CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 var sqlCommandText = ConstructSqlQuery(methodParameters, null, GetAllColumnNames(new List<DatabaseTable> { table }));
                 classBuilder.AppendLine($"var entities = new List<{table.NetName}>();");
                 WriteBeginCreateConnection();
@@ -725,6 +748,7 @@ namespace DatabaseSchemaReader.CodeGen
                 classBuilder.EndNest();
                 classBuilder.AppendLine("");
                 classBuilder.AppendLine("return entities;");
+                CodeWriterUtils.WriteExitLogging(classBuilder, methodSignature);
             }
         }
 
@@ -790,18 +814,15 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var methodParameters = CodeWriterUtils.GetCreateMethodParameters(table).ToList();
             WriteCreateMethodSummary(methodParameters);
-            using (classBuilder.BeginNest($"public {CodeWriterUtils.GetCreateMethodSignature(table, methodParameters)}"))
+            var methodSignature = CodeWriterUtils.GetCreateMethodSignature(table, methodParameters);
+            using (classBuilder.BeginNest($"public {methodSignature}"))
             {
+                CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 WriteGetPropertyColumnPairs();
                 classBuilder.AppendLine("var valuesClause = string.Join(\", \", propertyColumnPairs.Keys.Select(k => \"@\" + k.Name));");
                 var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
                 classBuilder.AppendLine($"var sqlCommandText = $\"INSERT INTO \\\"{table.Name}\\\" AS {thisTableAlias} ({{string.Join(\", \", propertyColumnPairs.Values)}}) VALUES ({{valuesClause}}) RETURNING {GetAllColumnNames(new List<DatabaseTable> { table })};\";");
                 var entityVariableName = "createdEntity";
-
-
-
-
-
                 classBuilder.AppendLine($"{table.NetName} {entityVariableName} = null;");
                 WriteBeginCreateConnection();
                 WriteBeginCreateCommand();
@@ -819,6 +840,7 @@ namespace DatabaseSchemaReader.CodeGen
                 classBuilder.EndNest();
                 classBuilder.EndNest();
                 WriteReturnEntityIfNotNull(entityVariableName);
+                CodeWriterUtils.WriteExitLogging(classBuilder, methodSignature);
             }
 
             classBuilder.AppendLine("");

@@ -9,6 +9,8 @@ namespace DatabaseSchemaReader.CodeGen
 {
     public static class CodeWriterUtils
     {
+        private static readonly Regex RegexMethodName = new Regex("^.*? (?<methodName>.*)\\(");
+
         public const string CustomerTableName = "Customer";
         public const string CustomerIDColumnName = "CustomerID";
         public const string CustomerAssetOrganizationIDColumnName = "CustomerAssetOrganizationID";
@@ -131,6 +133,25 @@ namespace DatabaseSchemaReader.CodeGen
                 Name = "dbContext",
                 Summary = "A database context."
             };
+        }
+
+        public static void WriteEntryLogging(ClassBuilder classBuilder, string methodSignature)
+        {
+            var methodName = RegexMethodName.Match(methodSignature).Groups["methodName"].Value;
+            classBuilder.AppendLine($"this._logger.LogTrace(\"Entering {methodName}\");");
+            classBuilder.AppendLine("var stopwatch = new Stopwatch();");
+            classBuilder.AppendLine("stopwatch.Start();");
+            classBuilder.BeginNest("try");
+        }
+
+        public static void WriteExitLogging(ClassBuilder classBuilder, string methodSignature)
+        {
+            var methodName = RegexMethodName.Match(methodSignature).Groups["methodName"].Value;
+            classBuilder.EndNest();
+            classBuilder.BeginNest("finally");
+            classBuilder.AppendLine("stopwatch.Stop();");
+            classBuilder.AppendLine($"this._logger.LogTrace($\"Exiting {methodName}\\t\\t{{stopwatch.ElapsedMilliseconds}}\");");
+            classBuilder.EndNest();
         }
 
         public static IEnumerable<Parameter> AddDbContextParameter(IEnumerable<Parameter> parameters)
