@@ -11,7 +11,8 @@
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
     <PackageReleaseNotes>2.6.0: #68 IndexConverter.FindBoolean, #66 column list
-2.6.1: #78 SqlServerMigrator supports CLUSTERED indices</PackageReleaseNotes>
+2.6.1: #78 SqlServerMigrator supports CLUSTERED indices
+2.6.2: #84 PostgreSql view sql</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -25,7 +26,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.6.1</Version>
+    <Version>2.6.2</Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
