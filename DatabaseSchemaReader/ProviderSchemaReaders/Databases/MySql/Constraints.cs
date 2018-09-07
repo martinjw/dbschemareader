@@ -44,7 +44,8 @@ FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
         ON (cons2.constraint_catalog = refs.constraint_catalog
             OR cons2.constraint_catalog IS NULL) AND
         cons2.constraint_schema = refs.constraint_schema AND
-        cons2.constraint_name = refs.unique_constraint_name AND
+        -- MySQL 8.0.12 bug https://bugs.mysql.com/bug.php?id=90690 requires collate clause
+        cons2.constraint_name COLLATE utf8_unicode_ci = refs.unique_constraint_name COLLATE utf8_unicode_ci AND
         cons2.table_name = refs.referenced_table_name
 WHERE 
     (keycolumns.table_name = @tableName OR @tableName IS NULL) AND 
