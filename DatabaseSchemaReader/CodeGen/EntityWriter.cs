@@ -163,8 +163,19 @@ namespace DatabaseSchemaReader.CodeGen
                     ffk,
                     codeWriterSettings);
 
-                var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
-                var repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
+                string propertyName = null;
+                string repositoryMethodNameForFfkTable = null;
+                if (table.IsSharedPrimaryKey(foreignKeyChild))
+                {
+                    propertyName = foreignKeyChild.Name;
+                    repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, true);
+                }
+                else
+                {
+                    propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
+                    repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
+                }
+                
                 classBuilder.BeginNest($"public {withMethodSignature}");
                 var repositoryMethodCallParametersForFfkTable = new List<string>();
                 foreach (var ffkReferencedColumn in ffkReferencedColumns)
@@ -288,7 +299,7 @@ namespace DatabaseSchemaReader.CodeGen
                     if (hasTablePerTypeInheritance)
                         continue;
                     //type and property name are the same
-                    classBuilder.AppendAutomaticProperty(foreignKey.NetName, foreignKey.NetName, true);
+                    classBuilder.AppendAutomaticProperty(foreignKey.NetName, foreignKey.Name, true);
                     continue;
                 }
 
