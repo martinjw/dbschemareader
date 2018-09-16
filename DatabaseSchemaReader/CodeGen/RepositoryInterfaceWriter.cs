@@ -233,7 +233,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             classBuilder.AppendLine("using System;");
             classBuilder.AppendLine("using System.Collections.Generic;");
-            foreach (var u in codeWriterSettings.Usings)
+            foreach (var u in codeWriterSettings.Usings.Where(u => !u.Equals(codeWriterSettings.Namespace)))
             {
                 classBuilder.AppendLine($"using {u};");
             }

@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System.Linq;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -59,7 +60,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteUsings()
         {
             classBuilder.AppendLine("using Npgsql;");
-            foreach (var u in codeWriterSettings.Usings)
+            foreach (var u in codeWriterSettings.Usings.Where(u => !u.Equals(codeWriterSettings.Namespace)))
             {
                 classBuilder.AppendLine($"using {u};");
             }

@@ -688,7 +688,7 @@ namespace DatabaseSchemaReader.CodeGen
             }
 
             classBuilder.AppendLine("using PeopleNet.EnterpriseData.DataAccess.Exceptions;");
-            foreach (var u in codeWriterSettings.Usings)
+            foreach (var u in codeWriterSettings.Usings.Where(u => !u.Equals(codeWriterSettings.Namespace)))
             {
                 classBuilder.AppendLine($"using {u};");
             }
