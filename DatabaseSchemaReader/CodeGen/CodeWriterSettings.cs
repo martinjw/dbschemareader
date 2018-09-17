@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace DatabaseSchemaReader.CodeGen
 {
     public class CodeWriterSettings
     {
         private INamer _namer;
+        private string[] _usings;
+
         public CodeWriterSettings()
         {
             Namespace = "Domain";
@@ -22,7 +25,13 @@ namespace DatabaseSchemaReader.CodeGen
 
         public DirectoryInfo OutputDirectory { get; set; }
         public string Namespace { get; set; }
-        public string[] Usings { get; set; }
+
+        public string[] Usings
+        {
+            get => _usings.Where(u => !u.Equals(Namespace)).ToArray();
+            set => _usings = value;
+        }
+
         public CodeTarget CodeTarget { get; set; }
         public INamer Namer
         {
