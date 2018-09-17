@@ -334,7 +334,16 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string GetWithMethodSignature(DatabaseTable table, DatabaseTable foreignKeyChild, DatabaseConstraint foreignForeignKey, CodeWriterSettings codeWriterSettings)
         {
-            var propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKeyChild, foreignForeignKey);
+            string propertyName = null;
+            if (table.IsSharedPrimaryKey(foreignKeyChild))
+            {
+                propertyName = foreignKeyChild.Name;
+            }
+            else
+            {
+                propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(table.Name, foreignKeyChild, foreignForeignKey);
+            }
+
             return $"{table.NetName} With{propertyName}()";
         }
 
@@ -610,7 +619,7 @@ namespace DatabaseSchemaReader.CodeGen
 
         public static string WriteClassFile(DirectoryInfo directory, string className, string txt)
         {
-            var fileName = className + ".cs";
+            var fileName = className + ".Generated.cs";
             var path = Path.Combine(directory.FullName, fileName);
             if (!directory.Exists) directory.Create();
             File.WriteAllText(path, txt);

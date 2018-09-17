@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System.Linq;
+using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.CodeGen
 {
