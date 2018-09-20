@@ -24,7 +24,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             var sql = migration.RenameTable(table, "OldName");
 
             //assert
-            Assert.IsTrue(sql.Contains("sp_rename '[dbo].[OldName]', '[NewOrders]'"), "names should be quoted correctly");
+            Assert.IsTrue(sql.Contains("sp_rename '[dbo].[OldName]', 'NewOrders'"), "names should be quoted correctly");
         }
 
 
@@ -44,7 +44,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             var sql = migration.RenameTable(table, "OldName");
 
             //assert
-            Assert.IsTrue(sql.Contains("sp_rename '[OldName]', '[NewOrders]'"), "names should be quoted correctly");
+            Assert.IsTrue(sql.Contains("sp_rename '[OldName]', 'NewOrders'"), "names should be quoted correctly");
         }
 
 
