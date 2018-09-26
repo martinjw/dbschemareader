@@ -135,7 +135,23 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var refTable = foreignKey.ReferencedTable(table.DatabaseSchema);
             var propertyName = refTable.Name;
-            if (table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
+
+            if (foreignKey.Columns.Count == 1)
+            {
+                var columnName = foreignKey.Columns[0];
+                if (columnName.Equals("CreatedUserID") || columnName.Equals("LastUpdatedUserID"))
+                {
+                    return $"{columnName.Remove(columnName.LastIndexOf("UserID"))}{propertyName}";
+                }
+
+                if (columnName.Equals("Driver1ID") || columnName.Equals("Driver2ID"))
+                {
+                    return $"{columnName.Remove(columnName.LastIndexOf("ID"))}{propertyName}";
+                }
+            }
+
+            var foreignKeysToRefTableCount = table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable);
+            if (foreignKeysToRefTableCount > 1)
             {
                 // Append the key name to the property name. In the event of multiple foreign keys to the same table
                 // This will give the consumer context.
@@ -151,6 +167,7 @@ namespace DatabaseSchemaReader.CodeGen
                     propertyName = column.NetName;
                 }
             }
+
             return propertyName;
         }
 
