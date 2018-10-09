@@ -135,7 +135,23 @@ namespace DatabaseSchemaReader.CodeGen
         {
             var refTable = foreignKey.ReferencedTable(table.DatabaseSchema);
             var propertyName = refTable.Name;
-            if (table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable) > 1)
+
+            if (foreignKey.Columns.Count == 1)
+            {
+                var columnName = foreignKey.Columns[0];
+                if (columnName.Equals("CreatedUserID") || columnName.Equals("LastUpdatedUserID"))
+                {
+                    return $"{columnName.Remove(columnName.LastIndexOf("UserID"))}{propertyName}";
+                }
+
+                if (columnName.Equals("Driver1ID") || columnName.Equals("Driver2ID"))
+                {
+                    return $"{columnName.Remove(columnName.LastIndexOf("ID"))}{propertyName}";
+                }
+            }
+
+            var foreignKeysToRefTableCount = table.ForeignKeys.Count(x => x.RefersToTable == foreignKey.RefersToTable);
+            if (foreignKeysToRefTableCount > 1)
             {
                 // Append the key name to the property name. In the event of multiple foreign keys to the same table
                 // This will give the consumer context.
@@ -151,6 +167,7 @@ namespace DatabaseSchemaReader.CodeGen
                     propertyName = column.NetName;
                 }
             }
+
             return propertyName;
         }
 
@@ -170,10 +187,26 @@ namespace DatabaseSchemaReader.CodeGen
         /// </returns>
         public virtual string ForeignKeyCollectionName(string targetTable, DatabaseTable table, DatabaseConstraint foreignKey)
         {
-            var fksToTarget = table.ForeignKeys.Where(x => x.RefersToTable == targetTable).ToList();
             string name = table.Name;
-            if (fksToTarget.Count > 1)
+
+            if (foreignKey.Columns.Count == 1)
+            {
+                var columnName = foreignKey.Columns[0];
+                if (columnName.Equals("CreatedUserID") || columnName.Equals("LastUpdatedUserID"))
+                {
+                    return $"{columnName.Remove(columnName.LastIndexOf("UserID"))}{NameCollection(name)}";
+                }
+
+                if (columnName.Equals("Driver1ID") || columnName.Equals("Driver2ID"))
+                {
+                    return $"{columnName.Remove(columnName.LastIndexOf("ID"))}{NameCollection(name)}";
+                }
+            }
+
+            if (table.ForeignKeys.Count(x => x.RefersToTable == targetTable) > 1)
+            {
                 name = string.Join("", foreignKey.Columns.Select(x => table.FindColumn(x).NetName).ToArray());
+            }
 
             return NameCollection(name);
         }

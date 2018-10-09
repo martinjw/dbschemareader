@@ -175,7 +175,7 @@ namespace DatabaseSchemaReader.CodeGen
                     propertyName = codeWriterSettings.Namer.ForeignKeyCollectionName(ffkReferencedTable.Name, ffkTable, ffk);
                     repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
                 }
-                
+
                 classBuilder.BeginNest($"public {withMethodSignature}");
                 var repositoryMethodCallParametersForFfkTable = new List<string>();
                 foreach (var ffkReferencedColumn in ffkReferencedColumns)
