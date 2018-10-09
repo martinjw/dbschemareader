@@ -203,11 +203,6 @@ namespace DatabaseSchemaReader.CodeGen
                 }
             }
 
-            if (table.ForeignKeys.Count(x => x.RefersToTable == targetTable) > 1)
-            {
-                name = string.Join("", foreignKey.Columns.Select(x => table.FindColumn(x).NetName).ToArray());
-            }
-
             return NameCollection(name);
         }
     }
