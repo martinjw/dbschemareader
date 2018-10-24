@@ -176,7 +176,7 @@ namespace DatabaseSchemaReader.CodeGen
                     repositoryMethodNameForFfkTable = CodeWriterUtils.GetGetMethodName(ffkColumns, codeWriterSettings, false);
                 }
 
-                classBuilder.BeginNest($"public {withMethodSignature}");
+                classBuilder.BeginNest($"public virtual {withMethodSignature}");
                 var repositoryMethodCallParametersForFfkTable = new List<string>();
                 foreach (var ffkReferencedColumn in ffkReferencedColumns)
                 {
@@ -216,7 +216,7 @@ namespace DatabaseSchemaReader.CodeGen
                 throw new InvalidOperationException("Number of foreign key columns does not match number of columns referenced!");
             }
 
-            classBuilder.BeginNest($"public {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, codeWriterSettings)}");
+            classBuilder.BeginNest($"public virtual {CodeWriterUtils.GetWithMethodSignature(table, foreignKey, codeWriterSettings)}");
 
             var methodCallParameters = new List<string>();
 
