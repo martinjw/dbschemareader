@@ -940,14 +940,20 @@ namespace DatabaseSchemaReader.CodeGen
         {
             foreach (var c in table.Columns)
             {
+                var leftHandSideComponent = $"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ";
+                var getValueFromReaderComponent = $"reader[\"{c.Name}\"]";
+                var castAsColumnDataTypeComponent = $"({CodeWriterUtils.FindDataType(c)})";
+                string line;
                 if (c.Nullable)
                 {
-                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = reader.GetValue({c.Ordinal - 1}) == DBNull.Value ? null : ({CodeWriterUtils.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
+                    line = $"{leftHandSideComponent}{getValueFromReaderComponent} == DBNull.Value ? null : {castAsColumnDataTypeComponent}{getValueFromReaderComponent};";
                 }
                 else
                 {
-                    classBuilder.AppendLine($"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ({CodeWriterUtils.FindDataType(c)})reader.GetValue({c.Ordinal - 1});");
+                    line = $"{leftHandSideComponent}{castAsColumnDataTypeComponent}{getValueFromReaderComponent};";
                 }
+
+                classBuilder.AppendLine(line);
             }
         }
     }
