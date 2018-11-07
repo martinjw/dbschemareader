@@ -41,9 +41,10 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             sb.AppendLine(SqlFormatProvider().RunStatements());
             foreach (var column in Table.Columns.Where(c => !string.IsNullOrEmpty(c.Description)))
             {
+                var description = column.Description.Replace("'", "''");
                 sb.AppendLine("EXEC sys.sp_addextendedproperty ");
                 sb.AppendLine("@name = N'MS_Description', ");
-                sb.AppendLine("@value = N'" + column.Description + "',");
+                sb.AppendLine("@value = N'" + description + "',");
                 sb.AppendLine("@level0type = N'Schema', @level0name = '" + (Table.SchemaOwner ?? "dbo") + "',");
                 sb.AppendLine("@level1type = N'Table', @level1name = '" + Table.Name + "',");
                 sb.AppendLine("@level2type = N'Column', @level2name = '" + column.Name + "'");
@@ -54,11 +55,12 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         protected virtual string AddTableDescription()
         {
+            var description = Table.Description.Replace("'", "''");
             var sb = new StringBuilder();
             sb.AppendLine(SqlFormatProvider().RunStatements());
             sb.AppendLine("EXEC sys.sp_addextendedproperty ");
             sb.AppendLine("@name = N'MS_Description', ");
-            sb.AppendLine("@value = N'" + Table.Description + "',");
+            sb.AppendLine("@value = N'" + description + "',");
             sb.AppendLine("@level0type = N'Schema', @level0name = '" + (Table.SchemaOwner ?? "dbo") + "',");
             sb.AppendLine("@level1type = N'Table', @level1name = '" + Table.Name + "'");
             sb.AppendLine(SqlFormatProvider().RunStatements());
