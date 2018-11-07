@@ -67,13 +67,13 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
         }
 
         [TestMethod]
-        public void TestSqlServerTableWithDescription()
+        public void TestSqlServerTableWithColumnDescription()
         {
             //arrange
             var schema = new DatabaseSchema(null, SqlType.SqlServer);
             var table = schema.AddTable("Test");
             var id = table.AddColumn<int>("Id").AddPrimaryKey();
-            id.Description = "This is the primary key";
+            id.Description = "This is the table's primary key";
             table.AddColumn<string>("Name").AddLength(200);
             var tableGen = new TableGenerator(table);
 
@@ -82,7 +82,25 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
 
             //assert
             Assert.IsTrue(ddl.Contains("EXEC sys.sp_addextendedproperty"));
-            Assert.IsTrue(ddl.Contains("'This is the primary key'"));
+            Assert.IsTrue(ddl.Contains("'This is the table''s primary key'"));
+        }
+
+        [TestMethod]
+        public void TestSqlServerTableWithTableDescription()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.SqlServer);
+            var table = schema.AddTable("Test");
+            table.Description = "This is the table's description";
+            table.AddColumn<int>("Id").AddPrimaryKey();
+            var tableGen = new TableGenerator(table);
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("EXEC sys.sp_addextendedproperty"));
+            Assert.IsTrue(ddl.Contains("'This is the table''s description'"));
         }
 
         [TestMethod]
