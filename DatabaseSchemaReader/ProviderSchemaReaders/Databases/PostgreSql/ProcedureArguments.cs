@@ -72,13 +72,19 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
         protected override void Mapper(IDataRecord record)
         {
             var allArgs = ReadLongArray(record["ALLARGS"]);
-            if (allArgs.Length == 0)
-            {
+            if (allArgs.Length == 0) {
                 //there may be just inputparameters
-                var s = ReadString(record["INARGS"]);
-                //inargs is space delimited.
-                if (!string.IsNullOrEmpty(s)) s = s.Replace(' ', ',');
-                allArgs = StringToLongArray(s);
+                var inargs = record["INARGS"];
+                // it might be an array of uints
+                if (inargs is uint[]) {
+                    allArgs = ((uint[])inargs).Select(i => (long)i).ToArray();
+                } else {
+                    var s = ReadString(inargs);
+                    //inargs is space delimited.
+                    if (!string.IsNullOrEmpty(s))
+                        s = s.Replace(' ', ',');
+                    allArgs = StringToLongArray(s);
+                }
             }
             //there are no arguments for this procedure
             if (allArgs.Length == 0) return;
