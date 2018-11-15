@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
-using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
+using System.Linq;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -72,13 +73,17 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
         protected override void Mapper(IDataRecord record)
         {
             var allArgs = ReadLongArray(record["ALLARGS"]);
-            if (allArgs.Length == 0) {
+            if (allArgs.Length == 0)
+            {
                 //there may be just inputparameters
                 var inargs = record["INARGS"];
                 // it might be an array of uints
-                if (inargs is uint[]) {
+                if (inargs is uint[])
+                {
                     allArgs = ((uint[])inargs).Select(i => (long)i).ToArray();
-                } else {
+                }
+                else
+                {
                     var s = ReadString(inargs);
                     //inargs is space delimited.
                     if (!string.IsNullOrEmpty(s))
