@@ -72,7 +72,7 @@ END;",
             var ddl = tableGen.Write();
 
             //assert
-            Assert.IsTrue(ddl.Contains("\"Id\" NUMBER (9) NOT NULL DEFAULT Seq.NEXTVAL"));
+            Assert.IsTrue(ddl.Contains("\"Id\" NUMBER (9) DEFAULT Seq.NEXTVAL NOT NULL"));
             Assert.IsFalse(ddl.Contains(@"CREATE OR REPLACE TRIGGER "));
         }
 

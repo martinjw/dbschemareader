@@ -1,14 +1,13 @@
-﻿using System;
-using System.Data;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Globalization;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
 {
     /// <summary>
     /// Returns a datatype string (will convert common Oracle types to SqlServer)
     /// </summary>
-    class DataTypeWriter : IDataTypeWriter
+    internal class DataTypeWriter : IDataTypeWriter
     {
         public static string OracleDataType(string dataType)
         {
@@ -220,7 +219,11 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     var writeScale = ((scale != null) && (scale > 0) ? "," + scale : "");
                     sql = "NUMBER (" + precision + writeScale + ")";
                 }
-                if (!column.Nullable) sql += " NOT NULL";
+
+                if (!column.Nullable && (string.IsNullOrEmpty(defaultValue) || column.IdentityDefinition != null))
+                {
+                    sql += " NOT NULL";
+                }
                 if (column.IdentityDefinition != null)
                 {
                     if (column.DatabaseSchema == null ||
@@ -229,7 +232,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                         //this doesn't look like oracle, so we're converting.
                         return sql;
                     }
-                    //Oracle 12c- this can be set. 
+                    //Oracle 12c- this can be set.
                     //For Oracle 11, IsAutoNumber can be set (by recognizing a sequence), but the definition won't be set.
                     //these must be NUMBER of some sort or it's invalid
                     sql += " GENERATED ";
@@ -245,8 +248,12 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                     //no other options should be done
                     return sql;
                 }
+
                 if (!string.IsNullOrEmpty(defaultValue))
+                {
                     sql += " DEFAULT " + defaultValue;
+                    if (!column.Nullable) sql += " NOT NULL";
+                }
                 return sql;
             }
             if (dataType == "REAL")
@@ -314,7 +321,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         private static string FixDefaultValue(DatabaseColumn column)
         {
-            //Guid defaults. 
+            //Guid defaults.
             if (SqlTranslator.IsGuidGenerator(column.DefaultValue))
             {
                 return "SYS_GUID()";

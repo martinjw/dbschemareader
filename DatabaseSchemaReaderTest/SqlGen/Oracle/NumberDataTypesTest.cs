@@ -127,5 +127,24 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             //assert
             Assert.AreEqual("NUMBER (15,4)", result);
         }
+
+        [TestMethod]
+        public void TestNullableNumberWithDefault()
+        {
+            //arrange
+            var column = new DatabaseColumn
+            {
+                Nullable = false,
+                DbDataType = "NUMBER",
+                Precision = 10,
+                DefaultValue = "1"
+            };
+
+            //act
+            var result = _typeWriter.WriteDataType(column);
+
+            //assert
+            Assert.AreEqual("NUMBER (10) DEFAULT 1 NOT NULL", result);
+        }
     }
 }
