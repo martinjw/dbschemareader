@@ -11,7 +11,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
     {
         private readonly string _name;
 
-        public ViewSources(string owner, string name)
+        public ViewSources(int? commandTimeout, string owner, string name) : base(commandTimeout, owner)
         {
             _name = name;
             Owner = owner;

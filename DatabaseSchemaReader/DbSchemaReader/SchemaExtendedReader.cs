@@ -227,6 +227,10 @@ namespace DatabaseSchemaReader
             {
                 da.SelectCommand = conn.CreateCommand();
                 da.SelectCommand.CommandText = sqlCommand;
+                if (CommandTimeout.HasValue && CommandTimeout.Value >= 0)
+                {
+                    da.SelectCommand.CommandTimeout = CommandTimeout.Value;
+                }
                 AddTableNameSchemaParameters(da.SelectCommand, tableName);
 
                 try
@@ -240,6 +244,8 @@ namespace DatabaseSchemaReader
                 return dt;
             }
         }
+
+        public int? CommandTimeout { get; set; }
 
         protected DbParameter AddDbParameter(string parameterName, object value)
         {

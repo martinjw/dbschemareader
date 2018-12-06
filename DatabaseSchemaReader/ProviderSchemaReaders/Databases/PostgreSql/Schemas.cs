@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
     internal class Schemas : SqlExecuter<DatabaseDbSchema>
     {
-        public Schemas()
+        public Schemas(int? commandTimeout) : base(commandTimeout, null)
         {
             Sql = "SELECT nspname AS name FROM pg_catalog.pg_namespace";
         }

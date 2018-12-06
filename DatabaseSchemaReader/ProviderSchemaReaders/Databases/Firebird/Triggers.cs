@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
     class Triggers : SqlExecuter<DatabaseTrigger>
     {
         private readonly string _tableName;
-        public Triggers(string owner, string tableName)
+        public Triggers(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
             Owner = owner;

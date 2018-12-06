@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
     class Schemas : SqlExecuter<DatabaseDbSchema>
     {
-        public Schemas()
+        public Schemas(int? commandTimeout) : base(commandTimeout, null)
         {
             Sql = @"SELECT USERNAME AS name FROM ALL_USERS ORDER BY USERNAME";
         }

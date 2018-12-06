@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite;
+using System.Collections.Generic;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -16,50 +16,50 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseTable> Tables(string tableName)
         {
-            return new Tables(tableName)
+            return new Tables(CommandTimeout, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)
         {
-            return new Columns( tableName)
+            return new Columns(CommandTimeout, tableName)
                 .Execute(ConnectionAdapter);
         }
 
 
         public override IList<DatabaseIndex> Indexes(string tableName)
         {
-            return new Indexes( tableName)
+            return new Indexes(CommandTimeout, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> ForeignKeys(string tableName)
         {
-            return new Constraints(tableName)
+            return new Constraints(CommandTimeout, tableName)
                 .Execute(ConnectionAdapter);
         }
         public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
         {
-            return new PkConstraints(tableName)
+            return new PkConstraints(CommandTimeout, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
-            return new Triggers( tableName)
+            return new Triggers(CommandTimeout, tableName)
                 .Execute(ConnectionAdapter);
         }
 
 
         public override IList<DatabaseView> Views(string viewName)
         {
-            return new Views(viewName)
+            return new Views(CommandTimeout, viewName)
                .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
-            return new ViewColumns(viewName)
+            return new ViewColumns(CommandTimeout, viewName)
                 .Execute(ConnectionAdapter);
         }
     }

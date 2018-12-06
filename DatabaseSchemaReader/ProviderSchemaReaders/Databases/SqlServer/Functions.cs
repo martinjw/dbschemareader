@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
     {
         private readonly string _name;
 
-        public Functions(string owner, string name)
+        public Functions(int? commandTimeout, string owner, string name) : base(commandTimeout, owner)
         {
             _name = name;
             Owner = owner;

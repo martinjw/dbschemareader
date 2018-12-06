@@ -9,11 +9,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
     class Triggers : OracleSqlExecuter<DatabaseTrigger>
     {
         private readonly string _tableName;
-        public Triggers(string owner, string tableName)
+        public Triggers(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
-
             Sql = @"SELECT OWNER,
   TRIGGER_NAME,
   TABLE_NAME,

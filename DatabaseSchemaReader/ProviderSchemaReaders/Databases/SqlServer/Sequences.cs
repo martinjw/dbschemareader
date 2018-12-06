@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
     class Sequences : SqlExecuter<DatabaseSequence>
     {
 
-        public Sequences(string owner)
+        public Sequences(int? commandTimeout, string owner) : base(commandTimeout, owner)
         {
             Owner = owner;
             Sql = @"

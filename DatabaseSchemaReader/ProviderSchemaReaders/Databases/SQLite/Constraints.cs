@@ -9,18 +9,20 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
     {
         private readonly string _tableName;
 
-        public Constraints(string tableName)
+        public Constraints(int? commandTimeout, string tableName)
         {
+            CommandTimeout = commandTimeout;
             _tableName = tableName;
             PragmaSql = @"PRAGMA foreign_key_list('{0}')";
         }
 
         protected List<DatabaseConstraint> Result { get; } = new List<DatabaseConstraint>();
         public string PragmaSql { get; set; }
+        public int? CommandTimeout { get; set; }
 
         public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            var tables = new Tables(_tableName).Execute(connectionAdapter);
+            var tables = new Tables(CommandTimeout, _tableName).Execute(connectionAdapter);
 
             foreach (var table in tables)
             {
@@ -28,6 +30,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                 using (var cmd = connectionAdapter.DbConnection.CreateCommand())
                 {
                     cmd.CommandText = string.Format(PragmaSql, tableName);
+                    if (CommandTimeout.HasValue && CommandTimeout.Value >= 0) cmd.CommandTimeout = CommandTimeout.Value;
                     using (var dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
@@ -64,18 +67,20 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
     {
         private readonly string _tableName;
 
-        public PkConstraints(string tableName)
+        public PkConstraints(int? commandTimeout, string tableName)
         {
+            CommandTimeout = commandTimeout;
             _tableName = tableName;
             PragmaSql = @"PRAGMA table_info('{0}')";
         }
 
         protected List<DatabaseConstraint> Result { get; } = new List<DatabaseConstraint>();
         public string PragmaSql { get; set; }
+        public int? CommandTimeout { get; set; }
 
         public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
         {
-            var tables = new Tables(_tableName).Execute(connectionAdapter);
+            var tables = new Tables(CommandTimeout, _tableName).Execute(connectionAdapter);
 
             foreach (var table in tables)
             {
@@ -83,6 +88,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                 using (var cmd = connectionAdapter.DbConnection.CreateCommand())
                 {
                     cmd.CommandText = string.Format(PragmaSql, tableName);
+                    if (CommandTimeout.HasValue && CommandTimeout.Value >= 0) cmd.CommandTimeout = CommandTimeout.Value;
                     using (var dr = cmd.ExecuteReader())
                     {
                         var columns = new List<string>();

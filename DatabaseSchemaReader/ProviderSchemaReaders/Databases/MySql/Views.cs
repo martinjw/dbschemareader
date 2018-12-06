@@ -10,10 +10,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
     {
         private readonly string _viewName;
 
-        public Views(string owner, string viewName)
+        public Views(int? commandTimeout, string owner, string viewName)
+            : base(commandTimeout, owner)
         {
             _viewName = viewName;
-            Owner = owner;
             Sql = @"select TABLE_SCHEMA, TABLE_NAME, VIEW_DEFINITION 
 from INFORMATION_SCHEMA.VIEWS 
 where 

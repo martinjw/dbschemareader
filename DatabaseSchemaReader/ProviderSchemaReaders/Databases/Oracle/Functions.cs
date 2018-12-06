@@ -8,9 +8,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
     internal class Functions : OracleSqlExecuter<DatabaseFunction>
     {
-        public Functions(string owner)
+        public Functions(int? commandTimeout, string owner) : base(commandTimeout, owner)
         {
-            Owner = owner;
             Sql = @"SELECT OWNER,
   OBJECT_NAME,
   DBMS_METADATA.GET_DDL('FUNCTION', OBJECT_NAME, :OWNER) AS ""SQL""

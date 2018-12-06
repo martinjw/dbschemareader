@@ -10,16 +10,21 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
 
     abstract class SqlExecuter<T> : SqlExecuter where T : new()
     {
-
+        protected SqlExecuter(int? commandTimeout, string owner)
+        {
+            Owner = owner;
+            CommandTimeout = commandTimeout;
+        }
         protected List<T> Result { get; } = new List<T>();
     }
 
     abstract class SqlExecuter
     {
-
         public string Sql { get; set; }
 
         public string Owner { get; set; }
+
+        public int? CommandTimeout { get; set; }
 
         protected void ExecuteDbReader(IConnectionAdapter connectionAdapter)
         {
@@ -51,6 +56,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases
             {
                 cmd.Transaction = transaction;
             }
+
+            if (CommandTimeout.HasValue && CommandTimeout.Value >= 0)
+            {
+                cmd.CommandTimeout = CommandTimeout.Value;
+            }
+
             return cmd;
         }
 

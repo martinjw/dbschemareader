@@ -10,10 +10,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
     {
         private readonly string _tableName;
 
-        public CheckConstraints(string owner, string tableName)
+        public CheckConstraints(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
             Sql = @"SELECT 
 chk.rdb$constraint_name AS constraint_name,  
 trig.rdb$relation_name AS table_name,

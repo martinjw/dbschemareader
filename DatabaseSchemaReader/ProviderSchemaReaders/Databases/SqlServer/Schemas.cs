@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
     class Schemas : SqlExecuter<DatabaseDbSchema>
     {
-        public Schemas()
+        public Schemas(int? commandTimeout) : base(commandTimeout, null)
         {
             Sql = @"SELECT name FROM sys.schemas ORDER BY name";
         }

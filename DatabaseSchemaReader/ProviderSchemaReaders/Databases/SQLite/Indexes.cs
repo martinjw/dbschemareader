@@ -12,7 +12,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
     {
         private readonly string _tableName;
 
-        public Indexes(string tableName)
+        public Indexes(int? commandTimeout, string tableName) : base(commandTimeout, null)
         {
             _tableName = tableName;
             Sql = @"SELECT

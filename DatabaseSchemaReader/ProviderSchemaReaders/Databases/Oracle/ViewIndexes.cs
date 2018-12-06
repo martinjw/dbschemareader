@@ -12,10 +12,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
     {
         private readonly string _tableName;
 
-        public ViewIndexes(string owner, string tableName)
+        public ViewIndexes(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
             //same a Indexes, but joined to MViews so we only get materialized views
             Sql = @"SELECT
   cols.INDEX_OWNER,

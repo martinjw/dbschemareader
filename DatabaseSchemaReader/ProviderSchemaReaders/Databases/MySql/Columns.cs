@@ -10,10 +10,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
     {
         private readonly string _tableName;
 
-        public Columns(string owner, string tableName)
+        public Columns(int? commandTimeout, string owner, string tableName)
+            : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
             Sql = @"select c.TABLE_SCHEMA, 
 c.TABLE_NAME, 
 COLUMN_NAME, 

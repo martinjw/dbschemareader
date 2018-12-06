@@ -14,7 +14,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
         private readonly string _viewName;
         private readonly string _sql93;
 
-        public MaterializedViews(string owner, string viewName)
+        public MaterializedViews(int? commandTimeout, string owner, string viewName) : base(commandTimeout, owner)
         {
             _viewName = viewName;
             Owner = owner;

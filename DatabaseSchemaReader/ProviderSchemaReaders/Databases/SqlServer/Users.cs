@@ -8,7 +8,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
     class Users : SqlExecuter<DatabaseUser>
     {
-        public Users()
+        public Users(int? commandTimeout) : base(commandTimeout, null)
         {
             Sql = @"select name from sysusers";
         }

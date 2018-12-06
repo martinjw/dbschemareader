@@ -9,6 +9,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
     internal class ServerVersion : SqlExecuter<int>
     {
+        public ServerVersion(int? commandTimeout) : base(commandTimeout, null)
+        {
+        }
+
         protected override void AddParameters(DbCommand command)
         {
         }

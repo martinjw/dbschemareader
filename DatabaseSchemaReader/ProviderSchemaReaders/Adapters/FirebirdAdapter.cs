@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird;
+using System.Collections.Generic;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -21,89 +21,89 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseTable> Tables(string tableName)
         {
-            return new Tables(Owner, tableName)
+            return new Tables(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)
         {
-            return new Columns(Owner, tableName)
+            return new Columns(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseView> Views(string viewName)
         {
-            return new Views(Owner, viewName)
+            return new Views(CommandTimeout, Owner, viewName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
-            return new ViewColumns(Owner, viewName)
+            return new ViewColumns(CommandTimeout, Owner, viewName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
         {
-            return new Constraints(Owner, tableName, ConstraintType.PrimaryKey)
+            return new Constraints(CommandTimeout, Owner, tableName, ConstraintType.PrimaryKey)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> UniqueKeys(string tableName)
         {
-            return new Constraints(Owner, tableName, ConstraintType.UniqueKey)
+            return new Constraints(CommandTimeout, Owner, tableName, ConstraintType.UniqueKey)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> ForeignKeys(string tableName)
         {
-            return new Constraints(Owner, tableName, ConstraintType.ForeignKey)
+            return new Constraints(CommandTimeout, Owner, tableName, ConstraintType.ForeignKey)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> CheckConstraints(string tableName)
         {
-            return new CheckConstraints(Owner, tableName).Execute(ConnectionAdapter);
+            return new CheckConstraints(CommandTimeout, Owner, tableName).Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseIndex> Indexes(string tableName)
         {
-            return new Indexes(Owner, tableName)
+            return new Indexes(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
-            return new Triggers(Owner, tableName)
+            return new Triggers(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseStoredProcedure> StoredProcedures(string name)
         {
-            return new StoredProcedures(Owner)
+            return new StoredProcedures(CommandTimeout, Owner)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseFunction> Functions(string name)
         {
-            return new Functions(name)
+            return new Functions(CommandTimeout, name)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseArgument> ProcedureArguments(string name)
         {
-            return new ProcedureArguments(Owner)
+            return new ProcedureArguments(CommandTimeout, Owner)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseSequence> Sequences(string name)
         {
-            return new Sequences().Execute(ConnectionAdapter);
+            return new Sequences(CommandTimeout).Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseUser> Users()
         {
-            return new Users().Execute(ConnectionAdapter);
+            return new Users(CommandTimeout).Execute(ConnectionAdapter);
         }
     }
 }

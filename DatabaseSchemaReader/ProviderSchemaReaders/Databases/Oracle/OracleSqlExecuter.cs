@@ -8,6 +8,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
 {
     abstract class OracleSqlExecuter<T> : SqlExecuter<T> where T : new()
     {
+        protected OracleSqlExecuter(int? commandTimeout, string owner) : base(commandTimeout, owner)
+        {
+        }
+
         /// <summary>
         /// The database version.
         /// </summary>

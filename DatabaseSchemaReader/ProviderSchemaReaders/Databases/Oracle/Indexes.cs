@@ -12,10 +12,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
     {
         private readonly string _tableName;
 
-        public Indexes(string owner, string tableName)
+        public Indexes(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
             Sql = @"SELECT
   cols.INDEX_OWNER,
   cols.INDEX_NAME,

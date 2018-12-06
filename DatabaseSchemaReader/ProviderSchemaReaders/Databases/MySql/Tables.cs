@@ -10,7 +10,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
     {
         private readonly string _tableName;
 
-        public Tables(string owner, string tableName)
+        public Tables(int? commandTimeout, string owner, string tableName)
+            : base(commandTimeout, owner)
         {
             _tableName = tableName;
             Owner = owner;

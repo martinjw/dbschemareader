@@ -10,10 +10,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
     {
         private readonly string _viewName;
 
-        public MaterializedViewColumns(string owner, string viewName)
+        public MaterializedViewColumns(int? commandTimeout, string owner, string viewName) : base(commandTimeout, owner)
         {
             _viewName = viewName;
-            Owner = owner;
             Sql = @"SELECT c.OWNER,
   TABLE_NAME,
   COLUMN_NAME,

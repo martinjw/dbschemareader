@@ -17,95 +17,95 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 
         public override IList<DatabaseTable> Tables(string tableName)
         {
-            return new Tables(Owner, tableName)
+            return new Tables(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> Columns(string tableName)
         {
-            return new Columns(Owner, tableName)
+            return new Columns(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> ComputedColumns(string tableName)
         {
-            return new ComputedColumns(Owner, tableName)
+            return new ComputedColumns(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseView> Views(string viewName)
         {
-            return new Views(Owner, viewName)
+            return new Views(CommandTimeout, Owner, viewName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> ViewColumns(string viewName)
         {
-            return new ViewColumns(Owner, viewName)
+            return new ViewColumns(CommandTimeout, Owner, viewName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> PrimaryKeys(string tableName)
         {
-            return new Constraints(Owner, tableName, ConstraintType.PrimaryKey)
+            return new Constraints(CommandTimeout, Owner, tableName, ConstraintType.PrimaryKey)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> UniqueKeys(string tableName)
         {
-            return new Constraints(Owner, tableName, ConstraintType.UniqueKey)
+            return new Constraints(CommandTimeout, Owner, tableName, ConstraintType.UniqueKey)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseConstraint> ForeignKeys(string tableName)
         {
-            return new Constraints(Owner, tableName, ConstraintType.ForeignKey)
+            return new Constraints(CommandTimeout, Owner, tableName, ConstraintType.ForeignKey)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseColumn> IdentityColumns(string tableName)
         {
-            return new IdentityColumns(Owner, tableName)
+            return new IdentityColumns(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseIndex> Indexes(string tableName)
         {
-            return new Indexes(Owner, tableName)
+            return new Indexes(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseTrigger> Triggers(string tableName)
         {
-            return new Triggers(Owner, tableName)
+            return new Triggers(CommandTimeout, Owner, tableName)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseStoredProcedure> StoredProcedures(string name)
         {
-            return new StoredProcedures(Owner, name)
+            return new StoredProcedures(CommandTimeout, Owner, name)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseFunction> Functions(string name)
         {
-            return new Functions(Owner, name)
+            return new Functions(CommandTimeout, Owner, name)
                 .Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseArgument> ProcedureArguments(string name)
         {
-            return new ProcedureArguments(Owner, name)
+            return new ProcedureArguments(CommandTimeout, Owner, name)
                 .Execute(ConnectionAdapter);
         }
         public override IList<DatabaseUser> Users()
         {
-            return new Users().Execute(ConnectionAdapter);
+            return new Users(CommandTimeout).Execute(ConnectionAdapter);
         }
 
         public override IList<DatabaseDbSchema> Schemas()
         {
-            return new Schemas().Execute(ConnectionAdapter);
+            return new Schemas(CommandTimeout).Execute(ConnectionAdapter);
         }
     }
 }

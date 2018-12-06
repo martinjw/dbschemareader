@@ -3,6 +3,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System.Collections.Generic;
 using System.Data.Common;
+using DatabaseSchemaReader.ProviderSchemaReaders.Databases;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -14,6 +15,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public ReaderAdapter(SchemaParameters schemaParameters)
         {
             Parameters = schemaParameters;
+            CommandTimeout = -1; //default timeout
         }
 
         /// <summary>
@@ -43,18 +45,6 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             }
         }
 
-        //protected DbConnection DbConnection
-        //{
-        //    get
-        //    {
-        //        if (_connectionAdapter == null)
-        //        {
-        //            _connectionAdapter = new ConnectionAdapter(Parameters);
-        //        }
-        //        return _connectionAdapter.DbConnection;
-        //    }
-        //}
-
         protected DbTransaction DbTransaction
         {
             get
@@ -72,6 +62,13 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             get { return Parameters.Owner; }
             set { Parameters.Owner = value; }
+        }
+
+        public int? CommandTimeout { get; set; }
+
+        protected void AddCommandTimeout(SqlExecuter executor)
+        {
+            executor.CommandTimeout = CommandTimeout;
         }
 
         public virtual IList<DataType> DataTypes()

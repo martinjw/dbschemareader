@@ -8,7 +8,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
 {
     class Schemas : SqlExecuter<DatabaseDbSchema>
     {
-        public Schemas()
+        public Schemas(int? commandTimeout)
+            : base(commandTimeout, null)
         {
             Sql = @"SELECT DATABASE() as name";
         }

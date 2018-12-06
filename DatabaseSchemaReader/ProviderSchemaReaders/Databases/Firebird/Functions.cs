@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
     {
         private readonly string _name;
 
-        public Functions(string name)
+        public Functions(int? commandTimeout, string name) : base(commandTimeout, null)
         {
             _name = name;
             Sql = @"SELECT

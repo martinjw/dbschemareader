@@ -10,10 +10,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
     {
         private readonly string _tableName;
 
-        public IdentityColumns(string owner, string tableName)
+        public IdentityColumns(int? commandTimeout, string owner, string tableName)
+            : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
 			//increment is always 1
             Sql = @"SELECT 
 TABLE_SCHEMA AS 'SchemaOwner', 

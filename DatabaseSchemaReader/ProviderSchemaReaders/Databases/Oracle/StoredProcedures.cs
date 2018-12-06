@@ -10,10 +10,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
     {
         private readonly string _name;
 
-        public StoredProcedures(string owner, string name)
+        public StoredProcedures(int? commandTimeout, string owner, string name) : base(commandTimeout, owner)
         {
             _name = name;
-            Owner = owner;
             Sql = @"SELECT
   OWNER,
   OBJECT_NAME,

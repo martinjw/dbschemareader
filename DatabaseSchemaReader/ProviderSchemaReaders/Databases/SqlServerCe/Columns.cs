@@ -10,7 +10,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServerCe
     {
         private readonly string _tableName;
 
-        public Columns(string owner, string tableName)
+        public Columns(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
             Owner = owner;

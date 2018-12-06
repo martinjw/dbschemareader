@@ -12,10 +12,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
     {
         private readonly string _tableName;
 
-        public Indexes(string owner, string tableName)
+        public Indexes(int? commandTimeout, string owner, string tableName)
+            : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
             Sql = @" SELECT 
      TABLE_SCHEMA,
      TABLE_NAME,

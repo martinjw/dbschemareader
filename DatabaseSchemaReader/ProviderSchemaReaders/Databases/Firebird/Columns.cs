@@ -11,10 +11,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Firebird
         private readonly string _tableName;
         private bool _isFirebird3 = true;
 
-        public Columns(string owner, string tableName)
+        public Columns(int? commandTimeout, string owner, string tableName) : base(commandTimeout, owner)
         {
             _tableName = tableName;
-            Owner = owner;
             Sql = @"SELECT
      rel.rdb$owner_name AS OWNER_NAME,
      rfr.rdb$relation_name AS TABLE_NAME,

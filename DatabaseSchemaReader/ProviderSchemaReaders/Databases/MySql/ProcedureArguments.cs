@@ -12,10 +12,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
     {
         private readonly string _name;
 
-        public ProcedureArguments(string owner, string name)
+        public ProcedureArguments(int? commandTimeout, string owner, string name)
+            : base(commandTimeout, owner)
         {
             _name = name;
-            Owner = owner;
             Sql = @"SELECT
   SPECIFIC_SCHEMA,
   SPECIFIC_NAME,

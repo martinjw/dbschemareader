@@ -148,6 +148,15 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Set the ADO command timeout. If not set, default is normally 30 seconds
+        /// </summary>
+        public int? CommandTimeout
+        {
+            get { return _readerAdapter.CommandTimeout; }
+            set { _readerAdapter.CommandTimeout = value; }
+        }
+
+        /// <summary>
         /// Gets the database schema. Only call AFTER calling <see cref="ReadAll()"/> or one or more other methods such as <see cref="AllTables()"/>. A collection of Tables, Views and StoredProcedures. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateReferences(DataSchema.DatabaseSchema)"/> to update object references after loaded. Use <see cref="DataSchema.DatabaseSchemaFixer.UpdateDataTypes(DataSchema.DatabaseSchema)"/> to add datatypes from DbDataType string after loaded.
         /// </summary>
         public DatabaseSchema DatabaseSchema

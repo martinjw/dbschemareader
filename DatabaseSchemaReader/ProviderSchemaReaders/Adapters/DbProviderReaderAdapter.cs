@@ -17,6 +17,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             _schemaReader = SchemaReaderFactory.Create(schemaParameters.ConnectionString, schemaParameters.ProviderName);
             _schemaReader.Owner = schemaParameters.Owner;
+            _schemaReader.CommandTimeout = CommandTimeout;
         }
 
         public override string Owner

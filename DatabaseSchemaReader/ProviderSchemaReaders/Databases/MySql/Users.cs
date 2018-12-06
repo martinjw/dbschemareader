@@ -8,7 +8,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.MySql
 {
     class Users : SqlExecuter<DatabaseUser>
     {
-        public Users()
+        public Users(int? commandTimeout)
+            : base(commandTimeout, null)
         {
             Sql = @"select User from mysql.user";
         }
