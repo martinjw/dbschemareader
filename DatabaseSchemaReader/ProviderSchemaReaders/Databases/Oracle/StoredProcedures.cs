@@ -30,6 +30,22 @@ AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTL
 
         public IList<DatabaseStoredProcedure> Execute(IConnectionAdapter connectionAdapter)
         {
+            if (Version(connectionAdapter.DbConnection) < 11)
+            {
+                //In Oracle 10.2, ALL_PROCEDURES has no OBJECT_TYPE field. The OBJECT_TYPE field is in DBA_OBJECTS.
+                 Sql = @"SELECT P.OWNER,
+  P.OBJECT_NAME,
+  P.PROCEDURE_NAME,
+  O.OBJECT_TYPE
+FROM ALL_PROCEDURES P
+INNER JOIN ALL_OBJECTS O ON O.OBJECT_ID = P.OBJECT_ID
+WHERE (P.OWNER = :OWNER OR :OWNER IS NULL)
+AND (P.OBJECT_NAME = :NAME OR :NAME IS NULL)
+AND (O.OBJECT_TYPE = 'PROCEDURE' OR O.OBJECT_TYPE = 'PACKAGE')
+AND NOT (P.PROCEDURE_NAME IS NULL AND O.OBJECT_TYPE = 'PACKAGE')
+AND P.OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')";
+            }
+
             ExecuteDbReader(connectionAdapter);
             return Result;
         }

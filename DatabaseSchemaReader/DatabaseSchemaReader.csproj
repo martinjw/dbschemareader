@@ -10,7 +10,8 @@
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
-    <PackageReleaseNotes>2.7.0: Add CommandTimeout option</PackageReleaseNotes>
+    <PackageReleaseNotes>2.7.0: Add CommandTimeout option
+2.7.1: Oracle 10 support</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,7 +25,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.0</Version>
+    <Version>2.7.1</Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
