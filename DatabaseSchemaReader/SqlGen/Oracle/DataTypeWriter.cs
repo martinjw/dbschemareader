@@ -302,7 +302,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             {
                 sql = dataType;
                 if (!string.IsNullOrEmpty(defaultValue))
-                    sql += " DEFAULT " + AddQuotedDefault(defaultValue);
+                    sql += " DEFAULT " + defaultValue; //not quoted
             }
             if (column.IsComputed)
             {
