@@ -228,6 +228,16 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 ProviderDbType = 0,
                 CreateFormat = ""
             });
+            dts.Add(new DataType("json", "Newtonsoft.Json.Linq.JObject")
+            {
+                ProviderDbType = 0,
+                CreateFormat = ""
+            });
+            dts.Add(new DataType("jsonb", "Newtonsoft.Json.Linq.JObject")
+            {
+                ProviderDbType = 0,
+                CreateFormat = ""
+            });
 
             return dts;
         }

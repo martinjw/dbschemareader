@@ -250,6 +250,24 @@ namespace DatabaseSchemaReader.DataSchema
         }
 
         /// <summary>
+        /// Returns if this is a JSON type.
+        /// </summary>
+        public bool IsJson
+        {
+            get
+            {
+                var tn = this.TypeName.ToLower();
+                if (tn.Contains("json") || tn.Contains("jsonb"))
+                {
+                    return true;
+                }
+
+                return false;
+
+            }
+        }
+
+        /// <summary>
         /// Returns if this is a System.Single (float)
         /// </summary>
         public bool IsFloat

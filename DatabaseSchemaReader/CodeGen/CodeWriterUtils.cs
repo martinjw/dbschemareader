@@ -645,7 +645,8 @@ namespace DatabaseSchemaReader.CodeGen
                 !dt.IsString &&
                 !string.IsNullOrEmpty(dataType) &&
                 !dataType.EndsWith("[]", StringComparison.OrdinalIgnoreCase) &&
-                !dt.IsGeospatial)
+                !dt.IsGeospatial &&
+                !dt.IsJson)
             {
                 dataType += "?"; //nullable
             }
