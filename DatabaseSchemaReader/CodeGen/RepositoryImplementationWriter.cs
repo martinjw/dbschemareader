@@ -938,22 +938,25 @@ namespace DatabaseSchemaReader.CodeGen
 
         private void WriteParseEntityFromReader(string entityVariableName)
         {
+            var ordinal = 0;
             foreach (var c in table.Columns)
             {
                 var leftHandSideComponent = $"{entityVariableName}.{CodeWriterUtils.GetPropertyNameForDatabaseColumn(c)} = ";
-                var getValueFromReaderComponent = $"reader[\"{c.Name}\"]";
-                var castAsColumnDataTypeComponent = $"({CodeWriterUtils.FindDataType(c)})";
+                var dataType = CodeWriterUtils.FindDataType(c);
+                var getValueFromReaderComponent = $"reader.GetFieldValue<{dataType}>({ordinal})";
+
                 string line;
                 if (c.Nullable)
                 {
-                    line = $"{leftHandSideComponent}{getValueFromReaderComponent} == DBNull.Value ? null : {castAsColumnDataTypeComponent}{getValueFromReaderComponent};";
+                    line = $"{leftHandSideComponent}reader.IsDBNull({ordinal}) ? null : {getValueFromReaderComponent};";
                 }
                 else
                 {
-                    line = $"{leftHandSideComponent}{castAsColumnDataTypeComponent}{getValueFromReaderComponent};";
+                    line = $"{leftHandSideComponent}{getValueFromReaderComponent};";
                 }
 
                 classBuilder.AppendLine(line);
+                ordinal++;
             }
         }
     }
