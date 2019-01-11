@@ -70,7 +70,10 @@ ORDER BY OWNER, TABLE_NAME, COLUMN_ID";
                 col.Length = record.GetNullableInt("DATA_LENGTH");
             }
             var d = record.GetString("DATA_DEFAULT");
-            if (!string.IsNullOrEmpty(d)) d = d.Trim(' ', '\'', '=');
+            if (!string.IsNullOrEmpty(d))
+            {
+                d = d.Trim('\n', ' ', '\'', '=');
+            }
             col.DefaultValue = d;
             Result.Add(col);
         }
