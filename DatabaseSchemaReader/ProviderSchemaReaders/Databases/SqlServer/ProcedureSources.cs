@@ -23,7 +23,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 FROM sys.sql_modules AS sm
     JOIN sys.objects AS o
         ON sm.object_id = o.object_id
-WHERE (o.type = N'P' OR o.type = N'FN' OR o.type = N'TF' OR o.type='PC' OR o.type='V')
+WHERE (o.type = N'P' OR o.type = N'FN' OR o.type = N'TF' OR o.type = N'IF' OR o.type='PC' OR o.type='V')
     AND (OBJECT_SCHEMA_NAME(o.object_id) = @schemaOwner OR @schemaOwner IS NULL)
     AND (OBJECT_NAME(sm.object_id) = @name OR @name IS NULL)
 ORDER BY o.type;";
@@ -62,10 +62,12 @@ ORDER BY o.type;";
             switch (type)
             {
                 case "P": //sql server procedure
+                case "PC": //sql server assembly procedure
                     source.SourceType = SourceType.StoredProcedure;
                     break;
 
                 case "TF": //sql server table-valued function
+                case "IF": //sql server inline table-valued function
                 case "FN": //sql server scalar function
                     source.SourceType = SourceType.Function;
                     break;
