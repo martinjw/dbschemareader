@@ -109,5 +109,19 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
             //assert
             Assert.AreEqual("DATE", result);
         }
+
+        [TestMethod]
+        public void TestTimestamp()
+        {
+            //arrange
+            _column.DbDataType = "TIMESTAMP";
+            _column.DefaultValue = "systimestamp";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("TIMESTAMP (6) DEFAULT systimestamp", result);
+        }
     }
 }

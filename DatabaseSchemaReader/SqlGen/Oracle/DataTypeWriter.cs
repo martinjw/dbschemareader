@@ -282,13 +282,13 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             {
                 sql = "TIMESTAMP" + (precision.HasValue ? " (" + precision + ")" : " (6)");
                 if (!string.IsNullOrEmpty(defaultValue))
-                    sql += " DEFAULT TIMESTAMP '" + defaultValue + "'";
+                    sql += " DEFAULT " + defaultValue;
             }
             if (dataType == "TIMESTAMP WITH TIME ZONE")
             {
                 sql = string.Format("TIMESTAMP ({0}) WITH TIME ZONE", precision.HasValue ? precision : 6);
                 if (!string.IsNullOrEmpty(defaultValue))
-                    sql += " DEFAULT TIMESTAMP '" + defaultValue + "'";
+                    sql += " DEFAULT " + defaultValue;
             }
 
             if (dataType == "CLOB" || dataType == "NCLOB")
