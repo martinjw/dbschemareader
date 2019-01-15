@@ -47,6 +47,11 @@ namespace DatabaseSchemaReader.CodeGen
             {
                 cb.AppendLine($"[DatabaseGenerated(DatabaseGeneratedOption.Computed)]");
             }
+		
+		    if (!string.IsNullOrEmpty(column.Description) && column.Description.StartsWith("[") && column.Description.EndsWith("]"))
+		    {
+			    cb.AppendLine( column.Description );
+		    }
         }
 
         private void WriteColumnAttribute(ClassBuilder cb, string name)

@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 
 namespace DatabaseSchemaReader.CodeGen
 {
+    enum Method { Create, Get, Update, Delete };
+
     public class RepositoryImplementationWriter
     {
         private DatabaseTable table;
@@ -16,6 +18,7 @@ namespace DatabaseSchemaReader.CodeGen
         private string _serviceProviderFieldName = "_serviceProvider";
         private string _loggerFieldName = "_logger";
         private string _dbContextFieldName = "_dbContext";
+        private Method method;
 
         public RepositoryImplementationWriter(DatabaseSchema schema, CodeWriterSettings codeWriterSettings, IEnumerable<string> logicalDeleteColumns)
         {
@@ -59,11 +62,19 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteAllMembers()
         {
             WriteConstructorsAndFields();
+
+            method = Method.Create;
             WriteCreate();
+
+            method = Method.Get;
             WriteGets();
             WriteGetLists();
             WriteGetListBys();
+
+            method = Method.Update;
             WriteUpdates();
+
+            method = Method.Delete;
             WriteDeletes();
         }
 
@@ -395,7 +406,17 @@ namespace DatabaseSchemaReader.CodeGen
                 CodeWriterUtils.WriteEntryLogging(classBuilder, methodSignature);
                 WriteGetPropertyColumnPairs();
 
-                classBuilder.AppendLine("var setClause = string.Join(\", \", propertyColumnPairs.Select(pcp => $\"{pcp.Value} = @{pcp.Key.Name}\"));");
+                var clause = "var setClause = string.Join(\", \", propertyColumnPairs.Select(pcp => $\"{pcp.Value} = @{pcp.Key.Name}\"))";
+                if (table.Columns.Any(c => c.Name == "DeletedTimestamp" ) )
+                {
+                    classBuilder.AppendLine(clause);
+                    classBuilder.AppendLine("                      .Replace(\"@DeletedTimestamp\", entity.DeletedTimestamp == null ? \"null\" : \"LEAST(@DeletedTimestamp, c.\\\"DeletedTimestamp\\\")\")");
+                }
+                else
+                {
+                    classBuilder.AppendLine($"{clause};");
+                }
+
                 var thisTableAlias = codeWriterSettings.Namer.NameToAcronym(table.Name);
                 if (!string.IsNullOrEmpty(fromClause))
                 {
@@ -763,11 +784,25 @@ namespace DatabaseSchemaReader.CodeGen
 
                 return $"{mp.TableAlias}.\\\"{mp.ColumnNameToQueryBy}\\\" = @{mp.Name}";
             }).ToList();
-            var logicalDeleteColumn = table.Columns.SingleOrDefault(c => logicalDeleteColumns.Contains(c.Name));
-            if (logicalDeleteColumn != null)
+
+            // GetXZY() methods always filter out deleted records. Update() and Delete() methods ignore DeletedTimestamp
+            if (method == Method.Get)
+            { 
+                var logicalDeleteColumn = table.Columns.SingleOrDefault(c => logicalDeleteColumns.Contains(c.Name));
+                if (logicalDeleteColumn != null)
+                {
+                    var ta = codeWriterSettings.Namer.NameToAcronym(table.Name);
+                    whereClauseElements.Add($"{ta}.\\\"{logicalDeleteColumn.Name}\\\" IS NULL");
+                }
+            }
+            else if (method == Method.Update)
             {
-                var ta = codeWriterSettings.Namer.NameToAcronym(table.Name);
-                whereClauseElements.Add($"{ta}.\\\"{logicalDeleteColumn.Name}\\\" IS NULL");
+                // Do not allow stale updates into the database (stale is where request's LastUpdatedTimestamp < database's LastUpdatedTimestamp)
+                if (table.Columns.Any(c => c.Name == "LastUpdatedTimestamp"))
+                {
+                    var ta = codeWriterSettings.Namer.NameToAcronym(table.Name);
+                    whereClauseElements.Add( $"{ta}.\\\"LastUpdatedTimestamp\\\" < '{{(entity.LastUpdatedTimestamp == DateTime.MinValue ? DateTime.MaxValue : entity.LastUpdatedTimestamp)}}'" );
+                }
             }
 
             var whereClause = string.Join(" AND ", whereClauseElements);
@@ -882,6 +917,15 @@ namespace DatabaseSchemaReader.CodeGen
                 {
                     classBuilder.AppendLine($"var defaultValue = cp.PropertyType.IsValueType ? Activator.CreateInstance(cp.PropertyType) : null;");
                     using (classBuilder.BeginNest($"if (cp.GetValue(entity).Equals(defaultValue))"))
+                    {
+                        classBuilder.AppendLine("continue;");
+                    }
+                }
+
+                if (method != Method.Create)
+                { 
+                    classBuilder.AppendLine("");
+                    using (classBuilder.BeginNest($"if (cp.GetCustomAttribute<WriteOnceAttribute>() != null)"))
                     {
                         classBuilder.AppendLine("continue;");
                     }
