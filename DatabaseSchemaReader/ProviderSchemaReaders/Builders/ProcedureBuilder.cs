@@ -134,7 +134,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     args.Where(
                         x =>
                             x.SchemaOwner == sproc.SchemaOwner && x.ProcedureName == sproc.Name &&
-                            x.PackageName == sproc.Package);
+                            x.PackageName == sproc.Package)
+                        .OrderBy(x => x.Ordinal);
                 sproc.Arguments.Clear();
                 sproc.Arguments.AddRange(sprocArgs);
             }
@@ -144,7 +145,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     args.Where(
                         x =>
                             x.SchemaOwner == func.SchemaOwner && x.ProcedureName == func.Name &&
-                            x.PackageName == func.Package);
+                            x.PackageName == func.Package)
+                        .OrderBy(x => x.Ordinal);
                 func.Arguments.Clear();
                 func.Arguments.AddRange(funcArgs);
                 func.CheckArgumentsForReturnType();
