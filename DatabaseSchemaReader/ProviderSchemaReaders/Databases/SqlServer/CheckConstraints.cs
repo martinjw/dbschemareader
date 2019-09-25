@@ -27,7 +27,7 @@ INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS cons2
   cons2.constraint_name = cons.constraint_name
 WHERE 
     (cons.table_name = @tableName OR @tableName IS NULL) AND 
-    (cons.constraint_catalog = @schemaOwner OR @schemaOwner IS NULL) AND 
+    (cons.constraint_schema = @schemaOwner OR @schemaOwner IS NULL) AND 
      cons.constraint_type = 'CHECK'
 ORDER BY cons.table_name, cons.constraint_name";
 
