@@ -1,19 +1,39 @@
-﻿using System;
-using System.Data.SqlClient;
 using DatabaseSchemaReader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Data.SqlClient;
+using System.Diagnostics;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
     [TestClass]
     public class DbConnectionTests
     {
-        [TestMethod]
+        private static bool CheckNorthwindExists(SqlConnection con)
+        {
+            try
+            {
+                con.Open();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.ToString());
+                return false;
+            }
+        }
+
+        [TestMethod, TestCategory("SqlServer")]
         public void TestSqlConnectionConstructor()
         {
             //also used by NetStandard
             using (var con = new SqlConnection(ConnectionStrings.Northwind))
             {
+                if (!CheckNorthwindExists(con))
+                {
+                    Assert.Inconclusive($"Could not access Northwind {con.ConnectionString}");
+                    return;
+                }
                 var dr = new DatabaseReader(con);
 
                 var tables = dr.AllTables();
@@ -22,12 +42,17 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("SqlServer")]
         public void TestSqlConnectionConstructorWithNoConnectionString()
         {
             //also used by NetStandard
             using (var con = new SqlConnection())
             {
+                if (!CheckNorthwindExists(con))
+                {
+                    Assert.Inconclusive($"Could not access Northwind {con.ConnectionString}");
+                    return;
+                }
                 var dr = new DatabaseReader(con);
 
                 try
