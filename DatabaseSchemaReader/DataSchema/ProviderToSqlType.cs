@@ -18,6 +18,8 @@ namespace DatabaseSchemaReader.DataSchema
 
             if (providerName.Equals("System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
                 return SqlType.SqlServer;
+            if (providerName.Equals("Microsoft.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
+                return SqlType.SqlServer;
             if (providerName.IndexOf("SQLite", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 return SqlType.SQLite;
