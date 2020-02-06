@@ -11,13 +11,13 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.0.19249.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.31" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.60" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
     <PackageReference Include="Npgsql" Version="4.0.10" />
     <PackageReference Include="MySql.Data.Core" Version="7.0.4-IR-19" />
   </ItemGroup>

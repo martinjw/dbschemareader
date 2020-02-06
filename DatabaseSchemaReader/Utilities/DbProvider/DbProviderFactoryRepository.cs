@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -153,7 +154,18 @@ namespace DatabaseSchemaReader.Utilities.DbProvider
                         //dll isn't .net (eg SQLite.Interop.dll)
                         continue;
                     }
-                    var assembly = AppDomain.CurrentDomain.Load(assemblyName);
+
+                    Assembly assembly;
+                    try
+                    {
+                        assembly = AppDomain.CurrentDomain.Load(assemblyName);
+                    }
+                    catch (Exception exception)
+                    {
+                        Trace.TraceError($"Could not load {assemblyName} - {exception.Message}");
+                        continue;
+                    }
+
                     foreach (var type in assembly.GetLoadableTypes())
                     {
                         if (type.IsClass)
