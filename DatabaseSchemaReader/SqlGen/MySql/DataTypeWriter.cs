@@ -47,9 +47,13 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             {
                 dataType = "CHAR";
             }
-            else if (dataType == "DATETIME2" || dataType == "TIME")
+            else if (dataType == "DATETIME2")
             {
                 dataType = "DATETIME";
+            }
+            else if (dataType == "TIME")
+            {
+                dataType = "TIME";
             }
             else if (dataType == "MONEY")
             {
