@@ -100,10 +100,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
 
         private static string WriteSequence(string sequenceName)
         {
-            const string sequence = @"CREATE SEQUENCE {0} 
-INCREMENT BY 1 
-START WITH 1 
-MINVALUE 1;";
+            const string sequence = @"CREATE SEQUENCE {0};";
             return string.Format(CultureInfo.InvariantCulture,
                                  sequence,
                                  sequenceName);
@@ -131,7 +128,9 @@ END;
                 _table.Name,
                 identityColumn,
                 sequenceName
-                );
+                )
+                //if we empty the schema (using default) don't add an empty "".
+                .Replace("\"\".", "");
         }
     }
 }

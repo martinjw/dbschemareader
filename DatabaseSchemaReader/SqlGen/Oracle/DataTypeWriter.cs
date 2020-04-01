@@ -275,7 +275,20 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             {
                 sql = "DATE";
                 if (!string.IsNullOrEmpty(defaultValue))
-                    sql += " DEFAULT DATE '" + defaultValue + "'";
+                {
+                    if (string.Equals(defaultValue, "current_timestamp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sql += " DEFAULT CURRENT_TIMESTAMP";
+                    }
+                    else if (string.Equals(defaultValue, "sysdate", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sql += " DEFAULT SYSDATE";
+                    }
+                    else
+                    {
+                        sql += " DEFAULT DATE '" + defaultValue + "'";
+                    }
+                }
             }
 
             if (dataType == "TIMESTAMP")
