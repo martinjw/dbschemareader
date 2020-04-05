@@ -111,6 +111,48 @@ namespace DatabaseSchemaReaderTest.SqlGen.Oracle
         }
 
         [TestMethod]
+        public void TestDateWithDefaultCurrentDate()
+        {
+            //arrange
+            _column.DbDataType = "DATE";
+            _column.DefaultValue = "current_date";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("DATE DEFAULT CURRENT_DATE", result);
+        }
+
+        [TestMethod]
+        public void TestDateWithDefaultSysDate()
+        {
+            //arrange
+            _column.DbDataType = "DATE";
+            _column.DefaultValue = "SYSDATE";
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("DATE DEFAULT SYSDATE", result);
+        }
+
+        [TestMethod]
+        public void TestDateWithDefaultDate()
+        {
+            //arrange
+            _column.DbDataType = "DATE";
+            _column.DefaultValue = "1999-12-31"; //assume the string is ANSI standard, otherwise they'd use TO_DATE
+
+            //act
+            var result = _typeWriter.WriteDataType(_column);
+
+            //assert
+            Assert.AreEqual("DATE DEFAULT DATE '1999-12-31'", result);
+        }
+
+        [TestMethod]
         public void TestTimestamp()
         {
             //arrange

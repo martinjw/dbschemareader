@@ -276,15 +276,16 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 sql = "DATE";
                 if (!string.IsNullOrEmpty(defaultValue))
                 {
-                    if (string.Equals(defaultValue, "current_timestamp", StringComparison.OrdinalIgnoreCase))
+                    //if any of the standard oracle functions
+                    var found = false;
+                    foreach (var s in new[] { "current_timestamp", "current_date", "sysdate", "systimestamp" })
                     {
-                        sql += " DEFAULT CURRENT_TIMESTAMP";
+                        if (!string.Equals(defaultValue, s, StringComparison.OrdinalIgnoreCase)) continue;
+                        sql += " DEFAULT " + s.ToUpperInvariant();
+                        found = true;
+                        break;
                     }
-                    else if (string.Equals(defaultValue, "sysdate", StringComparison.OrdinalIgnoreCase))
-                    {
-                        sql += " DEFAULT SYSDATE";
-                    }
-                    else
+                    if (!found) //otherwise quote it (could be a fixed date string eg '1999-12-31')
                     {
                         sql += " DEFAULT DATE '" + defaultValue + "'";
                     }
@@ -338,6 +339,14 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
             if (SqlTranslator.IsGuidGenerator(column.DefaultValue))
             {
                 return "SYS_GUID()";
+            }
+            //standard oracle shouldn't be translated
+            foreach (var s in new[] { "current_timestamp", "current_date", "sysdate", "systimestamp" })
+            {
+                if (string.Equals(column.DefaultValue, s, StringComparison.OrdinalIgnoreCase))
+                {
+                    return column.DefaultValue;
+                }
             }
             return SqlTranslator.Fix(column.DefaultValue);
         }
