@@ -9,7 +9,9 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
     /// </summary>
     internal class DataTypeWriter : IDataTypeWriter
     {
-        public static string OracleDataType(string dataType)
+        private static readonly string[] OracleFunctions = { "current_timestamp", "current_date", "sysdate", "systimestamp" };
+
+    public static string OracleDataType(string dataType)
         {
             //don't know provider
             return SqlServerToOracleConversion(dataType, -1, -1);
@@ -278,7 +280,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 {
                     //if any of the standard oracle functions
                     var found = false;
-                    foreach (var s in new[] { "current_timestamp", "current_date", "sysdate", "systimestamp" })
+                    foreach (var s in OracleFunctions)
                     {
                         if (!string.Equals(defaultValue, s, StringComparison.OrdinalIgnoreCase)) continue;
                         sql += " DEFAULT " + s.ToUpperInvariant();
@@ -341,7 +343,7 @@ namespace DatabaseSchemaReader.SqlGen.Oracle
                 return "SYS_GUID()";
             }
             //standard oracle shouldn't be translated
-            foreach (var s in new[] { "current_timestamp", "current_date", "sysdate", "systimestamp" })
+            foreach (var s in OracleFunctions)
             {
                 if (string.Equals(column.DefaultValue, s, StringComparison.OrdinalIgnoreCase))
                 {
