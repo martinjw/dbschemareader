@@ -10,7 +10,8 @@
     <AssemblyName>DatabaseSchemaReader</AssemblyName>
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
-    <PackageReleaseNotes>2.7.3: MySql time mapping thanks @tonyliving</PackageReleaseNotes>
+    <PackageReleaseNotes>2.7.3: MySql time mapping thanks @tonyliving
+2.7.4: Postgresql table list exclude views thanks @thomasjoscht</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,7 +25,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.3</Version>
+    <Version>2.7.4</Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
