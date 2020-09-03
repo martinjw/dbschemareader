@@ -97,7 +97,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         }
         protected virtual ConstraintWriterBase CreateConstraintWriter()
         {
-            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema };
+            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames};
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {

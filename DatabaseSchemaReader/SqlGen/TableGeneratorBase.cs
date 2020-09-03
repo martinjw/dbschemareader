@@ -16,13 +16,19 @@ namespace DatabaseSchemaReader.SqlGen
             TableName = table.Name;
             IncludeSchema = true;
             IncludeDefaultValues = true;
+            EscapeNames = true;
         }
 
         protected abstract ISqlFormatProvider SqlFormatProvider();
 
+        /// <summary>
+        /// Escape any names
+        /// </summary>
+        public bool EscapeNames { get; set; }
+
         private string EscapeName(string name)
         {
-            return SqlFormatProvider().Escape(name);
+            return EscapeNames? SqlFormatProvider().Escape(name) : name;
         }
         protected abstract string WriteDataType(DatabaseColumn column);
         protected abstract string NonNativeAutoIncrementWriter();

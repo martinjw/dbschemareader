@@ -59,6 +59,25 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             Assert.IsTrue(sql.StartsWith("ALTER TABLE [Orders] ADD [COUNTRY] VARCHAR (20)", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
 
+        [TestMethod]
+        public void TestSqlServerNoEscapeNames()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = CreateNewColumn();
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddColumn(table, column);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("ALTER TABLE Orders ADD COUNTRY VARCHAR (20)", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
 
         [TestMethod]
         public void TestOracleWithSchema()

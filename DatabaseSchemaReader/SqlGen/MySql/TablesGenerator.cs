@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
 
         protected override void WriteDrops(StringBuilder sb)
         {
-            sb.AppendLine(DropTables.Write(Schema, SqlFormatProvider()));
+            sb.AppendLine(DropTables.Write(Schema, SqlFormatProvider(), EscapeNames));
         }
     }
 }

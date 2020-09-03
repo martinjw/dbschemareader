@@ -36,6 +36,33 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
         }
 
         [TestMethod]
+        public void TestAddPrimaryKeyNoEscapeNames()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            var schema = new DatabaseSchema(null, SqlType.SqlServer);
+            var table = schema.AddTable("Test")
+                .AddColumn<int>("Id")
+                .AddColumn<string>("Name")
+                .Table;
+            var pk = new DatabaseConstraint
+            {
+                Name = "Test_PK",
+                ConstraintType = ConstraintType.PrimaryKey
+            };
+            pk.Columns.Add("Id");
+
+            //act
+            var sql = migration.AddConstraint(table, pk);
+
+            //assert
+            Assert.IsTrue(sql.IndexOf("ADD CONSTRAINT Test_PK PRIMARY KEY (Id)", StringComparison.OrdinalIgnoreCase) != -1, "adding a primary key");
+        }
+
+        [TestMethod]
         public void TestAddPrimaryKeyWithGuid()
         {
 

@@ -14,12 +14,13 @@ namespace DatabaseSchemaReader
     public class SqlWriter
     {
         private readonly DatabaseTable _table;
-        private readonly char _parameterPrefix;
-        private readonly string _nameEscapeStart;
-        private readonly string _nameEscapeEnd;
+        private char _parameterPrefix;
+        private string _nameEscapeStart;
+        private string _nameEscapeEnd;
         private IList<string> _primaryKeys;
         private readonly SqlType _sqlType;
         private bool _inStoredProcedure;
+        private bool _escapeNames;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlWriter"/> class.
@@ -34,7 +35,13 @@ namespace DatabaseSchemaReader
             _sqlType = sqlType;
             _nameEscapeStart = null;
             _nameEscapeEnd = null;
-            switch (sqlType)
+            _escapeNames = true;
+            ParametersByType();
+        }
+
+        private void ParametersByType()
+        {
+            switch (_sqlType)
             {
                 case SqlType.MySql:
                     _parameterPrefix = '?'; //or @ but can conflict with variables
@@ -70,6 +77,25 @@ namespace DatabaseSchemaReader
             }
         }
 
+        /// <summary>
+        /// Escape the names (default true)
+        /// </summary>
+        public bool EscapeNames
+        {
+            get { return _escapeNames; }
+            set
+            {
+                _escapeNames = value;
+                if (value)
+                {
+                    ParametersByType(); //reset the start and end
+                }
+                else
+                {
+                    _nameEscapeStart = _nameEscapeEnd = string.Empty; //empty them out
+                }
+            }
+        }
 
         /// <summary>
         /// In stored procedures, Oracle and MySql do not use the parameter prefix. Ignored for SqlServer (which requires @).
@@ -709,7 +735,7 @@ FETCH NEXT @EndingRowNumber - @StartingRowNumber + 1 ROWS ONLY
 
         private DatabaseColumn FindIdentityColumn()
         {
-            return _table.Columns.Find(delegate(DatabaseColumn col)
+            return _table.Columns.Find(delegate (DatabaseColumn col)
                     {
                         return col.IsAutoNumber;
                     });

@@ -12,7 +12,10 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         /// <value><c>true</c> if schema is written; otherwise, <c>false</c>.</value>
         bool IncludeSchema { get; set; }
-
+        /// <summary>
+        /// Escape the names (default true)
+        /// </summary>
+        bool EscapeNames { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether to include default values while writing column definitions
         /// </summary>
@@ -20,7 +23,6 @@ namespace DatabaseSchemaReader.SqlGen
         /// <c>true</c> if include default values; otherwise, <c>false</c>.
         /// </value>
         bool IncludeDefaultValues { get; set; }
-
 
         /// <summary>
         /// Writes the DDL.

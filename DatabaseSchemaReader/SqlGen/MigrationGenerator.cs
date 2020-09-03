@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.SqlGen.SqLite;
 using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaReader.SqlGen
@@ -19,6 +18,7 @@ namespace DatabaseSchemaReader.SqlGen
             _sqlFormatProvider = SqlFormatFactory.Provider(sqlType);
             _ddlFactory = new DdlGeneratorFactory(sqlType);
             IncludeSchema = (sqlType != SqlType.SqlServerCe && sqlType != SqlType.SQLite);
+            EscapeNames = true;
         }
 
         /// <summary>
@@ -26,9 +26,16 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         public bool IncludeSchema { get; set; }
 
+        /// <summary>
+        /// Escape any names
+        /// </summary>
+        public bool EscapeNames { get; set; }
+
         protected virtual ITableGenerator CreateTableGenerator(DatabaseTable databaseTable)
         {
-            return _ddlFactory.TableGenerator(databaseTable);
+            var tableGenerator = _ddlFactory.TableGenerator(databaseTable);
+            if (!EscapeNames) tableGenerator.EscapeNames = false;
+            return tableGenerator;
         }
         protected virtual ISqlFormatProvider SqlFormatProvider()
         {
@@ -37,7 +44,7 @@ namespace DatabaseSchemaReader.SqlGen
 
         public string Escape(string name)
         {
-            return SqlFormatProvider().Escape(name);
+            return EscapeNames ? SqlFormatProvider().Escape(name) : name;
         }
         protected virtual string LineEnding()
         {
@@ -214,6 +221,7 @@ namespace DatabaseSchemaReader.SqlGen
             var constraintWriter = _ddlFactory.ConstraintWriter(databaseTable);
             if (constraintWriter == null) return null;
             constraintWriter.IncludeSchema = IncludeSchema; //cascade setting
+            constraintWriter.EscapeNames = EscapeNames;
             return constraintWriter.WriteConstraint(constraint);
         }
 

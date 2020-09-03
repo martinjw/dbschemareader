@@ -15,6 +15,11 @@ namespace DatabaseSchemaReader.Data
         private int _pageSize = 1000;
 
         /// <summary>
+        /// Escape table and column names (default true)
+        /// </summary>
+        public bool EscapeNames { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets the maximum number of records returned. Default is 1000.
         /// </summary>
         /// <value>The size of the page.</value>
@@ -85,6 +90,7 @@ namespace DatabaseSchemaReader.Data
             var w = new InsertWriter(databaseTable, dt);
             w.IncludeIdentity = IncludeIdentity;
             w.IncludeBlobs = IncludeBlobs;
+            w.EscapeNames = EscapeNames;
             var providerName = connection.GetType().Namespace;
             return w.Write(FindSqlType(providerName));
         }
@@ -129,6 +135,7 @@ namespace DatabaseSchemaReader.Data
             var w = new InsertWriter(databaseTable, dt);
             w.IncludeIdentity = IncludeIdentity;
             w.IncludeBlobs = IncludeBlobs;
+            w.EscapeNames = EscapeNames;
             return w.Write(FindSqlType(providerName));
         }
 

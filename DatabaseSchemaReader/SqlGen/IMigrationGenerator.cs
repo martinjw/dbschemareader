@@ -12,7 +12,11 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         bool IncludeSchema { get; set; }
         /// <summary>
-        /// Adds the table. If any primary key, unqiue or check constraints are attached, they are written too (don't write them individually). Foreign keys must be added separately (use <see cref="AddConstraint"/>)
+        /// Escape the names (default true)
+        /// </summary>
+        bool EscapeNames { get; set; }
+        /// <summary>
+        /// Adds the table. If any primary key, unique or check constraints are attached, they are written too (don't write them individually). Foreign keys must be added separately (use <see cref="AddConstraint"/>)
         /// </summary>
         /// <param name="databaseTable">The database table.</param>
         /// <returns></returns>

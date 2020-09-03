@@ -21,16 +21,20 @@ namespace DatabaseSchemaViewer
         private readonly IMigrationGenerator _migrationGenerator;
         private readonly SqlType _sqlType;
 
-        public SqlTasks(SqlType sqlType)
+        public SqlTasks(SqlType sqlType, bool escapeNames)
         {
             _sqlType = sqlType;
             _migrationGenerator = new DdlGeneratorFactory(sqlType).MigrationGenerator();
+            EscapeNames = _migrationGenerator.EscapeNames = escapeNames;
         }
+
+        public bool EscapeNames { get; set; }
 
         public void BuildAllTableDdl(DatabaseSchema databaseSchema)
         {
             var tg = new DdlGeneratorFactory(_sqlType).AllTablesGenerator(databaseSchema);
             tg.IncludeSchema = false;
+            tg.EscapeNames = EscapeNames;
             try
             {
                 var txt = tg.Write();
@@ -56,7 +60,7 @@ namespace DatabaseSchemaViewer
                         sb.AppendLine("-- WARNING: " + databaseTable.Name + " has SELF-JOIN");
                     }
                     var sqlWriter = new SqlWriter(databaseTable, _sqlType);
-                    sb.AppendLine("DELETE FROM " + sqlWriter.EscapedTableName);
+                    sb.AppendLine("DELETE FROM " + (EscapeNames ? sqlWriter.EscapedTableName : databaseTable.Name));
                 }
                 Clipboard.SetText(sb.ToString(), TextDataFormat.UnicodeText);
             }
@@ -74,6 +78,7 @@ namespace DatabaseSchemaViewer
                 sw.IncludeBlobs = false;
                 sw.IncludeIdentity = true;
                 sw.PageSize = 100;
+                sw.EscapeNames = EscapeNames;
                 var txt = sw.ReadTable(databaseTable, connectionString, providerName);
                 Clipboard.SetText(txt, TextDataFormat.UnicodeText);
             }
@@ -87,6 +92,7 @@ namespace DatabaseSchemaViewer
         {
             var tg = new DdlGeneratorFactory(_sqlType).TableGenerator(databaseTable);
             tg.IncludeSchema = false;
+            tg.EscapeNames = EscapeNames;
             try
             {
                 var txt = tg.Write();
@@ -111,9 +117,16 @@ namespace DatabaseSchemaViewer
             }
         }
 
-        public void BuildTableSelect(DatabaseTable databaseTable)
+        private SqlWriter BuildSqlWriter(DatabaseTable databaseTable)
         {
             var sqlWriter = new SqlWriter(databaseTable, _sqlType);
+            sqlWriter.EscapeNames = EscapeNames;
+            return sqlWriter;
+        }
+
+        public void BuildTableSelect(DatabaseTable databaseTable)
+        {
+            var sqlWriter = BuildSqlWriter(databaseTable);
             try
             {
                 var txt = sqlWriter.SelectAllSql();
@@ -124,9 +137,11 @@ namespace DatabaseSchemaViewer
                 Debug.WriteLine(exception.Message);
             }
         }
+
+
         public void BuildTableSelectPaged(DatabaseTable databaseTable)
         {
-            var sqlWriter = new SqlWriter(databaseTable, _sqlType);
+            var sqlWriter = BuildSqlWriter(databaseTable);
             try
             {
                 var txt = sqlWriter.SelectPageSql();
@@ -139,7 +154,7 @@ namespace DatabaseSchemaViewer
         }
         public void BuildTableInsert(DatabaseTable databaseTable)
         {
-            var sqlWriter = new SqlWriter(databaseTable, _sqlType);
+            var sqlWriter = BuildSqlWriter(databaseTable);
             try
             {
                 var txt = sqlWriter.InsertSqlWithoutOutputParameter();
@@ -152,7 +167,7 @@ namespace DatabaseSchemaViewer
         }
         public void BuildTableUpdate(DatabaseTable databaseTable)
         {
-            var sqlWriter = new SqlWriter(databaseTable, _sqlType);
+            var sqlWriter = BuildSqlWriter(databaseTable);
             try
             {
                 var txt = sqlWriter.UpdateSql();

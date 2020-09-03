@@ -36,6 +36,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.openSchema = new System.Windows.Forms.ToolStripButton();
             this.saveSchema = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.label3 = new System.Windows.Forms.Label();
@@ -51,8 +52,9 @@
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.treeContext = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbQuote = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -109,7 +111,8 @@
             this.saveSchema,
             this.toolStripSeparator1,
             this.toolStripButton1,
-            this.toolStripButton2});
+            this.toolStripButton2,
+            this.tsbQuote});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(625, 25);
@@ -138,6 +141,11 @@
             this.saveSchema.Text = "Save";
             this.saveSchema.ToolTipText = "Save Schema";
             this.saveSchema.Click += new System.EventHandler(this.SaveSchemaClick);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // toolStripButton1
             // 
@@ -269,10 +277,18 @@
             this.treeContext.Name = "treeContext";
             this.treeContext.Size = new System.Drawing.Size(61, 4);
             // 
-            // toolStripSeparator1
+            // tsbQuote
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.tsbQuote.Checked = true;
+            this.tsbQuote.CheckOnClick = true;
+            this.tsbQuote.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.tsbQuote.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbQuote.Image = ((System.Drawing.Image)(resources.GetObject("tsbQuote.Image")));
+            this.tsbQuote.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbQuote.Name = "tsbQuote";
+            this.tsbQuote.Size = new System.Drawing.Size(87, 22);
+            this.tsbQuote.Text = "Escape Names";
+            this.tsbQuote.Click += new System.EventHandler(this.tsbQuote_Click);
             // 
             // Form1
             // 
@@ -290,6 +306,7 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -323,6 +340,7 @@
         private System.Windows.Forms.ToolStripButton openSchema;
         private System.Windows.Forms.ToolStripButton saveSchema;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton tsbQuote;
     }
 }
 

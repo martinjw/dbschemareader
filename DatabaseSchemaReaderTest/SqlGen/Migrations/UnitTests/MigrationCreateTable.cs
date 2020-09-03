@@ -47,6 +47,25 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             Assert.IsTrue(sql.Contains("ALTER TABLE [Orders] ADD CONSTRAINT [PK_Orders] PRIMARY KEY ([Id])"), "Primary key should be set with name");
         }
 
+        [TestMethod]
+        public void TestSqlServerCreateTableNoSchemaNoEscapeNames()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddTable(table);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE TABLE Orders", StringComparison.OrdinalIgnoreCase), "table name should be quoted correctly");
+            Assert.IsTrue(sql.Contains("ALTER TABLE Orders ADD CONSTRAINT PK_Orders PRIMARY KEY (Id)"), "Primary key should be set with name");
+        }
 
         [TestMethod]
         public void TestOracleCreateTableWithSchema()

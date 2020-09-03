@@ -135,6 +135,11 @@ namespace DatabaseSchemaReader.Data
         public bool IncludeBlobs { get; set; }
 
         /// <summary>
+        /// Escape table and column names (default true)
+        /// </summary>
+        public bool EscapeNames { get; set; } = true;
+
+        /// <summary>
         /// Writes the INSERTs in the specified SQL dialect
         /// </summary>
         /// <param name="sqlType">Type of the SQL.</param>
@@ -267,7 +272,7 @@ namespace DatabaseSchemaReader.Data
         {
             var cols = GetAllColumns();
 
-            _template = "INSERT INTO " + _sqlWriter.EscapedTableName + @" (
+            _template = "INSERT INTO " + (EscapeNames ? _sqlWriter.EscapedTableName : _databaseTable.Name) + @" (
 " + FormattedColumns(cols) + @") VALUES (
 {0}
 );
@@ -288,7 +293,9 @@ namespace DatabaseSchemaReader.Data
             {
                 if (IsNotWriteableType(databaseColumn)) continue;
                 if (!IncludeIdentity && databaseColumn.IsAutoNumber) continue;
-                cols.Add(_sqlWriter.EscapedColumnName(databaseColumn.Name));
+                var name = databaseColumn.Name;
+                if (EscapeNames) name = _sqlWriter.EscapedColumnName(databaseColumn.Name);
+                cols.Add(name);
             }
 
             return cols.ToArray();

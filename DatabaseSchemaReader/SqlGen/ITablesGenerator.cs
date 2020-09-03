@@ -12,6 +12,11 @@ namespace DatabaseSchemaReader.SqlGen
         bool IncludeSchema { get; set; }
 
         /// <summary>
+        /// Escape the table and column names
+        /// </summary>
+        bool EscapeNames { get; set; }
+
+        /// <summary>
         /// Writes this ddl script.
         /// </summary>
         /// <returns></returns>

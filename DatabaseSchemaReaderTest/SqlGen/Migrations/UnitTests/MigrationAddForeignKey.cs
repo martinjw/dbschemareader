@@ -47,6 +47,25 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             Assert.IsTrue(sql.StartsWith("ALTER TABLE [Orders] ADD CONSTRAINT [FK_Orders] FOREIGN KEY ([Parent]) REFERENCES [Orders] ([Id])", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
 
+        [TestMethod]
+        public void TestSqlServerNoEscapeNames()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var fk = MigrationCommon.CreateForeignKey(table);
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddConstraint(table, fk);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("ALTER TABLE Orders ADD CONSTRAINT FK_Orders FOREIGN KEY (Parent) REFERENCES Orders (Id)", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
 
         [TestMethod]
         public void TestOracleWithSchema()
@@ -84,6 +103,26 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
 
             //assert
             Assert.IsTrue(sql.StartsWith("ALTER TABLE \"Orders\" ADD CONSTRAINT \"FK_Orders\" FOREIGN KEY (\"Parent\") REFERENCES \"Orders\" (\"Id\")", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
+
+        [TestMethod]
+        public void TestOracleNoSchemaNoEscapeNames()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.Oracle).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var fk = MigrationCommon.CreateForeignKey(table);
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddConstraint(table, fk);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("ALTER TABLE Orders ADD CONSTRAINT FK_Orders FOREIGN KEY (Parent) REFERENCES Orders (Id)", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
 
         [TestMethod]

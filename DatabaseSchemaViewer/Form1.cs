@@ -325,10 +325,10 @@ namespace DatabaseSchemaViewer
             if (schema != null)
             {
                 var create = new ToolStripMenuItem("CREATE TABLEs to clipboard");
-                create.Click += (s, ea) => new SqlTasks(sqlType).BuildAllTableDdl(schema);
+                create.Click += (s, ea) => BuildSqlTasks(sqlType).BuildAllTableDdl(schema);
                 menu.Items.Add(create);
                 var deletes = new ToolStripMenuItem("DELETE all table data (in logical order) to clipboard");
-                deletes.Click += (s, ea) => new SqlTasks(sqlType).DeleteAllData(schema);
+                deletes.Click += (s, ea) => BuildSqlTasks(sqlType).DeleteAllData(schema);
                 menu.Items.Add(deletes);
             }
             else if (view != null)
@@ -343,13 +343,13 @@ namespace DatabaseSchemaViewer
             else if (pack != null)
             {
                 var create = new ToolStripMenuItem("CREATE PACKAGE " + pack.Name + " to clipboard");
-                create.Click += (s, ea) => new SqlTasks(sqlType).BuildPackage(pack);
+                create.Click += (s, ea) => BuildSqlTasks(sqlType).BuildPackage(pack);
                 menu.Items.Add(create);
             }
             else if (fun != null)
             {
                 var create = new ToolStripMenuItem("CREATE FUNCTION " + fun.Name + " to clipboard");
-                create.Click += (s, ea) => new SqlTasks(sqlType).BuildFunction(fun);
+                create.Click += (s, ea) => BuildSqlTasks(sqlType).BuildFunction(fun);
                 menu.Items.Add(create);
             }
             else if (sproc != null)
@@ -357,7 +357,7 @@ namespace DatabaseSchemaViewer
                 if (!string.IsNullOrEmpty(sproc.Sql))
                 {
                     var create = new ToolStripMenuItem("CREATE STORED PROC " + sproc.Name + " to clipboard");
-                    create.Click += (s, ea) => new SqlTasks(sqlType).BuildProcedure(sproc);
+                    create.Click += (s, ea) => BuildSqlTasks(sqlType).BuildProcedure(sproc);
                     menu.Items.Add(create);
 
                     var bar = new ToolStripSeparator();
@@ -365,47 +365,47 @@ namespace DatabaseSchemaViewer
                 }
 
                 var code = new ToolStripMenuItem("C# class to clipboard");
-                code.Click += (s, ea) => new SqlTasks(sqlType).BuildProcedureCode(_databaseSchema, sproc);
+                code.Click += (s, ea) => BuildSqlTasks(sqlType).BuildProcedureCode(_databaseSchema, sproc);
                 menu.Items.Add(code);
 
             }
             else if (column != null)
             {
                 var add = new ToolStripMenuItem("ADD COLUMN " + column.Name + " to clipboard");
-                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddColumn(column);
+                add.Click += (s, ea) => BuildSqlTasks(sqlType).BuildAddColumn(column);
                 menu.Items.Add(add);
                 var alter = new ToolStripMenuItem("ALTER COLUMN " + column.Name + " to clipboard");
-                alter.Click += (s, ea) => new SqlTasks(sqlType).BuildAlterColumn(column);
+                alter.Click += (s, ea) => BuildSqlTasks(sqlType).BuildAlterColumn(column);
                 menu.Items.Add(alter);
             }
             else if (constraint != null)
             {
                 var parentTable = node.Parent.Parent.Tag as DatabaseTable;
                 var add = new ToolStripMenuItem("ADD CONSTRAINT " + constraint.Name + " to clipboard");
-                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddConstraint(parentTable, constraint);
+                add.Click += (s, ea) => BuildSqlTasks(sqlType).BuildAddConstraint(parentTable, constraint);
                 menu.Items.Add(add);
                 var drop = new ToolStripMenuItem("DROP CONSTRAINT " + constraint.Name + " to clipboard");
-                drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropConstraint(parentTable, constraint);
+                drop.Click += (s, ea) => BuildSqlTasks(sqlType).BuildDropConstraint(parentTable, constraint);
                 menu.Items.Add(drop);
             }
             else if (trigger != null)
             {
                 var parentTable = node.Parent.Parent.Tag as DatabaseTable;
                 var add = new ToolStripMenuItem("ADD TRIGGER " + trigger.Name + " to clipboard");
-                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddTrigger(parentTable, trigger);
+                add.Click += (s, ea) => BuildSqlTasks(sqlType).BuildAddTrigger(parentTable, trigger);
                 menu.Items.Add(add);
                 var drop = new ToolStripMenuItem("DROP TRIGGER " + trigger.Name + " to clipboard");
-                drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropTrigger(trigger);
+                drop.Click += (s, ea) => BuildSqlTasks(sqlType).BuildDropTrigger(trigger);
                 menu.Items.Add(drop);
             }
             else if (index != null)
             {
                 var parentTable = node.Parent.Parent.Tag as DatabaseTable;
                 var add = new ToolStripMenuItem("ADD INDEX " + index.Name + " to clipboard");
-                add.Click += (s, ea) => new SqlTasks(sqlType).BuildAddIndex(parentTable, index);
+                add.Click += (s, ea) => BuildSqlTasks(sqlType).BuildAddIndex(parentTable, index);
                 menu.Items.Add(add);
                 var drop = new ToolStripMenuItem("DROP INDEX " + index.Name + " to clipboard");
-                drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropIndex(parentTable, index);
+                drop.Click += (s, ea) => BuildSqlTasks(sqlType).BuildDropIndex(parentTable, index);
                 menu.Items.Add(drop);
             }
 
@@ -417,12 +417,17 @@ namespace DatabaseSchemaViewer
 
         }
 
+        private SqlTasks BuildSqlTasks(SqlType sqlType)
+        {
+            return new SqlTasks(sqlType, tsbQuote.Checked);
+        }
+
         private void BuildViewMenu(ToolStrip menu, DatabaseView view, SqlType sqlType)
         {
             if (!string.IsNullOrEmpty(view.Sql))
             {
                 var create = new ToolStripMenuItem("CREATE VIEW " + view.Name + " to clipboard");
-                create.Click += (s, ea) => new SqlTasks(sqlType).BuildView(view);
+                create.Click += (s, ea) => BuildSqlTasks(sqlType).BuildView(view);
                 menu.Items.Add(create);
 
                 var bar = new ToolStripSeparator();
@@ -430,11 +435,11 @@ namespace DatabaseSchemaViewer
             }
 
             var select = new ToolStripMenuItem("SELECT VIEW to clipboard");
-            select.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelect(view);
+            select.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableSelect(view);
             menu.Items.Add(select);
 
             var selectPaged = new ToolStripMenuItem("SELECT VIEW PAGED to clipboard");
-            selectPaged.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelectPaged(view);
+            selectPaged.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableSelectPaged(view);
             menu.Items.Add(selectPaged);
         }
 
@@ -442,41 +447,41 @@ namespace DatabaseSchemaViewer
         {
             if (menu == null) throw new ArgumentNullException("menu");
             var create = new ToolStripMenuItem("CREATE TABLE " + table.Name + " to clipboard");
-            create.Click += (s, ea) => new SqlTasks(sqlType).BuildTableDdl(table);
+            create.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableDdl(table);
             menu.Items.Add(create);
 
             var drop = new ToolStripMenuItem("DROP TABLE " + table.Name + " to clipboard");
-            drop.Click += (s, ea) => new SqlTasks(sqlType).BuildDropTable(table);
+            drop.Click += (s, ea) => BuildSqlTasks(sqlType).BuildDropTable(table);
             menu.Items.Add(drop);
 
             var bar = new ToolStripSeparator();
             menu.Items.Add(bar);
 
             var select = new ToolStripMenuItem("SELECT TABLE to clipboard");
-            select.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelect(table);
+            select.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableSelect(table);
             menu.Items.Add(select);
 
             var selectPaged = new ToolStripMenuItem("SELECT TABLE PAGED to clipboard");
-            selectPaged.Click += (s, ea) => new SqlTasks(sqlType).BuildTableSelectPaged(table);
+            selectPaged.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableSelectPaged(table);
             menu.Items.Add(selectPaged);
 
             var insert = new ToolStripMenuItem("INSERT TABLE to clipboard");
-            insert.Click += (s, ea) => new SqlTasks(sqlType).BuildTableInsert(table);
+            insert.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableInsert(table);
             menu.Items.Add(insert);
 
             var update = new ToolStripMenuItem("UPDATE TABLE to clipboard");
-            update.Click += (s, ea) => new SqlTasks(sqlType).BuildTableUpdate(table);
+            update.Click += (s, ea) => BuildSqlTasks(sqlType).BuildTableUpdate(table);
             menu.Items.Add(update);
 
             var bar2 = new ToolStripSeparator();
             menu.Items.Add(bar2);
 
             var code = new ToolStripMenuItem("C# class to clipboard");
-            code.Click += (s, ea) => new SqlTasks(sqlType).BuildClass(table);
+            code.Click += (s, ea) => BuildSqlTasks(sqlType).BuildClass(table);
             menu.Items.Add(code);
 
             var data = new ToolStripMenuItem("INSERT (first 100 rows) to clipboard");
-            data.Click += (s, ea) => new SqlTasks(sqlType).GetData(table, ConnectionString.Text.Trim(), (string)DataProviders.SelectedItem);
+            data.Click += (s, ea) => BuildSqlTasks(sqlType).GetData(table, ConnectionString.Text.Trim(), (string)DataProviders.SelectedItem);
             menu.Items.Add(data);
         }
 
@@ -545,5 +550,9 @@ namespace DatabaseSchemaViewer
             }
         }
 
+        private void tsbQuote_Click(object sender, EventArgs e)
+        {
+            tsbQuote.ForeColor = tsbQuote.Checked ? SystemColors.ControlText : SystemColors.InactiveCaption;
+        }
     }
 }

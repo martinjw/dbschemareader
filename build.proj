@@ -20,7 +20,7 @@
     <Message Text="Building SchemaViewer in .net 3.5" />
     <RemoveDir Directories="$(OutputPath)net35\"/>
     <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
-		Properties="Configuration=Release;OutputPath=$(OutputPath)net35\;IntermediateOutputPath=$(ObjPath)Release\"/>
+		Properties="Configuration=net35;OutputPath=$(OutputPath)net35\;IntermediateOutputPath=$(ObjPath)Release\"/>
     <Message Text="SchemaViewer Built" />
 	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
   </Target>

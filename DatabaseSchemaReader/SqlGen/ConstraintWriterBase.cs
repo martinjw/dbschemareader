@@ -14,13 +14,16 @@ namespace DatabaseSchemaReader.SqlGen
         protected ConstraintWriterBase(DatabaseTable table)
         {
             Table = table;
+            EscapeNames = true;
         }
 
         protected abstract ISqlFormatProvider SqlFormatProvider();
 
+        public bool EscapeNames { get; set; }
+
         protected string EscapeName(string name)
         {
-            return SqlFormatProvider().Escape(name);
+            return EscapeNames? SqlFormatProvider().Escape(name) : name;
         }
 
         public bool IncludeSchema { get; set; }
@@ -74,6 +77,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             get { return "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})"; }
         }
+
         private string WriteUniqueKey(DatabaseConstraint uniqueKey)
         {
             var columnList = GetColumnList(uniqueKey.Columns);

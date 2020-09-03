@@ -6,7 +6,7 @@ namespace DatabaseSchemaReader.SqlGen
 {
     class DropTables
     {
-        public static string Write(DatabaseSchema schema, ISqlFormatProvider formatter)
+        public static string Write(DatabaseSchema schema, ISqlFormatProvider formatter, bool escapeNames)
         {
             var sb = new StringBuilder();
             var lineEnding = formatter.LineEnding();
@@ -19,13 +19,13 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 foreach (var foreignKey in table.ForeignKeys)
                 {
-                    sb.AppendLine("-- ALTER TABLE " + formatter.Escape(table.Name) + " DROP CONSTRAINT " + foreignKey.Name + lineEnding);
-
+                    sb.AppendLine("-- ALTER TABLE " + (escapeNames ? formatter.Escape(table.Name) : table.Name) + 
+                                  " DROP CONSTRAINT " + foreignKey.Name + lineEnding);
                 }
             }
             foreach (var table in schema.Tables)
             {
-                sb.AppendLine("-- DROP TABLE " + formatter.Escape(table.Name) + lineEnding);
+                sb.AppendLine("-- DROP TABLE " + (escapeNames ? formatter.Escape(table.Name) : table.Name) + lineEnding);
             }
             return sb.ToString();
         }

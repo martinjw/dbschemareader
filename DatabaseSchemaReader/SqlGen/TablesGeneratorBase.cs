@@ -11,9 +11,12 @@ namespace DatabaseSchemaReader.SqlGen
         {
             Schema = schema;
             IncludeSchema = true;
+            EscapeNames = true;
         }
 
         public bool IncludeSchema { get; set; }
+
+        public bool EscapeNames { get; set; }
 
         public string Write()
         {
@@ -24,6 +27,7 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 var tableGenerator = LoadTableGenerator(table);
                 tableGenerator.IncludeSchema = IncludeSchema;
+                tableGenerator.EscapeNames = EscapeNames;
                 sb.AppendLine(tableGenerator.Write());
             }
             sb.AppendLine();
@@ -35,6 +39,7 @@ namespace DatabaseSchemaReader.SqlGen
                 //SQLite has no ALTER TABLE support, so this is not supported
                 if (constraintWriter == null) continue;
                 constraintWriter.IncludeSchema = IncludeSchema;
+                constraintWriter.EscapeNames = EscapeNames;
                 sb.AppendLine(constraintWriter.WriteForeignKeys());
             }
             sb.AppendLine();
