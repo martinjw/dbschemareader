@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
@@ -497,7 +498,7 @@ namespace DatabaseSchemaViewer
             {
                 picker.FileName = "db" +
                     DateTime.Now.ToString("yyyyMMddThhmmss", CultureInfo.InvariantCulture);
-                picker.DefaultExt = ".dbschema";
+                picker.DefaultExt = ".xml";
                 picker.Title = "Save schema to file.";
                 picker.InitialDirectory =
                             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -506,8 +507,8 @@ namespace DatabaseSchemaViewer
                 {
                     using (var stream = picker.OpenFile())
                     {
-                        var f = new BinaryFormatter();
-                        f.Serialize(stream, _databaseSchema);
+                        var serializer = new XmlSerializer(typeof(DatabaseSchema));
+                        serializer.Serialize(stream, _databaseSchema);
                     }
                 }
             }
@@ -517,7 +518,7 @@ namespace DatabaseSchemaViewer
         {
             using (var picker = new OpenFileDialog())
             {
-                picker.DefaultExt = ".dbschema";
+                picker.DefaultExt = ".xml";
                 picker.Title = "Open saved schema.";
                 picker.InitialDirectory =
                             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -526,10 +527,11 @@ namespace DatabaseSchemaViewer
                 {
                     using (var stream = picker.OpenFile())
                     {
-                        var f = new BinaryFormatter();
+                        var serializer = new XmlSerializer(typeof(DatabaseSchema));
                         try
                         {
-                            _databaseSchema = f.Deserialize(stream) as DatabaseSchema;
+                            _databaseSchema = serializer.Deserialize(stream) as DatabaseSchema;
+                            DatabaseSchemaFixer.UpdateReferences(_databaseSchema);
                         }
                         catch (SerializationException)
                         {

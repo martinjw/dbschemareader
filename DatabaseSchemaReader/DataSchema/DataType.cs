@@ -7,9 +7,6 @@ namespace DatabaseSchemaReader.DataSchema
     /// <summary>
     /// Maps between database datatypes and .Net datatypes.
     /// </summary>
-    /// <remarks>
-    /// XmlSerializater won't work because TypeName and NetDataType are private
-    /// </remarks>
     [Serializable]
     public partial class DataType
     {
@@ -25,10 +22,7 @@ namespace DatabaseSchemaReader.DataSchema
         private bool? _isDateTime;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string _netDataTypeCSharpName;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly string _netDataType;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly string _typeName;
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private static readonly HashSet<Type> NumericTypes = new HashSet<Type>
         {
@@ -60,19 +54,19 @@ namespace DatabaseSchemaReader.DataSchema
         /// <param name="netDataType">Type of the net data.</param>
         public DataType(string typeName, string netDataType)
         {
-            _typeName = typeName;
-            _netDataType = netDataType;
+            TypeName = typeName;
+            NetDataType = netDataType;
         }
         ///<summary>
         ///The provider-specific data type name.
         ///</summary>
-        public string TypeName { get { return _typeName; } }
+        public string TypeName { get; set; }
 
 
         ///<summary>
         ///The name of the .NET Framework type of the data type.
         ///</summary>
-        public string NetDataType { get { return _netDataType; } }
+        public string NetDataType { get; set; }
 
         /// <summary>
         /// Gets the name of the C# net data type.
