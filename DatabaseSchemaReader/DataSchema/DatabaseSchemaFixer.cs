@@ -33,7 +33,7 @@ namespace DatabaseSchemaReader.DataSchema
                     if (c.ForeignKeyTableNames.Count == 0) return;
                     foreach (var fkTableName in c.ForeignKeyTableNames)
                     {
-                        DatabaseTable fkTable = databaseSchema.FindTableByName(fkTableName);
+                        DatabaseTable fkTable = databaseSchema.FindTableByName(fkTableName, c.SchemaOwner);
                         if (fkTable == null) continue;
                         c.ForeignKeyTable = fkTable;
                         if (!fkTable.ForeignKeyChildren.Contains(table))
