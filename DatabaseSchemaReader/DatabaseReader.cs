@@ -188,6 +188,9 @@ namespace DatabaseSchemaReader
                 AllUsers();
 
                 if (ct.IsCancellationRequested) return _db;
+                AllSchemas();
+
+                if (ct.IsCancellationRequested) return _db;
                 AllTables(ct);
 
                 if (ct.IsCancellationRequested) return _db;

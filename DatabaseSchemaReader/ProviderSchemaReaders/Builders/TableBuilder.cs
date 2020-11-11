@@ -106,6 +106,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var pks = _readerAdapter.PrimaryKeys(null);
             var uks = _readerAdapter.UniqueKeys(null);
             var fks = _readerAdapter.ForeignKeys(null);
+            
             var dfs = _readerAdapter.DefaultConstraints(null);
             var triggers = _readerAdapter.Triggers(null);
             var tableDescs = _readerAdapter.TableDescriptions(null);
@@ -113,7 +114,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var computed = _readerAdapter.ComputedColumns(null);
             var indexes = MergeIndexColumns(_readerAdapter.Indexes(null), _readerAdapter.IndexColumns(null));
             var noIndexes = (indexes.Count == 0); //we may not be able to get any indexes without a tableName
-
+            FillOutForeignKey(fks, indexes);
+            
             var tableFilter = _readerAdapter.Parameters.Exclusions.TableFilter;
             if (tableFilter != null)
             {
@@ -164,6 +166,18 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             return tables;
         }
 
+        private static void FillOutForeignKey(IList<DatabaseConstraint> fks, IList<DatabaseIndex> indexes)
+        {
+            foreach (var fk in fks.Where(f =>
+                !string.IsNullOrEmpty(f.RefersToConstraint) && string.IsNullOrEmpty(f.RefersToTable)))
+            {
+                var constraint = indexes.FirstOrDefault(i => i.Name == fk.RefersToConstraint);
+                if (constraint == null) continue;
+                fk.RefersToTable = constraint.TableName;
+                fk.RefersToSchema = constraint.SchemaOwner;
+            }
+        }
+
         private void UpdateTableDescriptions(DatabaseTable table, IList<DatabaseTable> descriptions)
         {
             var tableDesc = descriptions.FirstOrDefault(x => x.SchemaOwner == table.SchemaOwner &&
@@ -201,6 +215,15 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                                                 x.TableName == table.Name);
             foreach (var index in tableIndexes)
             {
+                var list = new List<DatabaseColumn>();
+                foreach (var indexColumn in index.Columns)
+                {
+                    var tableColumn = table.Columns.FirstOrDefault(c => c.Name == indexColumn.Name);
+                    if(tableColumn != null)
+                        list.Add(tableColumn);
+                }
+                index.Columns.Clear();
+                index.Columns.AddRange(list);
                 table.AddIndex(index);
             }
         }
