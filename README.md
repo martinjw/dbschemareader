@@ -50,7 +50,7 @@ foreach (var table in schema.Tables)
 //In .net Core, create the connection with the connection string
 using (var connection = new SqlConnection("Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind"))
 {
-    var dr = new DatabaseSchemaReader.DatabaseReader(connection);
+    var dbReader = new DatabaseSchemaReader.DatabaseReader(connection);
     //Then load the schema (this will take a little time on moderate to large database structures)
     var schema = dbReader.ReadAll();
 
