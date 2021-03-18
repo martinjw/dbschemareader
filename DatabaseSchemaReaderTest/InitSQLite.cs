@@ -216,7 +216,13 @@ CREATE TABLE [Territories]
 FOREIGN KEY ([RegionID]) REFERENCES [Region] ([RegionID])
 );
 
-INSERT INTO [Categories] (
+CREATE TABLE [CompoundKeys] (
+   [Key1] TEXT NOT NULL,
+   [Key2] TEXT NOT NULL,
+   CONSTRAINT [Pk_CompoundKeys] PRIMARY KEY([Key1], [Key2])
+);
+
+            INSERT INTO [Categories] (
   [CategoryName],  [Description],  [Picture]) VALUES (
 'Beverages' ,'Soft drinks, coffees, teas, beers, and ales' ,NULL
 );

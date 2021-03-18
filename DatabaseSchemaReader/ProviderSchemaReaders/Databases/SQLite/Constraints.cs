@@ -95,7 +95,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                         while (dr.Read())
                         {
                             var colName = dr.GetString("name");
-                            bool isPrimaryKey = dr.GetBoolean("pk");
+                            bool isPrimaryKey = dr.GetInt("pk") > 0;
                             if (isPrimaryKey == false)
                                 continue;
 

@@ -29,6 +29,9 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var schema = dbReader.ReadAll();
             var orders = schema.FindTableByName("Orders");
             Assert.IsTrue(orders.Columns.Count > 2); //we don't care if it's not standard Northwind
+            var compoundKeys = schema.FindTableByName("CompoundKeys");
+            Assert.IsTrue(compoundKeys.FindColumn("Key1").IsPrimaryKey);
+            Assert.IsTrue(compoundKeys.FindColumn("Key2").IsPrimaryKey);
         }
     }
 }
