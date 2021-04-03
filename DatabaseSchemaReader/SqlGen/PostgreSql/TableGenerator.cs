@@ -79,7 +79,10 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         }
         private ConstraintWriter CreateConstraintWriter()
         {
-            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema, TranslateCheckConstraint = TranslateCheckExpression };
+            return new ConstraintWriter(Table) { 
+                IncludeSchema = IncludeSchema, 
+                TranslateCheckConstraint = TranslateCheckExpression, 
+                EscapeNames = EscapeNames};
         }
         private static string TranslateCheckExpression(string expression)
         {

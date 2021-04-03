@@ -77,11 +77,13 @@ namespace DatabaseSchemaReader.SqlGen.MySql
         protected override string ConstraintWriter()
         {
             var sb = new StringBuilder();
-            var constraintWriter = new ConstraintWriter(Table);
-            constraintWriter.IncludeSchema = IncludeSchema;
-
-            constraintWriter.CheckConstraintExcluder = ExcludeCheckConstraint;
-            constraintWriter.TranslateCheckConstraint = TranslateCheckExpression;
+            var constraintWriter = new ConstraintWriter(Table)
+            {
+                IncludeSchema = IncludeSchema,
+                CheckConstraintExcluder = ExcludeCheckConstraint,
+                TranslateCheckConstraint = TranslateCheckExpression,
+                EscapeNames = EscapeNames
+            };
 
             //single primary keys done inline
             if (Table.PrimaryKey != null && Table.PrimaryKey.Columns.Count > 1)
