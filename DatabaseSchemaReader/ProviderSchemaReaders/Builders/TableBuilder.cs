@@ -68,7 +68,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var colDescs = _readerAdapter.ColumnDescriptions(tableName);
             var computed = _readerAdapter.ComputedColumns(tableName);
 
-            var indexes = MergeIndexColumns(_readerAdapter.Indexes(tableName), _readerAdapter.IndexColumns(tableName));
+            var indexes = MergeIndexColumns(_readerAdapter.Indexes(null), _readerAdapter.IndexColumns(null));
+            FillOutForeignKey(fks, indexes);
+            var noIndexes = (indexes.Count == 0); //we may not be able to get any indexes without a tableName
+            if (noIndexes)
+            {
+                indexes.Clear();
+                indexes = MergeIndexColumns(_readerAdapter.Indexes(tableName), _readerAdapter.IndexColumns(tableName));
+            }
             if (columns.Count == 0) return null;
 
             var table = new DatabaseTable
