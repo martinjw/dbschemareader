@@ -1,7 +1,4 @@
-﻿
-using System;
-
-namespace DatabaseSchemaReader.DataSchema
+﻿namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
     /// Represents a sequence in the database (eg Oracle, SqlServer 2011)
@@ -10,10 +7,10 @@ namespace DatabaseSchemaReader.DataSchema
     public partial class DatabaseSequence : NamedSchemaObject<DatabaseSequence>
     {
         /// <summary>
-        /// Gets or sets the mininum value.
+        /// Gets or sets the minimum value.
         /// </summary>
         /// <value>
-        /// The mininum value.
+        /// The minimum value.
         /// </value>
         public decimal? MinimumValue { get; set; }
         /// <summary>
@@ -24,7 +21,7 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public decimal? MaximumValue { get; set; }
         /// <summary>
-        /// Gets or sets the increment by.
+        /// Gets or sets the increment by. May be 0 if not defined.
         /// </summary>
         /// <value>
         /// The increment by.
