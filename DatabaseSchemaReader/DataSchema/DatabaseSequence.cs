@@ -1,4 +1,5 @@
-﻿namespace DatabaseSchemaReader.DataSchema
+﻿using System; 
+namespace DatabaseSchemaReader.DataSchema
 {
     /// <summary>
     /// Represents a sequence in the database (eg Oracle, SqlServer 2011)
