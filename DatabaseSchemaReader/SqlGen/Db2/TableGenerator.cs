@@ -89,7 +89,7 @@ namespace DatabaseSchemaReader.SqlGen.Db2
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
-            return new Db2MigrationGenerator { IncludeSchema = IncludeSchema };
+            return new Db2MigrationGenerator { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames};
         }
         private void AddIndexes(StringBuilder sb)
         {

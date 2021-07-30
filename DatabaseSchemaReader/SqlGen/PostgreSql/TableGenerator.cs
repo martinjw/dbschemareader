@@ -99,7 +99,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
-            return new PostgreSqlMigrationGenerator { IncludeSchema = IncludeSchema };
+            return new PostgreSqlMigrationGenerator { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames};
         }
         private void AddIndexes(StringBuilder sb)
         {

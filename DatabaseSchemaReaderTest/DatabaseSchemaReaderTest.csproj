@@ -298,6 +298,7 @@
     <Compile Include="SqlGen\Oracle\LongIntegerTest.cs" />
     <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
+    <Compile Include="SqlGen\PostgreSql\GeneratorTest.cs" />
     <Compile Include="SqlGen\SqlServerCe\AllTablesGeneratorTest.cs" />
     <Compile Include="SqlGen\SqlServerCe\TableGeneratorTest.cs" />
     <Compile Include="SqlGen\SqlServer\AccessCheckConstraintTest.cs" />

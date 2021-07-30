@@ -104,6 +104,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             var migrations = new SqlServerMigrationGenerator();
             //ensure we're not writing schema prefixes
             if (!IncludeSchema) migrations.IncludeSchema = false;
+            migrations.EscapeNames = EscapeNames;
             return migrations;
         }
 
