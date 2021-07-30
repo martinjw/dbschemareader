@@ -38,7 +38,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             foreach (var column in Table.Columns.Where(c => !string.IsNullOrEmpty(c.Description)))
             {
                 sb.Append("COMMENT ON COLUMN ");
-                sb.Append(tableName + "." + formatProvider.Escape(column.Name));
+                sb.Append(tableName + "." + (EscapeNames? formatProvider.Escape(column.Name): column.Name));
                 sb.Append(" IS '");
                 sb.Append(column.Description);
                 sb.AppendLine("'" + formatProvider.LineEnding());

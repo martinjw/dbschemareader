@@ -18,7 +18,10 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
                 .AddColumn<int>("Age")
                 .AddColumn<int>("Period")
                 .Table;
-            table.AddIndex("TableIndex", new[] { table.FindColumn("Name") });
+            var column = table.FindColumn("Name");
+            table.AddIndex("TableIndex", new[] {column});
+            table.Description = "Test table";
+            column.Description = "Name column";
 
             var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
             var tableGen = factory.TableGenerator(table);
@@ -29,6 +32,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
 
             //assert
             Assert.IsTrue(ddl.Contains("INDEX TableIndex ON AllTypes(Name)"));
+            Assert.IsTrue(ddl.Contains("COMMENT ON COLUMN AllTypes.Name IS 'Name column';"));
         }
     }
 }
