@@ -35,7 +35,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 //the pk index will have IndexType of PRIMARY NONCLUSTERED
                 var pkIndex = Table.Indexes.Find(x => x.IndexType?.IndexOf("PRIMARY", StringComparison.OrdinalIgnoreCase) != -1);
                 if (pkIndex != null &&
-                    pkIndex.IndexType.IndexOf("NONCLUSTERED", StringComparison.OrdinalIgnoreCase) != -1)
+                    pkIndex.IndexType?.IndexOf("NONCLUSTERED", StringComparison.OrdinalIgnoreCase) > -1)
                 {
                     nonClustered = "NONCLUSTERED";
                 }

@@ -3,6 +3,7 @@ using DatabaseSchemaReader.SqlGen;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Data;
+using System.Linq;
 
 namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
 {
@@ -114,6 +115,29 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             migration.EscapeNames = true;
             sql = migration.AddTable(newTable);
             Assert.IsTrue(sql.Contains("ALTER TABLE \"Chapter\" ADD CONSTRAINT \"Chapter_Pk\" PRIMARY KEY (\"Id\");"), "Escaping for names");
+        }
+
+
+        [TestMethod]
+        public void TestPrimaryKeyNoIndexType()
+        {
+            //#119 escaping was not cascaded down from table generator to constraint generator
+
+            //arrange
+            var schemaTemp = new DatabaseSchema(null, SqlType.Oracle);
+            var newTable = schemaTemp.AddTable("Chapter");
+            var idColumn = newTable.AddColumn("Id", DbType.Int64);
+            idColumn.AddPrimaryKey("Chapter_Pk").AddIndex("PK_Index");
+            //deliberately set indextype to null (from non SqlServer db)
+            newTable.Indexes.Find(x => x.Name == "PK_Index").IndexType = null;
+
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            //act
+            var sql = migration.AddTable(newTable);
+
+            Assert.IsTrue(sql.Contains("ALTER TABLE Chapter ADD CONSTRAINT Chapter_Pk PRIMARY KEY (Id)"), "No escaping for names");
         }
     }
 }

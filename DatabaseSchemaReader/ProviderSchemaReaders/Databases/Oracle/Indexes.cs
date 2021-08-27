@@ -23,7 +23,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.Oracle
   COLUMN_NAME,
   COLUMN_POSITION,
   DESCEND, --normally ASC
-  DECODE(UNIQUENESS,'UNIQUE',1,0) IsUnique
+  DECODE(UNIQUENESS,'UNIQUE',1,0) IsUnique,
+  ix.INDEX_TYPE
 FROM ALL_IND_COLUMNS cols
 INNER JOIN ALL_INDEXES ix
 	ON ix.OWNER = cols.INDEX_OWNER AND ix.INDEX_NAME = cols.INDEX_NAME
@@ -58,6 +59,7 @@ ORDER BY cols.TABLE_OWNER,
                     TableName = tableName,
                     Name = name,
                     IsUnique = record.GetBoolean("IsUnique"),
+                    IndexType = record.GetString("INDEX_TYPE")
                 };
                 Result.Add(index);
             }
