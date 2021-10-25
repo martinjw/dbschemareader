@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</Description>
     <AssemblyTitle>DatabaseSchemaReader</AssemblyTitle>
-    <VersionPrefix>2.7.9</VersionPrefix>
+    <VersionPrefix>2.7.11</VersionPrefix>
     <Authors>Martin Willey</Authors>
     <TargetFrameworks>netstandard2.0;netstandard1.5;net45;net40;net35</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -18,6 +18,7 @@
 2.7.7: fixes null 'RefersToTable' of FK when only one table is read thanks @mjalil
 2.7.8: PostgreSql sequences missing thanks @groogiam
 2.7.9: PostgreSql sqlgen escaping thanks @r-work
+2.7.11: CancellationToken leaking into net4 code thanks @KeithLRobertson
 	</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
@@ -32,7 +33,8 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.10</Version>
+    <Version>2.7.11</Version>
+    <Configurations>Debug;Release;net45;Net4</Configurations>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
@@ -60,6 +62,10 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' ">
+    <DefineConstants>TRACE;DEBUG;NET35</DefineConstants>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45' ">
     <DefineConstants>TRACE;DEBUG;NET4</DefineConstants>
   </PropertyGroup>
