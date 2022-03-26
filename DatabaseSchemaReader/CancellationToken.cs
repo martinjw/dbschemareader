@@ -1,6 +1,6 @@
 ﻿namespace DatabaseSchemaReader
 {
-#if !Net4
+#if NET35
     /// <summary>
     /// .net 3.5 version of the .net 4.0 System.Threading.CancellationToken
     /// </summary>

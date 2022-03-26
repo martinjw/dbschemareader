@@ -16,9 +16,10 @@ namespace CoreTest
             {
                 if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
                 {
-                    return @"Server=(local)\SQL2016;Database=NorthwindDsr;User ID=sa;Password=Password12!";
+                    return @"Server=(local)\SQL2016;Database=NorthwindDsr;User ID=sa;Password=Password12!;Encrypt=False";
                 }
-                return @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+                //Microsoft.Data.SqlClient v4 requires SSL with trusted cert chain :(
+                return @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind;Encrypt=False";
             }
         }
 
