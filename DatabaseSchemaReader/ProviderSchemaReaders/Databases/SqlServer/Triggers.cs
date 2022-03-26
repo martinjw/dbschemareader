@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
@@ -33,6 +35,28 @@ WHERE (SCHEMA_NAME(parent.schema_id) = @Owner or (@Owner is null))
     AND (parent.name = @TABLE_NAME or (@TABLE_NAME is null)) 
 ";
 
+        }
+
+        private void UseAlternativeSql()
+        {
+            Sql = @"SELECT
+ tr.name AS TRIGGER_NAME,
+ SCHEMA_NAME(parent.schema_id) AS TRIGGER_SCHEMA,
+ SCHEMA_NAME(parent.schema_id) AS TABLE_SCHEMA,
+ parent.name AS TABLE_NAME,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsUpdateTrigger') AS IS_UPDATE,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsDeleteTrigger') AS IS_DELETE,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsInsertTrigger') AS IS_INSERT,
+ OBJECTPROPERTY(tr.object_id, 'ExecIsAfterTrigger') AS IS_AFTER,
+ tr.is_instead_of_trigger AS IS_INSTEADOF,
+ tr.is_disabled AS IS_DISABLED,
+NULL as TRIGGER_BODY
+FROM sys.triggers AS tr
+ INNER JOIN sys.tables AS parent
+  ON tr.parent_id = parent.object_id
+WHERE (SCHEMA_NAME(parent.schema_id) = @Owner or (@Owner is null)) 
+    AND (parent.name = @TABLE_NAME or (@TABLE_NAME is null)) 
+";
         }
 
         protected override void AddParameters(DbCommand command)
@@ -77,7 +101,17 @@ WHERE (SCHEMA_NAME(parent.schema_id) = @Owner or (@Owner is null))
 
         public IList<DatabaseTrigger> Execute(IConnectionAdapter connectionAdapter)
         {
-            ExecuteDbReader(connectionAdapter);
+            try
+            {
+                ExecuteDbReader(connectionAdapter);
+            }
+            catch (DbException dbException)
+            {
+                Trace.WriteLine(dbException);
+                Trace.TraceWarning("Retrying triggers without OBJECT_DEFINITION (Azure Synapse)");
+                UseAlternativeSql();
+                ExecuteDbReader(connectionAdapter);
+            }
             return Result;
         }
     }
