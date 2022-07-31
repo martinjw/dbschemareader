@@ -321,6 +321,7 @@
     <Compile Include="IntegrationTests\DbConnectionTests.cs" />
     <Compile Include="IntegrationTests\SqlServerDbSchemas.cs" />
     <Compile Include="IntegrationTests\MicrosoftSqlClient.cs" />
+    <Compile Include="IntegrationTests\ViewExistsTests.cs" />
     <Compile Include="IntegrationTests\VistaDb.cs" />
     <Compile Include="IntegrationTests\Sybase.cs" />
     <Compile Include="IntegrationTests\Ingres.cs" />
