@@ -385,6 +385,22 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Does a named view exist?
+        /// </summary>
+        /// <param name="viewName">Name of the view</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public bool ViewExists(string viewName)
+        {
+            if (string.IsNullOrEmpty(viewName)) throw new ArgumentNullException("viewName");
+            using (_readerAdapter.CreateConnection())
+            {
+                var views = _readerAdapter.Views(viewName);
+                return views.Count > 0;
+            }
+        }
+
+        /// <summary>
         /// Gets the table. If <see cref="Owner"/> is specified, it is used.
         /// </summary>
         /// <param name="tableName">Name of the table. Oracle names can be case sensitive.</param>

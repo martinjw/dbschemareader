@@ -2,7 +2,7 @@
 
 A simple, cross-database facade over .Net 2.0 DbProviderFactories to read database metadata.
 
-Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model. For .net Core, we support SqlServer, SqlServer CE 4, SQLite, PostgreSql, MySQL and Oracle (even if the database clients  are not yet available in .net Core, we are ready for them).
+Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model. For .net Core, we support SqlServer, SqlServer CE 4, SQLite, PostgreSql, MySQL and Oracle.
 
 https://github.com/martinjw/dbschemareader or https://dbschemareader.codeplex.com/
 
@@ -25,7 +25,7 @@ Nuget: Install-Package DatabaseSchemaReader [![Nuget](https://img.shields.io/nug
 
 ## Use
 
-* Full .net framework (v3.5, v4.0, v4.5)
+* Full .net framework (v3.5, v4.0, v4.5-v4.8)
 ```C#
 //To use it simply specify the connection string and ADO provider (eg System.Data,SqlClient or System.Data.OracleClient)
 const string providername = "System.Data.SqlClient";
@@ -45,7 +45,7 @@ foreach (var table in schema.Tables)
   //do something with your model
 }
 ```
-* .net Core (netStandard1.5)
+* .net (netStandard1.5, netStandard 2.0, net 3.1, net6, net7)
 ```C#
 //In .net Core, create the connection with the connection string
 using (var connection = new SqlConnection("Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind"))
@@ -63,7 +63,7 @@ using (var connection = new SqlConnection("Data Source=.\SQLEXPRESS;Integrated S
 ```
 ## UIs
 
-There are two simple UIs.
+There are two simple UIs (.net framework only for now).
 
 * DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for
  - code generation, table DDL and stored procedure generation.
@@ -73,7 +73,7 @@ There are two simple UIs.
 
 ## Building the Source
 
-* If you use Visual Studio *2017* open DatabaseSchemaReader.sln (includes .net Core)
+* If you use Visual Studio *2022* open DatabaseSchemaReader.sln (includes .net Core)
   * You can also use the command line "build.bat" (msbuild)
   * You cannot use the command line "dotnet build" because Core tooling cannot build v3.5 (see https://github.com/Microsoft/msbuild/issues/1333)
 * If you use Visual Studio *2015* open DatabaseSchemaReader2015.sln (does not include .net Core; v3.5-v4.6 only)

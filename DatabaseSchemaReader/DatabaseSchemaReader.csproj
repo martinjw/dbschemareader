@@ -19,6 +19,7 @@
 2.7.8: PostgreSql sequences missing thanks @groogiam
 2.7.9: PostgreSql sqlgen escaping thanks @r-work
 2.7.11: CancellationToken leaking into net4 code thanks @KeithLRobertson
+2.7.12: reader.ViewExists(name)
 	</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
@@ -33,7 +34,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.11</Version>
+    <Version>2.7.12</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
   </PropertyGroup>
 
