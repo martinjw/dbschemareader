@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.PostgreSql
@@ -11,10 +12,6 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         {
         }
 
-        protected override string AlterColumnFormat
-        {
-            get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }
-        }
         public override string AddTrigger(DatabaseTable databaseTable, DatabaseTrigger trigger)
         {
             //CREATE TRIGGER notify_dept AFTER INSERT OR UPDATE OR DELETE
@@ -100,28 +97,28 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             }
 
             var dtw = new DataTypeWriter();
-            var dataType = dtw.WriteDataType(databaseColumn);
-
-            var tableName = TableName(databaseTable);
-            var columnName = Escape(databaseColumn.Name);
-            var columnDef = columnName + " TYPE " +
-                            dataType
-                                //Not null must be done as separate statement
+            var dataType = dtw.WriteDataType(databaseColumn)
+                //Not null must be done as separate statement
                                 .Replace("NOT NULL", String.Empty)
                                 .TrimEnd();
 
+            var tableName = TableName(databaseTable);
+            var columnName = Escape(databaseColumn.Name);
+
             //https://www.postgresql.org/docs/current/sql-altertable.html
-            //TODO ALTER COLUMN TYPE [ USING CAST(name AS type) ] #132
             //defaults #135
             var setDefault = AlterColumnDefaultValue(databaseColumn, originalColumn, tableName, columnName);
 
-            return comment +
-                   Environment.NewLine +
-                   string.Format(CultureInfo.InvariantCulture,
-                       AlterColumnFormat,
-                       tableName,
-                       columnDef) + setDefault +
-                   $"\r\nALTER TABLE {tableName} ALTER COLUMN {columnName} {(databaseColumn.Nullable ? "DROP" : "SET")} NOT NULL;";
+            var sb = new StringBuilder();
+            sb.AppendLine(comment);
+            //#132 with USING CAST(name AS type)
+            sb.AppendLine($"ALTER TABLE {tableName} ALTER COLUMN {columnName} TYPE {dataType} USING CAST({columnName} AS {dataType});");
+            if (!string.IsNullOrEmpty(setDefault))
+            {
+                sb.AppendLine(setDefault);
+            }
+            sb.AppendLine($"ALTER TABLE {tableName} ALTER COLUMN {columnName} {(databaseColumn.Nullable ? "DROP" : "SET")} NOT NULL;");
+            return sb.ToString();
         }
 
         private static string AlterColumnDefaultValue(DatabaseColumn databaseColumn, DatabaseColumn originalColumn,
@@ -130,24 +127,23 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             //set or drop default will also be a separate alter statement (if required)
             var setDefault = string.Empty;
             //defaultValue may be empty string- maybe just check null here??
-            if (originalColumn == null && !string.IsNullOrEmpty(databaseColumn.DefaultValue))
+            if (originalColumn == null && databaseColumn.DefaultValue != null)
             {
-                return Environment.NewLine +
-                             $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT '{databaseColumn.DefaultValue}';";
+                var defaultQuote = databaseColumn.DataType.IsString ? "'" : string.Empty;
+                return $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT {defaultQuote}{databaseColumn.DefaultValue}{defaultQuote};";
             }
 
             if (originalColumn != null && originalColumn.DefaultValue != databaseColumn.DefaultValue)
             {
                 //changed default
-                if (string.IsNullOrEmpty(databaseColumn.DefaultValue))
+                if (databaseColumn.DefaultValue == null)
                 {
-                    setDefault = Environment.NewLine + 
-                                 $"ALTER TABLE {tableName} ALTER COLUMN {columnName} DROP DEFAULT;";
+                    setDefault = $"ALTER TABLE {tableName} ALTER COLUMN {columnName} DROP DEFAULT;";
                 }
                 else
                 {
-                    setDefault = Environment.NewLine +
-                                 $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT '{databaseColumn.DefaultValue}';";
+                    var defaultQuote = databaseColumn.DataType.IsString ? "'" : string.Empty;
+                    setDefault = $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT {defaultQuote}{databaseColumn.DefaultValue}{defaultQuote};";
                 }
             }
 
