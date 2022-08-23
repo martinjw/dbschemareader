@@ -184,12 +184,14 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             table.SchemaOwner = "dbo";
             var column = table.FindColumn("NAME");
             column.Length = 40;
+            column.DefaultValue = "Bob";
 
             //act
             var sql = migration.AlterColumn(table, column, null);
 
             //assert
             Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" TYPE VARCHAR (40)"), "names should be quoted correctly");
+            Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" SET DEFAULT 'Bob';"), "default is set");
             Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" SET NOT NULL;"), "NULL should be handled correctly");
         }
     }

@@ -63,7 +63,9 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         /// <summary>
         /// Alters the column.
         /// </summary>
-        /// <param name="databaseTable">The database table.</param><param name="databaseColumn">The database column.</param><param name="originalColumn">The original column.</param>
+        /// <param name="databaseTable">The database table.</param>
+        /// <param name="databaseColumn">The database column.</param>
+        /// <param name="originalColumn">The original column.</param>
         /// <returns/>
         public override string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
         {
@@ -100,16 +102,55 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             var dtw = new DataTypeWriter();
             var dataType = dtw.WriteDataType(databaseColumn);
 
-            var columnDef = Escape(databaseColumn.Name) + " TYPE " +
-                            dataType.TrimEnd();
+            var tableName = TableName(databaseTable);
+            var columnName = Escape(databaseColumn.Name);
+            var columnDef = columnName + " TYPE " +
+                            dataType
+                                //Not null must be done as separate statement
+                                .Replace("NOT NULL", String.Empty)
+                                .TrimEnd();
+
+            //https://www.postgresql.org/docs/current/sql-altertable.html
+            //TODO ALTER COLUMN TYPE [ USING CAST(name AS type) ] #132
+            //defaults #135
+            var setDefault = AlterColumnDefaultValue(databaseColumn, originalColumn, tableName, columnName);
+
             return comment +
-                Environment.NewLine +
-                string.Format(CultureInfo.InvariantCulture,
-                    AlterColumnFormat,
-                    TableName(databaseTable),
-                    columnDef.Replace("NOT NULL", String.Empty)) +
-               string.Format("\r\nALTER TABLE {0} ALTER COLUMN {1} {2} NOT NULL;",
-               TableName(databaseTable), Escape(databaseColumn.Name), (databaseColumn.Nullable ? "DROP" : "SET"));
+                   Environment.NewLine +
+                   string.Format(CultureInfo.InvariantCulture,
+                       AlterColumnFormat,
+                       tableName,
+                       columnDef) + setDefault +
+                   $"\r\nALTER TABLE {tableName} ALTER COLUMN {columnName} {(databaseColumn.Nullable ? "DROP" : "SET")} NOT NULL;";
+        }
+
+        private static string AlterColumnDefaultValue(DatabaseColumn databaseColumn, DatabaseColumn originalColumn,
+            string tableName, string columnName)
+        {
+            //set or drop default will also be a separate alter statement (if required)
+            var setDefault = string.Empty;
+            if (originalColumn == null && !string.IsNullOrEmpty(databaseColumn.DefaultValue))
+            {
+                return Environment.NewLine +
+                             $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT '{databaseColumn.DefaultValue}';";
+            }
+
+            if (originalColumn != null && originalColumn.DefaultValue != databaseColumn.DefaultValue)
+            {
+                //changed default
+                if (string.IsNullOrEmpty(databaseColumn.DefaultValue))
+                {
+                    setDefault = Environment.NewLine + 
+                                 $"ALTER TABLE {tableName} ALTER COLUMN {columnName} DROP DEFAULT;";
+                }
+                else
+                {
+                    setDefault = Environment.NewLine +
+                                 $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT '{databaseColumn.DefaultValue}';";
+                }
+            }
+
+            return setDefault;
         }
     }
 }
