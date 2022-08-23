@@ -129,6 +129,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         {
             //set or drop default will also be a separate alter statement (if required)
             var setDefault = string.Empty;
+            //defaultValue may be empty string- maybe just check null here??
             if (originalColumn == null && !string.IsNullOrEmpty(databaseColumn.DefaultValue))
             {
                 return Environment.NewLine +
