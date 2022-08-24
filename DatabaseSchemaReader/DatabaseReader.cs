@@ -437,7 +437,13 @@ namespace DatabaseSchemaReader
             if (ct.IsCancellationRequested) return table;
 
             if (DatabaseSchema.DataTypes.Count > 0)
+            {
                 DatabaseSchemaFixer.UpdateDataTypes(DatabaseSchema);
+            }
+            else
+            {
+                DataTypes();
+            }
 
             return table;
         }
