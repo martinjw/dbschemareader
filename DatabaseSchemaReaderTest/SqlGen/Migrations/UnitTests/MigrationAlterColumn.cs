@@ -194,5 +194,26 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" SET DEFAULT 'Bob';"), "default is set");
             Assert.IsTrue(sql.Contains("ALTER TABLE \"dbo\".\"Orders\" ALTER COLUMN \"NAME\" SET NOT NULL;"), "NULL should be handled correctly");
         }
+
+
+        [TestMethod]
+        public void TestPostgreSqlWithFunction()
+        {
+            //#131
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.PostgreSql).MigrationGenerator();
+
+            var table = MigrationCommon.CreateTestTable("Orders")
+                .AddColumn<DateTime>("CreationDate").Table;
+            var column = table.FindColumn("CreationDate");
+            column.DefaultValue = "now()";
+
+            //act
+            var sql = migration.AlterColumn(table, column, null);
+
+            //assert
+            Assert.IsTrue(sql.Contains("ALTER TABLE \"Orders\" ALTER COLUMN \"CreationDate\" SET DEFAULT now();"), "names should be quoted correctly");
+
+        }
     }
 }

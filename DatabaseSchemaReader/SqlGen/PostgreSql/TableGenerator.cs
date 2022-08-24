@@ -167,8 +167,16 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             else //numeric default
             {
                 string d;
-                //remove any parenthesis
+                //remove any parenthesis except for common functions (nextval, now, random). Any others?
                 if (defaultValue.IndexOf("nextval(", StringComparison.OrdinalIgnoreCase) != -1)
+                {
+                    d = defaultValue;
+                }
+                else if (defaultValue.IndexOf("now(", StringComparison.OrdinalIgnoreCase) != -1)
+                {
+                    d = defaultValue;
+                }
+                else if (defaultValue.IndexOf("random(", StringComparison.OrdinalIgnoreCase) != -1)
                 {
                     d = defaultValue;
                 }
