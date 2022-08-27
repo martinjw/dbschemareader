@@ -48,7 +48,7 @@ namespace DatabaseSchemaReader.DataSchema
 
 
         /// <summary>
-        /// Adds a table.
+        /// Adds a table (with no columns).
         /// </summary>
         /// <param name="databaseSchema">The database schema.</param>
         /// <param name="tableName">Name of the table.</param>
@@ -59,10 +59,24 @@ namespace DatabaseSchemaReader.DataSchema
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName", "tableName must not be null");
 
             var table = new DatabaseTable { Name = tableName };
-            databaseSchema.Tables.Add(table);
-            table.DatabaseSchema = databaseSchema;
-            table.SchemaOwner = databaseSchema.Owner;
-            return table;
+            return databaseSchema.AddTable(table);
+        }
+
+        /// <summary>
+        /// Adds a table.
+        /// </summary>
+        /// <param name="databaseSchema">The database schema.</param>
+        /// <param name="databaseTable">Table.</param>
+        /// <returns></returns>
+        public static DatabaseTable AddTable(this DatabaseSchema databaseSchema, DatabaseTable databaseTable)
+        {
+            if (databaseSchema == null) throw new ArgumentNullException("databaseSchema", "databaseSchema must not be null");
+            if (databaseTable == null) throw new ArgumentNullException("databaseTable", "databaseTable must not be null");
+
+            databaseSchema.Tables.Add(databaseTable);
+            databaseTable.DatabaseSchema = databaseSchema;
+            databaseTable.SchemaOwner = databaseSchema.Owner;
+            return databaseTable;
         }
 
         /// <summary>

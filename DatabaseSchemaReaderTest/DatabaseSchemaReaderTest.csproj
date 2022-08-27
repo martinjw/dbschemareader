@@ -381,6 +381,7 @@
     <Compile Include="SqlGen\Migrations\UnitTests\MigrationCreateTable.cs" />
     <Compile Include="SqlGen\Migrations\MigrationDb2Test.cs" />
     <Compile Include="SqlGen\Migrations\MigrationPostgreSqlTest.cs" />
+    <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropTable.cs" />
     <Compile Include="SqlGen\MySql\DateTimeDataTypesTest.cs" />
     <Compile Include="SqlGen\MySql\NumberDataTypesTest.cs" />
     <Compile Include="SqlGen\MySql\StringDataTypesTest.cs" />
