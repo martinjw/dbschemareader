@@ -34,8 +34,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         public override string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "ALTER TABLE {0} DROP COLUMN {1} CASCADE;", 
-                TableName(databaseTable), 
+                "ALTER TABLE {0} DROP COLUMN {1} CASCADE;",
+                TableName(databaseTable),
                 Escape(databaseColumn.Name));
         }
 
@@ -98,7 +98,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
             var dtw = new DataTypeWriter();
             var dataType = dtw.WriteDataType(databaseColumn)
-                //Not null must be done as separate statement
+                                //Not null must be done as separate statement
                                 .Replace("NOT NULL", String.Empty)
                                 .TrimEnd();
 
@@ -129,7 +129,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             //defaultValue may be empty string- maybe just check null here??
             if (originalColumn == null && databaseColumn.DefaultValue != null)
             {
-                var defaultQuote = databaseColumn.DataType.IsString ? "'" : string.Empty;
+                var defaultQuote = string.Empty;
+                if (databaseColumn.DataType != null && databaseColumn.DataType.IsString) defaultQuote = "'";
                 return $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT {defaultQuote}{databaseColumn.DefaultValue}{defaultQuote};";
             }
 
@@ -142,7 +143,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 }
                 else
                 {
-                    var defaultQuote = databaseColumn.DataType.IsString ? "'" : string.Empty;
+                    var defaultQuote = string.Empty;
+                    if (databaseColumn.DataType != null && databaseColumn.DataType.IsString) defaultQuote = "'";
                     setDefault = $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET DEFAULT {defaultQuote}{databaseColumn.DefaultValue}{defaultQuote};";
                 }
             }

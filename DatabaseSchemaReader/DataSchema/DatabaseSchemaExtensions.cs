@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DatabaseSchemaReader.ProviderSchemaReaders;
+using DatabaseSchemaReader.ProviderSchemaReaders.Adapters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -226,6 +228,23 @@ namespace DatabaseSchemaReader.DataSchema
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Add datatypes for specific database type (when building schema manually, not via <see cref="DatabaseReader"/>).
+        /// </summary>
+        /// <param name="databaseSchema"></param>
+        /// <param name="sqlType">Only databases in <see cref="SqlType"/> enum supported with no provider calls</param>
+        public static DatabaseSchema AddDataTypes(this DatabaseSchema databaseSchema, SqlType sqlType)
+        {
+            var schemaParameters = new SchemaParameters(databaseSchema.ConnectionString, sqlType);
+            var readerAdapter = ReaderAdapterFactory.Create(schemaParameters);
+            var list = readerAdapter.DataTypes();
+            databaseSchema.DataTypes.Clear();
+            databaseSchema.DataTypes.AddRange(list);
+            DatabaseSchemaFixer.UpdateDataTypes(databaseSchema);
+
+            return databaseSchema;
         }
     }
 }

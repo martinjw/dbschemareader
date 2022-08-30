@@ -1,6 +1,8 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader;
+using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySqlX.XDevAPI.Relational;
 
 namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
 {
@@ -33,6 +35,25 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
             //assert
             Assert.IsTrue(ddl.Contains("INDEX TableIndex ON AllTypes(Name)"));
             Assert.IsTrue(ddl.Contains("COMMENT ON COLUMN AllTypes.Name IS 'Name column';"));
+        }
+
+        [TestMethod]
+        public void TableWithBooleanType()
+        {
+            var schema = new DatabaseSchema(null, SqlType.PostgreSql)
+                .AddDataTypes(SqlType.PostgreSql);
+            var isActive = schema.AddTable("BOOLEANS")
+                .AddColumn("ID", "NUMBER(6,0)").AddPrimaryKey()
+                .AddColumn("IS_ACTIVE", "Bool");
+            isActive.DefaultValue = "TRUE";
+
+            var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
+            var tableGen = factory.TableGenerator(isActive.Table);
+
+            //act
+            var ddl = tableGen.Write();
+            //assert
+            Assert.IsTrue(ddl.Contains("\"IS_ACTIVE\" BOOL  NOT NULL DEFAULT TRUE"));
         }
     }
 }

@@ -151,39 +151,66 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             return sql;
         }
 
+        private static bool IsBooleanColumn(DatabaseColumn column)
+        {
+            if (column.DataType == null)
+            {
+                return string.Equals(column.DbDataType, "bool", StringComparison.OrdinalIgnoreCase);
+            }
+            return column.DataType.GetNetType() == typeof(bool);
+        }
+
         private static string WriteDefaultValue(DatabaseColumn column)
         {
             const string defaultConstraint = " DEFAULT ";
-            var defaultValue = FixDefaultValue(column.DefaultValue);
+            var defaultValue = FixDefaultValue(column.DefaultValue).Trim();
+            if (defaultValue.StartsWith("(") && defaultValue.EndsWith(")"))
+            {
+                defaultValue = defaultValue.Substring(1, defaultValue.Length - 2);
+            }
             if (IsStringColumn(column))
             {
                 defaultValue = defaultConstraint + "'" + defaultValue + "'";
             }
-            else if (column.DataType != null && column.DataType.GetNetType() == typeof(bool))
+            else if (IsBooleanColumn(column))
             {
-                var d = defaultValue.Trim(new[] { '(', ')' });
-                defaultValue = defaultConstraint + (d == "1" ? "TRUE" : "FALSE");
+                switch (defaultValue.ToUpperInvariant())
+                {
+                    //true, yes, on, 1 or prefixes- t or y
+                    case "T":
+                    case "TRUE":
+                    case "ON":
+                    case "1":
+                    case "Y":
+                    case "YES":
+                        defaultValue = "TRUE";
+                        break;
+                    default:
+                        defaultValue = "FALSE";
+                        break;
+                }
+                defaultValue = defaultConstraint + defaultValue;
             }
             else //numeric default
             {
-                string d;
-                //remove any parenthesis except for common functions (nextval, now, random). Any others?
-                if (defaultValue.IndexOf("nextval(", StringComparison.OrdinalIgnoreCase) != -1)
-                {
-                    d = defaultValue;
-                }
-                else if (defaultValue.IndexOf("now(", StringComparison.OrdinalIgnoreCase) != -1)
-                {
-                    d = defaultValue;
-                }
-                else if (defaultValue.IndexOf("random(", StringComparison.OrdinalIgnoreCase) != -1)
-                {
-                    d = defaultValue;
-                }
-                else
-                {
-                    d = defaultValue.Trim(new[] { '(', ')' });
-                }
+                string d = defaultValue;
+                ////remove any parenthesis except for common functions (nextval, now, random). Any others?
+                //if (defaultValue.IndexOf("nextval(", StringComparison.OrdinalIgnoreCase) != -1)
+                //{
+                //    d
+                //}
+                //else if (defaultValue.IndexOf("now(", StringComparison.OrdinalIgnoreCase) != -1)
+                //{
+                //    d = defaultValue;
+                //}
+                //else if (defaultValue.IndexOf("random(", StringComparison.OrdinalIgnoreCase) != -1)
+                //{
+                //    d = defaultValue;
+                //}
+                //else
+                //{
+                //    d = defaultValue.Trim(new[] { '(', ')' });
+                //}
                 //special case casting. What about other single integers?
                 if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
                     d = "((0::text)::money)"; //cast from int to money. Weird.
