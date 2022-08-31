@@ -145,13 +145,18 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
             var clustered = string.IsNullOrEmpty(index.IndexType?.Trim()) ? string.Empty : index.IndexType + " ";
 
-            return string.Format(CultureInfo.InvariantCulture,
-                       "CREATE {0}{4}INDEX {1} ON {2}({3})",
-                       indexType, //must have trailing space
-                       Escape(index.Name),
-                       TableName(databaseTable),
-                       GetColumnList(index.Columns.Select(i => i.Name)),
-                       clustered) + LineEnding();
+            var format = string.Format(CultureInfo.InvariantCulture,
+                "CREATE {0}{4}INDEX {1} ON {2}({3})",
+                indexType, //must have trailing space
+                Escape(index.Name),
+                TableName(databaseTable),
+                GetColumnList(index.Columns.Select(i => i.Name)),
+                clustered);
+            if (!string.IsNullOrEmpty(index.Filter))
+            {
+                format = $"{format} WHERE {index.Filter}";
+            }
+            return format + LineEnding();
         }
     }
 }

@@ -60,6 +60,11 @@ namespace DatabaseSchemaReader.DataSchema
         public List<DatabaseColumn> Columns { get { return _columns; } }
 
         /// <summary>
+        /// Filtered index definition (where ...)
+        /// </summary>
+        public string Filter { get; set; }
+
+        /// <summary>
         /// Returns the columns of the parent table that are indexed.
         /// </summary>
         /// <param name="parentTable">The parent table.</param>

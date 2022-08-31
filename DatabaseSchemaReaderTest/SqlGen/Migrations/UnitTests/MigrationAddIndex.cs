@@ -348,5 +348,25 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             //assert
             Assert.IsTrue(sql.StartsWith("CREATE UNIQUE INDEX \"UI_COUNTRY\" ON \"dbo\".\"Orders\"(\"COUNTRY\")", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
+
+        [TestMethod]
+        public void TestFilteredSqlServerIndex()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = MigrationCommon.CreateNewColumn();
+            var index = MigrationCommon.CreateUniqueIndex(column, "COUNTRY");
+            index.Filter = "COUNTRY IS NOT NULL";
+
+            //act
+            var sql = migration.AddIndex(table, index);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE UNIQUE INDEX [UI_COUNTRY] ON [dbo].[Orders]([COUNTRY]) WHERE COUNTRY IS NOT NULL", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
     }
 }

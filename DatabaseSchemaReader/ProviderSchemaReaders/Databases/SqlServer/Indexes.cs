@@ -23,7 +23,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
      ColumnName = col.name,
      INDEX_TYPE = ind.type_desc,
      IsPrimary = is_primary_key,
-     IsUnique = is_unique
+     IsUnique = is_unique,
+     Filter = ind.filter_definition
 FROM 
      sys.indexes ind 
 INNER JOIN 
@@ -63,6 +64,7 @@ ORDER BY
                     Name = name,
                     IndexType = record.GetString("INDEX_TYPE"),
                     IsUnique = record.GetBoolean("IsUnique"),
+                    Filter = record.GetString("Filter")
                 };
                 if (record.GetBoolean("IsPrimary"))
                 {
