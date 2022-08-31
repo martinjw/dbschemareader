@@ -199,8 +199,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
 
             //assert
 
-            Assert.IsTrue(sql.Contains("DROP INDEX [idx_orderId] ON [Customer];"), "should drop index");
-            Assert.IsTrue(sql.Contains("ALTER TABLE [Customer] DROP CONSTRAINT [fk_cust_orders]"), "should drop fk");
+            Assert.IsTrue(sql.Contains("DROP INDEX IF EXISTS [idx_orderId] ON [Customer];"), "should drop index");
+            Assert.IsTrue(sql.Contains("ALTER TABLE [Customer] DROP CONSTRAINT IF EXISTS [fk_cust_orders]"), "should drop fk");
             Assert.IsTrue(sql.Contains("ALTER TABLE [Customer] DROP COLUMN [OrderId];"), "should drop column");
         }
     }

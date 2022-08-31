@@ -64,7 +64,7 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //assert
             Assert.IsTrue(result.Contains("ALTER TABLE [Test] ADD [D] INT"), "add the new column");
-            Assert.IsTrue(result.Contains("ALTER TABLE [Test] DROP CONSTRAINT [PK_TEST]"), "drop the old pk");
+            Assert.IsTrue(result.Contains("ALTER TABLE [Test] DROP CONSTRAINT IF EXISTS [PK_TEST]"), "drop the old pk");
             Assert.IsTrue(result.Contains("ALTER TABLE [Test] ADD CONSTRAINT [PK_TEST] PRIMARY KEY ([D])"), "add the new pk");
         }
 
@@ -90,8 +90,33 @@ namespace DatabaseSchemaReaderTest.Compare
 
             //assert
             Assert.IsTrue(result.Contains("ALTER TABLE [Test] ADD [D] INT"), "add the new column");
-            Assert.IsTrue(result.Contains("ALTER TABLE [Test] DROP CONSTRAINT [UK_TEST]"), "drop the old unique key");
+            Assert.IsTrue(result.Contains("ALTER TABLE [Test] DROP CONSTRAINT IF EXISTS [UK_TEST]"), "drop the old unique key");
             Assert.IsTrue(result.Contains("ALTER TABLE [Test] ADD CONSTRAINT [UK_TEST] UNIQUE ([D])"), "add the new unique key");
+        }
+
+        [TestMethod]
+        public void WhenDroppedColumn()
+        {
+            //arrange
+            var sb = new List<CompareResult>();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareTables(sb, writer);
+            var baseTable = CreateTable().AddColumn("D", DbType.Int32).AddIndex("idx_d").Table;
+            var compareTable = CreateTable();
+            var baseTables = new List<DatabaseTable> { baseTable };
+            var compareTables = new List<DatabaseTable> { compareTable };
+
+            //act
+            target.Execute(baseTables, compareTables);
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
+
+            //assert
+            Assert.IsTrue(result.Contains("DROP INDEX IF EXISTS [idx_d] ON [Test];"), "The index is dropped as well as the column");
+            //normally we add a column, then add indexes/constraints
+            //but when we drop, the order is reversed. we have to drop the indexes/constraints first (unless the db supports DROP CASCADE)
+            //for SqlServer we can use IF EXISTS and repeat the drop index
+            //for Oracle or MySql, there is no IF EXISTS, so the 2nd drop index will fail. You must wrap it with exception trapping.
+            //Dropping columns is rare so this may not be a common issue in practice
         }
 
     }

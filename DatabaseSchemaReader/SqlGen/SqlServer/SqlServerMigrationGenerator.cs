@@ -60,13 +60,18 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 if (df != null)
                 {
                     var sb = new StringBuilder();
-                    sb.AppendLine("ALTER TABLE " + TableName(databaseTable)
-                                  + " DROP CONSTRAINT " + Escape(df.Name) + ";");
+                    sb.AppendFormat(DropForeignKeyFormat, TableName(databaseTable), Escape(df.Name))
+                        .AppendLine();
                     sb.AppendLine(dropColumn);
                     dropColumn = sb.ToString();
                 }
             }
             return dropColumn;
+        }
+
+        protected override string DropForeignKeyFormat
+        {
+            get { return "ALTER TABLE {0} DROP CONSTRAINT IF EXISTS {1}"; }
         }
 
         private static DatabaseConstraint FindDefaultConstraint(DatabaseTable databaseTable, string databaseColumnName)
@@ -85,7 +90,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             if (df != null)
             {
                 sb.AppendLine("ALTER TABLE " + TableName(databaseTable)
-                              + " DROP CONSTRAINT " + Escape(df.Name) + ";");
+                              + " DROP CONSTRAINT IF EXISTS " + Escape(df.Name) + ";");
             }
             return sb.ToString();
         }
@@ -128,7 +133,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
             //no schema on index name, only on table
             return string.Format(CultureInfo.InvariantCulture,
-                "DROP INDEX {0} ON {1};",
+                "DROP INDEX IF EXISTS {0} ON {1};",
                 Escape(index.Name),
                 TableName(databaseTable));
         }

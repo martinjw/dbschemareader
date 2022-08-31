@@ -73,7 +73,6 @@ namespace DatabaseSchemaReader.Compare
                 copy.Columns.Remove(kv.Value);
                 CreateResult(ResultType.Delete, baseTable, kv.Key,
                     _writer.DropColumn(copy, kv.Value));
-                continue;
             }
         }
 
