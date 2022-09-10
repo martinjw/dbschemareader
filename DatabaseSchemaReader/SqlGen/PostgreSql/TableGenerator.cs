@@ -38,7 +38,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             foreach (var column in Table.Columns.Where(c => !string.IsNullOrEmpty(c.Description)))
             {
                 sb.Append("COMMENT ON COLUMN ");
-                sb.Append(tableName + "." + (EscapeNames? formatProvider.Escape(column.Name): column.Name));
+                sb.Append(tableName + "." + (EscapeNames ? formatProvider.Escape(column.Name) : column.Name));
                 sb.Append(" IS '");
                 sb.Append(column.Description);
                 sb.AppendLine("'" + formatProvider.LineEnding());
@@ -79,10 +79,12 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         }
         private ConstraintWriter CreateConstraintWriter()
         {
-            return new ConstraintWriter(Table) { 
-                IncludeSchema = IncludeSchema, 
-                TranslateCheckConstraint = TranslateCheckExpression, 
-                EscapeNames = EscapeNames};
+            return new ConstraintWriter(Table)
+            {
+                IncludeSchema = IncludeSchema,
+                TranslateCheckConstraint = TranslateCheckExpression,
+                EscapeNames = EscapeNames
+            };
         }
         private static string TranslateCheckExpression(string expression)
         {
@@ -99,7 +101,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
-            return new PostgreSqlMigrationGenerator { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames};
+            return new PostgreSqlMigrationGenerator { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames };
         }
         private void AddIndexes(StringBuilder sb)
         {
@@ -170,7 +172,8 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             }
             if (IsStringColumn(column))
             {
-                defaultValue = defaultConstraint + "'" + defaultValue + "'";
+                //if it already has quotes, trim them
+                defaultValue = defaultConstraint + "'" + defaultValue.Trim('\'') + "'";
             }
             else if (IsBooleanColumn(column))
             {
