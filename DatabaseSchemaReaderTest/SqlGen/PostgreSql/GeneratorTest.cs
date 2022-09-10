@@ -1,8 +1,8 @@
 ﻿using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
+using DatabaseSchemaReaderTest.IntegrationTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MySqlX.XDevAPI.Relational;
 
 namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
 {
@@ -15,13 +15,14 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
             //arrange
             var schema = new DatabaseSchema(null, SqlType.PostgreSql);
             var table = schema.AddTable("AllTypes")
-                .AddColumn<int>("Id").AddIdentity()
+                .AddColumn<int>("Id").AddIdentity().AddPrimaryKey("PK")
                 .AddColumn<string>("Name").AddLength(200)
                 .AddColumn<int>("Age")
                 .AddColumn<int>("Period")
                 .Table;
             var column = table.FindColumn("Name");
             table.AddIndex("TableIndex", new[] {column});
+            table.Indexes.Find(i=> i.Name =="TableIndex").IsUnique = true;
             table.Description = "Test table";
             column.Description = "Name column";
 
@@ -33,7 +34,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
             var ddl = tableGen.Write();
 
             //assert
-            Assert.IsTrue(ddl.Contains("INDEX TableIndex ON AllTypes(Name)"));
+            Assert.IsTrue(ddl.Contains("CREATE UNIQUE INDEX TableIndex ON AllTypes(Name)"));
             Assert.IsTrue(ddl.Contains("COMMENT ON COLUMN AllTypes.Name IS 'Name column';"));
         }
 
@@ -54,6 +55,27 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
             var ddl = tableGen.Write();
             //assert
             Assert.IsTrue(ddl.Contains("\"IS_ACTIVE\" BOOL  NOT NULL DEFAULT TRUE"));
+        }
+
+        [TestMethod, TestCategory("Postgresql")]
+        public void IntegrationTest()
+        {
+            const string providername = "Npgsql";
+            var connectionString = ConnectionStrings.PostgreSql;
+            ProviderChecker.Check(providername, connectionString);
+
+            var dbReader = new DatabaseReader(connectionString, providername);
+            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
+            var schema = dbReader.ReadAll();
+            var city = schema.FindTableByName("city");
+            var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
+            var tableGen = factory.TableGenerator(city);
+
+            //act
+            var ddl = tableGen.Write();
+            //assert
+            Assert.IsTrue(ddl.Contains("CREATE INDEX \"idx_fk_country_id\" ON \"public\".\"city\"(\"country_id\");"));
+
         }
     }
 }
