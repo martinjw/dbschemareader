@@ -35,7 +35,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.14</Version>
+    <Version>2.7.15</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
   </PropertyGroup>
 
