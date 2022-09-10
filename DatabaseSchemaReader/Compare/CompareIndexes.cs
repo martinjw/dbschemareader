@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
@@ -32,9 +33,10 @@ namespace DatabaseSchemaReader.Compare
                         _writer.DropIndex(databaseTable, index));
                     continue;
                 }
-                if (!ColumnsEqual(index, match) || (index.IndexType != match.IndexType))
+                if (!ColumnsEqual(index, match) || (index.IndexType != match.IndexType)
+                    || index.IsUnique != match.IsUnique || !string.Equals(index.Filter, match.Filter))
                 {
-                    CreateResult(ResultType.Add, databaseTable, indexName,
+                    CreateResult(ResultType.Change, databaseTable, indexName,
                        _writer.DropIndex(databaseTable, index) + Environment.NewLine +
                        _writer.AddIndex(databaseTable, match));
                 }

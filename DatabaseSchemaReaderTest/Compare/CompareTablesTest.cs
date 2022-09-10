@@ -1,10 +1,10 @@
-using System;
-using System.Data;
-using System.Linq;
-using System.Collections.Generic;
 using DatabaseSchemaReader.Compare;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 
 namespace DatabaseSchemaReaderTest.Compare
 {
@@ -68,7 +68,6 @@ namespace DatabaseSchemaReaderTest.Compare
             Assert.IsTrue(result.Contains("ALTER TABLE [Test] ADD CONSTRAINT [PK_TEST] PRIMARY KEY ([D])"), "add the new pk");
         }
 
-
         [TestMethod]
         public void WhenTableUniqueConstraintChanged()
         {
@@ -119,5 +118,58 @@ namespace DatabaseSchemaReaderTest.Compare
             //Dropping columns is rare so this may not be a common issue in practice
         }
 
+        [TestMethod]
+        public void WhenTableIndexChanged()
+        {
+            //arrange
+            var sb = new List<CompareResult>();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareTables(sb, writer);
+
+            var baseTable = CreateTable();
+            baseTable.FindColumn("B").AddIndex("IDX_B");
+            var baseTables = new List<DatabaseTable> { baseTable };
+            var compareTable = CreateTable();
+            compareTable.FindColumn("B").AddIndex("IDX_B");
+            compareTable.Indexes.Find(i => i.Name == "IDX_B").IsUnique = true;
+            var compareTables = new List<DatabaseTable> { compareTable };
+
+            //act
+            target.Execute(baseTables, compareTables);
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
+
+            //assert
+            Assert.IsTrue(sb.Count == 1, "1 change");
+            Assert.IsTrue(sb.First().ResultType == ResultType.Change, "It is a change, although will always be a drop/add");
+            Assert.IsTrue(result.Contains("CREATE UNIQUE NONCLUSTERED INDEX [IDX_B]"), "add the new column");
+        }
+
+
+        [TestMethod]
+        public void WhenTableIndexFilterChanged()
+        {
+            //arrange
+            var sb = new List<CompareResult>();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareTables(sb, writer);
+
+            var baseTable = CreateTable();
+            baseTable.FindColumn("B").AddIndex("IDX_B");
+            var baseTables = new List<DatabaseTable> { baseTable };
+            var compareTable = CreateTable();
+            compareTable.FindColumn("B").AddIndex("IDX_B");
+            compareTable.Indexes.Find(i => i.Name == "IDX_B").Filter = "(B IS NOT NULL)";
+            var compareTables = new List<DatabaseTable> { compareTable };
+
+            //act
+            target.Execute(baseTables, compareTables);
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
+
+            //assert
+            Assert.IsTrue(sb.Count == 1, "1 change");
+            Assert.IsTrue(sb.First().ResultType == ResultType.Change, "It is a change, although will always be a drop/add");
+            Assert.IsTrue(result.Contains("CREATE NONCLUSTERED INDEX [IDX_B] ON [Test]([B]) WHERE (B IS NOT NULL);"), 
+                "add the new column");
+        }
     }
 }
