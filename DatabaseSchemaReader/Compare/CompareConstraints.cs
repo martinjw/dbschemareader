@@ -55,7 +55,9 @@ namespace DatabaseSchemaReader.Compare
                         _writer.AddConstraint(databaseTable, matchConstraint));
                 }
                 if (constraint.ConstraintType == ConstraintType.ForeignKey &&
-                    constraint.RefersToTable != matchConstraint.RefersToTable)
+                    (constraint.RefersToTable != matchConstraint.RefersToTable
+                    || constraint.DeleteRule != matchConstraint.DeleteRule 
+                    || constraint.UpdateRule != matchConstraint.UpdateRule))
                 {
                     //unlikely a foreign key will change the fk table without changing name
                     CreateResult(ResultType.Change, databaseTable, constraintName,

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
-    class CompareIndexes
+    internal class CompareIndexes
     {
         private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
@@ -67,18 +66,17 @@ namespace DatabaseSchemaReader.Compare
             return columnNames1.SequenceEqual(columnNames2);
         }
 
-
         private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
-                {
-                    SchemaObjectType = SchemaObjectType.Index,
-                    ResultType = resultType,
-                    TableName = table.Name,
-                    SchemaOwner = table.SchemaOwner,
-                    Name = name,
-                    Script = script
-                };
+            {
+                SchemaObjectType = SchemaObjectType.Index,
+                ResultType = resultType,
+                TableName = table.Name,
+                SchemaOwner = table.SchemaOwner,
+                Name = name,
+                Script = script
+            };
             _results.Add(result);
         }
     }

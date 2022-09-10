@@ -13,8 +13,9 @@ namespace DatabaseSchemaReaderTest.Compare
     {
         private static DatabaseTable CreateTable()
         {
-            var table = new DatabaseTable();
-            table.Name = "Test";
+            var schema = new DatabaseSchema(null, SqlType.SqlServer)
+                .AddDataTypes(SqlType.SqlServer);
+            var table = schema.AddTable("Test");
             table.AddColumn("A", DbType.Int32).AddPrimaryKey("PK_TEST")
                 .AddColumn("B", DbType.Int32)
                 .AddColumn("C", DbType.String).AddLength(10).AddNullable();
@@ -144,7 +145,6 @@ namespace DatabaseSchemaReaderTest.Compare
             Assert.IsTrue(result.Contains("CREATE UNIQUE NONCLUSTERED INDEX [IDX_B]"), "add the new column");
         }
 
-
         [TestMethod]
         public void WhenTableIndexFilterChanged()
         {
@@ -168,8 +168,37 @@ namespace DatabaseSchemaReaderTest.Compare
             //assert
             Assert.IsTrue(sb.Count == 1, "1 change");
             Assert.IsTrue(sb.First().ResultType == ResultType.Change, "It is a change, although will always be a drop/add");
-            Assert.IsTrue(result.Contains("CREATE NONCLUSTERED INDEX [IDX_B] ON [Test]([B]) WHERE (B IS NOT NULL);"), 
-                "add the new column");
+            Assert.IsTrue(result.Contains("CREATE NONCLUSTERED INDEX [IDX_B] ON [Test]([B]) WHERE (B IS NOT NULL);"),
+                "drop/add the index");
+        }
+
+        [TestMethod]
+        public void WhenTableConstraintChanged()
+        {
+            const string foreignTableName = "CATEGORY";
+            //arrange
+            var sb = new List<CompareResult>();
+            var writer = new ComparisonWriter(SqlType.SqlServer);
+            var target = new CompareTables(sb, writer);
+
+            var baseTable = CreateTable();
+            baseTable.DatabaseSchema.AddTable(foreignTableName).AddColumn<int>("Id").AddPrimaryKey("PK_CAT");
+            baseTable.FindColumn("B").AddForeignKey("FK_B", foreignTableName);
+            var baseTables = new List<DatabaseTable> { baseTable };
+            var compareTable = CreateTable();
+            compareTable.DatabaseSchema.AddTable(foreignTableName).AddColumn<int>("Id").AddPrimaryKey("PK_CAT");
+            compareTable.FindColumn("B").AddForeignKey("FK_B", foreignTableName);
+            compareTable.ForeignKeys.Find(i => i.Name == "FK_B").DeleteRule = "SET null";
+            var compareTables = new List<DatabaseTable> { compareTable };
+
+            //act
+            target.Execute(baseTables, compareTables);
+            var result = string.Join(Environment.NewLine, sb.Select(x => x.Script).ToArray());
+
+            //assert
+            Assert.IsTrue(sb.Count == 1, "1 change");
+            Assert.IsTrue(result.Contains("ALTER TABLE [Test] ADD CONSTRAINT [FK_B] FOREIGN KEY ([B]) REFERENCES [CATEGORY] ([Id]) ON DELETE SET null;"),
+                "add the constraint with new rule");
         }
     }
 }
