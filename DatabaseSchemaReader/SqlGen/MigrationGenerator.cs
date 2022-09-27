@@ -418,6 +418,14 @@ namespace DatabaseSchemaReader.SqlGen
         public virtual string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             var sb = new StringBuilder();
+            if (databaseColumn.IsIndexed)
+            {
+                foreach (var index in databaseTable.Indexes)
+                {
+                    if(!index.Columns.Any(c=> string.Equals(c.Name,databaseColumn.Name))) continue;
+                    sb.AppendLine(DropIndex(databaseTable, index));
+                }
+            }
             if (databaseColumn.IsForeignKey)
             {
                 foreach (var foreignKey in databaseTable.ForeignKeys)

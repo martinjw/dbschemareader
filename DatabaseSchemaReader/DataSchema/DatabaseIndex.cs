@@ -9,7 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     /// Represents an index in the database.
     /// </summary>
     /// <remarks>
-    /// We don't capture if this is a UNIQUE or NONCLUSTERED index.
+    /// We don't capture if this is a NONCLUSTERED index.
     /// </remarks>
     [Serializable]
     public partial class DatabaseIndex : NamedSchemaObject<DatabaseIndex>
@@ -58,6 +58,11 @@ namespace DatabaseSchemaReader.DataSchema
         /// Gets the indexed columns.
         /// </summary>
         public List<DatabaseColumn> Columns { get { return _columns; } }
+
+        /// <summary>
+        /// Filtered index definition (where ...)
+        /// </summary>
+        public string Filter { get; set; }
 
         /// <summary>
         /// Returns the columns of the parent table that are indexed.

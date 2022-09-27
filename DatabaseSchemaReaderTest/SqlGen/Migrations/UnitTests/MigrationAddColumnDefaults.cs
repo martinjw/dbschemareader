@@ -58,5 +58,24 @@ ALTER TABLE "TestTable" ADD CONSTRAINT "PK_TestTable" PRIMARY KEY ("Id");
 
             Assert.IsTrue(ddl.IndexOf("BIGINT NOT NULL DEFAULT nextval('Seq_PK_Generator'),", StringComparison.OrdinalIgnoreCase) != -1, "default value should be included");
         }
+
+        [TestMethod]
+        public void TestPostgreSqlColumnQuotedDefault()
+        {
+            //https://github.com/martinjw/dbschemareader/issues/145
+            //arrange
+            var gen = new DdlGeneratorFactory(SqlType.PostgreSql).MigrationGenerator();
+            var newTable = new DatabaseTable { Name = "TestTable" };
+            newTable.
+                AddColumn<int>("id").AddPrimaryKey("pkTest").
+                AddColumn<string>("Version").DefaultValue = "'0.0.0.0'";
+
+            //act
+            var ddl = gen.AddTable(newTable);
+
+            //assert
+            Assert.IsTrue(ddl.Contains("DEFAULT '0.0.0.0'"));
+
+        }
     }
 }

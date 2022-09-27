@@ -20,7 +20,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
     n.nspname as table_schema,
     t.relname as table_name,
     i.relname as index_name,
-    a.attname as column_name
+    a.attname as column_name,
+    ix.indisunique as is_unique
 FROM
     pg_catalog.pg_class i 
 JOIN
@@ -68,6 +69,7 @@ ORDER BY
                     SchemaOwner = schema,
                     TableName = tableName,
                     Name = name,
+                    IsUnique = record.GetBoolean(4) //isUnique
                 };
                 Result.Add(index);
             }

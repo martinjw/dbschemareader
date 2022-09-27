@@ -108,7 +108,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             //ALTER TABLE [dbo].[Orders] DROP CONSTRAINT [DF_Orders_Name];
             //ALTER TABLE [dbo].[Orders] DROP COLUMN [NAME];
 
-            Assert.IsTrue(sql.Contains("DROP CONSTRAINT [DF_Orders_Name]"), "drop constraint");
+            Assert.IsTrue(sql.Contains("DROP CONSTRAINT IF EXISTS [DF_Orders_Name]"), "drop constraint");
         }
 
         [TestMethod]

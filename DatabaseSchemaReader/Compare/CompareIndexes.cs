@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Compare
 {
-    class CompareIndexes
+    internal class CompareIndexes
     {
         private readonly IList<CompareResult> _results;
         private readonly ComparisonWriter _writer;
@@ -32,9 +32,10 @@ namespace DatabaseSchemaReader.Compare
                         _writer.DropIndex(databaseTable, index));
                     continue;
                 }
-                if (!ColumnsEqual(index, match) || (index.IndexType != match.IndexType))
+                if (!ColumnsEqual(index, match) || (index.IndexType != match.IndexType)
+                    || index.IsUnique != match.IsUnique || !string.Equals(index.Filter, match.Filter))
                 {
-                    CreateResult(ResultType.Add, databaseTable, indexName,
+                    CreateResult(ResultType.Change, databaseTable, indexName,
                        _writer.DropIndex(databaseTable, index) + Environment.NewLine +
                        _writer.AddIndex(databaseTable, match));
                 }
@@ -65,18 +66,17 @@ namespace DatabaseSchemaReader.Compare
             return columnNames1.SequenceEqual(columnNames2);
         }
 
-
         private void CreateResult(ResultType resultType, DatabaseTable table, string name, string script)
         {
             var result = new CompareResult
-                {
-                    SchemaObjectType = SchemaObjectType.Index,
-                    ResultType = resultType,
-                    TableName = table.Name,
-                    SchemaOwner = table.SchemaOwner,
-                    Name = name,
-                    Script = script
-                };
+            {
+                SchemaObjectType = SchemaObjectType.Index,
+                ResultType = resultType,
+                TableName = table.Name,
+                SchemaOwner = table.SchemaOwner,
+                Name = name,
+                Script = script
+            };
             _results.Add(result);
         }
     }
