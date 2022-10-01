@@ -29,19 +29,19 @@ JOIN
 JOIN
     pg_catalog.pg_class t ON ix.indrelid = t.oid 
 JOIN
-    pg_attribute a on t.oid = a.attrelid 
+    pg_attribute a on i.oid = a.attrelid 
 LEFT JOIN
     pg_catalog.pg_namespace n ON n.oid = i.relnamespace
 WHERE
     i.relkind = 'i'
     AND n.nspname not in ('pg_catalog', 'pg_toast')
     AND pg_catalog.pg_table_is_visible(i.oid)
-    AND a.attnum = ANY(ix.indkey)
+    --AND a.attnum = ANY(ix.indkey)
     AND t.relkind = 'r'
     AND (n.nspname = :OWNER OR :OWNER IS NULL)
     AND (t.relname = :TABLENAME OR :TABLENAME IS NULL)
 ORDER BY
-    n.nspname, t.relname, i.relname";
+    n.nspname, t.relname, i.relname, a.attnum";
         }
 
         public IList<DatabaseIndex> Execute(IConnectionAdapter connectionAdapter)
