@@ -21,6 +21,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
     t.relname as table_name,
     i.relname as index_name,
     a.attname as column_name,
+    a.attnum as ordinal,
     ix.indisunique as is_unique
 FROM
     pg_catalog.pg_class i 
@@ -69,7 +70,7 @@ ORDER BY
                     SchemaOwner = schema,
                     TableName = tableName,
                     Name = name,
-                    IsUnique = record.GetBoolean(4) //isUnique
+                    IsUnique = record.GetBoolean(5) //isUnique
                 };
                 Result.Add(index);
             }
@@ -79,6 +80,7 @@ ORDER BY
             var col = new DatabaseColumn
             {
                 Name = colName,
+                Ordinal = record.GetInt("ordinal")
             };
             index.Columns.Add(col);
         }

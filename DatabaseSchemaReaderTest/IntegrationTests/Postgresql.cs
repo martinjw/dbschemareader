@@ -36,6 +36,16 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var schema = dbReader.ReadAll();
             var country = schema.FindTableByName("country");
             Assert.IsTrue(country.Columns.Count > 0);
+
+            //reading index with columns in correct order
+            var rental = schema.FindTableByName("rental");
+            var idx = rental.Indexes.Find(x => 
+                x.Name == "idx_unq_rental_rental_date_inventory_id_customer_id");
+            Assert.IsTrue(idx.IsUnique);
+            Assert.AreEqual(3, idx.Columns.Count);
+            Assert.AreEqual("rental_date", idx.Columns[0].Name);
+            Assert.AreEqual("inventory_id", idx.Columns[1].Name);
+            Assert.AreEqual("customer_id", idx.Columns[2].Name);
         }
 
         [TestMethod, TestCategory("Devart.Postgresql")]
