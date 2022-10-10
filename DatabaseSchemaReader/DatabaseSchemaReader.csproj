@@ -22,7 +22,7 @@
 2.7.12: reader.ViewExists(name)
 2.7.13: PostgreSql sql generation fixes thanks @Arnagos, @cm0201
 2.7.15: PostgreSql sqlgen fix, CompareSchema fixes thanks @Amagos, @r-work
-	</PackageReleaseNotes>
+2.7.16: FK constraints allowed to unique indexes (not just PK/UK) thanks @Amagos	</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -36,7 +36,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.15</Version>
+    <Version>2.7.16</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
   </PropertyGroup>
 
