@@ -133,11 +133,24 @@ namespace DatabaseSchemaReader.DataSchema
             //work item #1023 foreign key references to unique keys
             if (!string.IsNullOrEmpty(RefersToConstraint))
             {
+                if (referencedTable.PrimaryKey != null &&
+                    RefersToConstraint.Equals(referencedTable.PrimaryKey.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return referencedTable.PrimaryKey.Columns;
+                }
                 foreach (var uniqueKey in referencedTable.UniqueKeys)
                 {
                     if (RefersToConstraint.Equals(uniqueKey.Name, StringComparison.OrdinalIgnoreCase))
                     {
                         return uniqueKey.Columns;
+                    }
+                }
+                //#150 foreign key references to unique indexes
+                foreach (var index in referencedTable.Indexes)
+                {
+                    if (RefersToConstraint.Equals(index.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return index.Columns.Select(c=> c.Name);
                     }
                 }
             }
