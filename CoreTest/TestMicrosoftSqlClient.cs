@@ -7,6 +7,9 @@ using DatabaseSchemaReader.Procedures;
 
 namespace CoreTest
 {
+    /// <summary>
+    /// For Core/net6+ you should use the Microsoft.SqlClient. System.Data.SqlClient is netstandard 1.3 and missing some functionality (including dataAdapter used for reading data in these tests)
+    /// </summary>
     [TestClass]
     public class TestMicrosoftSqlClient
     {
