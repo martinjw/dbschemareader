@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Linq;
 using DatabaseSchemaReader.CodeGen;
+using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Procedures;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,6 +13,20 @@ namespace DatabaseSchemaReaderTest.Procedures
     [TestClass]
     public class RunnerTests
     {
+        [TestMethod]
+        public void TestRunnerWithEmptySchema()
+        {
+            var dbReader = TestHelper.GetNorthwindReader();
+            
+            var schema = dbReader.DatabaseSchema;
+            var runner = new ResultSetReader(schema);
+            runner.Execute();
+            //should load sprocs
+            var sproc = schema.StoredProcedures.First();
+            var result = sproc.ResultSets.First();
+            var col = result.Columns.First();
+            //Assert.IsNotNull(col.DataType, "Should have loaded a datatype");
+        }
 
         [TestMethod]
         public void TestRunnerWithNorthwind()

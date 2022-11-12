@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.Procedures
 {
@@ -16,6 +17,7 @@ namespace DatabaseSchemaReader.Procedures
         private readonly DatabaseSchema _schema;
         private DbProviderFactory _factory;
         private readonly bool _isOracle;
+        private readonly IList<DataType> _dataTypes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultSetReader"/> class.
@@ -33,6 +35,7 @@ namespace DatabaseSchemaReader.Procedures
 
             _schema = schema;
             _isOracle = (schema.Provider.IndexOf("Oracle", StringComparison.OrdinalIgnoreCase) != -1);
+            _dataTypes = new List<DataType>();
         }
 
 #if !NETSTANDARD2_0
@@ -65,6 +68,21 @@ namespace DatabaseSchemaReader.Procedures
 #else
             if (_factory == null) _factory = DbProviderFactories.GetFactory(_schema.Provider);
 #endif
+            if (!_schema.StoredProcedures.Any())
+            {
+                //didn't do a Read before calling this
+                var reader = new DatabaseReader(dbConnection);
+                reader.Owner = _schema.Owner;
+                _schema.DataTypes.AddRange( reader.DataTypes());
+                _schema.StoredProcedures.AddRange(reader.AllStoredProcedures());
+            }
+
+            if (!_schema.DataTypes.Any())
+            {
+                var reader = new DatabaseReader(dbConnection);
+                reader.Owner = _schema.Owner;
+                _schema.DataTypes.AddRange(reader.DataTypes());
+            }
 
             foreach (var procedure in _schema.StoredProcedures)
             {
@@ -151,7 +169,6 @@ namespace DatabaseSchemaReader.Procedures
                                 Debug.WriteLine(executionName + Environment.NewLine
                                                 + exception.Message);
                             }
-
                         }
                         tx.Rollback();
                     }
@@ -160,7 +177,7 @@ namespace DatabaseSchemaReader.Procedures
             }
         }
 
-        private static void UpdateProcedure(DatabaseStoredProcedure procedure, DataSet resultSet)
+        private void UpdateProcedure(DatabaseStoredProcedure procedure, DataSet resultSet)
         {
             foreach (DataTable table in resultSet.Tables)
             {
@@ -171,6 +188,17 @@ namespace DatabaseSchemaReader.Procedures
                     var dbColumn = new DatabaseColumn();
                     dbColumn.Name = column.ColumnName;
                     dbColumn.DbDataType = column.DataType.Name;
+                    if (!string.IsNullOrEmpty(dbColumn.DbDataType))
+                    {
+                        //add a datatype (not schema datatype, because this is .net types only)
+                        var resultColumnType = _dataTypes.FirstOrDefault(dt=> dt.TypeName.Equals(dbColumn.DbDataType, StringComparison.OrdinalIgnoreCase));
+                        if (resultColumnType == null)
+                        {
+                            resultColumnType = new DataType(dbColumn.DbDataType, column.DataType.FullName);
+                            Console.WriteLine(column.DataType.FullName);
+                        }
+                        dbColumn.DataType = resultColumnType;
+                    }
                     dbColumn.Length = column.MaxLength;
                     dbColumn.Nullable = column.AllowDBNull;
                     result.Columns.Add(dbColumn);
