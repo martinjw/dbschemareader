@@ -195,7 +195,6 @@ namespace DatabaseSchemaReader.Procedures
                         if (resultColumnType == null)
                         {
                             resultColumnType = new DataType(dbColumn.DbDataType, column.DataType.FullName);
-                            Console.WriteLine(column.DataType.FullName);
                         }
                         dbColumn.DataType = resultColumnType;
                     }
