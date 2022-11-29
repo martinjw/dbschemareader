@@ -121,6 +121,12 @@ namespace DatabaseSchemaReader.DataSchema
         public List<DatabaseSequence> Sequences { get { return _sequences; } }
 
         /// <summary>
+        /// UDTs
+        /// </summary>
+
+        public List<UserDefinedTable> UserDefinedTables = new List<UserDefinedTable>();
+
+        /// <summary>
         /// Gets or sets the provider.
         /// </summary>
         /// <value>

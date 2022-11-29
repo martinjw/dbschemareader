@@ -28,9 +28,25 @@ namespace DatabaseSchemaViewer
             FillSprocs(treeRoot, schema.StoredProcedures);
             FillFunctions(treeRoot, schema);
             if (schema.Packages.Count > 0) FillPackages(treeRoot, schema);
+            if(schema.UserDefinedTables.Any()) FillUdts(treeRoot, schema);
             FillUsers(treeRoot, schema);
 
             treeView1.EndUpdate();
+        }
+
+        private static void FillUdts(TreeNode treeRoot, DatabaseSchema schema)
+        {
+            var root = new TreeNode("UDTs");
+            treeRoot.Nodes.Add(root);
+            foreach (var udt in schema.UserDefinedTables)
+            {
+                var node = new TreeNode(udt.Name);
+                root.Nodes.Add(node);
+                foreach (var column in udt.Columns)
+                {
+                    FillColumn(node, column);
+                }
+            }
         }
 
         private static void FillUsers(TreeNode treeRoot, DatabaseSchema schema)
@@ -292,7 +308,7 @@ namespace DatabaseSchemaViewer
                 sb.Append(" FK to " + column.ForeignKeyTableName);
             }
             var colNode = new TreeNode(sb.ToString());
-            if (!(column.Table is DatabaseView))
+            if (!(column.Table is DatabaseView ) && !(column.Table is UserDefinedTable))
             {
                 colNode.Tag = column;
                 colNode.ToolTipText = RightClickToScript;

@@ -60,6 +60,20 @@ namespace DatabaseSchemaReader.DataSchema
             {
                 UpdatePackages(databaseSchema);
             }
+
+            if (databaseSchema.UserDefinedTables.Any())
+            {
+                databaseSchema.UserDefinedTables.ForEach(udt =>
+                {
+                    udt.DatabaseSchema = databaseSchema;
+                    udt.Columns.ForEach(c =>
+                    {
+                        c.Table = udt;
+                        c.DatabaseSchema= databaseSchema;
+
+                    });
+                });
+            }
             UpdateDataTypes(databaseSchema);
         }
 

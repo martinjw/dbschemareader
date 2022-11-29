@@ -4,6 +4,7 @@ using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System.Collections.Generic;
 using System.Data.Common;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases;
+using DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
@@ -199,6 +200,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public virtual IList<DatabaseUser> Users()
         {
             return new List<DatabaseUser>();
+        }
+
+        public virtual IList<UserDefinedTable> UserDefinedTableTypes()
+        {
+            return new List<UserDefinedTable>();
         }
 
         public virtual IList<DatabaseDbSchema> Schemas()

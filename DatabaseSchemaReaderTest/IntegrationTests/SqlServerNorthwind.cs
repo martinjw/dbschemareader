@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Linq;
 using DatabaseSchemaReader;
@@ -160,6 +161,12 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
                 //	Column ReorderLevel	smallint
                 //	Column Discontinued	bit
             }
+
+            var tableType = schema.UserDefinedTables.Find(x=>
+                string.Equals(x.Name, "LocationTableType", StringComparison.Ordinal));
+            Assert.IsNotNull(tableType);
+            Assert.AreEqual(2, tableType.Columns.Count);
+
         }
 
         [TestMethod, TestCategory("SqlServer")]

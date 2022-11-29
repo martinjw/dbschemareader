@@ -55,6 +55,9 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             var args = _readerAdapter.ProcedureArguments(null).ToList();
             AddArguments(sprocs, functions, args);
 
+            RaiseReadingProgress(SchemaObjectType.UserDefinedTables);
+            var udts = _readerAdapter.UserDefinedTableTypes();
+
             //exclusions
             var procFilter = _exclusions.StoredProcedureFilter;
             if (procFilter != null)
@@ -82,6 +85,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             _databaseSchema.Functions.AddRange(functions);
             _databaseSchema.Packages.Clear();
             _databaseSchema.Packages.AddRange(packs);
+            _databaseSchema.UserDefinedTables.Clear();
+            _databaseSchema.UserDefinedTables.AddRange(udts);
 
             if (ct.IsCancellationRequested) return;
             RaiseReadingProgress(SchemaObjectType.ProcedureSource);
@@ -120,6 +125,16 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     case SourceType.PackageBody:
                         var pack2 = _databaseSchema.Packages.Find(x => x.Name == name && x.SchemaOwner == owner);
                         if (pack2 != null) pack2.Body = source.Text;
+                        break;
+
+                    case SourceType.Type:
+                        var t = _databaseSchema.UserDefinedTables.Find(x => x.Name == name && x.SchemaOwner == owner);
+                        if(t != null) t.Source = source.Text;
+                        break;
+
+                    case SourceType.TypeBody:
+                        var t2 = _databaseSchema.UserDefinedTables.Find(x => x.Name == name && x.SchemaOwner == owner);
+                        if (t2 != null) t2.SourceBody = source.Text;
                         break;
                 }
             }
