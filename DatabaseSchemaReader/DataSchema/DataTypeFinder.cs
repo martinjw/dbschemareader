@@ -13,13 +13,14 @@ namespace DatabaseSchemaReader.DataSchema
     {
         private readonly IDictionary<string, DataType> _dataTypes;
         private readonly IList<UserDataType> _userDefined;
+        private readonly List<UserDefinedTable> _userDefinedTables;
 
         public DataTypeFinder(DatabaseSchema databaseSchema)
             : this(databaseSchema.DataTypes)
         {
             //check if no datatypes loaded
             _userDefined = databaseSchema.UserDataTypes;
-
+            _userDefinedTables = databaseSchema.UserDefinedTables;
         }
 
         public DataTypeFinder(IList<DataType> types)
@@ -33,9 +34,7 @@ namespace DatabaseSchemaReader.DataSchema
                 if (!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
             }
             _dataTypes = dataTypes;
-
         }
-
 
         public DataType Find(string dbDataType)
         {
@@ -66,10 +65,23 @@ namespace DatabaseSchemaReader.DataSchema
                 dt = _dataTypes.Values.FirstOrDefault(dataType => i.Equals(dataType.ProviderDbType));
 
             //look up a udt
-            var udt = _userDefined.FirstOrDefault(x => string.Equals(x.Name, dbDataType, StringComparison.OrdinalIgnoreCase));
+            var udt = _userDefined?.FirstOrDefault(x => string.Equals(x.Name, dbDataType, StringComparison.OrdinalIgnoreCase));
             if (udt != null) return udt.DataType;
 
             return dt;
+        }
+
+        public void UpdateArguments(DatabaseStoredProcedure databaseStoredProcedure)
+        {
+            foreach (DatabaseArgument arg in databaseStoredProcedure.Arguments)
+            {
+                arg.DataType = Find(arg.DatabaseDataType);
+                if (arg.DataType == null && _userDefinedTables != null)
+                {
+                    arg.UserDefinedTable = _userDefinedTables.FirstOrDefault(x =>
+                        string.Equals(x.Name, arg.DatabaseDataType, StringComparison.OrdinalIgnoreCase));
+                }
+            }
         }
     }
 }

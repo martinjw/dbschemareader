@@ -151,21 +151,21 @@ namespace DatabaseSchemaReader.DataSchema
             }
             foreach (DatabaseStoredProcedure sproc in databaseSchema.StoredProcedures)
             {
-                UpdateArgumentDataTypes(finder, sproc);
+                finder.UpdateArguments(sproc);
             }
             foreach (DatabaseFunction function in databaseSchema.Functions)
             {
-                UpdateArgumentDataTypes(finder, function);
+                finder.UpdateArguments(function);
             }
             foreach (DatabasePackage package in databaseSchema.Packages)
             {
                 foreach (DatabaseStoredProcedure sproc in package.StoredProcedures)
                 {
-                    UpdateArgumentDataTypes(finder, sproc);
+                    finder.UpdateArguments(sproc);
                 }
                 foreach (DatabaseFunction function in package.Functions)
                 {
-                    UpdateArgumentDataTypes(finder, function);
+                    finder.UpdateArguments(function);
                 }
             }
 
@@ -186,14 +186,6 @@ namespace DatabaseSchemaReader.DataSchema
             var finder = new DataTypeFinder(types);
 
             UpdateColumnDataTypes(finder, columns);
-        }
-
-        private static void UpdateArgumentDataTypes(DataTypeFinder finder, DatabaseStoredProcedure sproc)
-        {
-            foreach (DatabaseArgument arg in sproc.Arguments)
-            {
-                arg.DataType = finder.Find(arg.DatabaseDataType);
-            }
         }
 
         private static void UpdateColumnDataTypes(DataTypeFinder finder, IEnumerable<DatabaseColumn> columns)

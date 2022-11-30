@@ -166,6 +166,13 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsNotNull(tableType);
             Assert.AreEqual(2, tableType.Columns.Count);
 
+            //test sproc with a table value parameter, which is a user defined table type with 2 columns
+            var sproc = schema.StoredProcedures.FirstOrDefault(x => x.Name == "usp_GetMaxFromTvp");
+            Assert.IsNotNull(sproc);
+            var arg = sproc.Arguments.First();
+            Assert.AreEqual(2, arg.UserDefinedTable.Columns.Count);
+
+
             var ssn = schema.UserDataTypes.Find(x => x.Name == "SSN");
             Assert.IsNotNull(ssn, "data type SSN should be defined");
             Assert.IsTrue(ssn.DataType.IsString, "Underlying datatype is assigned to UDT");
