@@ -1,10 +1,8 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -22,9 +20,9 @@ t.typdefault,
 t2.typname AS BaseName
 FROM pg_catalog.pg_type t
   JOIN pg_catalog.pg_namespace ns
-	ON ns.oid = t.typnamespace
+    ON ns.oid = t.typnamespace
   JOIN pg_catalog.pg_type t2
-	ON t2.oid = t.typbasetype
+    ON t2.oid = t.typbasetype
 WHERE t.typtype = 'd'
 AND ns.nspname NOT LIKE 'pg_%'
 AND ns.nspname != 'information_schema'

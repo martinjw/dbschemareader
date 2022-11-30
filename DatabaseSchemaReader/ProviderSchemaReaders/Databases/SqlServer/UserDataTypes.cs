@@ -1,10 +1,8 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer
 {
@@ -60,17 +58,17 @@ ORDER BY st.name
         {
             var schema = record["schema_name"].ToString();
             var typeName = record["TYPE_NAME"].ToString();
-            var  tt = new UserDataType
-                {
-                    SchemaOwner = schema,
-                    Name = typeName,
-                    MaxLength = record.GetNullableInt("max_length"),
-                    Precision = record.GetNullableInt("precision"),
-                    Scale = record.GetNullableInt("scale"),
-                    Nullable = record.GetBoolean("is_nullable"),
-                    DbTypeName = record.GetString("BaseName"),
+            var tt = new UserDataType
+            {
+                SchemaOwner = schema,
+                Name = typeName,
+                MaxLength = record.GetNullableInt("max_length"),
+                Precision = record.GetNullableInt("precision"),
+                Scale = record.GetNullableInt("scale"),
+                Nullable = record.GetBoolean("is_nullable"),
+                DbTypeName = record.GetString("BaseName"),
             };
-                Result.Add(tt);
+            Result.Add(tt);
         }
     }
 }
