@@ -57,6 +57,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
 
             RaiseReadingProgress(SchemaObjectType.UserDefinedTables);
             var udts = _readerAdapter.UserDefinedTableTypes();
+            var udtypes = _readerAdapter.UserDefinedDataTypes();
 
             //exclusions
             var procFilter = _exclusions.StoredProcedureFilter;
@@ -87,6 +88,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             _databaseSchema.Packages.AddRange(packs);
             _databaseSchema.UserDefinedTables.Clear();
             _databaseSchema.UserDefinedTables.AddRange(udts);
+            _databaseSchema.UserDataTypes.Clear();
+            _databaseSchema.UserDataTypes.AddRange(udtypes);
 
             if (ct.IsCancellationRequested) return;
             RaiseReadingProgress(SchemaObjectType.ProcedureSource);

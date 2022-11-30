@@ -138,6 +138,10 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         {
             return new Users(CommandTimeout).Execute(ConnectionAdapter);
         }
+        public override IList<UserDataType> UserDefinedDataTypes()
+        {
+            return new UserDataTypes(CommandTimeout, Owner).Execute(ConnectionAdapter);
+        }
 
         public override IList<DatabaseDbSchema> Schemas()
         {

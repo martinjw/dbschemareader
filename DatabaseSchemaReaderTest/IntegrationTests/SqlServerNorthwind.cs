@@ -1,9 +1,9 @@
-using System;
-using System.Diagnostics;
-using System.Linq;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.Filters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -13,7 +13,6 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class SqlServerNorthwind
     {
-
         [TestMethod, TestCategory("SqlServer.Odbc")]
         public void ReadNorthwindUsingOdbc()
         {
@@ -36,7 +35,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             var dbReader = TestHelper.GetNorthwindReader();
             dbReader.AllSchemas();
             var schema = dbReader.DatabaseSchema;
-            
+
             //password is removed in SqlServer 2017
             //Assert.AreEqual(ConnectionStrings.Northwind, schema.ConnectionString, "Connection string is in the schema");
             Assert.IsNotNull(schema.ConnectionString, "Connection string is in the schema");
@@ -162,11 +161,14 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
                 //	Column Discontinued	bit
             }
 
-            var tableType = schema.UserDefinedTables.Find(x=>
+            var tableType = schema.UserDefinedTables.Find(x =>
                 string.Equals(x.Name, "LocationTableType", StringComparison.Ordinal));
             Assert.IsNotNull(tableType);
             Assert.AreEqual(2, tableType.Columns.Count);
 
+            var ssn = schema.UserDataTypes.Find(x => x.Name == "SSN");
+            Assert.IsNotNull(ssn, "data type SSN should be defined");
+            Assert.IsTrue(ssn.DataType.IsString, "Underlying datatype is assigned to UDT");
         }
 
         [TestMethod, TestCategory("SqlServer")]
@@ -180,7 +182,6 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
                 Assert.IsNotNull(sql, "ProcedureSource should also fill in the view source");
             }
         }
-
 
         [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindProductsWithCodeGen()
@@ -213,15 +214,14 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             sql = SqlWriter.SimpleFormat(sql); //remove line breaks
 
             Debug.WriteLine(sql);
-            //SELECT [ProductID], [ProductName], ...etc... 
-            //FROM 
-            //(SELECT ROW_NUMBER() OVER( ORDER BY [ProductID]) AS 
+            //SELECT [ProductID], [ProductName], ...etc...
+            //FROM
+            //(SELECT ROW_NUMBER() OVER( ORDER BY [ProductID]) AS
             //rowNumber, [ProductID], [ProductName],  ...etc..
-            //FROM [Products]) AS countedTable 
-            //WHERE rowNumber >= (@pageSize * (@currentPage - 1)) 
+            //FROM [Products]) AS countedTable
+            //WHERE rowNumber >= (@pageSize * (@currentPage - 1))
             //AND rowNumber <= (@pageSize * @currentPage)
         }
-
 
         [TestMethod, TestCategory("SqlServer")]
         public void ReadNorthwindWithFilters()

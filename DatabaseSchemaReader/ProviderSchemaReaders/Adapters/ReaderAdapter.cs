@@ -207,6 +207,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new List<UserDefinedTable>();
         }
 
+        public virtual IList<UserDataType> UserDefinedDataTypes()
+        {
+            return new List<UserDataType>();
+        }
+
         public virtual IList<DatabaseDbSchema> Schemas()
         {
             return new List<DatabaseDbSchema>();
