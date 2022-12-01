@@ -30,7 +30,7 @@ FROM
     ALL_TYPES      at
     LEFT OUTER JOIN ALL_TYPE_ATTRS ata
         ON at.OWNER = ata.OWNER AND at.TYPE_NAME = ata.TYPE_NAME
-    LEFT OUTER JOIN ALL_COL_TYPES atc
+    LEFT OUTER JOIN ALL_COLL_TYPES atc
         ON at.OWNER = atc.OWNER AND at.TYPE_NAME = atc.TYPE_NAME
 WHERE
 (at.OWNER = :schemaOwner OR :schemaOwner IS NULL)
