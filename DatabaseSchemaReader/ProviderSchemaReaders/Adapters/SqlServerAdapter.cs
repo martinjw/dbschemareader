@@ -219,12 +219,15 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             var udts = new UserDefinedTableTypes(CommandTimeout, Owner).Execute(ConnectionAdapter);
             if (udts.Any())
             {
+                var constraints = new UserDefinedTableConstraints(CommandTimeout,Owner).Execute(ConnectionAdapter);
                 var checks = new UserDefinedTableChecks(CommandTimeout, Owner).Execute(ConnectionAdapter);
 
                 var indexes = new UserDefinedTableIndexes(CommandTimeout, Owner).Execute(ConnectionAdapter);
                 foreach (var udt in udts)
                 {
                     TableIndexMerger.UpdateIndexes(udt, indexes);
+                    udt.AddConstraints(constraints.Where(x => x.SchemaOwner == udt.SchemaOwner &&
+                                                              x.TableName == udt.Name));
                     udt.AddConstraints(checks.Where(x => x.SchemaOwner == udt.SchemaOwner &&
                         x.TableName == udt.Name));
                 }
