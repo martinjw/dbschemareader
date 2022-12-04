@@ -143,6 +143,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             return new UserDataTypes(CommandTimeout, Owner).Execute(ConnectionAdapter);
         }
 
+        public override IList<UserDefinedTable> UserDefinedTableTypes()
+        {
+            return new UserDefinedTables(CommandTimeout, Owner).Execute(ConnectionAdapter);
+        }
+
+
         public override IList<DatabaseDbSchema> Schemas()
         {
             return new Schemas(CommandTimeout).Execute(ConnectionAdapter);
