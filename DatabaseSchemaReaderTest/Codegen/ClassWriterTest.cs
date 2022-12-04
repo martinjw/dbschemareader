@@ -39,8 +39,8 @@ namespace DatabaseSchemaReaderTest.Codegen
 
             //assert
             var hasName = txt.Contains("public class Category");
-            var hasCategoryId = txt.Contains("public virtual int CategoryId { get; set; }");
-            var hasCategoryName = txt.Contains("public virtual string CategoryName { get; set; }");
+            var hasCategoryId = txt.Contains("public int CategoryId { get; set; }");
+            var hasCategoryName = txt.Contains("public string CategoryName { get; set; }");
 
             Assert.IsTrue(hasName);
             Assert.IsTrue(hasCategoryId);
@@ -249,8 +249,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var txt = cw.Write();
 
             //assert
-            var hasFirstName = txt.Contains("public virtual string FirstName");
-            var hasLastName = txt.Contains("public virtual string LastName");
+            var hasFirstName = txt.Contains("public string FirstName");
+            var hasLastName = txt.Contains("public string LastName");
 
             Assert.IsTrue(hasFirstName);
             Assert.IsTrue(hasLastName);

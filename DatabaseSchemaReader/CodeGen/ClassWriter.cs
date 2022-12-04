@@ -338,7 +338,7 @@ namespace DatabaseSchemaReader.CodeGen
             if(writeAnnotations)
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
-            var useVirtual = !IsEntityFramework();
+            var useVirtual = IsNHibernate();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
 
