@@ -15,7 +15,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             //arrange
             var schema = Arrange();
             var table = schema.FindTableByName("Origin");
-            var cw = new ClassWriter(table, new CodeWriterSettings());
+            var cw = new ClassWriter(table, new CodeWriterSettings { CodeTarget = CodeTarget.PocoNHibernateFluent });
 
             //act
             var txt = cw.Write();

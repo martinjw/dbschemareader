@@ -205,7 +205,7 @@ namespace DatabaseSchemaReaderTest.Codegen
         public void AdventureWorksTest()
         {
             const string providername = "System.Data.SqlClient";
-            const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks";
+            const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=AdventureWorks2019";
             ProviderChecker.Check(providername, connectionString);
 
             var dbReader = new DatabaseReader(connectionString, providername);
