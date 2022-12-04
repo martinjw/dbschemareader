@@ -221,11 +221,9 @@ namespace DatabaseSchemaReaderTest.Codegen
             //assert
             var hasFirstName = txt.Contains("public virtual string FirstName");
             var hasLastName = txt.Contains("public virtual string LastName");
-            var hasEquals = txt.Contains("public override bool Equals(object obj)");
 
             Assert.IsTrue(hasFirstName);
             Assert.IsTrue(hasLastName);
-            Assert.IsTrue(hasEquals);
         }
 
         [TestMethod]
