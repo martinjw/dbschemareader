@@ -315,6 +315,7 @@ namespace DatabaseSchemaViewer
 
             var schema = node.Tag as DatabaseSchema;
             var view = node.Tag as DatabaseView;
+            var udt = node.Tag as UserDefinedTable;
             var table = node.Tag as DatabaseTable;
             var column = node.Tag as DatabaseColumn;
             var pack = node.Tag as DatabasePackage;
@@ -336,6 +337,13 @@ namespace DatabaseSchemaViewer
             {
                 //views are based on tables, so do them first
                 BuildViewMenu(menu, view, sqlType);
+            }
+            else if (udt != null)
+            {
+                //udts are also tables
+                var code = new ToolStripMenuItem("C# class to clipboard");
+                code.Click += (s, ea) => BuildSqlTasks(sqlType).BuildClass(udt);
+                menu.Items.Add(code);
             }
             else if (table != null)
             {

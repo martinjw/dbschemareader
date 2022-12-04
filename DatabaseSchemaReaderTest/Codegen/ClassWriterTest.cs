@@ -228,5 +228,34 @@ namespace DatabaseSchemaReaderTest.Codegen
             Assert.IsTrue(hasEquals);
         }
 
+        [TestMethod]
+        public void WriteUdtTest()
+        {
+            //arrange
+            var udt = new UserDefinedTable();
+            udt.Name = "Udt";
+            udt.AddColumn("FirstName", typeof(string)).AddNullable()
+                .AddColumn("LastName", typeof(string)).AddNullable();
+
+            var schema = new DatabaseSchema(null, null);
+            schema.UserDefinedTables.Add(udt);
+            PrepareSchemaNames.Prepare(schema, new Namer());
+
+            var codeWriterSettings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.Poco,
+            };
+            var cw = new ClassWriter(udt, codeWriterSettings);
+
+            //act
+            var txt = cw.Write();
+
+            //assert
+            var hasFirstName = txt.Contains("public virtual string FirstName");
+            var hasLastName = txt.Contains("public virtual string LastName");
+
+            Assert.IsTrue(hasFirstName);
+            Assert.IsTrue(hasLastName);
+        }
     }
 }
