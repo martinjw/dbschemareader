@@ -1,6 +1,6 @@
-﻿using System;
-using DatabaseSchemaReader.DataSchema;
+﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -15,7 +15,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
         /// </summary>
         public UserDefinedTables(int? commandTimeout, string owner) : base(commandTimeout, owner)
         {
-            Sql = @"select 
+            Sql = @"select
     ns.nspname AS schemaname,
     c.relname AS tableName,
     a.attname AS columnName,
@@ -26,12 +26,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
         WHEN 1042 /* char */ THEN NULLIF(a.atttypmod,-1)
         WHEN 1043 /* varchar */ THEN NULLIF(a.atttypmod,-1)-4
         END   AS maxLength
-FROM 
+FROM
 pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace ns
-    ON ns.oid = c.relnamespace 
+    ON ns.oid = c.relnamespace
 JOIN pg_catalog.pg_attribute a ON a.attrelid  = c.oid
-where 
+where
     c.relkind = 'c' --composite types
     AND ns.nspname NOT LIKE 'pg_%'
     AND ns.nspname != 'information_schema'
@@ -88,12 +88,12 @@ order by ns.nspname,c.relname, a.attnum
                 SchemaOwner = schema,
                 TableName = typeName,
                 DbDataType = record.GetString("dbType"),
-                Nullable = record.GetBoolean("NotNullable"),
+                //cannot define nullability on Postgresql create type
+                //Nullable = record.GetBoolean("NotNullable"),
                 Length = record.GetNullableInt("maxLength"),
                 Ordinal = record.GetInt("ordinal"),
             };
             tt.Columns.Add(col);
-
         }
     }
 }
