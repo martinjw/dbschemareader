@@ -11,16 +11,19 @@ namespace DatabaseSchemaReader.SqlGen
         /// Include the schema when writing migration sql. Default true (except if detects SQLite, SqlServerCE)
         /// </summary>
         bool IncludeSchema { get; set; }
+
         /// <summary>
         /// Escape the names (default true)
         /// </summary>
         bool EscapeNames { get; set; }
+
         /// <summary>
         /// Adds the table. If any primary key, unique or check constraints are attached, they are written too (don't write them individually). Foreign keys must be added separately (use <see cref="AddConstraint"/>)
         /// </summary>
         /// <param name="databaseTable">The database table.</param>
         /// <returns></returns>
         string AddTable(DatabaseTable databaseTable);
+
         /// <summary>
         /// Adds the column.
         /// </summary>
@@ -28,6 +31,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="databaseColumn">The database column.</param>
         /// <returns></returns>
         string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn);
+
         /// <summary>
         /// Alters the column.
         /// </summary>
@@ -36,6 +40,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="originalColumn">The original column.</param>
         /// <returns></returns>
         string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn);
+
         /// <summary>
         /// Renames the column.
         /// </summary>
@@ -176,6 +181,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="databaseFunction">The function.</param>
         /// <returns></returns>
         string DropFunction(DatabaseFunction databaseFunction);
+
         /// <summary>
         /// Adds the function.
         /// </summary>
@@ -196,5 +202,33 @@ namespace DatabaseSchemaReader.SqlGen
         /// <param name="databasePackage">The package.</param>
         /// <returns></returns>
         string AddPackage(DatabasePackage databasePackage);
+
+        /// <summary>
+        /// Add a new user defined data type
+        /// </summary>
+        /// <param name="dataType">The data type</param>
+        /// <returns></returns>
+        string AddDataType(UserDataType dataType);
+
+        /// <summary>
+        /// Drop a user defined data type
+        /// </summary>
+        /// <param name="dataType">The data type</param>
+        /// <returns></returns>
+        string DropUserDataType(UserDataType dataType);
+
+        /// <summary>
+        /// Drop a user defined table type
+        /// </summary>
+        /// <param name="userDefinedTable">The udt</param>
+        /// <returns></returns>
+        string DropUserDefinedTableType(UserDefinedTable userDefinedTable);
+
+        /// <summary>
+        /// Add a user defined table type
+        /// </summary>
+        /// <param name="userDefinedTable"></param>
+        /// <returns></returns>
+        string AddUserDefinedTableType(UserDefinedTable userDefinedTable);
     }
 }

@@ -92,6 +92,14 @@ namespace DatabaseSchemaReader.Compare
             var comparePackages = new ComparePackages(list, _writer);
             comparePackages.Execute(_baseSchema.Packages, _compareSchema.Packages);
 
+            //compare user data types
+            var compareDataTypes = new CompareUserDefinedTypes(list, _writer);
+            compareDataTypes.Execute(_baseSchema.UserDataTypes, _compareSchema.UserDataTypes);
+
+            //compare user data types
+            var compareTableTypes = new CompareUserDefinedTableTypes(list, _writer);
+            compareTableTypes.Execute(_baseSchema.UserDefinedTables, _compareSchema.UserDefinedTables);
+
             return list;
         }
     }
