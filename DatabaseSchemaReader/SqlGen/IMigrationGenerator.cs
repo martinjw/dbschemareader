@@ -208,7 +208,7 @@ namespace DatabaseSchemaReader.SqlGen
         /// </summary>
         /// <param name="dataType">The data type</param>
         /// <returns></returns>
-        string AddDataType(UserDataType dataType);
+        string AddUserDataType(UserDataType dataType);
 
         /// <summary>
         /// Drop a user defined data type

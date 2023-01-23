@@ -163,5 +163,18 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             }
             return format + LineEnding();
         }
+
+        public override string DropUserDataType(UserDataType dataType)
+        {
+            return $"DROP TYPE IF EXISTS {SchemaPrefix(dataType.SchemaOwner)}{Escape(dataType.Name)}{LineEnding()}";
+        }
+
+        public override string AddUserDataType(UserDataType dataType)
+        {
+            var typeWriter = new DataTypeWriter(SqlType.SqlServer);
+            var baseType = typeWriter.WriteDataType(dataType.DbTypeName.ToUpperInvariant(), dataType.MaxLength, dataType.Precision, dataType.Scale);
+            if (dataType.Nullable == false) baseType += " NOT NULL";
+            return $"CREATE TYPE {SchemaPrefix(dataType.SchemaOwner)}{Escape(dataType.Name)} FROM {baseType} {LineEnding()}";
+        }
     }
 }

@@ -327,22 +327,22 @@ namespace DatabaseSchemaReader.SqlGen
             return null; //only applies to Oracle, so see it's override
         }
 
-        public string AddDataType(UserDataType dataType)
+        public virtual string AddUserDataType(UserDataType dataType)
         {
             return null;
         }
 
-        public string DropUserDataType(UserDataType dataType)
+        public virtual string DropUserDataType(UserDataType dataType)
         {
             return null;
         }
 
-        public string DropUserDefinedTableType(UserDefinedTable userDefinedTable)
+        public virtual string DropUserDefinedTableType(UserDefinedTable userDefinedTable)
         {
             return null;
         }
 
-        public string AddUserDefinedTableType(UserDefinedTable userDefinedTable)
+        public virtual string AddUserDefinedTableType(UserDefinedTable userDefinedTable)
         {
             return null;
         }

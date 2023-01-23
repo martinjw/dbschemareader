@@ -187,7 +187,7 @@ namespace DatabaseSchemaReader.Compare
 
         public string AddDataType(UserDataType dataType)
         {
-            return _migration.AddDataType(dataType);
+            return _migration.AddUserDataType(dataType);
         }
 
         public string DropUserDataType(UserDataType dataType)
