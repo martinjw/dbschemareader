@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Linq;
 using System.Text;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.PostgreSql
 {
-    class TableGenerator : TableGeneratorBase
+    internal class TableGenerator : TableGeneratorBase
     {
         private bool _hasBit;
         protected DataTypeWriter DataTypeWriter;
@@ -77,6 +77,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
             return sb.ToString();
         }
+
         private ConstraintWriter CreateConstraintWriter()
         {
             return new ConstraintWriter(Table)
@@ -86,6 +87,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 EscapeNames = EscapeNames
             };
         }
+
         private static string TranslateCheckExpression(string expression)
         {
             //translate SqlServer-isms into PostgreSql
@@ -99,10 +101,12 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 .Replace("`", "\"")
                 .Replace("`", "\"");
         }
+
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
             return new PostgreSqlMigrationGenerator { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames };
         }
+
         private void AddIndexes(StringBuilder sb)
         {
             if (!Table.Indexes.Any()) return;
@@ -173,9 +177,14 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             if (IsStringColumn(column))
             {
                 //if it already has quotes, trim them
-                defaultValue = defaultConstraint + "'" + defaultValue.Trim('\'') + "'";
+                if (defaultValue.StartsWith("'") && !defaultValue.EndsWith("'"))
+                {
+                    return defaultConstraint + defaultValue;
+                }
+                return defaultConstraint + "'" + defaultValue.Trim('\'') + "'";
             }
-            else if (IsBooleanColumn(column))
+
+            if (IsBooleanColumn(column))
             {
                 switch (defaultValue.ToUpperInvariant())
                 {
@@ -188,37 +197,37 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                     case "YES":
                         defaultValue = "TRUE";
                         break;
+
                     default:
                         defaultValue = "FALSE";
                         break;
                 }
-                defaultValue = defaultConstraint + defaultValue;
+                return defaultConstraint + defaultValue;
             }
-            else //numeric default
-            {
-                string d = defaultValue;
-                ////remove any parenthesis except for common functions (nextval, now, random). Any others?
-                //if (defaultValue.IndexOf("nextval(", StringComparison.OrdinalIgnoreCase) != -1)
-                //{
-                //    d
-                //}
-                //else if (defaultValue.IndexOf("now(", StringComparison.OrdinalIgnoreCase) != -1)
-                //{
-                //    d = defaultValue;
-                //}
-                //else if (defaultValue.IndexOf("random(", StringComparison.OrdinalIgnoreCase) != -1)
-                //{
-                //    d = defaultValue;
-                //}
-                //else
-                //{
-                //    d = defaultValue.Trim(new[] { '(', ')' });
-                //}
-                //special case casting. What about other single integers?
-                if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
-                    d = "((0::text)::money)"; //cast from int to money. Weird.
-                defaultValue = defaultConstraint + d;
-            }
+
+            //numeric default
+            string d = defaultValue;
+            ////remove any parenthesis except for common functions (nextval, now, random). Any others?
+            //if (defaultValue.IndexOf("nextval(", StringComparison.OrdinalIgnoreCase) != -1)
+            //{
+            //    d
+            //}
+            //else if (defaultValue.IndexOf("now(", StringComparison.OrdinalIgnoreCase) != -1)
+            //{
+            //    d = defaultValue;
+            //}
+            //else if (defaultValue.IndexOf("random(", StringComparison.OrdinalIgnoreCase) != -1)
+            //{
+            //    d = defaultValue;
+            //}
+            //else
+            //{
+            //    d = defaultValue.Trim(new[] { '(', ')' });
+            //}
+            //special case casting. What about other single integers?
+            if ("money".Equals(column.DbDataType, StringComparison.OrdinalIgnoreCase) && d == "0")
+                d = "((0::text)::money)"; //cast from int to money. Weird.
+            defaultValue = defaultConstraint + d;
             return defaultValue;
         }
 
@@ -233,7 +242,7 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
 
         private static string FixDefaultValue(string defaultValue)
         {
-            //Guid defaults. 
+            //Guid defaults.
             if (SqlTranslator.IsGuidGenerator(defaultValue))
             {
                 return "uuid_generate_v1()"; //use uuid-osp contrib

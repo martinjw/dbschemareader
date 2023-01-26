@@ -21,8 +21,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
                 .AddColumn<int>("Period")
                 .Table;
             var column = table.FindColumn("Name");
-            table.AddIndex("TableIndex", new[] {column});
-            table.Indexes.Find(i=> i.Name =="TableIndex").IsUnique = true;
+            table.AddIndex("TableIndex", new[] { column });
+            table.Indexes.Find(i => i.Name == "TableIndex").IsUnique = true;
             table.Description = "Test table";
             column.Description = "Name column";
 
@@ -75,7 +75,30 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
             var ddl = tableGen.Write();
             //assert
             Assert.IsTrue(ddl.Contains("CREATE INDEX \"idx_fk_country_id\" ON \"public\".\"city\"(\"country_id\");"));
+        }
 
+        [TestMethod]
+        public void TestDefaultValueEscaping()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.PostgreSql);
+            var table = schema.AddTable("AllTypes")
+                .AddColumn<int>("Id").AddIdentity().AddPrimaryKey("PK")
+                .AddColumn<string>("Format")
+                .Table;
+            var column = table.FindColumn("Format");
+            column.DbDataType = "Text";
+            column.DefaultValue = "'HH:mm'::text";
+
+            var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
+            var tableGen = factory.TableGenerator(table);
+            tableGen.EscapeNames = false;
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("DEFAULT 'HH:mm'::text"));
         }
     }
 }
