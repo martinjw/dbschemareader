@@ -33,33 +33,39 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             Assert.IsTrue(sql.StartsWith("CREATE TYPE [dbo].[SSN] FROM VARCHAR (11) NOT NULL", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
 
-        //[TestMethod]
-        //public void TestAddUserTableType()
-        //{
-        //    //arrange
-        //    var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+        [TestMethod]
+        public void TestAddUserTableType()
+        {
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
 
-        //    //CREATE TYPE LocationTableType AS TABLE   
-        //    //    ( LocationName VARCHAR(50)  
-        //    //    , CostRate INT );  
+            //CREATE TYPE LocationTableType AS TABLE   
+            //    ( LocationName VARCHAR(50)  
+            //    , CostRate INT );  
 
-        //    var udt = new UserDefinedTable
-        //    {
-        //        Name = "LocationTableType",
-        //        SchemaOwner = "dbo",
-        //        Columns =
-        //        {
-        //            new DatabaseColumn { Name= "LocationName", DbDataType = "varchar", Length = 50},
-        //            new DatabaseColumn {Name = "CostRate", DbDataType = "int"}
-        //        }
-        //    };
+            var udt = new UserDefinedTable
+            {
+                Name = "LocationTableType",
+                SchemaOwner = "dbo",
+                Columns =
+                {
+                    new DatabaseColumn { Name= "LocationName", DbDataType = "varchar", Length = 50},
+                    new DatabaseColumn {Name = "CostRate", DbDataType = "int"}
+                },
+                PrimaryKey = new DatabaseConstraint
+                {
+                    ConstraintType = ConstraintType.PrimaryKey,
+                    Columns = { "LocationName" }
+                }
+            };
 
-        //    //act
-        //    var sql = migration.AddUserDefinedTableType(udt);
+            //act
+            var sql = migration.AddUserDefinedTableType(udt);
 
-        //    //assert
-        //    Assert.IsTrue(sql.StartsWith("CREATE TYPE [dbo].[LocationTableType] AS TABLE", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
-        //}
+            //assert
+            Assert.IsTrue(sql.StartsWith("CREATE TYPE [dbo].[LocationTableType] AS TABLE", StringComparison.OrdinalIgnoreCase), "table type is declared");
+            Assert.IsTrue(sql.Contains("[CostRate] INT NOT NULL"));
+        }
 
         //CREATE TYPE InventoryItem AS TABLE
         //(
