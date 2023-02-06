@@ -115,5 +115,10 @@ ON {4}
 
             return $"-- CREATE OR REPLACE TYPE {userDefinedTable.Name}";
         }
+
+        public override string DropUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return $"DROP TYPE {Escape(userDefinedTable.Name)}{LineEnding()}";
+        }
     }
 }
