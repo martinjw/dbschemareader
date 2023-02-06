@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.Oracle
@@ -95,6 +96,24 @@ ON {4}
         public override string RenameTable(DatabaseTable databaseTable, string originalTableName)
         {
             return RenameTableTo(databaseTable, originalTableName);
+        }
+
+        public override string AddUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            if (!string.IsNullOrEmpty(userDefinedTable.Source))
+            {
+                var sb = new StringBuilder();
+                sb.Append("CREATE OR REPLACE ");
+                sb.AppendLine(userDefinedTable.Source);
+                if (!string.IsNullOrEmpty(userDefinedTable.SourceBody))
+                {
+                    sb.Append("CREATE OR REPLACE ");
+                    sb.Append(userDefinedTable.SourceBody);
+                }
+                return sb.ToString();
+            }
+
+            return $"-- CREATE OR REPLACE TYPE {userDefinedTable.Name}";
         }
     }
 }
