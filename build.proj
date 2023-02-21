@@ -70,7 +70,7 @@
     <RemoveDir Directories="$(ObjPath)"/>
   </Target>
 
-  <Target Name="Release" DependsOnTargets="RestorePackages; BuildTests; Build35; BuildViewer; BuildCopyToSQLite; CleanUp">
+  <Target Name="Release" DependsOnTargets="RestorePackages; BuildTests; Build35; Build40; Build45; BuildViewer; BuildCopyToSQLite; CleanUp">
     <Message Text="Built All" />
   </Target>
   
