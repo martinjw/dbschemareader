@@ -63,7 +63,7 @@ using (var connection = new SqlConnection("Data Source=.\SQLEXPRESS;Integrated S
 ```
 ## UIs
 
-There are two simple UIs (.net framework only for now).
+There are two simple UIs (.net framework 4.8 only for now).
 
 * DatabaseSchemaViewer. It reads all the schema and displays it in a treeview. It also includes options for
  - code generation, table DDL and stored procedure generation.
@@ -73,10 +73,9 @@ There are two simple UIs (.net framework only for now).
 
 ## Building the Source
 
-* If you use Visual Studio *2022* open DatabaseSchemaReader.sln (includes .net Core)
+* Use Visual Studio *2022* open DatabaseSchemaReader.sln (includes .net Core)
   * You can also use the command line "build.bat" (msbuild)
   * You cannot use the command line "dotnet build" because Core tooling cannot build v3.5 (see https://github.com/Microsoft/msbuild/issues/1333)
-* If you use Visual Studio *2015* open DatabaseSchemaReader2015.sln (does not include .net Core; v3.5-v4.6 only)
 
 
 
