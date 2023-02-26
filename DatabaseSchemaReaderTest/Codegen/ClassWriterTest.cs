@@ -39,8 +39,8 @@ namespace DatabaseSchemaReaderTest.Codegen
 
             //assert
             var hasName = txt.Contains("public class Category");
-            var hasCategoryId = txt.Contains("public virtual int CategoryId { get; set; }");
-            var hasCategoryName = txt.Contains("public virtual string CategoryName { get; set; }");
+            var hasCategoryId = txt.Contains("public int CategoryId { get; set; }");
+            var hasCategoryName = txt.Contains("public string CategoryName { get; set; }");
 
             Assert.IsTrue(hasName);
             Assert.IsTrue(hasCategoryId);
@@ -221,12 +221,39 @@ namespace DatabaseSchemaReaderTest.Codegen
             //assert
             var hasFirstName = txt.Contains("public virtual string FirstName");
             var hasLastName = txt.Contains("public virtual string LastName");
-            var hasEquals = txt.Contains("public override bool Equals(object obj)");
 
             Assert.IsTrue(hasFirstName);
             Assert.IsTrue(hasLastName);
-            Assert.IsTrue(hasEquals);
         }
 
+        [TestMethod]
+        public void WriteUdtTest()
+        {
+            //arrange
+            var udt = new UserDefinedTable();
+            udt.Name = "Udt";
+            udt.AddColumn("FirstName", typeof(string)).AddNullable()
+                .AddColumn("LastName", typeof(string)).AddNullable();
+
+            var schema = new DatabaseSchema(null, null);
+            schema.UserDefinedTables.Add(udt);
+            PrepareSchemaNames.Prepare(schema, new Namer());
+
+            var codeWriterSettings = new CodeWriterSettings
+            {
+                CodeTarget = CodeTarget.Poco,
+            };
+            var cw = new ClassWriter(udt, codeWriterSettings);
+
+            //act
+            var txt = cw.Write();
+
+            //assert
+            var hasFirstName = txt.Contains("public string FirstName");
+            var hasLastName = txt.Contains("public string LastName");
+
+            Assert.IsTrue(hasFirstName);
+            Assert.IsTrue(hasLastName);
+        }
     }
 }

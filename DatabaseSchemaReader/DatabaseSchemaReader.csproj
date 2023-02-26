@@ -23,9 +23,9 @@
 2.7.13: PostgreSql sql generation fixes thanks @Arnagos, @cm0201
 2.7.15: PostgreSql sqlgen fix, CompareSchema fixes thanks @Amagos, @r-work
 2.7.16: FK constraints allowed to unique indexes (not just PK/UK) thanks @Amagos
-2.7.17: Procedure ResultSets don't have a DataType	</PackageReleaseNotes>
+2.7.17: Procedure ResultSets don't have a DataType
+2.8.0: Reads User Defined Types (Domain/composite types)</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.microsoft.com/en-us/openness/licenses.aspx#MPL</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/martinjw/dbschemareader</RepositoryUrl>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.5' ">$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
@@ -37,8 +37,9 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.7.17</Version>
+    <Version>2.8.0</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
+    <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
@@ -100,6 +101,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="CodeGen\Project.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

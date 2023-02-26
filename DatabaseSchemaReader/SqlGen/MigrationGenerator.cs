@@ -327,6 +327,26 @@ namespace DatabaseSchemaReader.SqlGen
             return null; //only applies to Oracle, so see it's override
         }
 
+        public virtual string AddUserDataType(UserDataType dataType)
+        {
+            return null;
+        }
+
+        public virtual string DropUserDataType(UserDataType dataType)
+        {
+            return null;
+        }
+
+        public virtual string DropUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return null;
+        }
+
+        public virtual string AddUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return null;
+        }
+
         public virtual string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
             return string.Format(CultureInfo.InvariantCulture,

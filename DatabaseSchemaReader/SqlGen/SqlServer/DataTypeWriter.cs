@@ -90,6 +90,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 dataType = dataType + "(" + column.DateTimePrecision + ")";
             }
 
+            return WriteDataType(dataType, length, precision, scale);
+        }
+
+        public string WriteDataType(string dataType, int? length, int? precision, int? scale)
+        {
             //write out SqlServer datatype definition
             if (dataType == "NVARCHAR" ||
                 dataType == "VARCHAR" ||

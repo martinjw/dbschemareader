@@ -137,5 +137,9 @@ namespace DatabaseSchemaReader
         /// The schemas
         /// </summary>
         Schemas,
+        /// <summary>
+        /// UDTs
+        /// </summary>
+        UserDefinedTables,
     }
 }

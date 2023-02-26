@@ -45,5 +45,13 @@
         /// package
         /// </summary>
         Package,
+        /// <summary>
+        /// user defined data type
+        /// </summary>
+        UserDataType,
+        /// <summary>
+        /// user defined table type
+        /// </summary>
+        UserTableType
     }
 }

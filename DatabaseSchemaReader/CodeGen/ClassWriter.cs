@@ -16,7 +16,6 @@ namespace DatabaseSchemaReader.CodeGen
         private DataAnnotationWriter _dataAnnotationWriter;
         private readonly CodeWriterSettings _codeWriterSettings;
         private DatabaseTable _inheritanceTable;
-        //private CodeInserter _codeInserter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassWriter"/> class.
@@ -28,8 +27,6 @@ namespace DatabaseSchemaReader.CodeGen
             _codeWriterSettings = codeWriterSettings;
             _table = table;
             _cb = new ClassBuilder();
-            //_codeInserter = codeWriterSettings.CodeInserter;
-            //if (_codeInserter == null) _codeInserter = new CodeInserter();
         }
 
         /// <summary>
@@ -149,7 +146,7 @@ namespace DatabaseSchemaReader.CodeGen
         {
             if (_table.HasCompositeKey)
             {
-                if (!IsEntityFramework())
+                if (!IsEntityFramework() && _codeWriterSettings.CodeTarget != CodeTarget.Poco)
                 {
                     _cb.AppendAutomaticProperty(className + "Key", "Key");
                 }
@@ -338,7 +335,7 @@ namespace DatabaseSchemaReader.CodeGen
             if(writeAnnotations)
             _dataAnnotationWriter.Write(_cb, column);
             //for code first, ordinary properties are non-virtual. 
-            var useVirtual = !IsEntityFramework();
+            var useVirtual = IsNHibernate();
             _cb.AppendAutomaticProperty(dataType, propertyName, useVirtual);
         }
 
@@ -448,7 +445,7 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteCompositeKeyClass(string className)
         {
             //CodeFirst can cope with multi-keys
-            if (IsEntityFramework()) return;
+            if (IsEntityFramework() || _codeWriterSettings.CodeTarget== CodeTarget.Poco) return;
 
             using (_cb.BeginNest("public class " + className + "Key", "Class representing " + _table.Name + " composite key"))
             {

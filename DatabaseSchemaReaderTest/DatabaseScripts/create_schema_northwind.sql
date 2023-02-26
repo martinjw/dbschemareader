@@ -649,6 +649,47 @@ ALTER TABLE EmployeeTerritories
 		[TerritoryID]
 	);
 GO
+CREATE TYPE SSN  
+FROM varchar(11) NOT NULL ; 
+GO
+CREATE TYPE LocationTableType AS TABLE   
+    ( LocationName VARCHAR(50)  
+    , CostRate INT );  
+GO
+CREATE TYPE InventoryItem AS TABLE
+(
+	[Name] NVARCHAR(50) NOT NULL,
+	SupplierId BIGINT NOT NULL,
+	Price DECIMAL (18, 4) NULL,
+	PRIMARY KEY (
+		Name
+	),
+	INDEX IX_InventoryItem_Price (
+		Price
+	)
+);
+GO
+CREATE TABLE dbo.UdtTable   
+(ID int IDENTITY(1,1) PRIMARY KEY, SSNValue SSN
+);
+GO
+CREATE PROCEDURE dbo. usp_GetMaxFromTvp
+   @TVP LocationTableType READONLY
+      AS
+      SET NOCOUNT ON
+      SELECT MAX(CostRate) FROM @TVP;
+GO
+--DECLARE	@return_value int
+--DECLARE @LocationTVP AS LocationTableType;
+--INSERT INTO @LocationTVP (LocationName, CostRate)
+--VALUES ('Name',10);
+--
+--EXEC	@return_value = [dbo].[usp_GetMaxFromTvp]
+--		@TVP = @LocationTVP
+--
+--SELECT	'Return Value' = @return_value
+--
+--GO
 
 --populate the Categories table
 INSERT INTO [Categories] (

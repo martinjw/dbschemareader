@@ -40,13 +40,17 @@ namespace DatabaseSchemaReader.CodeGen
                 _columns = _table.Columns.Where(x => x.IsPrimaryKey).ToList();
             }
 
-            _cb.AppendLine("#region overrides");
+            //if no columns, don't write these
+            if (!_columns.Any())
+            {
+                _cb.AppendLine("#region overrides");
 
-            AddToString();
-            AddGetHashCode();
-            AddEquals();
+                AddToString();
+                AddGetHashCode();
+                AddEquals();
 
-            _cb.AppendLine("#endregion");
+                _cb.AppendLine("#endregion");
+            }
         }
 
         private void AddEquals()

@@ -185,5 +185,24 @@ namespace DatabaseSchemaReader.Compare
             return _migration.DropPackage(package);
         }
 
+        public string AddDataType(UserDataType dataType)
+        {
+            return _migration.AddUserDataType(dataType);
+        }
+
+        public string DropUserDataType(UserDataType dataType)
+        {
+            return _migration.DropUserDataType(dataType);
+        }
+
+        public string DropUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return _migration.DropUserDefinedTableType(userDefinedTable);
+        }
+
+        public string AddUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return _migration.AddUserDefinedTableType(userDefinedTable);
+        }
     }
 }

@@ -22,7 +22,7 @@ LINE,
 TEXT
 FROM ALL_SOURCE 
 WHERE 
-    TYPE IN ('PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY') 
+    TYPE IN ('PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY','TYPE','TYPE BODY') 
     AND OWNER NOT IN ('SYS', 'SYSMAN', 'CTXSYS', 'MDSYS', 'OLAPSYS', 'ORDSYS', 'OUTLN', 'WKSYS', 'WMSYS', 'XDB', 'ORDPLUGINS', 'SYSTEM')
     AND OWNER = :schemaOwner     
     AND (NAME = :name OR :name IS NULL)
@@ -74,6 +74,14 @@ ORDER BY OWNER, NAME, TYPE, LINE";
 
                 case "FUNCTION": //oracle function
                     sourceType = SourceType.Function;
+                    break;
+
+                case "TYPE": //oracle UDT
+                    sourceType = SourceType.Type;
+                    break;
+
+                case "TYPE BODY": //oracle UDT body
+                    sourceType = SourceType.TypeBody;
                     break;
             }
             var source = Result.Find(x => x.Name == name && x.SchemaOwner == schemaOwner && x.SourceType == sourceType);

@@ -1,13 +1,15 @@
 ﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.ProviderSchemaReaders.Builders;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.SqlServer;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
 {
-    class SqlServerAdapter : ReaderAdapter
+    internal class SqlServerAdapter : ReaderAdapter
     {
         private bool? _isAzureSqlDatabase;
         private const int SqlServerEngineAzure = 5;
@@ -210,6 +212,32 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabaseUser> Users()
         {
             return new Users(CommandTimeout).Execute(ConnectionAdapter);
+        }
+
+        public override IList<UserDefinedTable> UserDefinedTableTypes()
+        {
+            var udts = new UserDefinedTableTypes(CommandTimeout, Owner).Execute(ConnectionAdapter);
+            if (udts.Any())
+            {
+                var constraints = new UserDefinedTableConstraints(CommandTimeout,Owner).Execute(ConnectionAdapter);
+                var checks = new UserDefinedTableChecks(CommandTimeout, Owner).Execute(ConnectionAdapter);
+
+                var indexes = new UserDefinedTableIndexes(CommandTimeout, Owner).Execute(ConnectionAdapter);
+                foreach (var udt in udts)
+                {
+                    TableIndexMerger.UpdateIndexes(udt, indexes);
+                    udt.AddConstraints(constraints.Where(x => x.SchemaOwner == udt.SchemaOwner &&
+                                                              x.TableName == udt.Name));
+                    udt.AddConstraints(checks.Where(x => x.SchemaOwner == udt.SchemaOwner &&
+                        x.TableName == udt.Name));
+                }
+            }
+            return udts;
+        }
+
+        public override IList<UserDataType> UserDefinedDataTypes()
+        {
+            return new UserDataTypes(CommandTimeout, Owner).Execute(ConnectionAdapter); ;
         }
 
         public override IList<DatabaseDbSchema> Schemas()

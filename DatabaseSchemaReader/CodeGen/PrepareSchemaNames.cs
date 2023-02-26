@@ -34,6 +34,17 @@ namespace DatabaseSchemaReader.CodeGen
                     Prepare(column, namer);
                 }
             }
+            foreach (var udt in schema.UserDefinedTables)
+            {
+                if (string.IsNullOrEmpty(udt.NetName))
+                    udt.NetName = namer.Name(udt);
+                FixDuplicateName(tableNames, udt);
+                tableNames.Add(udt.NetName);
+                foreach (var column in udt.Columns)
+                {
+                    Prepare(column, namer);
+                }
+            }
             foreach (var sproc in schema.StoredProcedures)
             {
                 PrepareStoredProcedureNames(sproc, namer);

@@ -34,10 +34,15 @@ namespace DatabaseSchemaReader.DataSchema
         public string PackageName { get; set; }
 
         /// <summary>
-        /// Gets or sets the dataType (string format).
+        /// Gets or sets the dataType (string format). See <see cref="DataType"/> or <see cref="UserDefinedTable"/>
         /// </summary>
         /// <value>The dataType.</value>
         public string DatabaseDataType { get; set; }
+
+        /// <summary>
+        /// If this is a table value parameter, the actual type
+        /// </summary>
+        public UserDefinedTable UserDefinedTable { get; set; }
 
         /// <summary>
         /// Gets or sets the ordinal position of the argument (1st, 2nd and so on).
