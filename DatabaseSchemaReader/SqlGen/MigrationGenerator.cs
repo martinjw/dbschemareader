@@ -77,7 +77,10 @@ namespace DatabaseSchemaReader.SqlGen
                     addColumn += " DEFAULT CURRENT_TIMESTAMP";
                 }
                 //make sure the NOT NULL is AFTER the default
-                addColumn = addColumn.Replace(" NOT NULL ", " ") + " NOT NULL";
+                if (!addColumn.EndsWith(" NOT NULL"))
+                {
+                    addColumn = addColumn.Replace(" NOT NULL ", " ") + " NOT NULL";
+                }
             }
             return string.Format(CultureInfo.InvariantCulture,
                 "ALTER TABLE {0} ADD {1}",
