@@ -24,7 +24,8 @@
 2.7.15: PostgreSql sqlgen fix, CompareSchema fixes thanks @Amagos, @r-work
 2.7.16: FK constraints allowed to unique indexes (not just PK/UK) thanks @Amagos
 2.7.17: Procedure ResultSets don't have a DataType
-2.8.0: Reads User Defined Types (Domain/composite types)</PackageReleaseNotes>
+2.8.0: Reads User Defined Types (Domain/composite types)
+2.8.1: AddColumn can generate invalid sql (#161, thanks @Arnagos)</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/martinjw/dbschemareader</RepositoryUrl>
@@ -37,7 +38,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.8.0</Version>
+    <Version>2.8.1</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
