@@ -28,9 +28,64 @@ namespace DatabaseSchemaViewer
             FillSprocs(treeRoot, schema.StoredProcedures);
             FillFunctions(treeRoot, schema);
             if (schema.Packages.Count > 0) FillPackages(treeRoot, schema);
+            if (schema.UserDataTypes.Any()) FillDomains(treeRoot, schema);
+            if (schema.UserDefinedTables.Any()) FillUdts(treeRoot, schema);
             FillUsers(treeRoot, schema);
 
             treeView1.EndUpdate();
+        }
+
+        private static void FillDomains(TreeNode treeRoot, DatabaseSchema schema)
+        {
+            var root = new TreeNode("User Data Types");
+            treeRoot.Nodes.Add(root);
+            foreach (var udt in schema.UserDataTypes)
+            {
+                var sb = new StringBuilder();
+                sb.Append(udt.Name);
+                sb.Append(" (");
+
+                sb.Append(udt.DbTypeName);
+                sb.Append(" ");
+
+                if (udt.Precision > 0 || udt.Scale > 0)
+                {
+                    sb.Append("(");
+                    sb.Append(udt.Precision);
+                    sb.Append(",");
+                    sb.Append(udt.Scale);
+                    sb.Append(")");
+                }
+                else if (udt.MaxLength.HasValue)
+                {
+                    sb.Append(udt.MaxLength.Value);
+                }
+
+                if (udt.Nullable == false)
+                {
+                    sb.Append(" NOT NULL");
+                }
+                sb.Append(")");
+
+                var node = new TreeNode(sb.ToString());
+                node.Tag = udt;
+                root.Nodes.Add(node);
+            }
+        }
+        private static void FillUdts(TreeNode treeRoot, DatabaseSchema schema)
+        {
+            var root = new TreeNode("User Defined Tables");
+            treeRoot.Nodes.Add(root);
+            foreach (var udt in schema.UserDefinedTables)
+            {
+                var node = new TreeNode(udt.Name);
+                node.Tag = udt;
+                root.Nodes.Add(node);
+                foreach (var column in udt.Columns)
+                {
+                    FillColumn(node, column);
+                }
+            }
         }
 
         private static void FillUsers(TreeNode treeRoot, DatabaseSchema schema)
@@ -292,7 +347,7 @@ namespace DatabaseSchemaViewer
                 sb.Append(" FK to " + column.ForeignKeyTableName);
             }
             var colNode = new TreeNode(sb.ToString());
-            if (!(column.Table is DatabaseView))
+            if (!(column.Table is DatabaseView) && !(column.Table is UserDefinedTable))
             {
                 colNode.Tag = column;
                 colNode.ToolTipText = RightClickToScript;

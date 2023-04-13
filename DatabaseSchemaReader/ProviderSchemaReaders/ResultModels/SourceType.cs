@@ -6,6 +6,8 @@
         Function,
         View,
         Package,
-        PackageBody
+        PackageBody,
+        Type,
+        TypeBody
     }
 }

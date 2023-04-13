@@ -210,5 +210,31 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             //assert
             Assert.IsTrue(sql.StartsWith("ALTER TABLE \"dbo\".\"Orders\" ADD \"COUNTRY\" VARCHAR (20)", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
+
+        [TestMethod]
+        public void TestSqlServerNoNulls()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.SqlServer).MigrationGenerator();
+            migration.EscapeNames = false;
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            var column = new DatabaseColumn
+            {
+                Name = "Unique",
+                DbDataType = "UNIQUEIDENTIFIER",
+                DataType = new DataType("UNIQUEIDENTIFIER", "System.Guid"),
+                Nullable = false
+            };
+
+            //act
+            migration.IncludeSchema = false;
+            var sql = migration.AddColumn(table, column);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("ALTER TABLE Orders ADD Unique UNIQUEIDENTIFIER  NOT NULL;", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
+        }
     }
 }

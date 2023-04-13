@@ -77,7 +77,10 @@ namespace DatabaseSchemaReader.SqlGen
                     addColumn += " DEFAULT CURRENT_TIMESTAMP";
                 }
                 //make sure the NOT NULL is AFTER the default
-                addColumn = addColumn.Replace(" NOT NULL ", " ") + " NOT NULL";
+                if (!addColumn.EndsWith(" NOT NULL"))
+                {
+                    addColumn = addColumn.Replace(" NOT NULL ", " ") + " NOT NULL";
+                }
             }
             return string.Format(CultureInfo.InvariantCulture,
                 "ALTER TABLE {0} ADD {1}",
@@ -325,6 +328,26 @@ namespace DatabaseSchemaReader.SqlGen
         public virtual string AddPackage(DatabasePackage databasePackage)
         {
             return null; //only applies to Oracle, so see it's override
+        }
+
+        public virtual string AddUserDataType(UserDataType dataType)
+        {
+            return null;
+        }
+
+        public virtual string DropUserDataType(UserDataType dataType)
+        {
+            return null;
+        }
+
+        public virtual string DropUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return null;
+        }
+
+        public virtual string AddUserDefinedTableType(UserDefinedTable userDefinedTable)
+        {
+            return null;
         }
 
         public virtual string DropIndex(DatabaseTable databaseTable, DatabaseIndex index)

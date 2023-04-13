@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace DatabaseSchemaReader.DataSchema
 {
@@ -11,7 +9,6 @@ namespace DatabaseSchemaReader.DataSchema
     /// </summary>
     public static class DatabaseSchemaFixer
     {
-
         /// <summary>
         /// Updates the references of child objects to this database
         /// </summary>
@@ -59,6 +56,19 @@ namespace DatabaseSchemaReader.DataSchema
             if (databaseSchema.Packages.Count > 0)
             {
                 UpdatePackages(databaseSchema);
+            }
+
+            if (databaseSchema.UserDefinedTables.Any())
+            {
+                databaseSchema.UserDefinedTables.ForEach(udt =>
+                {
+                    udt.DatabaseSchema = databaseSchema;
+                    udt.Columns.ForEach(c =>
+                    {
+                        c.Table = udt;
+                        c.DatabaseSchema = databaseSchema;
+                    });
+                });
             }
             UpdateDataTypes(databaseSchema);
         }
@@ -125,39 +135,43 @@ namespace DatabaseSchemaReader.DataSchema
             if (databaseSchema.DataTypes.Count == 0) return;
 
             //quickly lookup the datatypes
-            var dataTypes = new Dictionary<string, DataType>();
-            foreach (DataType type in databaseSchema.DataTypes)
-            {
-                //just in case there are duplicate names
-                if (!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
-            }
+            var finder = new DataTypeFinder(databaseSchema);
 
+            foreach (var udt in databaseSchema.UserDataTypes)
+            {
+                udt.DataType = finder.Find(udt.DbTypeName);
+            }
             foreach (DatabaseTable table in databaseSchema.Tables)
             {
-                UpdateColumnDataTypes(dataTypes, table.Columns);
+                UpdateColumnDataTypes(finder, table.Columns);
             }
             foreach (DatabaseView view in databaseSchema.Views)
             {
-                UpdateColumnDataTypes(dataTypes, view.Columns);
+                UpdateColumnDataTypes(finder, view.Columns);
             }
             foreach (DatabaseStoredProcedure sproc in databaseSchema.StoredProcedures)
             {
-                UpdateArgumentDataTypes(dataTypes, sproc);
+                finder.UpdateArguments(sproc);
             }
             foreach (DatabaseFunction function in databaseSchema.Functions)
             {
-                UpdateArgumentDataTypes(dataTypes, function);
+                finder.UpdateArguments(function);
             }
             foreach (DatabasePackage package in databaseSchema.Packages)
             {
                 foreach (DatabaseStoredProcedure sproc in package.StoredProcedures)
                 {
-                    UpdateArgumentDataTypes(dataTypes, sproc);
+                    finder.UpdateArguments(sproc);
                 }
                 foreach (DatabaseFunction function in package.Functions)
                 {
-                    UpdateArgumentDataTypes(dataTypes, function);
+                    finder.UpdateArguments(function);
                 }
+            }
+
+            foreach (var udt in databaseSchema.UserDefinedTables)
+            {
+                UpdateColumnDataTypes(finder, udt.Columns);
             }
         }
 
@@ -169,65 +183,21 @@ namespace DatabaseSchemaReader.DataSchema
             //check if no datatypes loaded
             if (types.Count == 0) return;
 
-            //quickly lookup the datatypes
-            var dataTypes = new Dictionary<string, DataType>();
-            foreach (DataType type in types)
-            {
-                //just in case there are duplicate names
-                if (!dataTypes.ContainsKey(type.TypeName)) dataTypes.Add(type.TypeName, type);
-            }
+            var finder = new DataTypeFinder(types);
 
-            UpdateColumnDataTypes(dataTypes, columns);
+            UpdateColumnDataTypes(finder, columns);
         }
 
-        private static void UpdateArgumentDataTypes(IDictionary<string, DataType> dataTypes, DatabaseStoredProcedure sproc)
-        {
-            foreach (DatabaseArgument arg in sproc.Arguments)
-            {
-                arg.DataType = FindDataType(dataTypes, arg.DatabaseDataType);
-            }
-        }
-
-        private static void UpdateColumnDataTypes(IDictionary<string, DataType> dataTypes, IEnumerable<DatabaseColumn> columns)
+        private static void UpdateColumnDataTypes(DataTypeFinder finder, IEnumerable<DatabaseColumn> columns)
         {
             foreach (DatabaseColumn column in columns)
             {
                 if (column.DataType == null)
                 {
                     string dbDataType = column.DbDataType;
-                    column.DataType = FindDataType(dataTypes, dbDataType);
+                    column.DataType = finder.Find(dbDataType);
                 }
             }
         }
-
-        private static DataType FindDataType(IDictionary<string, DataType> dataTypes, string dbDataType)
-        {
-            //quick lookup in dictionary, otherwise has to loop thru
-
-            if (string.IsNullOrEmpty(dbDataType)) return null;
-            DataType dt;
-            if (dataTypes.TryGetValue(dbDataType, out dt)) return dt;
-
-            //try without (n)
-            var unbraced = Regex.Replace(dbDataType, "\\([^\\)]*\\)", string.Empty);
-            if (dataTypes.TryGetValue(unbraced, out dt)) return dt;
-
-            var brace = dbDataType.IndexOf('(');
-            if (brace > 1)
-            {
-                dbDataType = dbDataType.Substring(0, brace).ToUpperInvariant();
-                if (dataTypes.TryGetValue(dbDataType, out dt)) return dt;
-            }
-
-            //TIMESTAMP(9) from Oracle == Timestamp
-            dt = dataTypes.Values.FirstOrDefault(dataType => dbDataType.StartsWith(dataType.TypeName, StringComparison.OrdinalIgnoreCase));
-
-            int i;
-            if (dt == null && int.TryParse(dbDataType, NumberStyles.Integer, CultureInfo.InvariantCulture, out i))
-                dt = dataTypes.Values.FirstOrDefault(dataType => i.Equals(dataType.ProviderDbType));
-
-            return dt;
-        }
-
     }
 }

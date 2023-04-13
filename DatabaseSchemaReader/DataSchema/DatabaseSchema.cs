@@ -121,6 +121,18 @@ namespace DatabaseSchemaReader.DataSchema
         public List<DatabaseSequence> Sequences { get { return _sequences; } }
 
         /// <summary>
+        /// User defined tables
+        /// </summary>
+
+        public List<UserDefinedTable> UserDefinedTables = new List<UserDefinedTable>();
+
+        /// <summary>
+        /// User defined data types (aka 'DOMAIN' in postgreSql)
+        /// </summary>
+
+        public List<UserDataType> UserDataTypes = new List<UserDataType>();
+
+        /// <summary>
         /// Gets or sets the provider.
         /// </summary>
         /// <value>

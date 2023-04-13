@@ -5,7 +5,8 @@
     <ProjectName>DatabaseSchemaReader</ProjectName>
 	<OutputPath>$(MSBuildProjectDirectory)\Bin\</OutputPath>
 	<ObjPath>$(MSBuildProjectDirectory)\obj\</ObjPath>
-	<CopyToSQLiteOutputPath>$(OutputPath)CopyToSQLite\</CopyToSQLiteOutputPath>
+	<ToolsOutputPath>$(OutputPath)net48tools\</ToolsOutputPath>
+	<CopyToSQLiteOutputPath>$(ToolsOutputPath)CopyToSQLite\</CopyToSQLiteOutputPath>
   </PropertyGroup>
   
   <!-- targets -->
@@ -16,35 +17,42 @@
     <Message Text="Tests Built" />
   </Target>
   
-  <Target Name="BuildViewer">
-    <Message Text="Building SchemaViewer in .net 3.5" />
+   <Target Name="Build35">
+    <Message Text="Building in .net 3.5" />
     <RemoveDir Directories="$(OutputPath)net35\"/>
-    <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
+    <MSBuild Projects="DatabaseSchemaReader\DatabaseSchemaReader.csproj" 
 		Properties="Configuration=net35;OutputPath=$(OutputPath)net35\;IntermediateOutputPath=$(ObjPath)Release\"/>
-    <Message Text="SchemaViewer Built" />
+    <Message Text="Reader Built" />
 	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
   </Target>
- 
-  <Target Name="BuildViewer4">
-    <Message Text="Building SchemaViewer in .net 4" />
-	<PropertyGroup>
-		<OutputPath4>$(OutputPath)net4\</OutputPath4>
-	</PropertyGroup>
-    <RemoveDir Directories="$(OutputPath4)"/>
-    <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
-		Properties="Configuration=Net4;OutputPath=$(OutputPath4);IntermediateOutputPath=$(ObjPath)Net4\"/>
-    <Message Text="SchemaViewer Built" />
+  
+    <Target Name="Build40">
+    <Message Text="Building in .net 4.0" />
+    <RemoveDir Directories="$(OutputPath)net40\"/>
+    <MSBuild Projects="DatabaseSchemaReader\DatabaseSchemaReader.csproj" 
+		Properties="Configuration=net40;OutputPath=$(OutputPath)net40\;IntermediateOutputPath=$(ObjPath)Release\"/>
+    <Message Text="Reader Built" />
+	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
   </Target>
   
-  <Target Name="BuildViewer45">
-    <Message Text="Building SchemaViewer in .net 4.5" />
+   <Target Name="Build45">
+    <Message Text="Building in .net 4.5" />
+    <RemoveDir Directories="$(OutputPath)net45\"/>
+    <MSBuild Projects="DatabaseSchemaReader\DatabaseSchemaReader.csproj" 
+		Properties="Configuration=net45;OutputPath=$(OutputPath)net45\;IntermediateOutputPath=$(ObjPath)Release\"/>
+    <Message Text="Reader Built" />
+	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
+  </Target>  
+  
+  <Target Name="BuildViewer">
+    <Message Text="Building SchemaViewer in .net 4.8" />
 	<PropertyGroup>
-		<OutputPath45>$(OutputPath)net45\</OutputPath45>
+		<OutputPathViewer>$(ToolsOutputPath)Viewer\</OutputPathViewer>
 	</PropertyGroup>
-    <RemoveDir Directories="$(OutputPath45)"/>
+    <RemoveDir Directories="$(OutputPathViewer)"/>
     <MSBuild Projects="DatabaseSchemaViewer\DatabaseSchemaViewer.csproj" 
-		Properties="Configuration=net45;OutputPath=$(OutputPath45);IntermediateOutputPath=$(ObjPath)Net45\"/>
-    <Message Text="SchemaViewer Built in 4.5" />
+		Properties="Configuration=Release;OutputPath=$(OutputPathViewer);"/>
+    <Message Text="SchemaViewer Built in 4.8" />
   </Target>
   
   <Target Name="RestorePackages">
@@ -54,7 +62,7 @@
   <Target Name="BuildCopyToSQLite">
     <Message Text="Building CopyToSQLite" />
     <MSBuild Projects="CopyToSQLite\CopyToSQLite.csproj" 
-		Properties="Configuration=Release;OutputPath=$(CopyToSQLiteOutputPath);IntermediateOutputPath=$(ObjPath)Net4\"/>
+		Properties="Configuration=Release;OutputPath=$(CopyToSQLiteOutputPath);"/>
     <Message Text="CopyToSQLite Built" />
   </Target>
    
@@ -62,7 +70,7 @@
     <RemoveDir Directories="$(ObjPath)"/>
   </Target>
 
-  <Target Name="Release" DependsOnTargets="RestorePackages; BuildTests; BuildViewer; BuildViewer4; BuildViewer45; BuildCopyToSQLite; CleanUp">
+  <Target Name="Release" DependsOnTargets="RestorePackages; BuildTests; Build35; Build40; Build45; BuildViewer; BuildCopyToSQLite; CleanUp">
     <Message Text="Built All" />
   </Target>
   

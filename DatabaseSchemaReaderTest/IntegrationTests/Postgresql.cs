@@ -46,6 +46,11 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual("rental_date", idx.Columns[0].Name);
             Assert.AreEqual("inventory_id", idx.Columns[1].Name);
             Assert.AreEqual("customer_id", idx.Columns[2].Name);
+
+            //reading a domain
+            var year = schema.UserDataTypes.Find(x=> x.Name=="year");
+            Assert.IsNotNull(year, "DOMAIN year should be defined");
+            Assert.IsTrue(year.DataType.IsInt, "Underlying data type is INT");
         }
 
         [TestMethod, TestCategory("Devart.Postgresql")]
