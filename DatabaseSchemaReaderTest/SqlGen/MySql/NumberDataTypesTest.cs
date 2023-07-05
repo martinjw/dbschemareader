@@ -104,7 +104,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.MySql
             var result = _typeWriter.WriteDataType(_column);
 
             //assert
-            Assert.AreEqual("TINYINT", result);
+            Assert.AreEqual("TINYINT(1)", result);
         }
 
         [TestMethod]

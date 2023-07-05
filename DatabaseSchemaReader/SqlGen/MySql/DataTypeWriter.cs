@@ -63,7 +63,7 @@ namespace DatabaseSchemaReader.SqlGen.MySql
             }
             else if (dataType == "BIT")
             {
-                dataType = "TINYINT";
+                dataType = "TINYINT(1)";
             }
 
             else if (dataType == "IMAGE" || dataType == "VARBINARY")
