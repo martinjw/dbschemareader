@@ -29,7 +29,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 if (originalColumn.DefaultValue != null)
                 {
                     //have to drop default contraint
-                    var df = FindDefaultConstraint(databaseTable, databaseColumn.Name);
+                    var df = FindDefaultConstraint(databaseTable, originalColumn.Name);
                     if (df != null)
                     {
                         defaultName = df.Name;
