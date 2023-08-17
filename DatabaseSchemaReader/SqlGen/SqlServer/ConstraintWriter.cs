@@ -10,11 +10,17 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         public ConstraintWriter(DatabaseTable table)
             : base(table)
         {
+            SqlFormatProviderInstance = new SqlFormatProvider();
+        }
+        public void UseGranularBatching()
+        {
+            SqlFormatProviderInstance = new BatchingSqlFormatProvider();
         }
 
+        protected ISqlFormatProvider SqlFormatProviderInstance { get; set; }
         protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return new SqlFormatProvider();
+            return SqlFormatProviderInstance;
         }
 
         protected override bool IsSelfReferencingCascadeAllowed()

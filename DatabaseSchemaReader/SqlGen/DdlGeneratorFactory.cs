@@ -20,6 +20,11 @@ namespace DatabaseSchemaReader.SqlGen
         }
 
         /// <summary>
+        /// If available, use batching after each statement (in SqlServer, GO)
+        /// </summary>
+        public bool UseGranularBatching { get; set; }
+
+        /// <summary>
         /// Creates a table DDL generator.
         /// </summary>
         /// <param name="table">The table.</param>
@@ -29,7 +34,9 @@ namespace DatabaseSchemaReader.SqlGen
             switch (_sqlType)
             {
                 case SqlType.SqlServer:
-                    return new SqlServer.TableGenerator(table);
+                    var tableGenerator = new SqlServer.TableGenerator(table);
+                    if (UseGranularBatching) tableGenerator.UseGranularBatching();
+                    return tableGenerator;
                 case SqlType.Oracle:
                     return new Oracle.TableGenerator(table);
                 case SqlType.MySql:
@@ -56,7 +63,9 @@ namespace DatabaseSchemaReader.SqlGen
             switch (_sqlType)
             {
                 case SqlType.SqlServer:
-                    return new SqlServer.TablesGenerator(schema);
+                    var allTablesGenerator = new SqlServer.TablesGenerator(schema);
+                    if (UseGranularBatching) allTablesGenerator.UseGranularBatching();
+                    return allTablesGenerator;
                 case SqlType.Oracle:
                     return new Oracle.TablesGenerator(schema);
                 case SqlType.MySql:
@@ -110,7 +119,9 @@ namespace DatabaseSchemaReader.SqlGen
             switch (_sqlType)
             {
                 case SqlType.SqlServer:
-                    return new SqlServer.ConstraintWriter(databaseTable);
+                    var constraintWriterBase = new SqlServer.ConstraintWriter(databaseTable);
+                    if (UseGranularBatching) constraintWriterBase.UseGranularBatching();
+                    return constraintWriterBase;
                 case SqlType.Oracle:
                     return new Oracle.ConstraintWriter(databaseTable);
                 case SqlType.MySql:

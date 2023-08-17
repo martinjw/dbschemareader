@@ -21,6 +21,8 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected abstract ISqlFormatProvider SqlFormatProvider();
 
+        protected ISqlFormatProvider SqlFormatProviderInstance { get; set; }
+
         /// <summary>
         /// Escape any names
         /// </summary>

@@ -39,9 +39,16 @@ namespace DatabaseSchemaReader.Utilities
             var separator = new[] { ";" };
             return script.Split(separator, StringSplitOptions.RemoveEmptyEntries)
                 //remove line feeds
-                .Select(s=> s.Trim())
-                .Where(s => s.Length > 0)
+                .Select(s => s.Trim())
+                .Where(StringMaybeSql)
                 .ToArray();
+        }
+
+        private static bool StringMaybeSql(string str)
+        {
+            if (str.Length == 0) return false;
+            if (!str.Contains('\r') && str.StartsWith("--")) return false;
+            return true;
         }
     }
 }

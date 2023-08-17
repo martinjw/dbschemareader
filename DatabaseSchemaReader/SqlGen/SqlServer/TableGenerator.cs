@@ -19,6 +19,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
                 originSqlType = ProviderToSqlType.Convert(table.DatabaseSchema.Provider);
 
             DataTypeWriter = new DataTypeWriter(originSqlType);
+            SqlFormatProviderInstance = new SqlFormatProvider();
+        }
+        public void UseGranularBatching()
+        {
+            SqlFormatProviderInstance = new BatchingSqlFormatProvider();
         }
 
         public override string Write()
@@ -136,7 +141,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return new SqlFormatProvider();
+            return SqlFormatProviderInstance;
         }
 
         protected virtual bool HandleComputed(DatabaseColumn column)

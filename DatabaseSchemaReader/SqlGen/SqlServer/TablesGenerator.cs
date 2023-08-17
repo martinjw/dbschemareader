@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DatabaseSchemaReader.DataSchema;
+using System.Collections.Generic;
 using System.Text;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
@@ -10,7 +10,16 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         {
             //we do some preprocessing here in case we are doing a conversion
             EnsureUniqueConstraintNames();
+            SqlFormatProviderInstance = new SqlFormatProvider();
         }
+
+        public void UseGranularBatching()
+        {
+            SqlFormatProviderInstance = new BatchingSqlFormatProvider();
+            _useGranularBatching = true;
+        }
+
+        private bool _useGranularBatching;
 
         private void EnsureUniqueConstraintNames()
         {
@@ -44,17 +53,22 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
 
         protected override ConstraintWriterBase LoadConstraintWriter(DatabaseTable table)
         {
-            return new ConstraintWriter(table);
+            var constraintWriter = new ConstraintWriter(table);
+            if (_useGranularBatching) constraintWriter.UseGranularBatching();
+            return constraintWriter;
         }
 
         protected override ITableGenerator LoadTableGenerator(DatabaseTable table)
         {
-            return new TableGenerator(table);
+            var tableGenerator = new TableGenerator(table);
+            if (_useGranularBatching) tableGenerator.UseGranularBatching();
+            return tableGenerator;
         }
 
+        protected ISqlFormatProvider SqlFormatProviderInstance { get; set; }
         protected override ISqlFormatProvider SqlFormatProvider()
         {
-            return new SqlFormatProvider();
+            return SqlFormatProviderInstance;
         }
 
         protected override void WriteDrops(StringBuilder sb)
