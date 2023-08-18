@@ -11,22 +11,22 @@
     <PackageId>DatabaseSchemaReader</PackageId>
     <PackageTags>ADO;Entity Framework Code First;SQLServer;SQLite;Oracle;MySQL;PostgreSql;Schema;Database</PackageTags>
     <PackageReleaseNotes>
-2.7.3: MySql time mapping thanks @tonyliving
-2.7.4: Postgresql table list exclude views thanks @thomasjoscht
-2.7.5: SqlLite Compound primary keys thanks @zls3201
-2.7.6: PostgreSql MigrationGenerator cascade escaping thanks @groogiam
-2.7.7: fixes null 'RefersToTable' of FK when only one table is read thanks @mjalil
-2.7.8: PostgreSql sequences missing thanks @groogiam
-2.7.9: PostgreSql sqlgen escaping thanks @r-work
-2.7.11: CancellationToken leaking into net4 code thanks @KeithLRobertson
-2.7.12: reader.ViewExists(name)
-2.7.13: PostgreSql sql generation fixes thanks @Arnagos, @cm0201
-2.7.15: PostgreSql sqlgen fix, CompareSchema fixes thanks @Amagos, @r-work
-2.7.16: FK constraints allowed to unique indexes (not just PK/UK) thanks @Amagos
-2.7.17: Procedure ResultSets don't have a DataType
-2.8.0: Reads User Defined Types (Domain/composite types)
-2.8.1: AddColumn can generate invalid sql (#161, thanks @Arnagos)
-2.8.2: Fix mysql bool type (#164 , thanks @tonyliving)</PackageReleaseNotes>
+		2.7.3: MySql time mapping thanks @tonyliving
+		2.7.4: Postgresql table list exclude views thanks @thomasjoscht
+		2.7.5: SqlLite Compound primary keys thanks @zls3201
+		2.7.6: PostgreSql MigrationGenerator cascade escaping thanks @groogiam
+		2.7.7: fixes null 'RefersToTable' of FK when only one table is read thanks @mjalil
+		2.7.8: PostgreSql sequences missing thanks @groogiam
+		2.7.9: PostgreSql sqlgen escaping thanks @r-work
+		2.7.11: CancellationToken leaking into net4 code thanks @KeithLRobertson
+		2.7.12: reader.ViewExists(name)
+		2.7.13: PostgreSql sql generation fixes thanks @Arnagos, @cm0201
+		2.7.15: PostgreSql sqlgen fix, CompareSchema fixes thanks @Amagos, @r-work
+		2.7.16: FK constraints allowed to unique indexes (not just PK/UK) thanks @Amagos
+		2.7.17: Procedure ResultSets don't have a DataType
+		2.8.0: Reads User Defined Types (Domain/composite types)
+		2.8.1: AddColumn can generate invalid sql (#161, thanks @Arnagos)
+		2.8.2: Fix mysql bool type (#164 , thanks @tonyliving); DdlGeneratorFactory add UseGranularBatching (#168 thanks @whibdev)</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/martinjw/dbschemareader</RepositoryUrl>
