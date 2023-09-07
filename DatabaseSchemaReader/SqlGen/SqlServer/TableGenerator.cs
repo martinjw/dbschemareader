@@ -9,6 +9,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
     class TableGenerator : TableGeneratorBase
     {
         private bool _hasBit;
+        private bool _useGranularBatching;
         protected DataTypeWriter DataTypeWriter;
 
         public TableGenerator(DatabaseTable table)
@@ -23,6 +24,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         }
         public void UseGranularBatching()
         {
+            _useGranularBatching = true;
             SqlFormatProviderInstance = new BatchingSqlFormatProvider();
         }
 
@@ -102,7 +104,9 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
         }
         protected virtual ConstraintWriterBase CreateConstraintWriter()
         {
-            return new ConstraintWriter(Table) { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames};
+            var constraintWriter = new ConstraintWriter(Table) { IncludeSchema = IncludeSchema, EscapeNames = EscapeNames };
+            if (_useGranularBatching) constraintWriter.UseGranularBatching();
+            return constraintWriter;
         }
         protected virtual IMigrationGenerator CreateMigrationGenerator()
         {
