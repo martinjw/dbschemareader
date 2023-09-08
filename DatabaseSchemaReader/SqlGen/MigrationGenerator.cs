@@ -1,22 +1,22 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using DatabaseSchemaReader.DataSchema;
-using DatabaseSchemaReader.Utilities;
 
 namespace DatabaseSchemaReader.SqlGen
 {
-    class MigrationGenerator : IMigrationGenerator
+    internal class MigrationGenerator : IMigrationGenerator
     {
-        private readonly ISqlFormatProvider _sqlFormatProvider;
-        private readonly DdlGeneratorFactory _ddlFactory;
+        private ISqlFormatProvider _sqlFormatProvider;
+        protected readonly DdlGeneratorFactory DdlFactory;
 
         public MigrationGenerator(SqlType sqlType)
         {
             _sqlFormatProvider = SqlFormatFactory.Provider(sqlType);
-            _ddlFactory = new DdlGeneratorFactory(sqlType);
+            DdlFactory = new DdlGeneratorFactory(sqlType);
             IncludeSchema = (sqlType != SqlType.SqlServerCe && sqlType != SqlType.SQLite);
             EscapeNames = true;
         }
@@ -33,23 +33,31 @@ namespace DatabaseSchemaReader.SqlGen
 
         protected virtual ITableGenerator CreateTableGenerator(DatabaseTable databaseTable)
         {
-            var tableGenerator = _ddlFactory.TableGenerator(databaseTable);
+            var tableGenerator = DdlFactory.TableGenerator(databaseTable);
             if (!EscapeNames) tableGenerator.EscapeNames = false;
             return tableGenerator;
         }
+
         protected virtual ISqlFormatProvider SqlFormatProvider()
         {
             return _sqlFormatProvider;
+        }
+
+        protected virtual void SqlFormatProvider(ISqlFormatProvider sqlFormatProvider)
+        {
+            _sqlFormatProvider = sqlFormatProvider;
         }
 
         public string Escape(string name)
         {
             return EscapeNames ? SqlFormatProvider().Escape(name) : name;
         }
+
         protected virtual string LineEnding()
         {
             return SqlFormatProvider().LineEnding();
         }
+
         public string AddTable(DatabaseTable databaseTable)
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
@@ -92,11 +100,15 @@ namespace DatabaseSchemaReader.SqlGen
         {
             get { return "ALTER TABLE {0} MODIFY {1};"; }
         }
-        protected virtual bool SupportsAlterColumn { get { return true; } }
+
+        protected virtual bool SupportsAlterColumn
+        { get { return true; } }
+
         /// <summary>
         /// Sql Server cannot change default values in ALTER COLUMN statements (they are constraints)
         /// </summary>
-        protected virtual bool AlterColumnIncludeDefaultValue { get { return true; } }
+        protected virtual bool AlterColumnIncludeDefaultValue
+        { get { return true; } }
 
         public virtual string AlterColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, DatabaseColumn originalColumn)
         {
@@ -208,7 +220,6 @@ namespace DatabaseSchemaReader.SqlGen
                 Escape(databaseColumn.Name)) + LineEnding();
         }
 
-
         public virtual string AddConstraint(DatabaseTable databaseTable, DatabaseConstraint constraint)
         {
             //we always use the named form.
@@ -221,7 +232,7 @@ namespace DatabaseSchemaReader.SqlGen
                 throw new InvalidOperationException("Constraint has no columns");
 
             //use the standard constraint writer for the database
-            var constraintWriter = _ddlFactory.ConstraintWriter(databaseTable);
+            var constraintWriter = DdlFactory.ConstraintWriter(databaseTable);
             if (constraintWriter == null) return null;
             constraintWriter.IncludeSchema = IncludeSchema; //cascade setting
             constraintWriter.EscapeNames = EscapeNames;
@@ -296,7 +307,6 @@ namespace DatabaseSchemaReader.SqlGen
                 + _sqlFormatProvider.RunStatements();
         }
 
-
         public virtual string DropFunction(DatabaseFunction databaseFunction)
         {
             return "DROP FUNCTION " + SchemaPrefix(databaseFunction.SchemaOwner) + Escape(databaseFunction.Name) + ";"
@@ -368,10 +378,12 @@ namespace DatabaseSchemaReader.SqlGen
                 trigger.TriggerEvent,
                 TableName(databaseTable));
         }
+
         protected virtual string DropTriggerFormat
         {
             get { return "DROP TRIGGER {0}{1};"; }
         }
+
         public string DropTrigger(DatabaseTrigger trigger)
         {
             return string.Format(CultureInfo.InvariantCulture,
@@ -413,7 +425,7 @@ namespace DatabaseSchemaReader.SqlGen
         {
             if (index.Columns.Count == 0)
             {
-                //IndexColumns errors 
+                //IndexColumns errors
                 return "-- add index " + index.Name + " (unknown columns)";
             }
             //we could plug in "CLUSTERED" or "PRIMARY XML" from index.IndexType here
@@ -431,12 +443,14 @@ namespace DatabaseSchemaReader.SqlGen
         {
             get { return "ALTER TABLE {0} DROP CONSTRAINT {1}"; }
         }
+
         protected virtual string DropUniqueFormat
         {
             get { return DropForeignKeyFormat; }
         }
 
-        protected virtual bool SupportsDropColumn { get { return true; } }
+        protected virtual bool SupportsDropColumn
+        { get { return true; } }
 
         public virtual string DropColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
@@ -445,7 +459,7 @@ namespace DatabaseSchemaReader.SqlGen
             {
                 foreach (var index in databaseTable.Indexes)
                 {
-                    if(!index.Columns.Any(c=> string.Equals(c.Name,databaseColumn.Name))) continue;
+                    if (!index.Columns.Any(c => string.Equals(c.Name, databaseColumn.Name))) continue;
                     sb.AppendLine(DropIndex(databaseTable, index));
                 }
             }

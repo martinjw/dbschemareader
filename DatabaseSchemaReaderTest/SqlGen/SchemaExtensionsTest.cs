@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System.Linq;
+using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -101,8 +102,29 @@ namespace DatabaseSchemaReaderTest.SqlGen
         {
             var table = _schema.FindTableByName("Product");
             var column = table.FindColumn("Name");
-            var code = column.ToSqlAddColumn();
-            Assert.IsNotNull(code);
+            var sql = column.ToSqlAddColumn();
+            Assert.IsNotNull(sql);
+        }
+
+        [TestMethod]
+        public void TestDropColumn()
+        {
+            var table = _schema.FindTableByName("Product");
+            var column = table.FindColumn("Name");
+            var sql = column.ToSqlDropColumn();
+            Assert.IsNotNull(sql);
+        }
+
+
+        [TestMethod]
+        public void TestAddConstraint()
+        {
+            var table = _schema.FindTableByName("Product");
+            var constraint = table.ForeignKeys.First();
+            var sql = constraint.ToSqlAddConstraint(table);
+            var sql2 = constraint.ToSqlAddConstraint(table, new SqlGenerationParameters { UseGranularBatching = true});
+            Assert.IsNotNull(sql);
+            Assert.IsTrue(sql2.Trim().EndsWith("GO"));
         }
     }
 }

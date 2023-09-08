@@ -11,7 +11,11 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             : base(SqlType.SqlServer)
         {
         }
-
+        public void UseGranularBatching()
+        {
+            DdlFactory.UseGranularBatching = true;
+            SqlFormatProvider(new BatchingSqlFormatProvider());
+        }
         protected override string AlterColumnFormat
         {
             get { return "ALTER TABLE {0} ALTER COLUMN {1};"; }

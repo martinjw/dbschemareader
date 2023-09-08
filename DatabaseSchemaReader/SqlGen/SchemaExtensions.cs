@@ -198,5 +198,61 @@ namespace DatabaseSchemaReader.SqlGen
             return migrationGenerator.AddColumn(column.Table, column);
         }
 
+        /// <summary>
+        /// Generate ALTER TABLE DROP COLUMN sql
+        /// </summary>
+        /// <param name="column">The column (attached to a table)</param>
+        /// <param name="sqlGenerationParameters">Escape the table and column names</param>
+        public static string ToSqlDropColumn(this DatabaseColumn column, SqlGenerationParameters sqlGenerationParameters = null)
+        {
+            if (column == null) return null;
+            if (column.Table == null) return null;
+
+            var sqlType = ProviderToSqlType.Convert(column.Table.DatabaseSchema?.Provider) ?? SqlType.SqlServer;
+            var ddlGeneratorFactory = new DdlGeneratorFactory(sqlType);
+            if (sqlGenerationParameters != null && sqlGenerationParameters.UseGranularBatching)
+            {
+                ddlGeneratorFactory.UseGranularBatching = true;
+            }
+
+            var migrationGenerator = ddlGeneratorFactory.MigrationGenerator();
+            if (sqlGenerationParameters != null)
+            {
+                migrationGenerator.EscapeNames = sqlGenerationParameters.EscapeNames;
+                migrationGenerator.IncludeSchema = sqlGenerationParameters.IncludeSchema;
+            }
+
+            return migrationGenerator.DropColumn(column.Table, column);
+        }
+
+
+        /// <summary>
+        /// Generate ALTER TABLE ADD CONSTRAINT sql
+        /// </summary>
+        /// <param name="constraint">The constraint</param>
+        /// <param name="table">The table which the constraint is attached to</param>
+        /// <param name="sqlGenerationParameters">Escape the table and column names</param>
+        public static string ToSqlAddConstraint(this DatabaseConstraint constraint, DatabaseTable table, SqlGenerationParameters sqlGenerationParameters = null)
+        {
+            if (constraint == null) return null;
+            if (table == null) return null;
+
+            var sqlType = ProviderToSqlType.Convert(table.DatabaseSchema?.Provider) ?? SqlType.SqlServer;
+            var ddlGeneratorFactory = new DdlGeneratorFactory(sqlType);
+            if (sqlGenerationParameters != null && sqlGenerationParameters.UseGranularBatching)
+            {
+                ddlGeneratorFactory.UseGranularBatching = true;
+            }
+
+            var migrationGenerator = ddlGeneratorFactory.MigrationGenerator();
+            if (sqlGenerationParameters != null)
+            {
+                migrationGenerator.EscapeNames = sqlGenerationParameters.EscapeNames;
+                migrationGenerator.IncludeSchema = sqlGenerationParameters.IncludeSchema;
+            }
+
+            return migrationGenerator.AddConstraint(table, constraint);
+        }
+
     }
 }

@@ -147,7 +147,9 @@ namespace DatabaseSchemaReader.SqlGen
             switch (_sqlType)
             {
                 case SqlType.SqlServer:
-                    return new SqlServer.SqlServerMigrationGenerator();
+                    var sqlServerMigrationGenerator = new SqlServer.SqlServerMigrationGenerator();
+                    if (UseGranularBatching) sqlServerMigrationGenerator.UseGranularBatching();
+                    return sqlServerMigrationGenerator;
                 case SqlType.Oracle:
                     return new Oracle.OracleMigrationGenerator();
                 case SqlType.MySql:
