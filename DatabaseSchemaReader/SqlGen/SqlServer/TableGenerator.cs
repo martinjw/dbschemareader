@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
@@ -114,6 +114,7 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             //ensure we're not writing schema prefixes
             if (!IncludeSchema) migrations.IncludeSchema = false;
             migrations.EscapeNames = EscapeNames;
+            if (_useGranularBatching) migrations.UseGranularBatching();
             return migrations;
         }
 

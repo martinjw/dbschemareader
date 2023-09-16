@@ -18,9 +18,13 @@ namespace DatabaseSchemaReaderTest.SqlGen
             schema.AddTable("Warehouse").AddColumn<int>("Id").AddPrimaryKey()
                 .AddColumn<string>("Address").AddLength(100);
             schema.AddTable("Product").AddColumn<int>("Id").AddPrimaryKey()
-                .AddColumn<string>("Name").AddLength(20)
-                .AddColumn<int>("CategoryId").AddForeignKey("FkProduct_Category", "Category")
-                .AddColumn<int>("WarehouseId").AddForeignKey("FkProduct_Warehouse", "Warehouse");
+                .AddColumn<string>("Name").AddLength(20).AddIndex("Idx_Name")
+                .AddColumn<int>("CategoryId")
+                .AddIndex("Idx_CatId")
+                .AddForeignKey("FkProduct_Category", "Category")
+                .AddColumn<int>("WarehouseId")
+                .AddIndex("Idx_WhId")
+                .AddForeignKey("FkProduct_Warehouse", "Warehouse");
             _schema = schema;
         }
 
