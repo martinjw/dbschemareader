@@ -27,7 +27,7 @@ namespace DatabaseSchemaReader.CodeGen
                     name = name.Substring(0, name.Length - 2);
                 }
                 //member name cannot be same as class name
-                if (name == column.Table.NetName)
+                if (name == column.Table?.NetName)
                 {
                     name += "Property";
                 }
