@@ -254,5 +254,57 @@ namespace DatabaseSchemaReader.SqlGen
             return migrationGenerator.AddConstraint(table, constraint);
         }
 
+        /// <summary>
+        /// Generate CREATE TYPE
+        /// </summary>
+        /// <param name="udt">The user defined type</param>
+        /// <param name="schema">The schema</param>
+        /// <param name="sqlGenerationParameters">Escape the table and column names</param>
+        public static string ToSqlAddUserDefinedType(this UserDataType udt, DatabaseSchema schema, SqlGenerationParameters sqlGenerationParameters = null)
+        {
+            if(udt == null) return null;
+            if(schema == null) return null;
+            var sqlType = ProviderToSqlType.Convert(schema.Provider) ?? SqlType.SqlServer;
+            var ddlGeneratorFactory = new DdlGeneratorFactory(sqlType);
+            if (sqlGenerationParameters != null && sqlGenerationParameters.UseGranularBatching)
+            {
+                ddlGeneratorFactory.UseGranularBatching = true;
+            }
+            var migrationGenerator = ddlGeneratorFactory.MigrationGenerator();
+            if (sqlGenerationParameters != null)
+            {
+                migrationGenerator.EscapeNames = sqlGenerationParameters.EscapeNames;
+                migrationGenerator.IncludeSchema = sqlGenerationParameters.IncludeSchema;
+            }
+
+            return migrationGenerator.AddUserDataType(udt);
+        }
+
+        /// <summary>
+        /// Generate CREATE TYPE
+        /// </summary>
+        /// <param name="udt">The user defined table</param>
+        /// <param name="schema">The schema</param>
+        /// <param name="sqlGenerationParameters">Escape the table and column names</param>
+        public static string ToSqlAddUserDefinedTable(this UserDefinedTable udt, DatabaseSchema schema, SqlGenerationParameters sqlGenerationParameters = null)
+        {
+            if (udt == null) return null;
+            if (schema == null) return null;
+            var sqlType = ProviderToSqlType.Convert(schema.Provider) ?? SqlType.SqlServer;
+            var ddlGeneratorFactory = new DdlGeneratorFactory(sqlType);
+            if (sqlGenerationParameters != null && sqlGenerationParameters.UseGranularBatching)
+            {
+                ddlGeneratorFactory.UseGranularBatching = true;
+            }
+            var migrationGenerator = ddlGeneratorFactory.MigrationGenerator();
+            if (sqlGenerationParameters != null)
+            {
+                migrationGenerator.EscapeNames = sqlGenerationParameters.EscapeNames;
+                migrationGenerator.IncludeSchema = sqlGenerationParameters.IncludeSchema;
+            }
+
+            return migrationGenerator.AddUserDefinedTableType(udt);
+        }
+
     }
 }

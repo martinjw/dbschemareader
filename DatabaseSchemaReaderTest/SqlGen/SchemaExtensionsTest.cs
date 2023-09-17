@@ -25,6 +25,29 @@ namespace DatabaseSchemaReaderTest.SqlGen
                 .AddColumn<int>("WarehouseId")
                 .AddIndex("Idx_WhId")
                 .AddForeignKey("FkProduct_Warehouse", "Warehouse");
+            schema.UserDataTypes.Add(new UserDataType
+            {
+                Name = "SSN",
+                SchemaOwner = "dbo",
+                DbTypeName = "varchar",
+                MaxLength = 11,
+                Nullable = false
+            });
+            schema.UserDefinedTables.Add(new UserDefinedTable
+            {
+                Name = "LocationTableType",
+                SchemaOwner = "dbo",
+                Columns =
+                {
+                    new DatabaseColumn { Name= "LocationName", DbDataType = "varchar", Length = 50},
+                    new DatabaseColumn {Name = "CostRate", DbDataType = "int"}
+                },
+                PrimaryKey = new DatabaseConstraint
+                {
+                    ConstraintType = ConstraintType.PrimaryKey,
+                    Columns = { "LocationName" }
+                }
+            });
             _schema = schema;
         }
 
@@ -129,6 +152,22 @@ namespace DatabaseSchemaReaderTest.SqlGen
             var sql2 = constraint.ToSqlAddConstraint(table, new SqlGenerationParameters { UseGranularBatching = true});
             Assert.IsNotNull(sql);
             Assert.IsTrue(sql2.Trim().EndsWith("GO"));
+        }
+
+        [TestMethod]
+        public void TestAddUserDataType()
+        {
+            var udt = _schema.UserDataTypes.First();
+            var sql = udt.ToSqlAddUserDefinedType(_schema);
+            Assert.IsNotNull(sql);
+        }
+
+        [TestMethod]
+        public void TestAddUserDefinedTable()
+        {
+            var udt = _schema.UserDefinedTables.First();
+            var sql = udt.ToSqlAddUserDefinedTable(_schema);
+            Assert.IsNotNull(sql);
         }
     }
 }
