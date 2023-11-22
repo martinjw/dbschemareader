@@ -24,6 +24,17 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             return trigger.TriggerBody + ";";
         }
 
+        public override string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
+        {
+            var sql= base.AddIndex(databaseTable, index);
+            if (!string.IsNullOrEmpty(sql) && !string.IsNullOrEmpty(index.Filter))
+            {
+                sql = $"{sql} WHERE {index.Filter}";
+            }
+
+            return sql;
+        }
+
         public override string DropTable(DatabaseTable databaseTable)
         {
             return string.Format(CultureInfo.InvariantCulture,

@@ -22,7 +22,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
     i.relname as index_name,
     a.attname as column_name,
     a.attnum as ordinal,
-    ix.indisunique as is_unique
+    ix.indisunique as is_unique,
+    pg_get_expr(ix.indpred, ix.indrelid) as filter
 FROM
     pg_catalog.pg_class i 
 JOIN
@@ -70,6 +71,7 @@ ORDER BY
                     SchemaOwner = schema,
                     TableName = tableName,
                     Name = name,
+                    Filter = record.GetString("filter"), //if partial index
                     IsUnique = record.GetBoolean(5) //isUnique
                 };
                 Result.Add(index);
