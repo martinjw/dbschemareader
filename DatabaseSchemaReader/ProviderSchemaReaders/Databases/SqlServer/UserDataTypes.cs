@@ -24,7 +24,7 @@ st2.name AS BaseName
 FROM sys.types st
 JOIN sys.types st2 ON st.system_type_id = st2.system_type_id AND st2.is_user_defined = 0
 WHERE
-    st.name <> 'sysname'
+    st2.name <> 'sysname'
 AND st.is_user_defined = 1
 AND st.is_table_type = 0
 AND (SCHEMA_NAME(st.schema_id) = @schema OR @schema IS NULL)
