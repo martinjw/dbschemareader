@@ -39,6 +39,34 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
         }
 
         [TestMethod]
+        public void TestGeneratorPartialIndex()
+        {
+            //arrange
+            var schema = new DatabaseSchema(null, SqlType.PostgreSql);
+            var table = schema.AddTable("AllTypes")
+                .AddColumn<int>("Id").AddIdentity().AddPrimaryKey("PK")
+                .AddColumn<string>("Name").AddLength(200)
+                .AddColumn<int>("Age")
+                .AddColumn<int>("Period")
+                .Table;
+            var column = table.FindColumn("Name");
+            table.AddIndex("TableIndex", new[] { column });
+            table.Indexes.Find(i => i.Name == "TableIndex").Filter = "\"Age\" IS NOT NULL";
+            table.Description = "Test table";
+            column.Description = "Name column";
+
+            var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
+            var tableGen = factory.TableGenerator(table);
+            tableGen.EscapeNames = false;
+
+            //act
+            var ddl = tableGen.Write();
+
+            //assert
+            Assert.IsTrue(ddl.Contains("CREATE INDEX TableIndex ON AllTypes(Name) WHERE \"Age\" IS NOT NULL;"));
+        }
+
+        [TestMethod]
         public void TableWithBooleanType()
         {
             var schema = new DatabaseSchema(null, SqlType.PostgreSql)

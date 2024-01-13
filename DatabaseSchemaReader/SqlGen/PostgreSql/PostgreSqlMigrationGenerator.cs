@@ -27,9 +27,10 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
         public override string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)
         {
             var sql= base.AddIndex(databaseTable, index);
+
             if (!string.IsNullOrEmpty(sql) && !string.IsNullOrEmpty(index.Filter))
             {
-                sql = $"{sql} WHERE {index.Filter}";
+                sql = $"{sql.Replace(LineEnding(),"")} WHERE {index.Filter};";
             }
 
             return sql;
