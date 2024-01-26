@@ -1,4 +1,5 @@
 using System;
+using System.Configuration.Provider;
 using System.Data.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -54,6 +55,24 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             {
                 //no oracle installed = System.Exception: System.Data.OracleClient requires Oracle client software version 8.1.7 or greater.
                 Assert.Inconclusive("Cannot access database for provider " + providerName + " message= " + exception.Message);
+            }
+        }
+
+        public static void Check(DbConnection connection)
+        {
+            try
+            {
+                    connection.Open();
+                    connection.Close();
+            }
+            catch (DbException exception)
+            {
+                Assert.Inconclusive("Cannot access database message= " +
+                                    exception.Message);
+            }
+            catch (Exception exception)
+            {
+                Assert.Inconclusive("Cannot access database  message= " + exception.Message);
             }
         }
     }
