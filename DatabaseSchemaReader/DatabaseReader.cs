@@ -43,6 +43,16 @@ namespace DatabaseSchemaReader
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbConnection.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="sqlType">Explicitly set the database type. Required if the driver can connect to different db types (eg dotConnect Universal)</param>
+        public DatabaseReader(System.Data.Common.DbConnection connection, SqlType sqlType) :
+            this(connection.GetType().Namespace, connection.ConnectionString, new SchemaParameters(connection, sqlType))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseReader"/> class from a DbTransaction.
         /// </summary>
         /// <param name="transaction">The transaction</param>

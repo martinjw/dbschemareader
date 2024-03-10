@@ -16,6 +16,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             SqlType = ProviderToSqlType.Convert(ProviderName);
             Exclusions = new Exclusions();
         }
+        public SchemaParameters(System.Data.Common.DbConnection dbConnection, SqlType sqlType)
+        {
+            DbConnection = dbConnection;
+            ProviderName = DbConnection.GetType().Namespace;
+            ConnectionString = dbConnection.ConnectionString;
+            SqlType = sqlType;
+            Exclusions = new Exclusions();
+        }
 
         public SchemaParameters(System.Data.Common.DbTransaction dbTransaction) :this(dbTransaction.Connection)
         {

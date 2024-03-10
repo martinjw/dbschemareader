@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</Description>
     <AssemblyTitle>DatabaseSchemaReader</AssemblyTitle>
-    <VersionPrefix>2.10.1</VersionPrefix>
+    <VersionPrefix>2.11.0</VersionPrefix>
     <Authors>Martin Willey</Authors>
     <TargetFrameworks>netstandard2.0;netstandard1.5;net45;net40;net35</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -31,6 +31,7 @@
 		2.9.1: Granular batching for indexes fix (#170), user defined types extensions (#171,thanks @whibdev) 
 		2.10.0: Postgresql: support partial indexes (#140)
 		2.10.1: Postgresql: fix partial indexes generation (#140); sql server UDTs bug (#173)
+		2.11.0: SQLite: sqlGeneration of Drop Table If Exists (#179)
 	</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -45,7 +46,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.10.1</Version>
+    <Version>2.11.0</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
