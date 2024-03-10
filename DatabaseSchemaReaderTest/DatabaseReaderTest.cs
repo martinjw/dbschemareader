@@ -17,7 +17,7 @@ namespace DatabaseSchemaReaderTest
         [ExpectedException(typeof(ArgumentNullException))]
         public void NoConnectionStringTest()
         {
-            new DatabaseReader(null, SqlType.SqlServer);
+            new DatabaseReader((string)null, SqlType.SqlServer);
 
             Assert.Fail("Should not have succeeded");
         }
