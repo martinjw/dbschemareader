@@ -17,7 +17,7 @@ namespace DatabaseSchemaReader.SqlGen.SqLite
         public override string DropTable(DatabaseTable databaseTable)
         {
             //automatically removes fk references
-            return "DROP TABLE " + databaseTable.Name + ";";
+            return "DROP TABLE IF EXISTS " + databaseTable.Name + ";";
         }
 
         protected override bool SupportsAlterColumn { get { return false; } }
