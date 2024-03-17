@@ -68,8 +68,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var txt = cw.Write();
 
             //assert
-            var hasBillingAddress = txt.Contains("public virtual IList<Order> BillingAddressCollection { get; private set; }");
-            var hasDeliveryAddress = txt.Contains("public virtual IList<Order> DeliveryAddressCollection { get; private set; }");
+            var hasBillingAddress = txt.Contains("public virtual IList<Order> OrderBillingAddressCollection { get; private set; }");
+            var hasDeliveryAddress = txt.Contains("public virtual IList<Order> OrderDeliveryAddressCollection { get; private set; }");
 
             Assert.IsTrue(hasBillingAddress);
             Assert.IsTrue(hasDeliveryAddress);
@@ -89,8 +89,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var txt = cw.Write();
 
             //assert
-            var hasBillingAddress = txt.Contains("HasMany(x => x.BillingAddressCollection);");
-            var hasDeliveryAddress = txt.Contains("HasMany(x => x.DeliveryAddressCollection);");
+            var hasBillingAddress = txt.Contains("HasMany(x => x.OrderBillingAddressCollection);");
+            var hasDeliveryAddress = txt.Contains("HasMany(x => x.OrderDeliveryAddressCollection);");
 
             Assert.IsTrue(hasBillingAddress);
             Assert.IsTrue(hasDeliveryAddress);
@@ -110,8 +110,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var txt = cw.Write();
 
             //assert
-            var hasBillingAddress = txt.Contains("HasRequired(x => x.BillingAddress).WithMany(c => c.BillingAddressCollection).Map(m => m.MapKey(\"BillingAddress\"));");
-            var hasDeliveryAddress = txt.Contains("HasRequired(x => x.DeliveryAddress).WithMany(c => c.DeliveryAddressCollection).Map(m => m.MapKey(\"DeliveryAddress\"));");
+            var hasBillingAddress = txt.Contains("HasRequired(x => x.BillingAddress).WithMany(c => c.OrderBillingAddressCollection).Map(m => m.MapKey(\"BillingAddress\"));");
+            var hasDeliveryAddress = txt.Contains("HasRequired(x => x.DeliveryAddress).WithMany(c => c.OrderDeliveryAddressCollection).Map(m => m.MapKey(\"DeliveryAddress\"));");
 
             Assert.IsTrue(hasBillingAddress);
             Assert.IsTrue(hasDeliveryAddress);
@@ -132,8 +132,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var txt = cw.Write();
 
             //assert
-            var hasBillingAddress = txt.Contains("<bag name=\"BillingAddressCollection\" table=\"`Orders`\"");
-            var hasDeliveryAddress = txt.Contains("<bag name=\"DeliveryAddressCollection\" table=\"`Orders`\"");
+            var hasBillingAddress = txt.Contains("<bag name=\"OrderBillingAddressCollection\" table=\"`Orders`\"");
+            var hasDeliveryAddress = txt.Contains("<bag name=\"OrderDeliveryAddressCollection\" table=\"`Orders`\"");
 
             Assert.IsTrue(hasBillingAddress);
             Assert.IsTrue(hasDeliveryAddress);
@@ -174,8 +174,8 @@ namespace DatabaseSchemaReaderTest.Codegen
             var txt = cw.Write();
 
             //assert
-            var hasBillingAddress = txt.Contains("HasMany(x => x.BillingAddressCollection).KeyColumn(\"BillingAddress\").Inverse()");
-            var hasDeliveryAddress = txt.Contains("HasMany(x => x.DeliveryAddressCollection).KeyColumn(\"DeliveryAddress\").Inverse()");
+            var hasBillingAddress = txt.Contains("HasMany(x => x.OrderBillingAddressCollection).KeyColumn(\"BillingAddress\").Inverse()");
+            var hasDeliveryAddress = txt.Contains("HasMany(x => x.OrderDeliveryAddressCollection).KeyColumn(\"DeliveryAddress\").Inverse()");
 
             Assert.IsTrue(hasBillingAddress);
             Assert.IsTrue(hasDeliveryAddress);

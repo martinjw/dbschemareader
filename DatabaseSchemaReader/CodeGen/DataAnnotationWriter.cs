@@ -127,7 +127,10 @@ namespace DatabaseSchemaReader.CodeGen
         private void WriteDecimalRange(ClassBuilder cb, int max)
         {
             var maximum = new string('9', max);
-            var range = string.Format(CultureInfo.InvariantCulture, "[Range(typeof(decimal), \"0\", \"{0}\")]", maximum);
+            //#180
+            //dbs only limit negative numbers with check constraints ... unless it's MySql ;)
+            //for integers negatives are unlikely, so we keep 0 as lower range, but they are possible in decimals (e.g. money).
+            var range = string.Format(CultureInfo.InvariantCulture, "[Range(typeof(decimal), \"-{0}\", \"{0}\")]", maximum);
             var rangeErrorMessage = _codeWriterSettings.RangeErrorMessage;
             if (!string.IsNullOrEmpty(rangeErrorMessage))
             {

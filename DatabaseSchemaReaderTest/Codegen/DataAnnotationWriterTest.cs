@@ -295,7 +295,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var result = classBuilder.ToString().Trim(); //ignore lines
 
             //assert
-            Assert.AreEqual("[Range(typeof(decimal), \"0\", \"9999\")]", result);
+            Assert.AreEqual("[Range(typeof(decimal), \"-9999\", \"9999\")]", result);
         }
 
 
@@ -320,7 +320,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var result = classBuilder.ToString().Trim(); //ignore lines
 
             //assert
-            Assert.AreEqual("[Range(typeof(decimal), \"0\", \"9999\", ErrorMessage=\"Name must be less than 9999\")]", result);
+            Assert.AreEqual("[Range(typeof(decimal), \"-9999\", \"9999\", ErrorMessage=\"Name must be less than 9999\")]", result);
         }
 
 
