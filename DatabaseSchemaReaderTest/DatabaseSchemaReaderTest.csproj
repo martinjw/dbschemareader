@@ -326,6 +326,7 @@
     <Compile Include="Compare\CompareSchemasTest.cs" />
     <Compile Include="Compare\CompareUserDefinedTablesTests.cs" />
     <Compile Include="DataSchema\ChangeNameTest.cs" />
+    <Compile Include="Filters\TestInclusionPrefix.cs" />
     <Compile Include="IntegrationTests\CompareSQLiteDatabases.cs" />
     <Compile Include="Compare\CompareTablesTest.cs" />
     <Compile Include="Compare\CompareViewsTest.cs" />

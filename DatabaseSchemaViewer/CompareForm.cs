@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Filters;
 
 namespace DatabaseSchemaViewer
 {
@@ -22,6 +23,8 @@ namespace DatabaseSchemaViewer
 
             InitializeComponent();
         }
+
+        public string TableStartsWith { get; set; }
 
         private void CompareFormLoad(object sender, EventArgs e)
         {
@@ -122,7 +125,10 @@ namespace DatabaseSchemaViewer
             var owner = SchemaOwner.Text.Trim();
             if (!string.IsNullOrEmpty(owner))
                 rdr.Owner = owner;
-
+            if (!string.IsNullOrEmpty(TableStartsWith))
+            {
+                rdr.Exclusions.TableFilter = new InclusionPrefixFilter(TableStartsWith);
+            }
             backgroundWorker1.RunWorkerAsync(rdr);
         }
 

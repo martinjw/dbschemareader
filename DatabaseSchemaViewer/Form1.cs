@@ -7,12 +7,11 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using DatabaseSchemaReader;
-using DatabaseSchemaReader.Conversion;
 using DatabaseSchemaReader.DataSchema;
+using DatabaseSchemaReader.Filters;
 
 namespace DatabaseSchemaViewer
 {
@@ -207,6 +206,11 @@ namespace DatabaseSchemaViewer
             var owner = SchemaOwner.Text.Trim();
             if (!string.IsNullOrEmpty(owner))
                 rdr.Owner = owner;
+            var startsWith = txtTableStartsWith.Text.Trim();
+            if (!string.IsNullOrEmpty(startsWith))
+            {
+                rdr.Exclusions.TableFilter = new InclusionPrefixFilter(startsWith);
+            }
             toolStripStatusLabel1.Text = "Reading...";
 
             backgroundWorker1.RunWorkerAsync(rdr);
@@ -276,6 +280,7 @@ namespace DatabaseSchemaViewer
 
             using (var f = new CompareForm(_databaseSchema))
             {
+                f.TableStartsWith = txtTableStartsWith.Text.Trim();
                 f.ShowDialog();
             }
         }
