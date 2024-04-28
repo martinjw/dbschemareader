@@ -31,7 +31,7 @@
 		2.9.1: Granular batching for indexes fix (#170), user defined types extensions (#171,thanks @whibdev) 
 		2.10.0: Postgresql: support partial indexes (#140)
 		2.10.1: Postgresql: fix partial indexes generation (#140); sql server UDTs bug (#173)
-		2.11.0: SQLite: sqlGeneration of Drop Table If Exists (#179)
+		2.11.0: SQLite: sqlGeneration of Drop Table If Exists (#179), multiple constraints on the same related table #184
 	</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
