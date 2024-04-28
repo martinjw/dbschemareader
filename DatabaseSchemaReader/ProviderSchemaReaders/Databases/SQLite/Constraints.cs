@@ -36,8 +36,14 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                         while (dr.Read())
                         {
                             var refersToTable = dr.GetString("table");
-                            var con =
-                                Result.FirstOrDefault(x => x.TableName == tableName && x.RefersToTable == refersToTable);
+                            var fieldName = dr.GetString("from");
+                            // 27/04/2024 A table can have multiple constraints on the same related table
+                            //var con =
+                            //    Result.FirstOrDefault(x => x.TableName == tableName && x.RefersToTable == refersToTable);
+                            var con = Result.FirstOrDefault(x =>
+                                x.TableName == tableName &&
+                                x.RefersToTable == refersToTable &&
+                                x.RefersToConstraint == fieldName);
                             if (con == null)
                             {
                                 con = new DatabaseConstraint
@@ -48,10 +54,11 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.SQLite
                                     RefersToTable = refersToTable,
                                     UpdateRule = dr.GetString("on_update"),
                                     DeleteRule = dr.GetString("on_delete"),
+                                    RefersToConstraint = fieldName,
                                 };
                                 Result.Add(con);
                             }
-                            con.Columns.Add(dr.GetString("from"));
+                            con.Columns.Add(fieldName);
 
                         }
                     }
