@@ -53,21 +53,34 @@ ORDER BY OWNER, TABLE_NAME, COLUMN_ID";
             var tableName = record.GetString("TABLE_NAME");
             var name = record.GetString("COLUMN_NAME");
 
+            // 19/06/2024 Specify the size of text fields
+            var dbDataType = record.GetString("DATA_TYPE");
+            var charLength = record.GetNullableInt("CHAR_LENGTH");
+            var dataLength = record.GetNullableInt("DATA_LENGTH");
+            var dbDataTypeWithLength = dbDataType;
+            if (dbDataType == "NCHAR" || 
+                dbDataType == "NVARCHAR2" || 
+                dbDataType == "VARCHAR2")
+                dbDataTypeWithLength = dbDataType + "(" + charLength + ")";
+            // For the moment, DATA_LENGTH is not the actual length of NUMBER
+            //if (dbDataType == "NUMBER")
+            //    dbDataTypeWithLength = dbDataType + "(" + dataLength + ")";
+
             var col = new DatabaseColumn
             {
                 SchemaOwner = owner,
                 TableName = tableName,
                 Name = name,
                 Ordinal = record.GetNullableInt("ordinal_position").GetValueOrDefault(),
-                DbDataType = record.GetString("DATA_TYPE"),
-                Length = record.GetNullableInt("CHAR_LENGTH"),
+                DbDataType = dbDataTypeWithLength,
+                Length = charLength,
                 Precision = record.GetNullableInt("DATA_PRECISION"),
                 Scale = record.GetNullableInt("DATA_SCALE"),
                 Nullable = record.GetBoolean("NULLABLE"),
             };
             if (col.Length < 1)
             {
-                col.Length = record.GetNullableInt("DATA_LENGTH");
+                col.Length = dataLength;
             }
             var d = record.GetString("DATA_DEFAULT");
             if (!string.IsNullOrEmpty(d))
