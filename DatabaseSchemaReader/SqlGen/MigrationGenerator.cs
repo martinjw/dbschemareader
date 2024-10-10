@@ -65,6 +65,11 @@ namespace DatabaseSchemaReader.SqlGen
             return tableGenerator.Write().Trim();
         }
 
+        private string SanitizeExpression(string expression)
+        {
+            return expression.Replace("\"", "").Replace("[", "").Replace("]", "");
+        }
+
         public virtual string AddColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn)
         {
             var tableGenerator = CreateTableGenerator(databaseTable);
@@ -84,10 +89,21 @@ namespace DatabaseSchemaReader.SqlGen
                 {
                     addColumn += " DEFAULT CURRENT_TIMESTAMP";
                 }
+                //is there a named check constraint?
+                //check constraints don't have columns, so simply try to find the column name in the expression
+                //column name may be quoted or [bracketed] but so we do a dumb sanitize
+                var notNullExpression = $"{databaseColumn.Name} IS NOT NULL";
+                var nnc = databaseTable.CheckConstraints.FirstOrDefault(cc =>
+                    SanitizeExpression(cc.Expression).Equals(notNullExpression, StringComparison.OrdinalIgnoreCase));
+                if (nnc != null)
+                {
+                    addColumn += " CONSTRAINT " + Escape(nnc.Name);
+                }
                 //make sure the NOT NULL is AFTER the default
                 if (!addColumn.EndsWith(" NOT NULL"))
                 {
-                    addColumn = addColumn.Replace(" NOT NULL ", " ") + " NOT NULL";
+
+                    addColumn = $"{addColumn.Replace(" NOT NULL ", " ")} NOT NULL";
                 }
             }
             return string.Format(CultureInfo.InvariantCulture,
