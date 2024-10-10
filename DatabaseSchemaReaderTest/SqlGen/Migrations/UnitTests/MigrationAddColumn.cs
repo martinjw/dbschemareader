@@ -117,6 +117,34 @@ namespace DatabaseSchemaReaderTest.SqlGen.Migrations.UnitTests
             Assert.IsTrue(sql.StartsWith("ALTER TABLE \"Orders\" ADD \"COUNTRY\" NVARCHAR2 (20)", StringComparison.OrdinalIgnoreCase), "names should be quoted correctly");
         }
 
+
+        [TestMethod]
+        public void TestOracleWithCheckConstraint()
+        {
+
+            //arrange
+            var migration = new DdlGeneratorFactory(SqlType.Oracle).MigrationGenerator();
+            migration.EscapeNames = false;
+            migration.IncludeSchema = false;
+
+            var table = MigrationCommon.CreateTestTable("Orders");
+            table.SchemaOwner = "dbo";
+            table.CheckConstraints.Add(new DatabaseConstraint
+            {
+                Name = "COUNTRY_NN",
+                ConstraintType = ConstraintType.Check,
+                Expression = "\"COUNTRY\" IS NOT NULL"
+            });
+            var column = CreateNewColumn();
+            column.Nullable = false;
+
+            //act
+            var sql = migration.AddColumn(table, column);
+
+            //assert
+            Assert.IsTrue(sql.StartsWith("ALTER TABLE Orders ADD COUNTRY NVARCHAR2 (20) DEFAULT '' CONSTRAINT COUNTRY_NN NOT NULL", StringComparison.OrdinalIgnoreCase), "default constraint added");
+        }
+
         [TestMethod]
         public void TestMySqlWithSchema()
         {
