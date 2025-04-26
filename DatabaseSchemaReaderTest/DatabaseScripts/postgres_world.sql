@@ -238,6 +238,15 @@ END $$;
 
 ALTER FUNCTION public.last_updated() OWNER TO postgres;
 
+CREATE PROCEDURE get_films_by_title(IN film_name TEXT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    SELECT * FROM film WHERE title LIKE '%' || film_name || '%';
+END;
+$$;
+
+ALTER PROCEDURE public.get_films_by_title() OWNER TO postgres;
+
 --
 -- Name: customer_customer_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --

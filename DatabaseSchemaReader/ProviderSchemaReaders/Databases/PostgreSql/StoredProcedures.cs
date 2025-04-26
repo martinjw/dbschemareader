@@ -6,13 +6,14 @@ using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
-    internal class Functions : SqlExecuter<DatabaseFunction>
+    internal class StoredProcedures : SqlExecuter<DatabaseStoredProcedure>
     {
-        public Functions(int? commandTimeout, string owner) : base(commandTimeout, owner)
+        public StoredProcedures(int? commandTimeout, string owner) : base(commandTimeout, owner)
         {
             Owner = owner;
             //Npgsql doesn't have a functions collection, so this is a simple substitute
             //based on http://www.alberton.info/postgresql_meta_info.html 
+            //copy of Functions with condition for procedures
             Sql = @"SELECT 
 ns.nspname AS SCHEMA, 
 pr.proname AS NAME, 
@@ -25,7 +26,7 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
 INNER JOIN pg_language lng ON lng.oid = pr.prolang
  WHERE --pr.proisagg = FALSE AND 
   tp.typname <> 'trigger'
-  AND pr.prokind <> 'p'
+  AND pr.prokind = 'p'
   AND ns.nspname NOT LIKE 'pg_%'
   AND ns.nspname != 'information_schema'
   AND (ns.nspname = :schemaOwner OR :schemaOwner IS NULL)
@@ -33,7 +34,7 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
 
         }
 
-        public IList<DatabaseFunction> Execute(IConnectionAdapter connectionAdapter)
+        public IList<DatabaseStoredProcedure> Execute(IConnectionAdapter connectionAdapter)
         {
             try
             {
@@ -56,13 +57,12 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
             var owner = record.GetString("SCHEMA");
             var name = record.GetString("NAME");
             var sql = record.GetString("BODY");
-            var sproc = new DatabaseFunction
+            var sproc = new DatabaseStoredProcedure
             {
                 SchemaOwner = owner,
                 Name = name,
                 Sql = sql,
                 Language = record.GetString("LANGUAGE"),
-                ReturnType = record.GetString("RETURNTYPE")
             };
             Result.Add(sproc);
         }

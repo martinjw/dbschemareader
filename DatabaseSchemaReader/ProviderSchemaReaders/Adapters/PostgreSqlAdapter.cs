@@ -119,6 +119,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                 .Execute(ConnectionAdapter);
         }
 
+        public override IList<DatabaseStoredProcedure> StoredProcedures(string name)
+        {
+            return new StoredProcedures(CommandTimeout, Owner)
+                .Execute(ConnectionAdapter);
+        }
+
         public override IList<DatabaseSequence> Sequences(string name)
         {
             if (_serverVersion == 0)
