@@ -1,5 +1,6 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql;
+using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
 using DatabaseSchemaReader.SqlGen.PostgreSql;
 using System;
 using System.Collections.Generic;
@@ -122,6 +123,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
         public override IList<DatabaseStoredProcedure> StoredProcedures(string name)
         {
             return new StoredProcedures(CommandTimeout, Owner)
+                .Execute(ConnectionAdapter);
+        }
+
+        public override IList<ProcedureSource> ProcedureSources(string name)
+        {
+            return new ProcedureSources(CommandTimeout, Owner, null)
                 .Execute(ConnectionAdapter);
         }
 
