@@ -58,6 +58,9 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
                 Escape(index.Name));
         }
 
+        protected override string DropTriggerFormat =>
+            "DROP TRIGGER IF EXISTS {1} ON {0}{2};";
+
         public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
         {
             return RenameColumnTo(databaseTable, databaseColumn, originalColumnName);

@@ -405,7 +405,9 @@ namespace DatabaseSchemaReader.SqlGen
             return string.Format(CultureInfo.InvariantCulture,
                 DropTriggerFormat,
                 SchemaPrefix(trigger.SchemaOwner),
-                Escape(trigger.Name));
+                Escape(trigger.Name),
+                //in PostgreSql, triggers are on tables- but in sql standard they are in schema
+                Escape(trigger.TableName));
         }
 
         public string RunStatements()
