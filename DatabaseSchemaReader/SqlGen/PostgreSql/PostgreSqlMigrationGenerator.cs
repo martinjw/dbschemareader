@@ -21,7 +21,17 @@ namespace DatabaseSchemaReader.SqlGen.PostgreSql
             if (string.IsNullOrEmpty(trigger.TriggerBody))
                 return "-- add trigger " + trigger.Name;
 
-            return trigger.TriggerBody + ";";
+            var sb = new StringBuilder();
+            sb.Append($"CREATE TRIGGER {trigger.Name} {trigger.TriggerType} {trigger.TriggerEvent}");
+            sb.Append($" ON {TableName(databaseTable)}");
+            //we don't capture FOR EACH ROW/FOR EACH STATEMENT or WHEN clauses
+            sb.Append(" FOR EACH ROW ");
+            sb.Append(trigger.TriggerBody);
+            if (!trigger.TriggerBody.TrimEnd().EndsWith(";"))
+            {
+                sb.Append(";");
+            }
+            return sb.ToString();
         }
 
         public override string AddIndex(DatabaseTable databaseTable, DatabaseIndex index)

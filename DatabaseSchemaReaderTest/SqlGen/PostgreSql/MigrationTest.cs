@@ -8,7 +8,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
     public class MigrationTest
     {
         [TestMethod, TestCategory("Postgresql")]
-        public void TestMigration()
+        public void TestDropTrigger()
         {
             //#197 PostgreSQL: Invalid DROP TRIGGER syntax (not sql standard!)
             var trigger = new DatabaseTrigger
@@ -22,34 +22,37 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
             var migrator = factory.MigrationGenerator();
             var sql = migrator.DropTrigger(trigger);
             Assert.AreEqual("DROP TRIGGER IF EXISTS \"TriggerName\" ON \"public\".\"Table1\";",sql);
-            //should be DROP TRIGGER "your_trigger_name" ON "public"."your_table_name";
+        }
 
+        [TestMethod, TestCategory("Postgresql")]
+        public void TestAddTrigger()
+        {
+            //#198 PostgreSQL: DbSchemaReader adds extra semicolon at the end of the TriggerBody
+            var table = new DatabaseTable
+            {
+                Name = "Table1",
+                SchemaOwner = "public"
+            };
 
-            //            const string providername = "Npgsql";
-            //            var connectionString = ConnectionStrings.PostgreSql;
-            //            ProviderChecker.Check(providername, connectionString);
+            var trigger = new DatabaseTrigger
+            {
+                Name = "TriggerName",
+                SchemaOwner = "public",
+                TableName = table.Name,
+                TriggerEvent = "UPDATE",
+                TriggerBody = "EXECUTE FUNCTION last_updated()",
+                TriggerType = "BEFORE"
+            };
 
-            //            var dbReader = new DatabaseReader(connectionString, providername);
-            //            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
-            //            var schema = dbReader.ReadAll();
-            //            //exactly the same
-            //            var schema2 = dbReader.ReadAll();
+            var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
+            var migrator = factory.MigrationGenerator();
+            var sql = migrator.AddTrigger(table, trigger);
+            Assert.AreEqual("CREATE TRIGGER TriggerName BEFORE UPDATE ON \"public\".\"Table1\" FOR EACH ROW EXECUTE FUNCTION last_updated();", sql);
+            //CREATE TRIGGER check_update
+            //    BEFORE UPDATE ON accounts
+            //    FOR EACH ROW
+            //    EXECUTE FUNCTION last_updated();
 
-            //            var employees = schema2.FindTableByName("employees");
-            //            schema2.RemoveTable(employees);
-
-            //            schema2.AddTable("employees")
-            //                .AddColumn<int>("employee_id").AddIdentity().AddPrimaryKey("pkEmployees")
-            //                .AddColumn<string>("name").AddLength(100)
-            //                .AddColumn<int>("manager_id")
-            //                .AddForeignKey("manager_id", "employees", "employee_id");
-
-            //            var comparer = new CompareSchemas(schema2, schema);
-            //            var migration = comparer.Execute();
-            //            Console.WriteLine(migration);
-
-            //            //    Type names are different in postgres and schema reader. e.g. decimal is numeric in postgresql, so dbschemareader always creates migration because it detects change.
-            //            //    Identity cannot be set on existing column - there is problem with default value
 
         }
     }
