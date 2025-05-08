@@ -24,6 +24,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
   udt_name AS data_type,
   character_maximum_length,
   numeric_precision,
+  numeric_precision_radix,
   numeric_scale,
   datetime_precision
 FROM information_schema.columns
@@ -58,6 +59,7 @@ ORDER BY table_schema, table_name, ordinal_position";
                 DbDataType = record.GetString("data_type"),
                 Length = record.GetNullableInt("character_maximum_length"),
                 Precision = record.GetNullableInt("numeric_precision"),
+                PrecisionRadix = record.GetNullableInt("numeric_precision_radix"),
                 Scale = record.GetNullableInt("numeric_scale"),
                 Nullable = record.GetBoolean("is_nullable"),
                 DefaultValue = record.GetString("column_default"),

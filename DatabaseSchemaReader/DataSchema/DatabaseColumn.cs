@@ -88,12 +88,17 @@ namespace DatabaseSchemaReader.DataSchema
         public string DefaultValue { get; set; }
 
         /// <summary>
-        /// Precision is the number of digits in a number. For example, the number 123.45 has a precision of 5 and a scale of 2.
+        /// Precision is the number of digits in a number. For example, the number 123.45 has a precision of 5 and a scale of 2. For floats, may be binary - check <see cref="PrecisionRadix"/>.
         /// </summary>
         /// <value>
         /// The precision.
         /// </value>
         public int? Precision { get; set; }
+
+        /// <summary>
+        /// The base of <see cref="Precision"/> and <see cref="Scale"/>- normally 10 for numeric/int/money/decimal, 2 for float/real (null for all other types)
+        /// </summary>
+        public int? PrecisionRadix { get; set; }
 
         /// <summary>
         /// Scale is the number of digits to the right of the decimal point in a number. For example, the number 123.45 has a precision of 5 and a scale of 2.

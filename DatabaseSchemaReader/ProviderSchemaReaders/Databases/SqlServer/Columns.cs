@@ -25,6 +25,7 @@ IS_NULLABLE,
 DATA_TYPE, 
 CHARACTER_MAXIMUM_LENGTH, 
 NUMERIC_PRECISION, 
+NUMERIC_PRECISION_RADIX, 
 NUMERIC_SCALE, 
 DATETIME_PRECISION 
 from INFORMATION_SCHEMA.COLUMNS c
@@ -69,6 +70,7 @@ where
                 Nullable = row.GetBoolean("IS_NULLABLE"),
                 Length = row.GetNullableInt("CHARACTER_MAXIMUM_LENGTH"),
                 Precision = row.GetNullableInt("NUMERIC_PRECISION"),
+                PrecisionRadix = row.GetNullableInt("NUMERIC_PRECISION_RADIX"),
                 Scale = row.GetNullableInt("NUMERIC_SCALE"),
                 DateTimePrecision = row.GetNullableInt("DATETIME_PRECISION")
             };
