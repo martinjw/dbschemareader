@@ -1,4 +1,5 @@
-﻿using DatabaseSchemaReader.DataSchema;
+﻿using System;
+using DatabaseSchemaReader.DataSchema;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -112,9 +113,12 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             //nicely, SQLServer gives you the entire sql including create statement in TriggerBody
             if (string.IsNullOrEmpty(trigger.TriggerBody))
                 return "-- add trigger " + trigger.Name;
-
-            return trigger.TriggerBody + ";";
+            //#199 ensure a GO before create trigger, as it must be the first statement
+            return $"GO{Environment.NewLine}{trigger.TriggerBody};";
         }
+
+        protected override string DropTriggerFormat { get { return @"GO
+DROP TRIGGER {0}{1};"; }  }
 
         public override string RenameColumn(DatabaseTable databaseTable, DatabaseColumn databaseColumn, string originalColumnName)
         {
