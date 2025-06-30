@@ -210,7 +210,10 @@ Order by constraint_schema, table_name, constraint_name, ordinal_position";
                 Result.Add(constraint);
             }
             var columnName = record.GetString("column_name");
-            constraint.Columns.Add(columnName);
+            if (!constraint.Columns.Contains(columnName))
+            {
+                constraint.Columns.Add(columnName);
+            }
         }
 
         public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
