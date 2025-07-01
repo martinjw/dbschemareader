@@ -29,22 +29,22 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
   CASE WHEN con.contype = 'f' THEN ref_nsp.nspname ELSE NULL END AS fk_schema,
   CASE WHEN con.contype = 'f' THEN ref_rel.relname ELSE NULL END AS fk_table,
     
-  CASE con.confdeltype
+  CASE con.confdeltype::text
     WHEN 'a' THEN 'NO ACTION'
     WHEN 'r' THEN 'RESTRICT'
     WHEN 'c' THEN 'CASCADE'
     WHEN 'n' THEN 'SET NULL'
     WHEN 'd' THEN 'SET DEFAULT'
-    ELSE con.confdeltype
-  END::text AS delete_rule,
-  CASE con.confupdtype
+    ELSE con.confdeltype::text
+  END AS delete_rule,
+  CASE con.confupdtype::text
     WHEN 'a' THEN 'NO ACTION'
     WHEN 'r' THEN 'RESTRICT'
     WHEN 'c' THEN 'CASCADE'
     WHEN 'n' THEN 'SET NULL'
     WHEN 'd' THEN 'SET DEFAULT'
-    ELSE con.confupdtype
-  END::text AS update_rule
+    ELSE con.confupdtype::text
+  END AS update_rule
   
   --CASE WHEN con.contype = 'f' THEN ref_att.attname ELSE NULL END AS fk_column,
   --con.contype AS constraint_type,
@@ -210,7 +210,10 @@ Order by constraint_schema, table_name, constraint_name, ordinal_position";
                 Result.Add(constraint);
             }
             var columnName = record.GetString("column_name");
-            constraint.Columns.Add(columnName);
+            if (!constraint.Columns.Contains(columnName))
+            {
+                constraint.Columns.Add(columnName);
+            }
         }
 
         public IList<DatabaseConstraint> Execute(IConnectionAdapter connectionAdapter)
