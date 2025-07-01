@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</Description>
     <AssemblyTitle>DatabaseSchemaReader</AssemblyTitle>
-    <VersionPrefix>2.15.0</VersionPrefix>
+    <VersionPrefix>2.16.0</VersionPrefix>
     <Authors>Martin Willey</Authors>
     <TargetFrameworks>netstandard2.0;netstandard1.5;net45;net40;net35</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -36,6 +36,7 @@
 		2.13.0: PostgreSql separate stored procedures from functions #196
 		2.14.0: Schema: Columns now have PrecisionRadix (PostgreSql/SqlServer) #195. PostgreSql trigger sqlGen #197, #198
 		2.15.0: PostgreSql trigger body has full create #196; SqlServer sqlgen triggers add GO before create/drop #199
+		2.16.0: PostgreSql constraint fixes (#201 thanks @doverhill)
 		</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -50,7 +51,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.15.0</Version>
+    <Version>2.16.0</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
