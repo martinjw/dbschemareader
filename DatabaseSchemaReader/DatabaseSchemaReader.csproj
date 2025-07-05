@@ -36,7 +36,7 @@
 		2.13.0: PostgreSql separate stored procedures from functions #196
 		2.14.0: Schema: Columns now have PrecisionRadix (PostgreSql/SqlServer) #195. PostgreSql trigger sqlGen #197, #198
 		2.15.0: PostgreSql trigger body has full create #196; SqlServer sqlgen triggers add GO before create/drop #199
-		2.16.0: PostgreSql constraint fixes (#201 thanks @doverhill)
+		2.16.0: PostgreSql constraint fixes (#201 thanks @doverhill); Oracle index column names (#202 thanks @bojanpikl)
 		</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
