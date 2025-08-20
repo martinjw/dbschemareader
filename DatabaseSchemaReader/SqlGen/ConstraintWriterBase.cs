@@ -111,7 +111,13 @@ namespace DatabaseSchemaReader.SqlGen
             //remove wrapping
             if (expression.StartsWith("(", StringComparison.OrdinalIgnoreCase) && expression.EndsWith(")", StringComparison.OrdinalIgnoreCase))
             {
-                expression = expression.Substring(1, expression.Length - 2);
+                //only extract wrapped brackets if they are not nested
+                var inner = expression.Substring(1, expression.Length - 2);
+                if (!inner.Contains("(") && !inner.Contains(")"))
+                {
+                    expression = inner;
+                }
+
             }
             //ignore "IS NOT NULL" constraints as they are generally handled on the add/alter column level
             if (expression.EndsWith(" IS NOT NULL", StringComparison.OrdinalIgnoreCase))
