@@ -38,5 +38,27 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
                 return 1;
             }
         }
+
+        public bool IsCockroachDb(IConnectionAdapter connectionAdapter)
+        {
+            try
+            {
+                using (var cmd = BuildCommand(connectionAdapter))
+                {
+                    cmd.CommandText = @"SELECT p.proname
+FROM pg_catalog.pg_proc p
+WHERE p.proname = 'crdb_version'";
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        return reader.Read(); // If a row exists, crdb_version() is present
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Trace.TraceError("Error checking if CockroachDB " + exception);
+                return false;
+            }
+        }
     }
 }

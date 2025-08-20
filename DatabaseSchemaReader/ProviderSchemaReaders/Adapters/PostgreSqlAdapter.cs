@@ -11,6 +11,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
     class PostgreSqlAdapter : ReaderAdapter
     {
         private int _serverVersion;
+        private bool? _isCoachroach;
 
         public PostgreSqlAdapter(SchemaParameters schemaParameters) : base(schemaParameters)
         {
@@ -69,8 +70,17 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
             {
                 _serverVersion = new ServerVersion(CommandTimeout).Execute(ConnectionAdapter);
             }
+            if (!_isCoachroach.HasValue)
+            {
+                _isCoachroach = new ServerVersion(CommandTimeout).IsCockroachDb(ConnectionAdapter);
+            }
 
-            var triggers = new Triggers(CommandTimeout, Owner, tableName) {ServerVersion = _serverVersion};
+
+            var triggers = new Triggers(CommandTimeout, Owner, tableName)
+            {
+                ServerVersion = _serverVersion,
+                IsCoachroachDb = _isCoachroach
+            };
             return triggers.Execute(ConnectionAdapter);
         }
 
@@ -103,7 +113,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Adapters
                     _serverVersion = new ServerVersion(CommandTimeout).Execute(ConnectionAdapter);
                 }
 
-                var materializedViews = new MaterializedViews(CommandTimeout, Owner, viewName) {ServerVersion = _serverVersion};
+                var materializedViews = new MaterializedViews(CommandTimeout, Owner, viewName) { ServerVersion = _serverVersion };
                 var mviews = materializedViews
                     .Execute(ConnectionAdapter);
                 foreach (var mview in mviews)
