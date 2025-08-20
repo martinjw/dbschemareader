@@ -1,6 +1,7 @@
 ﻿using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -161,8 +162,18 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
 
         private static long[] ReadLongArray(object o)
         {
-            var ar = o as long[];
-            if (ar != null) return ar;
+            var ar = o as uint[];
+            if (ar != null)
+            {
+                //or Array.ConvertAll() if netstandard 2...
+                var longArray = new long[ar.Length];
+                for (var i = 0; i < ar.Length; i++)
+                {
+                    longArray[i] = (long)ar[i];
+                }
+                return longArray;
+            }
+            ;
             if (o is long) return new[] { (long)o };
             return new long[] { };
         }
@@ -191,6 +202,9 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
         {
             var ar = o as string[];
             if (ar != null) return ar;
+            var cha = o as char[];
+            //modes can be a char array, so convert to strings
+            if (cha != null) return cha.Select(c => c.ToString()).ToArray();
             var s = ReadString(o);
             if (s == null) return new string[] { };
             s = s.Trim(new[] { '{', '}' });
