@@ -123,7 +123,7 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
                 };
                 if (direction.Contains("IN")) arg.In = true;
                 //can be INOUT
-                if (direction.Contains("OUT")) arg.Out = true;
+                if (direction.Contains("OUT") || direction.Contains("TABLE")) arg.Out = true;
                 var typeOid = allArgs[index];
                 if (!_requiredDataTypes.ContainsKey(typeOid))
                 {
@@ -143,6 +143,8 @@ INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
                     return "INOUT";
                 case "o":
                     return "OUT";
+                case "t":
+                    return "TABLE";
                 default:
                     return "IN";
             }
