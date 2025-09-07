@@ -19,7 +19,8 @@ ns.nspname AS SCHEMA,
 pr.proname AS NAME, 
 tp.typname AS RETURNTYPE, 
 lng.lanname AS LANGUAGE,
-pr.prosrc AS BODY
+pr.prosrc AS BODY,
+pr.oid AS OID
   FROM pg_proc pr
 LEFT OUTER JOIN pg_type tp ON tp.oid = pr.prorettype
 INNER JOIN pg_namespace ns ON pr.pronamespace = ns.oid
@@ -57,12 +58,14 @@ INNER JOIN pg_language lng ON lng.oid = pr.prolang
             var owner = record.GetString("SCHEMA");
             var name = record.GetString("NAME");
             var sql = record.GetString("BODY");
+            var oid = (uint)record["oid"];
             var sproc = new DatabaseStoredProcedure
             {
                 SchemaOwner = owner,
                 Name = name,
                 Sql = sql,
                 Language = record.GetString("LANGUAGE"),
+                Oid = oid,
             };
             Result.Add(sproc);
         }

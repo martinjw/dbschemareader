@@ -8,6 +8,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.ResultModels
         public SourceType SourceType { get; set; }
         public string Text { get; set; }
 
+        public uint Oid { get; set; }
+
         public override string ToString()
         {
             return string.Format("Source for {0}.{1} {2}", SchemaOwner, Name, SourceType);

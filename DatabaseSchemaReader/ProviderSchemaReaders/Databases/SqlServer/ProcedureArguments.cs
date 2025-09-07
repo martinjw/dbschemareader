@@ -78,8 +78,8 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, PARAMETER_NAME";
             };
             string inout = record.GetString("PARAMETER_MODE");
             if (inout.Contains("IN")) arg.In = true;
-            //can be INOUT
-            if (inout.Contains("OUT")) arg.Out = true;
+            //in SqlServer, OUTPUT parameters are also IN parameters, but we'll be conventional
+            if (inout.Contains("OUT")) arg.ArgumentMode = DatabaseArgumentMode.Out;
 
             Result.Add(arg);
         }

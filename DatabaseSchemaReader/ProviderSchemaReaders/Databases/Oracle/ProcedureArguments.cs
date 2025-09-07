@@ -68,7 +68,8 @@ ORDER BY OWNER, PACKAGE_NAME, OBJECT_NAME, POSITION";
             string inout = record.GetString("IN_OUT");
             if (inout.Contains("IN")) arg.In = true;
             //can be INOUT
-            if (inout.Contains("OUT")) arg.Out = true;
+            if (inout.Contains("OUT")) arg.ArgumentMode = DatabaseArgumentMode.Out;
+            if (inout.Contains("IN/OUT")) arg.ArgumentMode = DatabaseArgumentMode.InOut;
 
             Result.Add(arg);
         }

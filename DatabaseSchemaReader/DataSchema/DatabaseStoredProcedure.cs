@@ -100,6 +100,11 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public string NetName { get; set; }
 
+        /// <summary>
+        /// Object id (used by PostgreSql)
+        /// </summary>
+        public uint? Oid { get; set; }
+
         #region overrides
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.

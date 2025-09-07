@@ -103,15 +103,16 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             {
                 var name = source.Name;
                 var owner = source.SchemaOwner;
+                var oid = source.Oid;
                 switch (source.SourceType)
                 {
                     case SourceType.StoredProcedure:
-                        var sproc = _databaseSchema.StoredProcedures.Find(x => x.Name == name && x.SchemaOwner == owner);
+                        var sproc = _databaseSchema.StoredProcedures.Find(x => x.Name == name && x.SchemaOwner == owner && x.Oid == oid);
                         if (sproc != null) sproc.Sql = source.Text;
                         break;
 
                     case SourceType.Function:
-                        var fun = _databaseSchema.Functions.Find(x => x.Name == name && x.SchemaOwner == owner);
+                        var fun = _databaseSchema.Functions.Find(x => x.Name == name && x.SchemaOwner == owner && x.Oid == oid);
                         if (fun != null) fun.Sql = source.Text;
                         break;
 
@@ -152,7 +153,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     args.Where(
                         x =>
                             x.SchemaOwner == sproc.SchemaOwner && x.ProcedureName == sproc.Name &&
-                            x.PackageName == sproc.Package)
+                            x.PackageName == sproc.Package && x.Oid == sproc.Oid)
                         .OrderBy(x => x.Ordinal);
                 sproc.Arguments.Clear();
                 sproc.Arguments.AddRange(sprocArgs);
@@ -163,7 +164,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
                     args.Where(
                         x =>
                             x.SchemaOwner == func.SchemaOwner && x.ProcedureName == func.Name &&
-                            x.PackageName == func.Package)
+                            x.PackageName == func.Package && x.Oid == func.Oid)
                         .OrderBy(x => x.Ordinal);
                 func.Arguments.Clear();
                 func.Arguments.AddRange(funcArgs);

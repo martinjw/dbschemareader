@@ -142,7 +142,7 @@ WHERE rfr.rdb$relation_name = 'Test'";
             var inout = record.GetNullableInt("PARAMETER_DIRECTION");
             if (inout == 1)
             {
-                arg.Out = true;
+                arg.ArgumentMode = DatabaseArgumentMode.Out;
             }
             else
             {

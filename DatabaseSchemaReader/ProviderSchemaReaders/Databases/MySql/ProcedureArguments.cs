@@ -73,7 +73,8 @@ ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, PARAMETER_NAME";
             {
                 if (inout.Contains("IN")) arg.In = true;
                 //can be INOUT
-                if (inout.Contains("OUT")) arg.Out = true;
+                if (inout.Contains("OUT")) arg.ArgumentMode = DatabaseArgumentMode.Out;
+                if (inout.Contains("INOUT")) arg.ArgumentMode = DatabaseArgumentMode.InOut;
             }
 
             Result.Add(arg);

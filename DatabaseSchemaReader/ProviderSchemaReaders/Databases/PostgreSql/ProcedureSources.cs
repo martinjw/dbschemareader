@@ -1,11 +1,9 @@
 ﻿using DatabaseSchemaReader.ProviderSchemaReaders.ConnectionContext;
 using DatabaseSchemaReader.ProviderSchemaReaders.ResultModels;
-using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
-using System.Text;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 {
@@ -21,7 +19,8 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
     ns.nspname AS Owner,
     p.proname AS Name,
     p.prokind AS Type,
-    pg_get_functiondef(p.oid) AS Text
+    pg_get_functiondef(p.oid) AS Text,
+    p.oid AS OID
 FROM
     pg_proc p
 JOIN
@@ -63,6 +62,7 @@ WHERE
                 Name = record.GetString("Name"),
                 SchemaOwner = record.GetString("Owner")
             };
+            source.Oid = (uint)record["oid"];
             var type = record.GetString("Type").Trim();
             switch (type)
             {

@@ -9,6 +9,7 @@ namespace DatabaseSchemaReader.DataSchema
     [Serializable]
     public partial class DatabaseArgument : NamedObject<DatabaseArgument>
     {
+        private DatabaseArgumentMode _argumentMode;
 
         /// <summary>
         /// Gets or sets the schema owner.
@@ -87,6 +88,37 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public bool Out { get; set; }
 
+        /// <summary>
+        /// Gets or sets the mode (input/output/both or table)
+        /// </summary>
+        public DatabaseArgumentMode ArgumentMode
+        {
+            get => _argumentMode;
+            set
+            {
+                _argumentMode = value;
+                switch (value)
+                {
+                    case DatabaseArgumentMode.In:
+                        In = true;
+                        Out = false;
+                        break;
+                    case DatabaseArgumentMode.Out:
+                        In = false;
+                        Out = true;
+                        break;
+                    case DatabaseArgumentMode.InOut:
+                        In = true;
+                        Out = true;
+                        break;
+                    case DatabaseArgumentMode.Table:
+                        In = false;
+                        Out = true;
+                        break;
+                }
+            }
+        }
+
         #region Derived properties
 
         /// <summary>
@@ -103,6 +135,11 @@ namespace DatabaseSchemaReader.DataSchema
         /// </value>
         public string NetName { get; set; }
 
+        /// <summary>
+        /// For PostgreSQL, the object id of the parent procedure or function
+        /// </summary>
+        public uint? Oid { get; set; }
+
         #endregion
 
         /// <summary>
@@ -116,5 +153,28 @@ namespace DatabaseSchemaReader.DataSchema
             return Name;
         }
 
+    }
+
+    /// <summary>
+    /// The argument mode- normally In, Out or InOut. Table is used by PostgreSQL and SAP.
+    /// </summary>
+    public enum DatabaseArgumentMode
+    {
+        /// <summary>
+        /// Input parameter
+        /// </summary>
+        In,
+        /// <summary>
+        /// Output parameter (NB in SqlServer, output parameters are implicitly InOut)
+        /// </summary>
+        Out,
+        /// <summary>
+        /// Input and output parameter
+        /// </summary>
+        InOut,
+        /// <summary>
+        /// Table parameter (PostgreSQL, SAP)
+        /// </summary>
+        Table
     }
 }
