@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace DatabaseSchemaReader.SqlGen.SqlServer
+﻿namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
-    class SqlFormatProvider : ISqlFormatProvider
+    internal class SqlFormatProvider : ISqlFormatProvider
     {
         public string Escape(string name)
         {
@@ -14,7 +12,6 @@ namespace DatabaseSchemaReader.SqlGen.SqlServer
             return ";";
         }
 
-
         public string RunStatements()
         {
             return @"
@@ -25,6 +22,11 @@ GO
         public int MaximumNameLength
         {
             get { return 128; }
+        }
+
+        public override string ToString()
+        {
+            return "SqlServer.SqlFormatProvider";
         }
     }
 }

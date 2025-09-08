@@ -29,5 +29,32 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlServer
             Assert.IsFalse(ddl.Contains("GO"));
             Assert.IsTrue(dllWithBatching.Contains("GO"));
         }
+
+        [TestMethod]
+        public void TestGranularBatchingForViews()
+        {
+            var view = new DatabaseView
+            {
+                Name = "View1",
+                Sql = "CREATE VIEW [View1] AS SELECT Name FROM Test",
+                Columns = { new DatabaseColumn
+                {
+                    Name = "Name", DbDataType = "VARCHAR",
+                } }
+            };
+
+            var ddlGeneratorFactory = new DdlGeneratorFactory(SqlType.SqlServer);
+            ddlGeneratorFactory.UseGranularBatching = false;
+            var migrator = ddlGeneratorFactory.MigrationGenerator();
+            var ddl = migrator.AddView(view);
+
+            Assert.IsFalse(ddl.Contains("GO"));
+
+            ddlGeneratorFactory.UseGranularBatching = true;
+            migrator = ddlGeneratorFactory.MigrationGenerator();
+            ddl = migrator.AddView(view);
+
+            Assert.IsTrue(ddl.Contains("GO"));
+        }
     }
 }

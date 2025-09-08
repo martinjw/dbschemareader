@@ -1,6 +1,6 @@
 ﻿namespace DatabaseSchemaReader.SqlGen.SqlServer
 {
-    class BatchingSqlFormatProvider : ISqlFormatProvider
+    internal class BatchingSqlFormatProvider : ISqlFormatProvider
     {
         public string Escape(string name)
         {
@@ -12,7 +12,6 @@
             return RunStatements();
         }
 
-
         public string RunStatements()
         {
             return @"
@@ -23,6 +22,11 @@ GO
         public int MaximumNameLength
         {
             get { return 128; }
+        }
+
+        public override string ToString()
+        {
+            return "SqlServer.BatchingSqlFormatProvider";
         }
     }
 }
