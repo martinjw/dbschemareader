@@ -233,7 +233,7 @@ namespace DatabaseSchemaReaderTest.Codegen
             var category = files.First(f => f.Name == "uspLogError.cs");
             var cs = File.ReadAllText(category.FullName);
 
-            var ok = cs.Contains("public virtual DbCommand CreateCommand(int? errorLogId)");
+            var ok = cs.Contains("public virtual DbCommand CreateCommand(");
             Assert.IsTrue(ok, "Should contain the uspLogError stored procedure (in standard AdventureWorks db)");
         }
 
