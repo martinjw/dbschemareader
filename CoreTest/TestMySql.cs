@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DatabaseSchemaReader.Procedures;
 
 namespace CoreTest
 {
     [TestClass]
     public class TestMySql
     {
-        public static string MySql
-        {
-            get
-            {
-                if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
-                {
-                    return @"Server=localhost;Uid=root;Pwd=Password12!;Database=sakila;Allow User Variables=True;";
-                }
-                //had to add SslMode=None because of a NotImplemented error
-                return @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;SslMode=None";
-            }
-        }
+        public static string MySql =>
+            //if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
+            //{
+            //    return @"Server=localhost;Uid=root;Pwd=Password12!;Database=sakila;Allow User Variables=True;";
+            //}
+            //had to add SslMode=None because of a NotImplemented error
+            @"Server=localhost;Uid=root;Pwd=mysql;Database=sakila;Allow User Variables=True;";
 
         [TestMethod]
         public void RunTableList()
