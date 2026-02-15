@@ -30,7 +30,63 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
 FROM information_schema.columns
 WHERE (table_schema = :OWNER OR :OWNER IS NULL)
 AND (table_name = :TABLENAME OR :TABLENAME IS NULL)
-ORDER BY table_schema, table_name, ordinal_position";
+
+UNION
+
+-- specialized query for materialized views, because INFORMATION_SCHEMA does not support them
+SELECT
+    n.nspname                               AS table_schema,
+    c.relname                               AS table_name,
+    a.attname                               AS column_name,
+    a.attnum                                AS ordinal_position,
+    pg_get_expr(ad.adbin, ad.adrelid)       AS column_default,
+    CASE a.attnotnull
+        WHEN true  THEN 'NO'
+        ELSE 'YES'
+    END                                     AS is_nullable,
+    t.typname                               AS data_type,
+    CASE
+        WHEN t.typname IN ('varchar','bpchar')
+            THEN a.atttypmod - 4
+        ELSE NULL
+    END                                     AS character_maximum_length,
+    CASE
+        WHEN t.typname IN ('numeric','decimal')
+            THEN ((a.atttypmod - 4) >> 16) & 65535
+        ELSE NULL
+    END                                     AS numeric_precision,
+    CASE
+        WHEN t.typname IN ('numeric','decimal')
+            THEN 10
+        ELSE NULL
+    END                                     AS numeric_precision_radix,
+    CASE
+        WHEN t.typname IN ('numeric','decimal')
+            THEN (a.atttypmod - 4) & 65535
+        ELSE NULL
+    END                                     AS numeric_scale,
+    NULL::integer                           AS datetime_precision
+FROM pg_class c
+JOIN pg_namespace n
+  ON n.oid = c.relnamespace
+JOIN pg_attribute a
+  ON a.attrelid = c.oid
+JOIN pg_type t
+  ON t.oid = a.atttypid
+LEFT JOIN pg_attrdef ad
+  ON ad.adrelid = c.oid
+ AND ad.adnum   = a.attnum
+WHERE c.relkind = 'm'                       -- materialized views
+  AND a.attnum > 0
+  AND NOT a.attisdropped
+  AND (n.nspname = :OWNER OR :OWNER IS NULL)
+  AND (c.relname = :TABLENAME OR :TABLENAME IS NULL)
+
+ORDER BY
+    table_schema,
+    table_name,
+    ordinal_position
+";
         }
 
         public IList<DatabaseColumn> Execute(IConnectionAdapter connectionAdapter)
