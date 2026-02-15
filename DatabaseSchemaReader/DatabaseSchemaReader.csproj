@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</Description>
     <AssemblyTitle>DatabaseSchemaReader</AssemblyTitle>
-    <VersionPrefix>2.19.0</VersionPrefix>
+    <VersionPrefix>2.20.0</VersionPrefix>
     <Authors>Martin Willey</Authors>
     <TargetFrameworks>netstandard2.0;netstandard1.5;net45;net40;net35</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -40,6 +40,7 @@
 		2.17.0: PostgreSql check constraint fixes (#203); CockroachDb support (#204), Check constraint brackets (#205); PostgreSql function OUT parameters (#206)
 		2.18.0: PostgreSql procs with overloads (#207); SqlServer Migrator for views with UseGranularBatching (GO, #208); PostgreSql table output arguments (#209) 
 		2.19.0: Fix Oracle Index_Type (#210)
+		2.20.0: PostgreSql materialized view columns missing (#211)
 		</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -54,7 +55,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.19.0</Version>
+    <Version>2.20.0</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
