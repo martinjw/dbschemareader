@@ -41,7 +41,7 @@
       2.18.0: PostgreSql procs with overloads (#207); SqlServer Migrator for views with UseGranularBatching (GO, #208); PostgreSql table output arguments (#209)
       2.19.0: Fix Oracle Index_Type (#210)
       2.20.0: PostgreSql materialized view columns missing (#211)
-      2.21.0: PostgreSql check constraint fix (#203)
+      2.21.0: PostgreSql check constraint fix (#203), SqlServer procedure source missing (#214)
     </PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
