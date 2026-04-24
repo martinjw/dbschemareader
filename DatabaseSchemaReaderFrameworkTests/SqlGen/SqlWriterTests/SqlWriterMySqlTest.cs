@@ -2,6 +2,7 @@ using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
 using DatabaseSchemaReader.Utilities.DbProvider;
+using DatabaseSchemaReaderFrameworkTests.Utilities;
 using System.Data.Common;
 
 namespace DatabaseSchemaReaderFrameworkTests.SqlGen.SqlWriterTests
@@ -18,8 +19,7 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.SqlWriterTests
         {
             try
             {
-                _factory = MySqlConnector.MySqlConnectorFactory.Instance;
-                EnsureProviderFactory();
+                _factory = new MySqlConnectorSetup().EnsureProviderFactory();
             }
             catch (ArgumentException)
             {
@@ -28,29 +28,6 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.SqlWriterTests
             catch (Exception)
             {
                 //MySQL is not installed. ProviderChecker will assert.inconclusive.
-            }
-        }
-
-        private void EnsureProviderFactory()
-        {
-            if (FactoryTools.GetFactory(ProviderName) == null)
-            {
-                var manualDescription = new DbProviderFactoryDescription
-                {
-                    Description = ProviderName,
-                    InvariantName = ProviderName,
-                    Name = ProviderName,
-                    AssemblyQualifiedName = _factory.GetType().AssemblyQualifiedName,
-                };
-
-                // Initialize the repository.
-                if (FactoryTools.ProviderRepository == null)
-                {
-                    var repo = new DbProviderFactoryRepository();
-                    FactoryTools.ProviderRepository = repo;
-                }
-
-                FactoryTools.ProviderRepository.Add(manualDescription);
             }
         }
 

@@ -1,5 +1,6 @@
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
+using DatabaseSchemaReaderFrameworkTests.Utilities;
 
 namespace DatabaseSchemaReaderFrameworkTests.SqlGen.Migrations
 {
@@ -14,11 +15,12 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.Migrations
         {
             //arrange
             var connectionString = ConnectionStrings.MySql;
-            var tableName = MigrationCommon.FindFreeTableName(ProviderName, connectionString);
+            var factory = new MySqlConnectorSetup().EnsureProviderFactory();
+            var tableName = MigrationCommon.FindFreeTableName(factory, connectionString);
             var migration = new DdlGeneratorFactory(SqlType.MySql).MigrationGenerator();
 
             //MySql DDL isn't transactional. Hope this works.
-            MigrationCommon.ExecuteScripts(ProviderName, connectionString, tableName, migration);
+            MigrationCommon.ExecuteScripts(factory, connectionString, tableName, migration);
         }
     }
 }

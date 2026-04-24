@@ -11,10 +11,25 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.Migrations
     {
         public static string FindFreeTableName(string providerName, string connectionString)
         {
-            IList<DatabaseTable> tables = null;
             try
             {
                 var factory = DbProviderFactories.GetFactory(providerName);
+                return FindFreeTableName(factory, connectionString);
+            }
+            catch (Exception)
+            {
+                Assert.Inconclusive();
+            }
+
+            return null;
+        }
+
+
+        public static string FindFreeTableName(DbProviderFactory factory, string connectionString)
+        {
+            IList<DatabaseTable> tables = null;
+            try
+            {
                 using (var dbConnection = factory.CreateConnection())
                 {
                     dbConnection.ConnectionString = connectionString;
@@ -133,7 +148,14 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.Migrations
             return constraint;
         }
 
-        public static void ExecuteScripts(string providerName, string connectionString, string tableName, IMigrationGenerator migrationGenerator)
+        public static void ExecuteScripts(string providerName, string connectionString, string tableName,
+            IMigrationGenerator migrationGenerator)
+        {
+            var factory = DbProviderFactories.GetFactory(providerName);
+            ExecuteScripts(factory, connectionString, tableName, migrationGenerator);
+        }
+
+        public static void ExecuteScripts(DbProviderFactory factory, string connectionString, string tableName, IMigrationGenerator migrationGenerator)
         {
             var table = CreateTestTable(tableName);
             var newColumn = CreateNewColumn();
@@ -153,7 +175,6 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.Migrations
             var dropColumn = migrationGenerator.DropColumn(table, newColumn);
             var dropTable = migrationGenerator.DropTable(table);
 
-            var factory = DbProviderFactories.GetFactory(providerName);
             using (var con = factory.CreateConnection())
             {
                 con.ConnectionString = connectionString;
@@ -197,5 +218,6 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.Migrations
                 cmd.ExecuteNonQuery();
             }
         }
+
     }
 }

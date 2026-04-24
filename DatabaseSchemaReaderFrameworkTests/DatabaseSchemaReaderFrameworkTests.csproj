@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="2.5.0" />
+    <PackageReference Include="Oracle.ManagedDataAccess" Version="23.26.200" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
   </ItemGroup>
 
@@ -30,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,8 +50,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.2.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.2.1" />
   </ItemGroup>
 
 </Project>
