@@ -103,16 +103,17 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Builders
             {
                 var name = source.Name;
                 var owner = source.SchemaOwner;
+                //oid in Postgresql, Oracle and DB2, but not in SQL Server/MySql. Default is zero, so we check GetValueOrDefault()
                 var oid = source.Oid;
                 switch (source.SourceType)
                 {
                     case SourceType.StoredProcedure:
-                        var sproc = _databaseSchema.StoredProcedures.Find(x => x.Name == name && x.SchemaOwner == owner && x.Oid == oid);
+                        var sproc = _databaseSchema.StoredProcedures.Find(x => x.Name == name && x.SchemaOwner == owner && x.Oid.GetValueOrDefault() == oid);
                         if (sproc != null) sproc.Sql = source.Text;
                         break;
 
                     case SourceType.Function:
-                        var fun = _databaseSchema.Functions.Find(x => x.Name == name && x.SchemaOwner == owner && x.Oid == oid);
+                        var fun = _databaseSchema.Functions.Find(x => x.Name == name && x.SchemaOwner == owner && x.Oid.GetValueOrDefault() == oid);
                         if (fun != null) fun.Sql = source.Text;
                         break;
 
