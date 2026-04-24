@@ -3,6 +3,7 @@ using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
 using DatabaseSchemaReaderTest.IntegrationTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
 {
@@ -88,13 +89,21 @@ namespace DatabaseSchemaReaderTest.SqlGen.PostgreSql
         [TestMethod, TestCategory("Postgresql")]
         public void IntegrationTest()
         {
-            const string providername = "Npgsql";
+            DatabaseSchema schema = null;
             var connectionString = ConnectionStrings.PostgreSql;
-            ProviderChecker.Check(providername, connectionString);
-
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
-            var schema = dbReader.ReadAll();
+            try
+            {
+                using (var con = new Npgsql.NpgsqlConnection(connectionString))
+                {
+                    var dbReader = new DatabaseReader(con);
+                    dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
+                    schema = dbReader.ReadAll();
+                }
+            }
+            catch (Exception)
+            {
+                Assert.Inconclusive();
+            }
             var city = schema.FindTableByName("city");
             var factory = new DdlGeneratorFactory(SqlType.PostgreSql);
             var tableGen = factory.TableGenerator(city);

@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace DatabaseSchemaReader.Utilities.DbProvider
 {
@@ -18,7 +20,15 @@ namespace DatabaseSchemaReader.Utilities.DbProvider
             //a simple static manual override.
             if (SingleProviderFactory != null) return SingleProviderFactory;
             if (ProviderRepository != null) return ProviderRepository.GetFactory(providerName);
-            return DbProviderFactories.GetFactory(providerName);
+            try
+            {
+                return DbProviderFactories.GetFactory(providerName);
+            }
+            catch (ArgumentException e)
+            {
+                Trace.TraceError($"Could not find installed provider {providerName}");
+                return null;
+            }
         }
 
 

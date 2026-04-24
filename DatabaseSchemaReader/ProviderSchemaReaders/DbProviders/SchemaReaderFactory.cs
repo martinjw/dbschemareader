@@ -51,10 +51,12 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
                     {
                         schemaReader = new SybaseUltraLiteSchemaReader(connectionString, providerName);
                     }
+#if !(NET8_0 || NET8_0_OR_GREATER)
                     else if (providerName.Equals("System.Data.OleDb", StringComparison.OrdinalIgnoreCase))
                     {
                         schemaReader = new OleDbSchemaReader(connectionString, providerName);
                     }
+#endif
                     else if (providerName.Equals("System.Data.VistaDB", StringComparison.OrdinalIgnoreCase))
                     {
                         schemaReader = new VistaDbSchemaReader(connectionString, providerName);

@@ -1,9 +1,7 @@
-using System.IO;
-using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
-using DatabaseSchemaReaderTest.IntegrationTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 
 namespace DatabaseSchemaReaderTest.SqlGen
 {
@@ -13,18 +11,12 @@ namespace DatabaseSchemaReaderTest.SqlGen
     [TestClass]
     public class WritingSprocsTest
     {
-
         private static DatabaseTable LoadCategoriesFromNorthwind()
         {
-            const string providername = "System.Data.SqlClient";
-            var connectionString = ConnectionStrings.Northwind;
-            ProviderChecker.Check(providername, connectionString);
-
-            var dbReader = new DatabaseReader(connectionString, providername);
-            var schema = dbReader.ReadAll();
+            var schema = TestHelper.GetNorthwindSchema();
+            if (schema == null) Assert.Inconclusive();
             return schema.FindTableByName("Categories");
         }
-
 
         [TestMethod]
         public void TestWritingNorthwindTables()
@@ -73,7 +65,6 @@ namespace DatabaseSchemaReaderTest.SqlGen
             //manually check the script is ok
         }
 
-
         [TestMethod]
         public void TestWritingSqlTableIntoMySqlTable()
         {
@@ -105,8 +96,6 @@ namespace DatabaseSchemaReaderTest.SqlGen
             Assert.IsFalse(string.IsNullOrEmpty(txt), "Should have written some text");
             //manually check the script is ok
         }
-
-
 
         [TestMethod]
         public void TestWritingCrudSprocsWithOracleConversion()

@@ -1,9 +1,12 @@
-using System.Diagnostics;
-using System.Linq;
 using DatabaseSchemaReader.CodeGen;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Procedures;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using DatabaseSchemaReader;
 
 namespace DatabaseSchemaReaderTest.Procedures
 {
@@ -16,11 +19,25 @@ namespace DatabaseSchemaReaderTest.Procedures
         [TestMethod]
         public void TestRunnerWithEmptySchema()
         {
-            var dbReader = TestHelper.GetNorthwindReader();
-            
-            var schema = dbReader.DatabaseSchema;
-            var runner = new ResultSetReader(schema);
-            runner.Execute();
+            var connectionString = ConnectionStrings.Northwind;
+            DatabaseSchema schema = null;
+            try
+            {
+                using (var con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    var northwindReader = new DatabaseReader(con);
+                    northwindReader.Owner = "dbo";
+                    schema = northwindReader.DatabaseSchema;
+                    var runner = new ResultSetReader(schema);
+                    runner.Execute(con);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Could not open Northwind: {e}");
+            }
+
             //should load sprocs
             var sproc = schema.StoredProcedures.First();
             var result = sproc.ResultSets.First();
@@ -32,11 +49,24 @@ namespace DatabaseSchemaReaderTest.Procedures
         public void TestRunnerWithNorthwind()
         {
             //smoke test - does this run without any exceptions
-            var dbReader = TestHelper.GetNorthwindReader();
-            var schema = dbReader.ReadAll();
-
-            var runner = new ResultSetReader(schema);
-            runner.Execute();
+            var connectionString = ConnectionStrings.Northwind;
+            DatabaseSchema schema = null;
+            try
+            {
+                using (var con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    var northwindReader = new DatabaseReader(con);
+                    northwindReader.Owner = "dbo";
+                    schema = northwindReader.ReadAll();
+                    var runner = new ResultSetReader(schema);
+                    runner.Execute(con);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Could not open Northwind: {e}");
+            }
 
             var directory = TestHelper.CreateDirectory("NorthwindSproc");
             const string @namespace = "Northwind.Domain";

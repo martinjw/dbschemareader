@@ -4,7 +4,7 @@ using System.Data.Common;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
-using DatabaseSchemaReaderTest.IntegrationTests;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
@@ -12,29 +12,28 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
     [TestClass]
     public class SqlWriterSqlServerTest
     {
-        private const string ProviderName = "System.Data.SqlClient";
-        readonly string _connectionString = ConnectionStrings.Northwind;
+        private readonly string _connectionString = ConnectionStrings.Northwind;
         private DatabaseTable _categoriesTable;
         private readonly DbProviderFactory _factory;
 
         public SqlWriterSqlServerTest()
         {
-            _factory = DbProviderFactories.GetFactory(ProviderName);
+            _factory =  SqlClientFactory.Instance;
+            // DbProviderFactories.GetFactory(ProviderName);
         }
 
         private DatabaseTable LoadCategoriesFromNorthwind()
         {
             if (_categoriesTable != null) return _categoriesTable;
 
-            ProviderChecker.Check(ProviderName, _connectionString);
+            var schema = TestHelper.GetNorthwindSchema();
+            if (schema == null) Assert.Inconclusive();
 
-            var dbReader = new DatabaseReader(_connectionString, ProviderName);
-            dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _categoriesTable = dbReader.Table("Categories"); //this hits database for columns and constraints
+            _categoriesTable = schema.FindTableByName("Categories"); //this hits database for columns and constraints
             return _categoriesTable;
         }
 
-        [TestMethod, TestCategory("SqlServer")]
+        [TestMethod, Microsoft.VisualStudio.TestTools.UnitTesting.TestCategory("SqlServer")]
         public void TestGeneratedSqlForCount()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -44,8 +43,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunCountSql();
         }
 
-
-        [TestMethod, TestCategory("SqlServer")]
+        [TestMethod, Microsoft.VisualStudio.TestTools.UnitTesting.TestCategory("SqlServer")]
         public void TestGeneratedSqlForSelectAll()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -55,7 +53,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunSelectAllSql();
         }
 
-        [TestMethod, TestCategory("SqlServer")]
+        [TestMethod, Microsoft.VisualStudio.TestTools.UnitTesting.TestCategory("SqlServer")]
         public void TestGeneratedSqlForPaging()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -65,7 +63,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingSql();
         }
 
-        [TestMethod, TestCategory("SqlServer")]
+        [TestMethod, Microsoft.VisualStudio.TestTools.UnitTesting.TestCategory("SqlServer")]
         public void TestGeneratedSqlForPagingStartToEnd()
         {
             var table = LoadCategoriesFromNorthwind();
@@ -75,7 +73,7 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             runner.RunPagingStartToEndSql();
         }
 
-        [TestMethod, TestCategory("SqlServer")]
+        [TestMethod, Microsoft.VisualStudio.TestTools.UnitTesting.TestCategory("SqlServer")]
         public void TestGeneratedSqlForInsert()
         {
             //arrange
@@ -85,9 +83,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.SqlWriterTests
             int identity;
 
             //run generated sql
-            using (var con = _factory.CreateConnection())
+            using (var con = new SqlConnection(_connectionString))
             {
-                con.ConnectionString = _connectionString;
                 con.Open();
                 using (var transaction = con.BeginTransaction())
                 {

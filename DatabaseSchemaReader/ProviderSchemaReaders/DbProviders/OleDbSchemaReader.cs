@@ -1,10 +1,11 @@
-﻿using System;
+﻿#if !(NET8_0 || NET8_0_OR_GREATER)
+using DatabaseSchemaReader.DataSchema;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Linq;
-using DatabaseSchemaReader.DataSchema;
 
 namespace DatabaseSchemaReader.ProviderSchemaReaders
 {
@@ -73,7 +74,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
             return schemaTable;
         }
 
-        protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection) 
+        protected override DataTable StoredProcedureArguments(string storedProcedureName, DbConnection connection)
         {
             //for JET and ACE providers this isn't supported, but we'll try anyway
             var schemaTable = GetOleDbSchemaTable(OleDbSchemaGuid.Procedure_Parameters, storedProcedureName, connection, ProcedureParametersCollectionName);
@@ -138,3 +139,4 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders
         }
     }
 }
+#endif

@@ -1,14 +1,15 @@
-﻿using System;
+﻿using DatabaseSchemaReader;
+using DatabaseSchemaReader.DataSchema;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using DatabaseSchemaReader;
-using DatabaseSchemaReaderTest.IntegrationTests;
 
 namespace DatabaseSchemaReaderTest
 {
-    static class TestHelper
+    internal static class TestHelper
     {
-
         /// <summary>
         /// Creates the directory for writing test files. We use the %TEMP% directory here.
         /// </summary>
@@ -43,19 +44,40 @@ namespace DatabaseSchemaReaderTest
             return subdirectory;
         }
 
+        public static DatabaseSchema GetNorthwindSchema()
+        {
+            DatabaseSchema schema = null;
+            if (!GetNorthwindReader(reader => schema = reader.ReadAll()))
+            {
+                return null;
+            }
+            return schema;
+        }
+
         /// <summary>
         /// Gets the SqlServer NorthWind reader.
         /// </summary>
         /// <returns></returns>
-        public static DatabaseReader GetNorthwindReader()
+        public static bool GetNorthwindReader(Action<DatabaseReader> configure)
         {
-            const string providername = "System.Data.SqlClient";
             var connectionString = ConnectionStrings.Northwind;
-            ProviderChecker.Check(providername, connectionString);
+            try
+            {
+                using (var con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    var northwindReader = new DatabaseReader(con);
+                    northwindReader.Owner = "dbo";
+                    configure.Invoke(northwindReader);
+                }
 
-            var northwindReader = new DatabaseReader(connectionString, providername);
-            northwindReader.Owner = "dbo";
-            return northwindReader;
+                return true;
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Could not open Northwind: {e}");
+                return false;
+            }
         }
     }
 }

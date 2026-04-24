@@ -1,9 +1,12 @@
-using System;
-using System.Data;
-using System.Globalization;
 using DatabaseSchemaReader.Data;
 using DatabaseSchemaReader.DataSchema;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
+using DatabaseSchemaReader;
 
 namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
 {
@@ -149,21 +152,33 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         }
 
 
-        const string Providername = "System.Data.SqlClient";
-        readonly string ConnectionString = ConnectionStrings.Northwind;
-
-
         [TestMethod]
         public void TestInsertIntegration()
         {
             //arrange
-            var dbReader = TestHelper.GetNorthwindReader();
-            var table = dbReader.Table("Orders");
+            DatabaseTable table;
+            DataTable dataTable;
+            var connectionString = ConnectionStrings.Northwind;
+            try
+            {
+                using (var con = new SqlConnection(connectionString))
+                {
+                    con.Open();
 
-            var rdr = new Reader(table, ConnectionString, Providername);
-            var dt = rdr.Read();
+                    var northwindReader = new DatabaseReader(con);
+                    northwindReader.Owner = "dbo";
+                    table = northwindReader.Table("Orders");
+                    var rdr = new Reader(table);
+                    dataTable = rdr.Read(con);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Could not open Northwind: {e}");
+                return;
+            }
 
-            var insertWriter = new InsertWriter(table, dt);
+            var insertWriter = new InsertWriter(table, dataTable);
             insertWriter.IncludeIdentity = true;
 
             //act

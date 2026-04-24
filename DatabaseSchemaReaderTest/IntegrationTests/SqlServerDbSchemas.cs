@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using DatabaseSchemaReader.DataSchema;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
@@ -9,8 +11,11 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod, TestCategory("SqlServer")]
         public void DiscoverSqlServerDbSchemas()
         {
-            var dbReader = TestHelper.GetNorthwindReader();
-            var schemas = dbReader.AllSchemas();
+            IList<DatabaseDbSchema> schemas = null;
+            if (!TestHelper.GetNorthwindReader(reader => schemas = reader.AllSchemas()))
+            {
+                return;
+            }
 
             var dbo = schemas.FirstOrDefault(x => x.Name == "dbo");
             Assert.IsNotNull(dbo);

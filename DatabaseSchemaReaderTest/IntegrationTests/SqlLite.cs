@@ -1,7 +1,7 @@
-using System;
-using System.IO;
 using DatabaseSchemaReader;
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -15,23 +15,26 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         [TestMethod, TestCategory("SQLite")]
         public void SqlLiteTest()
         {
-            const string providername = "System.Data.SQLite";
-            var dir = ConnectionStrings.SqLiteFilePath;
-            if (!File.Exists(dir))
+            var filePath = ConnectionStrings.SqLiteFilePath;
+            if (!File.Exists(filePath))
             {
-                Assert.Inconclusive("SqlLite test requires database file " + dir);
+                Assert.Inconclusive("SqlLite test requires database file " + filePath);
+            }
+            var csb = new SqliteConnectionStringBuilder { DataSource = filePath };
+            var connectionString = csb.ConnectionString;
+            using (var con = new SqliteConnection(connectionString))
+            {
+                con.Open();
+                var dbReader = new DatabaseReader(con);
+                var schema = dbReader.ReadAll();
+                var orders = schema.FindTableByName("Orders");
+                Assert.IsTrue(orders.Columns.Count > 2); //we don't care if it's not standard Northwind
+                var compoundKeys = schema.FindTableByName("CompoundKeys");
+                Assert.IsTrue(compoundKeys.FindColumn("Key1").IsPrimaryKey);
+                Assert.IsTrue(compoundKeys.FindColumn("Key2").IsPrimaryKey);
             }
 
-            string connectionString = @"Data Source=" + dir;
-            ProviderChecker.Check(providername, connectionString);
 
-            var dbReader = new DatabaseReader(connectionString, providername);
-            var schema = dbReader.ReadAll();
-            var orders = schema.FindTableByName("Orders");
-            Assert.IsTrue(orders.Columns.Count > 2); //we don't care if it's not standard Northwind
-            var compoundKeys = schema.FindTableByName("CompoundKeys");
-            Assert.IsTrue(compoundKeys.FindColumn("Key1").IsPrimaryKey);
-            Assert.IsTrue(compoundKeys.FindColumn("Key2").IsPrimaryKey);
         }
     }
 }
