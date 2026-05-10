@@ -16,7 +16,7 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
             Owner = owner;
             Sql = @"SELECT 
 cons.constraint_name, 
-cons.constraint_catalog AS constraint_schema,
+cons.constraint_schema AS constraint_schema,
 cons.table_name, 
 cons2.check_clause AS Expression
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
