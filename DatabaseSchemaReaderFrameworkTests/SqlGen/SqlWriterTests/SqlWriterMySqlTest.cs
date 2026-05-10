@@ -49,6 +49,8 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.SqlWriterTests
             {
                 Assert.Inconclusive($"Cannot access database for provider {ProviderName} message= {exception.Message}");
             }
+
+            return new DatabaseTable();
         }
 
         [TestMethod, TestCategory("MySql")]
