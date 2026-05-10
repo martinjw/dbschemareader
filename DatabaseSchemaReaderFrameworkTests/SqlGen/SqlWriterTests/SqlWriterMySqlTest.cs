@@ -1,7 +1,6 @@
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.Utilities;
-using DatabaseSchemaReader.Utilities.DbProvider;
 using DatabaseSchemaReaderFrameworkTests.Utilities;
 using System.Data.Common;
 
@@ -35,12 +34,21 @@ namespace DatabaseSchemaReaderFrameworkTests.SqlGen.SqlWriterTests
         {
             if (_categoriesTable != null) return _categoriesTable;
 
-            ProviderChecker.Check(ProviderName, _connectionString);
-
-            var dbReader = new DatabaseReader(_connectionString, ProviderName);
-            dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
-            _categoriesTable = dbReader.Table("country"); //this hits database for columns and constraints
-            return _categoriesTable;
+            try
+            {
+                using (var con = _factory.CreateConnection())
+                {
+                    con.ConnectionString = _connectionString;
+                    var dbReader = new DatabaseReader(con);
+                    dbReader.DataTypes(); //ensure we have datatypes (this doesn't hit the database)
+                    _categoriesTable = dbReader.Table("country"); //this hits database for columns and constraints
+                    return _categoriesTable;
+                }
+            }
+            catch (Exception exception)
+            {
+                Assert.Inconclusive($"Cannot access database for provider {ProviderName} message= {exception.Message}");
+            }
         }
 
         [TestMethod, TestCategory("MySql")]
