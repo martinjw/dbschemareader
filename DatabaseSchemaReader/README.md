@@ -1,6 +1,6 @@
 ﻿* Source: https://github.com/martinjw/dbschemareader 
 * GUI: https://github.com/martinjw/dbschemareader/releases
-* Documentation: http://dbschemareader.codeplex.com/documentation
+* Documentation: https://github.com/martinjw/dbschemareader/wiki
 
 # General
 
@@ -13,7 +13,7 @@ Supported databases include SqlServer, SqlServer Ce, Oracle (via Microsoft, ODP 
 # Use
 
 
-## .net Core/6/7/8 (netStandard1.5)
+## .net Core/6/7/8+ (netStandard2.0 and net8)
 
 ```c#
 //In .net Core, create the connection with the connection string
@@ -46,12 +46,14 @@ The DatabaseSchema object has a collection of tables, views, stored procedures, 
 
 ```c#
 //first the standard schema reader
-const string providername = "System.Data.SqlClient";
 const string connectionString = @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
-var reader = new DatabaseReader(connectionString, providername);
-//for Oracle, specify dbReader.Owner = "MyOwner";
-//for .net Core, var reader = new DatabaseReader(new SqlConnection(connectionString));
-var schema = reader.ReadAll();
+DatabaseSchema schema = null;
+using (var connection = new SqlConnection(connectionString)) {
+    var reader = new DatabaseReader(connection);
+    //for .net framework: var reader = new DatabaseReader(connectionString, "System.Data.SqlClient");
+    //for Oracle, specify dbReader.Owner = "MyOwner";
+    schema = reader.ReadAll();
+}
 
 //now write the code
 var directory = new DirectoryInfo(Environment.CurrentDirectory);

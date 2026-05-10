@@ -18,9 +18,9 @@ namespace DatabaseSchemaReaderTest
             {
                 if (string.Equals("True", Environment.GetEnvironmentVariable("APPVEYOR")))
                 {
-                    return @"Server=(local)\SQL2017;Database=NorthwindDsr;User ID=sa;Password=Password12!";
+                    return @"Server=(local)\SQL2017;Database=NorthwindDsr;User ID=sa;Password=Password12!;TrustServerCertificate=True;";
                 }
-                return @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind";
+                return @"Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind;TrustServerCertificate=True;";
             }
         }
 

@@ -1,4 +1,5 @@
-using System.Data.SQLite;
+using System;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,19 +11,36 @@ namespace DatabaseSchemaReaderTest
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
         {
-            //initialize SQLite database
+            // initialize SQLite database
             var filePath = ConnectionStrings.SqLiteFilePath;
+            // remove any existing file
             AssemblyCleanup();
-            SQLiteConnection.CreateFile(filePath);
-            var csb = new SQLiteConnectionStringBuilder { DataSource = filePath };
-            var connectionString = csb.ConnectionString;
-            using (var con = new SQLiteConnection(connectionString))
+
+            var sql = Ddl();
+
+            CreateSqlite(filePath, sql);
+        }
+
+        public static void CreateSqlite(string filePath, string sql)
+        {
+            // ensure directory exists
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
+                Directory.CreateDirectory(directory);
+            }
+
+            // build connection string
+            var csb = new SqliteConnectionStringBuilder { DataSource = filePath };
+            var connectionString = csb.ConnectionString;
+            Console.WriteLine($"Sqlite connection string = {connectionString}");
+
+            using (var con = new SqliteConnection(connectionString))
+            {
+                con.Open();
                 using (var cmd = con.CreateCommand())
                 {
-                    cmd.Connection = con;
-                    cmd.CommandText = Ddl();
-                    con.Open();
+                    cmd.CommandText = sql;
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -35,7 +53,14 @@ namespace DatabaseSchemaReaderTest
             var filePath = ConnectionStrings.SqLiteFilePath;
             if (File.Exists(filePath))
             {
-                File.Delete(filePath);
+                try
+                {
+                    File.Delete(filePath);
+                }
+                catch (Exception e)
+                {    
+                    Console.WriteLine($"Could not delete SqLite file {filePath} (probably in use) {e.Message}");
+                }
             }
         }
 

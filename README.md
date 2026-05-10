@@ -73,7 +73,7 @@ There are two simple UIs (.net framework 4.8 only for now).
 
 ## Building the Source
 
-* Use Visual Studio *2022* open DatabaseSchemaReader.sln (includes .net Core)
+* Use Visual Studio *2022* (or 2026) open DatabaseSchemaReader.sln (includes .net Core)
   * You can also use the command line "build.bat" (msbuild)
   * You cannot use the command line "dotnet build" because Core tooling cannot build v3.5 (see https://github.com/Microsoft/msbuild/issues/1333)
 

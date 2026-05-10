@@ -1,62 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>
-    </ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7EF4F6B5-100C-432A-9858-C7F3FEC14F5C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DatabaseSchemaReaderTest</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>DatabaseSchemaReaderTest</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
+    <PackageId>DatabaseSchemaReaderTest</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <UseVSTest>true</UseVSTest>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45|AnyCPU'">
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <OutputPath>bin\net45\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
+    <None Remove="Codegen\nhibernate-mapping.xsd" />
     <Reference Include="Azure.Core, Version=1.51.1.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
       <HintPath>..\packages\Azure.Core.1.51.1\lib\net472\Azure.Core.dll</HintPath>
     </Reference>
@@ -329,248 +291,41 @@
       <HintPath>..\packages\ZstdSharp.Port.0.8.7\lib\net462\ZstdSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
-      <Visible>False</Visible>
-    </CodeAnalysisDependentAssemblyPaths>
+    <EmbeddedResource Include="Codegen\nhibernate-mapping.xsd" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Codegen\ClassWriterInserterTest.cs" />
-    <Compile Include="Codegen\CodeFirstContextWriterTest.cs" />
-    <Compile Include="Codegen\CodeFirstMappingWriterTest.cs" />
-    <Compile Include="Codegen\CodeFirstWriterTest.cs" />
-    <Compile Include="Codegen\CodeWriterIntegrationTest.cs" />
-    <Compile Include="Codegen\CodeWriterTest.cs" />
-    <Compile Include="Codegen\ClassWriterTest.cs" />
-    <Compile Include="Codegen\CodeFirstContextWriterWithViewTest.cs" />
-    <Compile Include="Codegen\ClassWriterCompositeKeyTest.cs" />
-    <Compile Include="Codegen\CodeWriterBuildTest.cs" />
-    <Compile Include="Codegen\ClassWriterForeignKeyTest.cs" />
-    <Compile Include="Codegen\ClassWriterOneToOneTest.cs" />
-    <Compile Include="Codegen\ClassWriterTablePerTypeTest.cs" />
-    <Compile Include="Codegen\EfCoreContextWriterTest.cs" />
-    <Compile Include="Codegen\EfCoreMappingWriterManyToManyTest.cs" />
-    <Compile Include="Codegen\EfCoreMappingWriterTest.cs" />
-    <Compile Include="Codegen\NHibernateMappingWriterTest.cs" />
-    <Compile Include="Codegen\RiaServicesTest.cs" />
-    <Compile Include="Codegen\DataAnnotationWriterTest.cs" />
-    <Compile Include="Codegen\DataTypeWriterTest.cs" />
-    <Compile Include="Codegen\NameFixerTest.cs" />
-    <Compile Include="Codegen\ClassWriterAssociationTableTest.cs" />
-    <Compile Include="Codegen\ClassWriterCompositeKeyTest2.cs" />
-    <Compile Include="Codegen\OracleClassWriterTest.cs" />
-    <Compile Include="Codegen\ProjectWriterTest.cs" />
-    <Compile Include="Codegen\ClassWriterDuplicates.cs" />
-    <Compile Include="Compare\CompareResultFindTest.cs" />
-    <Compile Include="Compare\CompareSchemaResultsTest.cs" />
-    <Compile Include="Compare\CompareSchemasTest.cs" />
-    <Compile Include="Compare\CompareUserDefinedTablesTests.cs" />
-    <Compile Include="DataSchema\ChangeNameTest.cs" />
-    <Compile Include="Filters\TestInclusionPrefix.cs" />
-    <Compile Include="IntegrationTests\CompareSQLiteDatabases.cs" />
-    <Compile Include="Compare\CompareTablesTest.cs" />
-    <Compile Include="Compare\CompareViewsTest.cs" />
-    <Compile Include="Compare\CompareProceduresTest.cs" />
-    <Compile Include="Compare\CompareSchemasIntegrationTest.cs" />
-    <Compile Include="ConnectionStrings.cs" />
-    <Compile Include="Conversion\SchemaProcedureConverterTest.cs" />
-    <Compile Include="Conversion\Db2ISeriesKeyMapTest.cs" />
-    <Compile Include="DatabaseReaderTest.cs" />
-    <Compile Include="DataSchema\CanSerializeTest.cs" />
-    <Compile Include="DataSchema\DatabaseConstraintTest.cs" />
-    <Compile Include="DataSchema\DatabaseSchemaTest.cs" />
-    <Compile Include="DataSchema\DataTypeTest.cs" />
-    <Compile Include="DataSchema\DatabaseColumnTest.cs" />
-    <Compile Include="DataSchema\ExtensionsTest.cs" />
-    <Compile Include="DataSchema\CompositeKeyTest.cs" />
-    <Compile Include="DataSchema\ForeignKeyTests.cs" />
-    <Compile Include="DataSchema\ManyToManyExtensionsTest.cs" />
-    <Compile Include="DataSchema\OracleSequenceTriggerTest.cs" />
-    <Compile Include="DataSchema\Oracle12IdentityConversionTest.cs" />
-    <Compile Include="DataSchema\PostgreSqlTest.cs" />
-    <Compile Include="DataSchema\RemoveTableTest.cs" />
-    <Compile Include="InitSQLite.cs" />
-    <Compile Include="IntegrationTests\Access.cs" />
-    <Compile Include="IntegrationTests\TableExistsTests.cs" />
-    <Compile Include="IntegrationTests\DbConnectionTests.cs" />
-    <Compile Include="IntegrationTests\SqlServerDbSchemas.cs" />
-    <Compile Include="IntegrationTests\MicrosoftSqlClient.cs" />
-    <Compile Include="IntegrationTests\ViewExistsTests.cs" />
-    <Compile Include="IntegrationTests\VistaDb.cs" />
-    <Compile Include="IntegrationTests\Sybase.cs" />
-    <Compile Include="IntegrationTests\Ingres.cs" />
-    <Compile Include="IntegrationTests\IntersystemsCache.cs" />
-    <Compile Include="IntegrationTests\Db2.cs" />
-    <Compile Include="IntegrationTests\SqlServerCe4.cs" />
-    <Compile Include="IntegrationTests\DatabaseReaderTest.cs" />
-    <Compile Include="IntegrationTests\DataDirectProvider.cs" />
-    <Compile Include="IntegrationTests\DevartProviderTests.cs" />
-    <Compile Include="IntegrationTests\Firebird.cs" />
-    <Compile Include="IntegrationTests\MySql.cs" />
-    <Compile Include="IntegrationTests\OracleDataProvider.cs" />
-    <Compile Include="IntegrationTests\Postgresql.cs" />
-    <Compile Include="IntegrationTests\ProviderChecker.cs" />
-    <Compile Include="IntegrationTests\SqlLite.cs" />
-    <Compile Include="IntegrationTests\SqlServerNorthwind.cs" />
-    <Compile Include="Procedures\RunnerTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IntegrationTests\SqlServerIssueOfNullFKReferenceTests.cs" />
-    <Compile Include="ProviderSchemaReaders\SqlAzureOrSqlServerSchemaReaderTests.cs" />
-    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingIntegerTest.cs" />
-    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingDateTimeTest.cs" />
-    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingDecimalTest.cs" />
-    <Compile Include="SqlGen\DataTypeMapping\DataTypeMappingStringTest.cs" />
-    <Compile Include="SqlGen\DataTypeParserTest.cs" />
-    <Compile Include="SqlGen\Db2\DateTimeDataTypesTest.cs" />
-    <Compile Include="SqlGen\Db2\NumberDataTypesTest.cs" />
-    <Compile Include="SqlGen\Db2\StringDataTypesTest.cs" />
-    <Compile Include="SqlGen\Db2\DataTypesTest.cs" />
-    <Compile Include="SqlGen\InsertWriterTests\ConverterTest.cs" />
-    <Compile Include="SqlGen\InsertWriterTests\DateConverterTest.cs" />
-    <Compile Include="SqlGen\InsertWriterTests\InsertWriterTest.cs" />
-    <Compile Include="SqlGen\InsertWriterTests\ScriptWriterTest.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddColumnDefaults.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddPrimaryKey.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterDefault.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationRenameTable.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationRenameColumn.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAlterColumn.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropIndex.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropColumn.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddIndex.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddForeignKey.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddColumn.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationCreateTable.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationDb2Test.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationPostgreSqlTest.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationDropTable.cs" />
-    <Compile Include="SqlGen\Migrations\UnitTests\MigrationAddUserDefinedType.cs" />
-    <Compile Include="SqlGen\MySql\DateTimeDataTypesTest.cs" />
-    <Compile Include="SqlGen\MySql\NumberDataTypesTest.cs" />
-    <Compile Include="SqlGen\MySql\StringDataTypesTest.cs" />
-    <Compile Include="SqlGen\MySql\DataTypesTest.cs" />
-    <Compile Include="SqlGen\Oracle\DateTimeDataTypesTest.cs" />
-    <Compile Include="SqlGen\Oracle\NumberDataTypesTest.cs" />
-    <Compile Include="DataSchema\OracleSchemaReaderTest.cs" />
-    <Compile Include="SqlGen\Oracle\OracleAutoNumberTest.cs" />
-    <Compile Include="SqlGen\Oracle\StringDataTypesTest.cs" />
-    <Compile Include="SqlGen\Oracle\DataTypesTest.cs" />
-    <Compile Include="SqlGen\Oracle\LongIntegerTest.cs" />
-    <Compile Include="SqlGen\PostgreSql\DateTimeDataTypesTest.cs" />
-    <Compile Include="SqlGen\PostgreSql\StringDataTypesTest.cs" />
-    <Compile Include="SqlGen\PostgreSql\GeneratorTest.cs" />
-    <Compile Include="SqlGen\PostgreSql\TableGeneratorTest.cs" />
-    <Compile Include="SqlGen\PostgreSql\MigrationTest.cs" />
-    <Compile Include="SqlGen\SchemaExtensionsTest.cs" />
-    <Compile Include="SqlGen\SqlServerCe\AllTablesGeneratorTest.cs" />
-    <Compile Include="SqlGen\SqlServerCe\TableGeneratorTest.cs" />
-    <Compile Include="SqlGen\SqlServer\AccessCheckConstraintTest.cs" />
-    <Compile Include="SqlGen\SqlServer\AccessConversionTest.cs" />
-    <Compile Include="SqlGen\SqlServer\TableGeneratorTest.cs" />
-    <Compile Include="SqlGen\SqlServer\DateTimeDataTypesTest.cs" />
-    <Compile Include="SqlGen\SqlServer\NumberDataTypesTest.cs" />
-    <Compile Include="SqlGen\SqlServer\StringDataTypesTest.cs" />
-    <Compile Include="SqlGen\SqlServer\DataTypesTest.cs" />
-    <Compile Include="SqlGen\SqlServer\MigrationTest.cs" />
-    <Compile Include="SqlGen\SqlServer\UseGranularBatchingTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterDb2Test.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterPostgreSqlTest.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationSqlServerCeTest.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationMySqlTest.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationSQLiteTest.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationCommon.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationOracleTest.cs" />
-    <Compile Include="SqlGen\Migrations\MigrationSqlServerTest.cs" />
-    <Compile Include="SqlGen\PostgreSql\DataTypesTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterSqlServerCeTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterCommonTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterSqlServerTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterSQLiteTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterOracleTest.cs" />
-    <Compile Include="SqlGen\SqlWriterTests\SqlWriterMySqlTest.cs" />
-    <Compile Include="SqlGen\WritingSprocsTest.cs" />
-    <Compile Include="TestHelper.cs" />
-    <Compile Include="Utilities\EF\Catalog.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Catalog.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Utilities\EF\EntityImporterTest.cs" />
-    <Compile Include="Utilities\SchemaTablesSorterTest.cs" />
-    <Compile Include="Utilities\DbProviderFactoryRepositoryTest.cs" />
-    <Compile Include="Utilities\QueryReaderTest.cs" />
+    <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="DatabaseScripts\create_database_northwind.sql" />
-    <Content Include="DatabaseScripts\create_schema_northwind.sql" />
-    <Content Include="DatabaseScripts\sakila-data.sql" />
-    <Content Include="DatabaseScripts\sakila-schema.sql" />
-    <Content Include="DatabaseScripts\postgres_world.sql" />
-    <None Include="northwind.sdf">
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.7" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.2.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.2.2" />
+    <PackageReference Include="MySql.Data" Version="9.7.0" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.26.200" />
+    <PackageReference Include="Npgsql" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="northwind.sdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="README.txt" />
-    <Content Include="Utilities\EF\Catalog.edmx.sql" />
-    <None Include="Oracle.DataAccess.Common.Configuration.Section.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Oracle.ManagedDataAccess.Client.Configuration.Section.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config" />
   </ItemGroup>
-  <Choose>
-    <When Condition="$(MSBuildToolsVersion) &lt; 15.0">
-      <ItemGroup>
-        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader2015.csproj">
-          <Project>{AA652F8E-0B96-484C-A146-C4183E4A0A25}</Project>
-          <Name>DatabaseSchemaReader</Name>
-        </ProjectReference>
-      </ItemGroup>
-    </When>
-    <When Condition="$(MSBuildToolsVersion) &gt; 14.0">
-      <ItemGroup>
-        <ProjectReference Include="..\DatabaseSchemaReader\DatabaseSchemaReader.csproj">
-          <Project>{8280afb4-9066-4656-a80e-23b859e5299c}</Project>
-          <Name>DatabaseSchemaReader</Name>
-        </ProjectReference>
-      </ItemGroup>
-    </When>
-  </Choose>
+
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
-    <EntityDeploy Include="Utilities\EF\Catalog.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>Catalog.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <EmbeddedResource Include="Codegen\nhibernate-mapping.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Utilities\EF\CatalogV3.edmxv3" />
+    <PackageReference Update="MSTest.Analyzers" Version="4.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
-    <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Data.SqlClient.SNI.6.0.2\build\net462\Microsoft.Data.SqlClient.SNI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Data.SqlClient.SNI.6.0.2\build\net462\Microsoft.Data.SqlClient.SNI.targets'))" />
-    <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
-  </Target>
-  <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
-  <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.6.0.2\build\net462\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.6.0.2\build\net462\Microsoft.Data.SqlClient.SNI.targets')" />
-  <Import Project="..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

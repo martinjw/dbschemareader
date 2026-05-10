@@ -143,6 +143,7 @@ namespace DatabaseSchemaReader.DataSchema
             }
             foreach (DatabaseTable table in databaseSchema.Tables)
             {
+                if (table == null) continue;
                 UpdateColumnDataTypes(finder, table.Columns);
             }
             foreach (DatabaseView view in databaseSchema.Views)
