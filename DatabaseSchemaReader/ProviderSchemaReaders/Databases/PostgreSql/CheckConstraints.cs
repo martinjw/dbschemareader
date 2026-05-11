@@ -14,22 +14,20 @@ namespace DatabaseSchemaReader.ProviderSchemaReaders.Databases.PostgreSql
         {
             _tableName = tableName;
             Owner = owner;
-            Sql = @"SELECT 
-cons.constraint_name, 
-cons.constraint_schema AS constraint_schema,
-cons.table_name, 
-cons2.check_clause AS Expression
-FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS cons
-INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS cons2
- ON cons2.constraint_catalog = cons.constraint_catalog AND
-  cons2.constraint_schema = cons.constraint_schema AND
-  cons2.constraint_name = cons.constraint_name
-WHERE 
-    (cons.table_name = :tableName OR :tableName IS NULL) AND 
-    cons.constraint_schema NOT IN ('pg_catalog', 'information_schema') AND
-    --(cons.constraint_catalog = :schemaOwner OR :schemaOwner IS NULL) AND 
-     cons.constraint_type = 'CHECK'
-ORDER BY cons.table_name, cons.constraint_name";
+            Sql = @"SELECT
+    con.conname AS constraint_name,
+    n.nspname AS constraint_schema,
+    c.relname AS table_name,
+    cons.check_clause AS Expression
+FROM pg_constraint con
+         JOIN pg_class c ON con.conrelid = c.oid
+         JOIN pg_namespace n ON con.connamespace = n.oid
+         JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS cons ON con.conname = cons.constraint_name
+WHERE
+    (c.relname = :tableName OR :tableName IS NULL) AND 
+    n.nspname NOT IN ('pg_catalog', 'information_schema') AND 
+    con.contype = 'c'
+ORDER BY c.relname, con.conname;";
 
         }
 
