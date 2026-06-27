@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model.</Description>
     <AssemblyTitle>DatabaseSchemaReader</AssemblyTitle>
-    <VersionPrefix>2.20.0</VersionPrefix>
+    <VersionPrefix>2.22.0</VersionPrefix>
     <Authors>Martin Willey</Authors>
     <TargetFrameworks>netstandard2.0;net8.0;net45;net40;net35;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -42,6 +42,7 @@
       2.19.0: Fix Oracle Index_Type (#210)
       2.20.0: PostgreSql materialized view columns missing (#211)
       2.21.0: PostgreSql check constraint fix (#203), SqlServer procedure source missing (#214)
+	  2.22.0: PostgreSql check constraint fix (#216) thanks @Amagos
     </PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/martinjw/dbschemareader</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -56,7 +57,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <Version>2.21.0</Version>
+    <Version>2.22.0</Version>
     <Configurations>Debug;Release;net45;Net4</Configurations>
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
