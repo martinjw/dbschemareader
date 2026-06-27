@@ -23,7 +23,7 @@
     <MSBuild Projects="DatabaseSchemaReader\DatabaseSchemaReader.csproj" 
 		Properties="Configuration=net35;OutputPath=$(OutputPath)net35\;IntermediateOutputPath=$(ObjPath)Release\"/>
     <Message Text="Reader Built" />
-	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
+	<Copy SourceFiles="DatabaseSchemaReader\README.md" DestinationFolder="$(OutputPath)" />
   </Target>
   
     <Target Name="Build40">
@@ -32,7 +32,7 @@
     <MSBuild Projects="DatabaseSchemaReader\DatabaseSchemaReader.csproj" 
 		Properties="Configuration=net40;OutputPath=$(OutputPath)net40\;IntermediateOutputPath=$(ObjPath)Release\"/>
     <Message Text="Reader Built" />
-	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
+	<Copy SourceFiles="DatabaseSchemaReader\README.md" DestinationFolder="$(OutputPath)" />
   </Target>
   
    <Target Name="Build45">
@@ -41,7 +41,7 @@
     <MSBuild Projects="DatabaseSchemaReader\DatabaseSchemaReader.csproj" 
 		Properties="Configuration=net45;OutputPath=$(OutputPath)net45\;IntermediateOutputPath=$(ObjPath)Release\"/>
     <Message Text="Reader Built" />
-	<Copy SourceFiles="DatabaseSchemaReader\README.txt" DestinationFolder="$(OutputPath)" />
+	<Copy SourceFiles="DatabaseSchemaReader\README.md" DestinationFolder="$(OutputPath)" />
   </Target>  
   
   <Target Name="BuildViewer">

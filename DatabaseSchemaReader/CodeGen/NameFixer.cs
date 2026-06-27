@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+#if NET8_0_OR_GREATER
+        using Microsoft.CodeAnalysis.CSharp;
+#endif
 
 namespace DatabaseSchemaReader.CodeGen
 {
@@ -78,8 +81,29 @@ namespace DatabaseSchemaReader.CodeGen
                 name = "@" + name;
             }
 #endif
+#if NET8_0_OR_GREATER
+            if (!IsValidIdentifier(name))
+            {
+                //in practice all keywords are lowercase. 
+                name = "@" + name;
+            }
+#endif
             return name;
         }
+
+#if NET8_0_OR_GREATER
+        private static bool IsValidIdentifier(string identifier)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+                return false;
+
+            var kind = SyntaxFacts.GetKeywordKind(identifier);
+            if (kind != SyntaxKind.None)
+                return false; // keywords are not valid identifiers
+
+            return SyntaxFacts.IsValidIdentifier(identifier);
+        }
+#endif
 
         private static string MakePascalCase(string name)
         {

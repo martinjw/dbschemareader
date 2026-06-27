@@ -1,19 +1,20 @@
-using System.Data.SQLite;
-using System.Transactions;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.Compare;
 using DatabaseSchemaReader.DataSchema;
 using DatabaseSchemaReader.SqlGen;
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
     [TestClass]
-    // ReSharper disable once InconsistentNaming
-    public class CompareSQLiteDatabases
+    public class CompareSqLiteDatabases
     {
         //we can't use 2 :memory: databases
         private const string Db1Sqlite = "db1.sqlite";
+
         private const string Db2Sqlite = "db2.sqlite";
 
         [TestMethod]
@@ -23,10 +24,8 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             CreateDatabases();
 
             //act
-            var dsr1 = new DatabaseReader("Data Source=" + Db1Sqlite + ";Version=3;", SqlType.SQLite);
-            var schema1 = dsr1.ReadAll();
-            var dsr2 = new DatabaseReader("Data Source=" + Db2Sqlite + ";Version=3;", SqlType.SQLite);
-            var schema2 = dsr2.ReadAll();
+            var schema1 = ReadAll(Db1Sqlite);
+            var schema2 = ReadAll(Db2Sqlite);
             var comparison = new CompareSchemas(schema1, schema2);
             var result = comparison.Execute();
 
@@ -41,9 +40,37 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.IsTrue(result.Contains("TO CHANGE COLUMN"));
         }
 
+        private DatabaseSchema ReadAll(string filePath)
+        {
+            var connectionString = BuildConnectionString(filePath);
+
+            using (var con = new SqliteConnection(connectionString))
+            {
+                con.Open();
+                var dsr1 = new DatabaseReader(con);
+                return dsr1.ReadAll();
+            }
+        }
+
+        private static string BuildConnectionString(string filePath)
+        {
+            var csb = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Environment.CurrentDirectory, filePath) };
+            var connectionString = csb.ConnectionString;
+            return connectionString;
+        }
 
         private static void CreateDatabases()
         {
+            try
+            {
+                File.Delete(Path.Combine(Environment.CurrentDirectory, Db1Sqlite));
+                File.Delete(Path.Combine(Environment.CurrentDirectory, Db2Sqlite));
+            }
+            catch (Exception)
+            {
+                //clean out before we recreate - ignore any errors
+            }
+
             var schema = new DatabaseSchema(null, SqlType.SQLite);
             var products = schema.AddTable("Products");
             products.AddColumn<int>("Id").AddPrimaryKey()
@@ -71,19 +98,7 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         // ReSharper disable once InconsistentNaming
         private static void CreateSQLiteDatabase(string script, string fileName)
         {
-            SQLiteConnection.CreateFile(fileName);
-            using (var tran = new TransactionScope())
-            {
-                using (var con = new SQLiteConnection("Data Source=" + fileName + ";Version=3;"))
-                {
-                    con.Open();
-                    using (var command = new SQLiteCommand(script, con))
-                    {
-                        command.ExecuteNonQuery();
-                    }
-                    tran.Complete();
-                }
-            }
+            InitSqLite.CreateSqlite(fileName, script);
         }
     }
 }

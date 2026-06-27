@@ -4,9 +4,7 @@ A simple, cross-database facade over .Net 2.0 DbProviderFactories to read databa
 
 Any ADO provider can be read  (SqlServer, SqlServer CE 4, MySQL, SQLite, System.Data.OracleClient, ODP, Devart, PostgreSql, DB2...) into a single standard model. For .net Core, we support SqlServer, SqlServer CE 4, SQLite, PostgreSql, MySQL and Oracle.
 
-https://github.com/martinjw/dbschemareader or https://dbschemareader.codeplex.com/
-
-https://dbschemareader.codeplex.com/documentation
+https://github.com/martinjw/dbschemareader
 
 Nuget: Install-Package DatabaseSchemaReader [![Nuget](https://img.shields.io/nuget/v/DatabaseSchemaReader.svg) ](https://www.nuget.org/packages/DatabaseSchemaReader/)
 
@@ -45,7 +43,7 @@ foreach (var table in schema.Tables)
   //do something with your model
 }
 ```
-* .net (netStandard1.5, netStandard 2.0, net 3.1, net6, net7)
+* .net (netStandard1.5, netStandard 2.0, net 3.1, net6, net8, for .net 10 use the .net 8 version)
 ```C#
 //In .net Core, create the connection with the connection string
 using (var connection = new SqlConnection("Data Source=.\SQLEXPRESS;Integrated Security=true;Initial Catalog=Northwind"))
@@ -73,7 +71,7 @@ There are two simple UIs (.net framework 4.8 only for now).
 
 ## Building the Source
 
-* Use Visual Studio *2022* open DatabaseSchemaReader.sln (includes .net Core)
+* Use Visual Studio *2026*  open DatabaseSchemaReader.sln (includes .net Core)
   * You can also use the command line "build.bat" (msbuild)
   * You cannot use the command line "dotnet build" because Core tooling cannot build v3.5 (see https://github.com/Microsoft/msbuild/issues/1333)
 

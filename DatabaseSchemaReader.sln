@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36212.18 d17.14
+VisualStudioVersion = 17.14.36212.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseSchemaReader", "DatabaseSchemaReader\DatabaseSchemaReader.csproj", "{8280AFB4-9066-4656-A80E-23B859E5299C}"
 EndProject
@@ -17,6 +17,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseSchemaViewer", "DatabaseSchemaViewer\DatabaseSchemaViewer.csproj", "{7BE356E2-11FD-4570-8523-EF512D476797}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopyToSQLite", "CopyToSQLite\CopyToSQLite.csproj", "{CE4A50D0-62F7-49A4-B216-7DEB7EA57147}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseSchemaReaderFrameworkTests", "DatabaseSchemaReaderFrameworkTests\DatabaseSchemaReaderFrameworkTests.csproj", "{FB425B90-5B20-4AA3-B992-412B328C30BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,26 @@ Global
 		{CE4A50D0-62F7-49A4-B216-7DEB7EA57147}.Release|Any CPU.ActiveCfg = Release|x86
 		{CE4A50D0-62F7-49A4-B216-7DEB7EA57147}.Release|x86.ActiveCfg = Release|x86
 		{CE4A50D0-62F7-49A4-B216-7DEB7EA57147}.Release|x86.Build.0 = Release|x86
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net35|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net35|Any CPU.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net35|x86.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net35|x86.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Net4|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Net4|Any CPU.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Net4|x86.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Net4|x86.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net45|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net45|Any CPU.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net45|x86.ActiveCfg = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.net45|x86.Build.0 = Debug|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB425B90-5B20-4AA3-B992-412B328C30BB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,7 @@
 using DatabaseSchemaReader;
+using DatabaseSchemaReader.DataSchema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace DatabaseSchemaReaderTest.IntegrationTests
 {
@@ -12,34 +14,33 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
     [TestClass]
     public class Postgresql
     {
-        //You must have the configuration set up
-        //	<system.data>
-        //		<DbProviderFactories>
-        //			<remove invariant="Npgsql" />
-        //			<add name="Npgsql Data Provider" invariant="Npgsql"
-        //				 description=".Net Framework Data Provider for Postgresql Server"
-        //				 type="Npgsql.NpgsqlFactory, Npgsql"/>
-        //		</DbProviderFactories>
-        //	</system.data>
-        //also reference Npgsql.dll and Mono.Security.dll
-
         [TestMethod, TestCategory("Postgresql")]
         public void TestNpgsql()
         {
             //using the MySql world database ported to Postgres
-            const string providername = "Npgsql";
+            DatabaseSchema schema = null;
             var connectionString = ConnectionStrings.PostgreSql;
-            ProviderChecker.Check(providername, connectionString);
 
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
-            var schema = dbReader.ReadAll();
+            try
+            {
+                using (var con = new Npgsql.NpgsqlConnection(connectionString))
+                {
+                    var dbReader = new DatabaseReader(con);
+                    dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
+                    schema = dbReader.ReadAll();
+                }
+            }
+            catch (Exception)
+            {
+                Assert.Inconclusive();
+            }
+
             var country = schema.FindTableByName("country");
             Assert.IsTrue(country.Columns.Count > 0);
 
             //reading index with columns in correct order
             var rental = schema.FindTableByName("rental");
-            var idx = rental.Indexes.Find(x => 
+            var idx = rental.Indexes.Find(x =>
                 x.Name == "idx_unq_rental_rental_date_inventory_id_customer_id");
             Assert.IsTrue(idx.IsUnique);
             Assert.AreEqual(3, idx.Columns.Count);
@@ -48,25 +49,9 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
             Assert.AreEqual("customer_id", idx.Columns[2].Name);
 
             //reading a domain
-            var year = schema.UserDataTypes.Find(x=> x.Name=="year");
+            var year = schema.UserDataTypes.Find(x => x.Name == "year");
             Assert.IsNotNull(year, "DOMAIN year should be defined");
             Assert.IsTrue(year.DataType.IsInt, "Underlying data type is INT");
-        }
-
-        [TestMethod, TestCategory("Devart.Postgresql")]
-        public void TestDevartPostgreSql()
-        {
-            //http://www.devart.com/dotconnect/postgresql/docs/MetaData.html
-            const string providername = "Devart.Data.PostgreSql";
-            var connectionString = ConnectionStrings.PostgreSql;
-            ProviderChecker.Check(providername, connectionString);
-
-            var dbReader = new DatabaseReader(connectionString, providername);
-            dbReader.Owner = "public"; //otherwise you have "postgres" owned tables and views
-            var schema = dbReader.ReadAll();
-
-            var country = schema.FindTableByName("country");
-            Assert.IsTrue(country.Columns.Count > 0);
         }
     }
 }

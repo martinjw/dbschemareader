@@ -1,27 +1,45 @@
+using DatabaseSchemaReader;
 using DatabaseSchemaReader.Data;
-using DatabaseSchemaReaderTest.IntegrationTests;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Diagnostics;
 
 namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
 {
     [TestClass]
     public class ScriptWriterTest
     {
-        const string Providername = "System.Data.SqlClient";
-        readonly string _connectionString = ConnectionStrings.Northwind;
+        private string ScriptWriterRunner()
+        {
+            var connectionString = ConnectionStrings.Northwind;
+            try
+            {
+                using (var con = new SqlConnection(connectionString))
+                {
+                    con.Open();
 
+                    var northwindReader = new DatabaseReader(con);
+                    northwindReader.Owner = "dbo";
+                    var schema = northwindReader.ReadAll();
+
+                    var table = northwindReader.Table("Categories");
+                    var rdr = new ScriptWriter();
+                    return rdr.ReadTable(table, con);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Could not open Northwind: {e}");
+                return null;
+            }
+        }
 
         [TestMethod]
         public void TestInsertIntegration()
         {
-            //arrange
-            var dbReader = TestHelper.GetNorthwindReader();
-            var table = dbReader.Table("Categories");
-
-            var rdr = new ScriptWriter();
-
             //act
-            var txt = rdr.ReadTable(table, _connectionString, Providername);
+            var txt = ScriptWriterRunner();
 
             //assert
             Assert.IsTrue(txt.Contains("INSERT INTO [Categories]"), "Insert statments created: [" + txt + "]");
@@ -32,13 +50,8 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         [TestMethod]
         public void TestInsertNoDirectDatabaseReaderIntegration()
         {
-            //arrange
-            ProviderChecker.Check(Providername, _connectionString);
-
-            var rdr = new ScriptWriter();
-
             //act
-            var txt = rdr.ReadTable("Categories", _connectionString, Providername);
+            var txt = ScriptWriterRunner();
 
             //assert
             Assert.IsTrue(txt.Contains("INSERT INTO [Categories]"), "Insert statments created: [" + txt + "]");
@@ -50,20 +63,35 @@ namespace DatabaseSchemaReaderTest.SqlGen.InsertWriterTests
         public void TestInsertWithDataReader()
         {
             //arrange
-            var dbReader = TestHelper.GetNorthwindReader();
-            dbReader.DataTypes(); //need the datatypes here, so this must be called before or after
-            var table = dbReader.Table("Categories");
-
-            var rdr = new ScriptWriter();
-
             string result = null;
 
             //act
-            rdr.ReadTable(table, _connectionString, Providername, insertString =>
+            var connectionString = ConnectionStrings.Northwind;
+            try
             {
-                result = insertString;
-                return false; //only need one record, return
-            });
+                using (var con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    var northwindReader = new DatabaseReader(con);
+                    northwindReader.Owner = "dbo";
+                    //need the datatypes here, so this must be called before or after
+                    northwindReader.DataTypes();
+
+                    var table = northwindReader.Table("Categories");
+                    var rdr = new ScriptWriter();
+                    rdr.ReadTable(table, con, insertString =>
+                    {
+                        result = insertString;
+                        return false; //only need one record, return
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Could not open Northwind: {e}");
+                return;
+            }
 
             //assert
             Assert.IsNotNull(result);

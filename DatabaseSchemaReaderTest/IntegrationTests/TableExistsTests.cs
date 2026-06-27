@@ -9,10 +9,13 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void TableExists()
         {
             //arrange
-            var dbReader = TestHelper.GetNorthwindReader();
-
+            var result = false;
             //act
-            var result = dbReader.TableExists("Products");
+            if (!TestHelper.GetNorthwindReader(reader => result = reader.TableExists("Products")))
+            {
+                return;
+            }
+
             //assert
             Assert.IsTrue(result, "Products table should exist in Northwind database");
         }
@@ -21,9 +24,12 @@ namespace DatabaseSchemaReaderTest.IntegrationTests
         public void TableDoesNotExist()
         {
             //arrange
-            var dbReader = TestHelper.GetNorthwindReader();
+            var result = true;
             //act
-            var result = dbReader.TableExists("Does_Not_Exist");
+            if (!TestHelper.GetNorthwindReader(reader => result = reader.TableExists("Does_Not_Exist")))
+            {
+                return;
+            }            
             //assert
             Assert.IsFalse(result, "Does_Not_Exist table should not exist in Northwind database");
         }

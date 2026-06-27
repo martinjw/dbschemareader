@@ -14,7 +14,7 @@ namespace DatabaseSchemaReaderTest.Compare
         {
             //arrange
             var schema1 = new DatabaseSchema(null, null);
-            var schema2 = TestHelper.GetNorthwindReader().ReadAll();
+            var schema2 = TestHelper.GetNorthwindSchema();
 
             //act
             var comparison = new CompareSchemas(schema1, schema2);
@@ -40,7 +40,7 @@ namespace DatabaseSchemaReaderTest.Compare
         public void WhenSecondSchemaIsEmptyThenEverythingIsDropped()
         {
             //arrange
-            var schema1 = TestHelper.GetNorthwindReader().ReadAll();
+            var schema1 = TestHelper.GetNorthwindSchema();
             var schema2 = new DatabaseSchema(null, null);
 
             //act
