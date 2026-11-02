@@ -133,6 +133,7 @@
       <DependentUpon>CompareForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CompareRunner.cs" />
+    <Compile Include="DocRunner.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

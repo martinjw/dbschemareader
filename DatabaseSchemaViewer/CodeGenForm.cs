@@ -77,10 +77,19 @@ namespace DatabaseSchemaViewer
             {
                 var table = (DatabaseTable)cmbTables.SelectedItem;
                 RunData(directory, dialect, table);
+            } 
+            else if (radDocs.Checked)
+            {
+                RunDocs(directory);
             }
             StopWaiting();
         }
 
+        private void RunDocs(DirectoryInfo directory)
+        {
+            var runner = new DocRunner(_databaseSchema);
+            runner.Execute(directory);
+        }
         private void RunData(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
         {
             var runner = new TaskRunner(_databaseSchema);
@@ -248,6 +257,16 @@ namespace DatabaseSchemaViewer
                 labNamespace.Visible = true;
                 panelTables.Visible = false;
                 chkReadSprocs.Visible = true;
+            }
+            else if (radDocs.Checked)
+            {
+                panelCodeGen.Visible = false;
+                cmbDialect.Visible = false;
+                labDialect.Visible = false;
+                panelTables.Visible = false;
+                chkReadSprocs.Visible = false;
+                txtNamespace.Visible = false;
+                labNamespace.Visible = false;
             }
             else
             {
