@@ -88,7 +88,7 @@ namespace DatabaseSchemaViewer
         private void RunDocs(DirectoryInfo directory)
         {
             var runner = new DocRunner(_databaseSchema);
-            runner.Execute(directory);
+            toolStripStatusLabel1.Text = runner.Execute(directory);
         }
         private void RunData(DirectoryInfo directory, SqlType dialect, DatabaseTable table)
         {
